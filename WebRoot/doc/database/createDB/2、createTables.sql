@@ -17,7 +17,7 @@ create table TBL_ACQ_GROUP_CONF
   type       NUMBER(1) default 0,
   remark     VARCHAR2(2000)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -40,7 +40,7 @@ create table TBL_ACQ_UNIT_CONF
   protocol  VARCHAR2(50),
   remark    VARCHAR2(2000)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -71,7 +71,7 @@ create table TBL_ACQ_ITEM2GROUP_CONF
   historycurvecolor  VARCHAR2(20),
   matrix   VARCHAR2(8)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -93,7 +93,7 @@ create table TBL_ACQ_GROUP2UNIT_CONF
   unitid  NUMBER(10) not null,
   matrix  VARCHAR2(8) not null
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -115,7 +115,7 @@ create table TBL_ALARM_UNIT_CONF
   protocol  VARCHAR2(50),
   remark    VARCHAR2(2000)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -150,7 +150,7 @@ create table TBL_ALARM_ITEM2UNIT_CONF
   issendmessage NUMBER(1) default 0,
   issendmail    NUMBER(1) default 0
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -174,7 +174,7 @@ create table TBL_CODE
   state     NUMBER(10),
   remark    VARCHAR2(200)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -198,7 +198,7 @@ create table TBL_DATAMAPPING
   repetitiontimes NUMBER(2),
   mappingmode     NUMBER(1)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -224,7 +224,7 @@ create table TBL_DEVICEOPERATIONLOG
   devicetype NUMBER(3),
   remark     VARCHAR2(200)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -248,7 +248,7 @@ create table TBL_SYSTEMLOG
   action     NUMBER(2),
   remark     VARCHAR2(200)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -275,7 +275,7 @@ create table TBL_DIST_NAME
   updatetime DATE default sysdate not null,
   createdate DATE default sysdate
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -304,7 +304,7 @@ create table TBL_DIST_ITEM
   updatetime DATE default sysdate,
   createdate DATE default sysdate
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -338,7 +338,7 @@ create table TBL_MODULE
   md_type     NUMBER(1) default 0,
   md_control  VARCHAR2(100)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -361,7 +361,7 @@ create table TBL_ROLE
   showlevel   NUMBER(10) default 0,
   remark      VARCHAR2(2000)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -383,7 +383,7 @@ create table TBL_MODULE2ROLE
   rm_roleid   NUMBER(10) not null,
   rm_matrix   VARCHAR2(8) not null
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -414,7 +414,7 @@ create table TBL_ORG
   org_parent NUMBER(10) default 0 not null,
   org_seq    NUMBER(10)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -435,7 +435,7 @@ create table TBL_PROTOCOLALARMINSTANCE
   devicetype  NUMBER(1) default 0,
   sort        NUMBER(10)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -464,7 +464,7 @@ create table TBL_PROTOCOLINSTANCE
   devicetype       NUMBER(1) default 0,
   sort             NUMBER(10)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -487,7 +487,7 @@ create table TBL_PROTOCOLSMSINSTANCE
   ctrlprotocoltype VARCHAR2(50),
   sort             NUMBER(10)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -513,7 +513,7 @@ create table TBL_RESOURCEMONITORING
   memusedpercent NUMBER(8,2),
   tablespacesize NUMBER(10,2)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -543,7 +543,7 @@ create table TBL_USER
   user_receivesms  NUMBER(10) default 0,
   user_receivemail NUMBER(10) default 0
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -555,9 +555,9 @@ alter table TBL_USER add constraint PK_USER_NO primary key (USER_NO)
 /
 
 /*==============================================================*/
-/* Table: TBL_PUMPDEVICE                                    */
+/* Table: TBL_RPCDEVICE                                    */
 /*==============================================================*/
-create table TBL_PUMPDEVICE
+create table TBL_RPCDEVICE
 (
   id                   NUMBER(10) not null,
   orgid                NUMBER(10) not null,
@@ -572,7 +572,7 @@ create table TBL_PUMPDEVICE
   status               NUMBER(1) default 1,
   sortnum              NUMBER(10) default 9999
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -580,14 +580,14 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PUMPDEVICE
-  add constraint PK_PUMPDEVICE primary key (ID)
+alter table TBL_RPCDEVICE
+  add constraint PK_RPCDEVICE primary key (ID)
 /
 
 /*==============================================================*/
-/* Table: TBL_PIPELINEDEVICE                                    */
+/* Table: TBL_PCPDEVICE                                    */
 /*==============================================================*/
-create table TBL_PIPELINEDEVICE
+create table TBL_PCPDEVICE
 (
   id                   NUMBER(10) not null,
   orgid                NUMBER(10) not null,
@@ -602,7 +602,7 @@ create table TBL_PIPELINEDEVICE
   status               NUMBER(1) default 1,
   sortnum              NUMBER(10) default 9999
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -610,8 +610,8 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PIPELINEDEVICE
-  add constraint PK_PIPELINEDEVICE primary key (ID)
+alter table TBL_PCPDEVICE
+  add constraint PK_PCPDEVICE primary key (ID)
 /
 
 /*==============================================================*/
@@ -626,7 +626,7 @@ create table TBL_SMSDEVICE
   instancecode VARCHAR2(50),
   sortnum      NUMBER(10) default 9999
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -639,9 +639,9 @@ alter table TBL_SMSDEVICE
 /
 
 /*==============================================================*/
-/* Table: TBL_PUMPDEVICEADDINFO                                    */
+/* Table: TBL_RPCDEVICEADDINFO                                    */
 /*==============================================================*/
-create table TBL_PUMPDEVICEADDINFO
+create table TBL_RPCDEVICEADDINFO
 (
   id        NUMBER(10) not null,
   wellid    NUMBER(10) not null,
@@ -649,7 +649,7 @@ create table TBL_PUMPDEVICEADDINFO
   itemvalue VARCHAR2(200),
   itemunit  VARCHAR2(200)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -657,20 +657,20 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PUMPDEVICEADDINFO
-  add constraint PK_PUMPDEVICEADDINFO primary key (ID)
+alter table TBL_RPCDEVICEADDINFO
+  add constraint PK_RPCDEVICEADDINFO primary key (ID)
 /
 
 /*==============================================================*/
-/* Table: TBL_PUMPDEVICEGRAPHICSET                                    */
+/* Table: TBL_RPCDEVICEGRAPHICSET                                    */
 /*==============================================================*/
-create table TBL_PUMPDEVICEGRAPHICSET
+create table TBL_RPCDEVICEGRAPHICSET
 (
   id           NUMBER(10) not null,
   wellid       NUMBER(10) not null,
   graphicstyle VARCHAR2(4000)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -678,14 +678,14 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PUMPDEVICEGRAPHICSET
-  add constraint PK_PUMPDEVICEGRAPHICSET primary key (ID)
+alter table TBL_RPCDEVICEGRAPHICSET
+  add constraint PK_RPCDEVICEGRAPHICSET primary key (ID)
 /
 
 /*==============================================================*/
-/* Table: TBL_PIPELINEDEVICEADDINFO                                    */
+/* Table: TBL_PCPDEVICEADDINFO                                    */
 /*==============================================================*/
-create table TBL_PIPELINEDEVICEADDINFO
+create table TBL_PCPDEVICEADDINFO
 (
   id        NUMBER(10) not null,
   wellid    NUMBER(10) not null,
@@ -693,7 +693,7 @@ create table TBL_PIPELINEDEVICEADDINFO
   itemvalue VARCHAR2(200),
   itemunit  VARCHAR2(200)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -701,20 +701,20 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PIPELINEDEVICEADDINFO
-  add constraint PK_PIPELINEDEVICEADDINFO primary key (ID)
+alter table TBL_PCPDEVICEADDINFO
+  add constraint PK_PCPDEVICEADDINFO primary key (ID)
 /
 
 /*==============================================================*/
-/* Table: TBL_PIPELINEDEVICEGRAPHICSET                                    */
+/* Table: TBL_PCPDEVICEGRAPHICSET                                    */
 /*==============================================================*/
-create table TBL_PIPELINEDEVICEGRAPHICSET
+create table TBL_PCPDEVICEGRAPHICSET
 (
   id           NUMBER(10) not null,
   wellid       NUMBER(10) not null,
   graphicstyle VARCHAR2(4000)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -722,8 +722,8 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PIPELINEDEVICEGRAPHICSET
-  add constraint PK_PIPELINEDEVICEGRAPHICSET primary key (ID)
+alter table TBL_PCPDEVICEGRAPHICSET
+  add constraint PK_PCPDEVICEGRAPHICSET primary key (ID)
 /
 
 /*==============================================================*/
@@ -738,7 +738,7 @@ create table TBL_AUXILIARYDEVICE
   sort   NUMBER(10) not null,
   remark VARCHAR2(2000)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -760,7 +760,7 @@ create table TBL_AUXILIARY2MASTER
   auxiliaryid NUMBER(10) not null,
   matrix      VARCHAR2(8) not null
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -773,9 +773,9 @@ alter table TBL_AUXILIARY2MASTER
 /
 
 /*==============================================================*/
-/* Table: TBL_PUMPACQDATA_HIST                                    */
+/* Table: TBL_RPCACQDATA_HIST                                    */
 /*==============================================================*/
-create table TBL_PUMPACQDATA_HIST
+create table TBL_RPCACQDATA_HIST
 (
   id                 NUMBER(10) not null,
   wellid             NUMBER(10),
@@ -789,7 +789,7 @@ create table TBL_PUMPACQDATA_HIST
   runtime            NUMBER(8,2) default 0,
   runrange           CLOB
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -797,14 +797,14 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PUMPACQDATA_HIST
-  add constraint PK_TBL_PUMPACQDATA_HIST primary key (ID)
+alter table TBL_RPCACQDATA_HIST
+  add constraint PK_TBL_RPCACQDATA_HIST primary key (ID)
 /
 
 /*==============================================================*/
-/* Table: TBL_PUMPACQDATA_LATEST                                    */
+/* Table: TBL_RPCACQDATA_LATEST                                    */
 /*==============================================================*/
-create table TBL_PUMPACQDATA_LATEST
+create table TBL_RPCACQDATA_LATEST
 (
   id                 NUMBER(10) not null,
   wellid             NUMBER(10),
@@ -818,7 +818,7 @@ create table TBL_PUMPACQDATA_LATEST
   runtime            NUMBER(8,2) default 0,
   runrange           CLOB
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -826,21 +826,21 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PUMPACQDATA_LATEST
-  add constraint PK_TBL_PUMPACQDATA_LATEST primary key (ID)
+alter table TBL_RPCACQDATA_LATEST
+  add constraint PK_TBL_RPCACQDATA_LATEST primary key (ID)
 /
 
 /*==============================================================*/
-/* Table: TBL_PUMPACQRAWDATA                                    */
+/* Table: TBL_RPCACQRAWDATA                                    */
 /*==============================================================*/
-create table TBL_PUMPACQRAWDATA
+create table TBL_RPCACQRAWDATA
 (
   id      NUMBER(10) not null,
   wellid  NUMBER(10) not null,
   acqtime DATE not null,
   rawdata VARCHAR2(4000)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -848,14 +848,14 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PUMPACQRAWDATA
-  add constraint PK_PUMPACQRAWDATA primary key (ID)
+alter table TBL_RPCACQRAWDATA
+  add constraint PK_RPCACQRAWDATA primary key (ID)
 /
 
 /*==============================================================*/
-/* Table: TBL_PUMPALARMINFO_HIST                               */
+/* Table: TBL_RPCALARMINFO_HIST                               */
 /*==============================================================*/
-create table TBL_PUMPALARMINFO_HIST
+create table TBL_RPCALARMINFO_HIST
 (
   id            NUMBER(10) not null,
   wellid        NUMBER(10),
@@ -871,7 +871,7 @@ create table TBL_PUMPALARMINFO_HIST
   issendmail    NUMBER(1) default 0,
   recoverytime  DATE
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -879,15 +879,15 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PUMPALARMINFO_HIST
-  add constraint PK_PUMPALARMINFO_HIST primary key (ID)
+alter table TBL_RPCALARMINFO_HIST
+  add constraint PK_RPCALARMINFO_HIST primary key (ID)
 /
 
 
 /*==============================================================*/
-/* Table: TBL_PUMPALARMINFO_LATEST                                  */
+/* Table: TBL_RPCALARMINFO_LATEST                                  */
 /*==============================================================*/
-create table TBL_PUMPALARMINFO_LATEST
+create table TBL_RPCALARMINFO_LATEST
 (
   id            NUMBER(10) not null,
   wellid        NUMBER(10),
@@ -903,7 +903,7 @@ create table TBL_PUMPALARMINFO_LATEST
   issendmail    NUMBER(1) default 0,
   recoverytime  DATE
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -911,15 +911,15 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PUMPALARMINFO_LATEST
-  add constraint PK_PUMPALARMINFO_LATEST primary key (ID)
+alter table TBL_RPCALARMINFO_LATEST
+  add constraint PK_RPCALARMINFO_LATEST primary key (ID)
 /
 
 
 /*==============================================================*/
-/* Table: TBL_PIPELINEACQDATA_HIST                                    */
+/* Table: TBL_PCPACQDATA_HIST                                    */
 /*==============================================================*/
-create table TBL_PIPELINEACQDATA_HIST
+create table TBL_PCPACQDATA_HIST
 (
   id                 NUMBER(10) not null,
   wellid             NUMBER(10),
@@ -933,7 +933,7 @@ create table TBL_PIPELINEACQDATA_HIST
   runtime            NUMBER(8,2) default 0,
   runrange           CLOB
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -941,14 +941,14 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PIPELINEACQDATA_HIST
-  add constraint PK_TBL_PIPELINEACQDATA_HIST primary key (ID)
+alter table TBL_PCPACQDATA_HIST
+  add constraint PK_TBL_PCPACQDATA_HIST primary key (ID)
 /
 
 /*==============================================================*/
-/* Table: TBL_PIPELINEACQDATA_LATEST                                    */
+/* Table: TBL_PCPACQDATA_LATEST                                    */
 /*==============================================================*/
-create table TBL_PIPELINEACQDATA_LATEST
+create table TBL_PCPACQDATA_LATEST
 (
   id                 NUMBER(10) not null,
   wellid             NUMBER(10),
@@ -962,7 +962,7 @@ create table TBL_PIPELINEACQDATA_LATEST
   runtime            NUMBER(8,2) default 0,
   runrange           CLOB
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -970,21 +970,21 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PIPELINEACQDATA_LATEST
-  add constraint PK_TBL_PIPELINEACQDATA_LATEST primary key (ID)
+alter table TBL_PCPACQDATA_LATEST
+  add constraint PK_TBL_PCPACQDATA_LATEST primary key (ID)
 /
 
 /*==============================================================*/
-/* Table: TBL_PIPELINEACQRAWDATA                                    */
+/* Table: TBL_PCPACQRAWDATA                                    */
 /*==============================================================*/
-create table TBL_PIPELINEACQRAWDATA
+create table TBL_PCPACQRAWDATA
 (
   id      NUMBER(10) not null,
   wellid  NUMBER(10) not null,
   acqtime DATE not null,
   rawdata VARCHAR2(4000)
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -992,14 +992,14 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PIPELINEACQRAWDATA
-  add constraint PK_PIPELINEACQRAWDATA primary key (ID)
+alter table TBL_PCPACQRAWDATA
+  add constraint PK_PCPACQRAWDATA primary key (ID)
 /
 
 /*==============================================================*/
-/* Table: TBL_PIPELINEALARMINFO_HIST                               */
+/* Table: TBL_PCPALARMINFO_HIST                               */
 /*==============================================================*/
-create table TBL_PIPELINEALARMINFO_HIST
+create table TBL_PCPALARMINFO_HIST
 (
   id            NUMBER(10) not null,
   wellid        NUMBER(10),
@@ -1015,7 +1015,7 @@ create table TBL_PIPELINEALARMINFO_HIST
   issendmail    NUMBER(1) default 0,
   recoverytime  DATE
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -1023,15 +1023,15 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PIPELINEALARMINFO_HIST
-  add constraint PK_PIPELINEALARMINFO_HIST primary key (ID)
+alter table TBL_PCPALARMINFO_HIST
+  add constraint PK_PCPALARMINFO_HIST primary key (ID)
 /
 
 
 /*==============================================================*/
-/* Table: TBL_PIPELINEALARMINFO_LATEST                                  */
+/* Table: TBL_PCPALARMINFO_LATEST                                  */
 /*==============================================================*/
-create table TBL_PIPELINEALARMINFO_LATEST
+create table TBL_PCPALARMINFO_LATEST
 (
   id            NUMBER(10) not null,
   wellid        NUMBER(10),
@@ -1047,7 +1047,7 @@ create table TBL_PIPELINEALARMINFO_LATEST
   issendmail    NUMBER(1) default 0,
   recoverytime  DATE
 )
-tablespace AP_FB_DATA
+tablespace AP_JF_DATA
   storage
   (
     initial 64K
@@ -1055,8 +1055,8 @@ tablespace AP_FB_DATA
     maxextents unlimited
   )
 /
-alter table TBL_PIPELINEALARMINFO_LATEST
-  add constraint PK_PIPELINEALARMINFO_LATEST primary key (ID)
+alter table TBL_PCPALARMINFO_LATEST
+  add constraint PK_PCPALARMINFO_LATEST primary key (ID)
 /
 
 /*==============================================================*/

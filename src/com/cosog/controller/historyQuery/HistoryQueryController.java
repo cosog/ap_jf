@@ -182,11 +182,11 @@ public class HistoryQueryController extends BaseController  {
 			}
 		}
 		
-		String tableName="tbl_pumpacqdata_hist";
-		String deviceTableName="tbl_pumpdevice";
+		String tableName="tbl_rpcacqdata_hist";
+		String deviceTableName="tbl_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="tbl_pipelineacqdata_hist";
-			deviceTableName="tbl_pipelinedevice";
+			tableName="tbl_pcpacqdata_hist";
+			deviceTableName="tbl_pcpdevice";
 		}
 		if(StringManagerUtils.isNotNull(deviceId)&&!StringManagerUtils.isNotNull(endDate)){
 			String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd hh24:mi:ss') from "+tableName+" t where t.wellId= "+deviceId;
@@ -230,9 +230,9 @@ public class HistoryQueryController extends BaseController  {
 		String title = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "title"),"utf-8");
 		
 		DataDictionary ddic = null;
-		String ddicName="pumpHistoryQuery";
+		String ddicName="rpcHistoryQuery";
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			ddicName="pipelineHistoryQuery";
+			ddicName="pcpHistoryQuery";
 		}
 		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
 		heads=StringUtils.join(ddic.getHeaders(), ",");
@@ -248,11 +248,11 @@ public class HistoryQueryController extends BaseController  {
 			}
 		}
 		
-		String tableName="tbl_pumpacqdata_hist";
-		String deviceTableName="tbl_pumpdevice";
+		String tableName="tbl_rpcacqdata_hist";
+		String deviceTableName="tbl_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="tbl_pipelineacqdata_hist";
-			deviceTableName="tbl_pipelinedevice";
+			tableName="tbl_pcpacqdata_hist";
+			deviceTableName="tbl_pcpdevice";
 		}
 		if(StringManagerUtils.isNotNull(deviceId)&&!StringManagerUtils.isNotNull(endDate)){
 			String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd hh24:mi:ss') from "+tableName+" t where t.wellId="+deviceId;
@@ -316,11 +316,11 @@ public class HistoryQueryController extends BaseController  {
 		deviceType = ParamUtils.getParameter(request, "deviceType");
 		startDate = ParamUtils.getParameter(request, "startDate");
 		endDate = ParamUtils.getParameter(request, "endDate");
-		String deviceTableName="tbl_pumpdevice";
-		String tableName="tbl_pumpacqdata_hist";
+		String deviceTableName="tbl_rpcdevice";
+		String tableName="tbl_rpcacqdata_hist";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			deviceTableName="tbl_pipelinedevice";
-			tableName="tbl_pipelineacqdata_hist";
+			deviceTableName="tbl_pcpdevice";
+			tableName="tbl_pcpacqdata_hist";
 		}
 		if(!StringManagerUtils.isNotNull(endDate)){
 			String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd hh24:mi:ss') from "+tableName+" t where t.wellId="+deviceId;

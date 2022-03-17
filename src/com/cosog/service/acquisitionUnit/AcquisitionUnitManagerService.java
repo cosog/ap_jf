@@ -1187,8 +1187,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	
 	public String getAcquisitionUnitTreeData(){
 		StringBuffer result_json = new StringBuffer();
-		StringBuffer pumpTree_json = new StringBuffer();
-		StringBuffer pipelineTree_json = new StringBuffer();
+		StringBuffer rpcTree_json = new StringBuffer();
+		StringBuffer pcpTree_json = new StringBuffer();
 		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
 		if(equipmentDriveMap.size()==0){
 			EquipmentDriverServerTask.loadProtocolConfig();
@@ -1196,8 +1196,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		}
 		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
 		
-		pumpTree_json.append("[");
-		pipelineTree_json.append("[");
+		rpcTree_json.append("[");
+		pcpTree_json.append("[");
 		
 		if(modbusProtocolConfig!=null){
 			String unitSql="select t.id as id,t.unit_code as unitCode,t.unit_name as unitName,t.remark,t.protocol from tbl_acq_unit_conf t order by t.protocol,t.id";
@@ -1212,124 +1212,124 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			
 			for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
 				if(modbusProtocolConfig.getProtocol().get(i).getDeviceType()==0){
-					pumpTree_json.append("{\"classes\":1,");
-					pumpTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
-					pumpTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
-					pumpTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
-					pumpTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
-					pumpTree_json.append("\"iconCls\": \"protocol\",");
-					pumpTree_json.append("\"expanded\": true,");
-					pumpTree_json.append("\"children\": [");
+					rpcTree_json.append("{\"classes\":1,");
+					rpcTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
+					rpcTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
+					rpcTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
+					rpcTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
+					rpcTree_json.append("\"iconCls\": \"protocol\",");
+					rpcTree_json.append("\"expanded\": true,");
+					rpcTree_json.append("\"children\": [");
 					for(int j=0;j<unitList.size();j++){
 						Object[] unitObj = (Object[]) unitList.get(j);
 						if(modbusProtocolConfig.getProtocol().get(i).getName().equalsIgnoreCase(unitObj[unitObj.length-1]+"")){
-							pumpTree_json.append("{\"classes\":2,");
-							pumpTree_json.append("\"id\":"+unitObj[0]+",");
-							pumpTree_json.append("\"code\":\""+unitObj[1]+"\",");
-							pumpTree_json.append("\"text\":\""+unitObj[2]+"\",");
-							pumpTree_json.append("\"remark\":\""+unitObj[3]+"\",");
-							pumpTree_json.append("\"protocol\":\""+unitObj[4]+"\",");
-							pumpTree_json.append("\"iconCls\": \"acqUnit\",");
-							pumpTree_json.append("\"expanded\": true,");
-							pumpTree_json.append("\"children\": [");
+							rpcTree_json.append("{\"classes\":2,");
+							rpcTree_json.append("\"id\":"+unitObj[0]+",");
+							rpcTree_json.append("\"code\":\""+unitObj[1]+"\",");
+							rpcTree_json.append("\"text\":\""+unitObj[2]+"\",");
+							rpcTree_json.append("\"remark\":\""+unitObj[3]+"\",");
+							rpcTree_json.append("\"protocol\":\""+unitObj[4]+"\",");
+							rpcTree_json.append("\"iconCls\": \"acqUnit\",");
+							rpcTree_json.append("\"expanded\": true,");
+							rpcTree_json.append("\"children\": [");
 							for(int k=0;k<groupList.size();k++){
 								Object[] groupObj = (Object[]) groupList.get(k);
 								if((unitObj[0]+"").equalsIgnoreCase(groupObj[groupObj.length-1]+"")){
-									pumpTree_json.append("{\"classes\":3,");
-									pumpTree_json.append("\"id\":"+groupObj[0]+",");
-									pumpTree_json.append("\"code\":\""+groupObj[1]+"\",");
-									pumpTree_json.append("\"text\":\""+groupObj[2]+"\",");
-									pumpTree_json.append("\"acq_cycle\":\""+groupObj[3]+"\",");
-									pumpTree_json.append("\"save_cycle\":\""+groupObj[4]+"\",");
-									pumpTree_json.append("\"remark\":\""+groupObj[5]+"\",");
-									pumpTree_json.append("\"protocol\":\""+groupObj[6]+"\",");
-									pumpTree_json.append("\"type\":"+groupObj[7]+",");
-									pumpTree_json.append("\"typeName\":\""+("0".equalsIgnoreCase(groupObj[7]+"")?"采集组":"控制组")+"\",");
-									pumpTree_json.append("\"unitId\":"+groupObj[groupObj.length-1]+",");
-									pumpTree_json.append("\"iconCls\": \"acqGroup\",");
-									pumpTree_json.append("\"leaf\": true");
-									pumpTree_json.append("},");
+									rpcTree_json.append("{\"classes\":3,");
+									rpcTree_json.append("\"id\":"+groupObj[0]+",");
+									rpcTree_json.append("\"code\":\""+groupObj[1]+"\",");
+									rpcTree_json.append("\"text\":\""+groupObj[2]+"\",");
+									rpcTree_json.append("\"acq_cycle\":\""+groupObj[3]+"\",");
+									rpcTree_json.append("\"save_cycle\":\""+groupObj[4]+"\",");
+									rpcTree_json.append("\"remark\":\""+groupObj[5]+"\",");
+									rpcTree_json.append("\"protocol\":\""+groupObj[6]+"\",");
+									rpcTree_json.append("\"type\":"+groupObj[7]+",");
+									rpcTree_json.append("\"typeName\":\""+("0".equalsIgnoreCase(groupObj[7]+"")?"采集组":"控制组")+"\",");
+									rpcTree_json.append("\"unitId\":"+groupObj[groupObj.length-1]+",");
+									rpcTree_json.append("\"iconCls\": \"acqGroup\",");
+									rpcTree_json.append("\"leaf\": true");
+									rpcTree_json.append("},");
 								}
 							}
-							if(pumpTree_json.toString().endsWith(",")){
-								pumpTree_json.deleteCharAt(pumpTree_json.length() - 1);
+							if(rpcTree_json.toString().endsWith(",")){
+								rpcTree_json.deleteCharAt(rpcTree_json.length() - 1);
 							}
 							
-							pumpTree_json.append("]},");
+							rpcTree_json.append("]},");
 						}
 					}
-					if(pumpTree_json.toString().endsWith(",")){
-						pumpTree_json.deleteCharAt(pumpTree_json.length() - 1);
+					if(rpcTree_json.toString().endsWith(",")){
+						rpcTree_json.deleteCharAt(rpcTree_json.length() - 1);
 					}
-					pumpTree_json.append("]},");
+					rpcTree_json.append("]},");
 				}else{
-					pipelineTree_json.append("{\"classes\":1,");
-					pipelineTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
-					pipelineTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
-					pipelineTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
-					pipelineTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
-					pipelineTree_json.append("\"iconCls\": \"protocol\",");
-					pipelineTree_json.append("\"expanded\": true,");
-					pipelineTree_json.append("\"children\": [");
+					pcpTree_json.append("{\"classes\":1,");
+					pcpTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
+					pcpTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
+					pcpTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
+					pcpTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
+					pcpTree_json.append("\"iconCls\": \"protocol\",");
+					pcpTree_json.append("\"expanded\": true,");
+					pcpTree_json.append("\"children\": [");
 					for(int j=0;j<unitList.size();j++){
 						Object[] unitObj = (Object[]) unitList.get(j);
 						if(modbusProtocolConfig.getProtocol().get(i).getName().equalsIgnoreCase(unitObj[unitObj.length-1]+"")){
-							pipelineTree_json.append("{\"classes\":2,");
-							pipelineTree_json.append("\"id\":"+unitObj[0]+",");
-							pipelineTree_json.append("\"code\":\""+unitObj[1]+"\",");
-							pipelineTree_json.append("\"text\":\""+unitObj[2]+"\",");
-							pipelineTree_json.append("\"remark\":\""+unitObj[3]+"\",");
-							pipelineTree_json.append("\"protocol\":\""+unitObj[4]+"\",");
-							pipelineTree_json.append("\"iconCls\": \"acqUnit\",");
-							pipelineTree_json.append("\"expanded\": true,");
-							pipelineTree_json.append("\"children\": [");
+							pcpTree_json.append("{\"classes\":2,");
+							pcpTree_json.append("\"id\":"+unitObj[0]+",");
+							pcpTree_json.append("\"code\":\""+unitObj[1]+"\",");
+							pcpTree_json.append("\"text\":\""+unitObj[2]+"\",");
+							pcpTree_json.append("\"remark\":\""+unitObj[3]+"\",");
+							pcpTree_json.append("\"protocol\":\""+unitObj[4]+"\",");
+							pcpTree_json.append("\"iconCls\": \"acqUnit\",");
+							pcpTree_json.append("\"expanded\": true,");
+							pcpTree_json.append("\"children\": [");
 							for(int k=0;k<groupList.size();k++){
 								Object[] groupObj = (Object[]) groupList.get(k);
 								if((unitObj[0]+"").equalsIgnoreCase(groupObj[groupObj.length-1]+"")){
-									pipelineTree_json.append("{\"classes\":3,");
-									pipelineTree_json.append("\"id\":"+groupObj[0]+",");
-									pipelineTree_json.append("\"code\":\""+groupObj[1]+"\",");
-									pipelineTree_json.append("\"text\":\""+groupObj[2]+"\",");
-									pipelineTree_json.append("\"acq_cycle\":\""+groupObj[3]+"\",");
-									pipelineTree_json.append("\"save_cycle\":\""+groupObj[4]+"\",");
-									pipelineTree_json.append("\"remark\":\""+groupObj[5]+"\",");
-									pipelineTree_json.append("\"protocol\":\""+groupObj[6]+"\",");
-									pipelineTree_json.append("\"type\":"+groupObj[7]+",");
-									pipelineTree_json.append("\"typeName\":\""+("0".equalsIgnoreCase(groupObj[7]+"")?"采集组":"控制组")+"\",");
-									pipelineTree_json.append("\"unitId\":"+groupObj[groupObj.length-1]+",");
-									pipelineTree_json.append("\"iconCls\": \"acqGroup\",");
-									pipelineTree_json.append("\"leaf\": true");
-									pipelineTree_json.append("},");
+									pcpTree_json.append("{\"classes\":3,");
+									pcpTree_json.append("\"id\":"+groupObj[0]+",");
+									pcpTree_json.append("\"code\":\""+groupObj[1]+"\",");
+									pcpTree_json.append("\"text\":\""+groupObj[2]+"\",");
+									pcpTree_json.append("\"acq_cycle\":\""+groupObj[3]+"\",");
+									pcpTree_json.append("\"save_cycle\":\""+groupObj[4]+"\",");
+									pcpTree_json.append("\"remark\":\""+groupObj[5]+"\",");
+									pcpTree_json.append("\"protocol\":\""+groupObj[6]+"\",");
+									pcpTree_json.append("\"type\":"+groupObj[7]+",");
+									pcpTree_json.append("\"typeName\":\""+("0".equalsIgnoreCase(groupObj[7]+"")?"采集组":"控制组")+"\",");
+									pcpTree_json.append("\"unitId\":"+groupObj[groupObj.length-1]+",");
+									pcpTree_json.append("\"iconCls\": \"acqGroup\",");
+									pcpTree_json.append("\"leaf\": true");
+									pcpTree_json.append("},");
 								}
 							}
-							if(pipelineTree_json.toString().endsWith(",")){
-								pipelineTree_json.deleteCharAt(pipelineTree_json.length() - 1);
+							if(pcpTree_json.toString().endsWith(",")){
+								pcpTree_json.deleteCharAt(pcpTree_json.length() - 1);
 							}
 							
-							pipelineTree_json.append("]},");
+							pcpTree_json.append("]},");
 						}
 					}
-					if(pipelineTree_json.toString().endsWith(",")){
-						pipelineTree_json.deleteCharAt(pipelineTree_json.length() - 1);
+					if(pcpTree_json.toString().endsWith(",")){
+						pcpTree_json.deleteCharAt(pcpTree_json.length() - 1);
 					}
-					pipelineTree_json.append("]},");
+					pcpTree_json.append("]},");
 				}
 			}
 		}
-		if(pumpTree_json.toString().endsWith(",")){
-			pumpTree_json.deleteCharAt(pumpTree_json.length() - 1);
+		if(rpcTree_json.toString().endsWith(",")){
+			rpcTree_json.deleteCharAt(rpcTree_json.length() - 1);
 		}
-		pumpTree_json.append("]");
+		rpcTree_json.append("]");
 		
-		if(pipelineTree_json.toString().endsWith(",")){
-			pipelineTree_json.deleteCharAt(pipelineTree_json.length() - 1);
+		if(pcpTree_json.toString().endsWith(",")){
+			pcpTree_json.deleteCharAt(pcpTree_json.length() - 1);
 		}
-		pipelineTree_json.append("]");
+		pcpTree_json.append("]");
 		
 		result_json.append("[");
 		
-		result_json.append("{\"classes\":0,\"text\":\"泵设备\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pumpTree_json+"},");
-		result_json.append("{\"classes\":0,\"text\":\"管设备\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pipelineTree_json+"}");
+		result_json.append("{\"classes\":0,\"text\":\"抽油机\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
+		result_json.append("{\"classes\":0,\"text\":\"螺杆泵\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
 		result_json.append("]");
 		return result_json.toString().replaceAll("null", "");
 	}
@@ -1337,8 +1337,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	
 	public String modbusProtocolAddrMappingTreeData(){
 		StringBuffer result_json = new StringBuffer();
-		StringBuffer pumpTree_json = new StringBuffer();
-		StringBuffer pipelineTree_json = new StringBuffer();
+		StringBuffer rpcTree_json = new StringBuffer();
+		StringBuffer pcpTree_json = new StringBuffer();
 		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
 		if(equipmentDriveMap.size()==0){
 			EquipmentDriverServerTask.loadProtocolConfig();
@@ -1346,48 +1346,48 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		}
 		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
 		
-		pumpTree_json.append("[");
-		pipelineTree_json.append("[");
+		rpcTree_json.append("[");
+		pcpTree_json.append("[");
 		
 		if(modbusProtocolConfig!=null){
 			//排序
 			Collections.sort(modbusProtocolConfig.getProtocol());
 			for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
 				if(modbusProtocolConfig.getProtocol().get(i).getDeviceType()==0){
-					pumpTree_json.append("{\"classes\":1,");
-					pumpTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
-					pumpTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
-					pumpTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
-					pumpTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
-					pumpTree_json.append("\"iconCls\": \"protocol\",");
-					pumpTree_json.append("\"leaf\": true");
-					pumpTree_json.append("},");
+					rpcTree_json.append("{\"classes\":1,");
+					rpcTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
+					rpcTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
+					rpcTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
+					rpcTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
+					rpcTree_json.append("\"iconCls\": \"protocol\",");
+					rpcTree_json.append("\"leaf\": true");
+					rpcTree_json.append("},");
 				}else{
-					pipelineTree_json.append("{\"classes\":1,");
-					pipelineTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
-					pipelineTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
-					pipelineTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
-					pipelineTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
-					pipelineTree_json.append("\"iconCls\": \"protocol\",");
-					pipelineTree_json.append("\"leaf\": true");
-					pipelineTree_json.append("},");
+					pcpTree_json.append("{\"classes\":1,");
+					pcpTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
+					pcpTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
+					pcpTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
+					pcpTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
+					pcpTree_json.append("\"iconCls\": \"protocol\",");
+					pcpTree_json.append("\"leaf\": true");
+					pcpTree_json.append("},");
 				}
 			}
 		}
-		if(pumpTree_json.toString().endsWith(",")){
-			pumpTree_json.deleteCharAt(pumpTree_json.length() - 1);
+		if(rpcTree_json.toString().endsWith(",")){
+			rpcTree_json.deleteCharAt(rpcTree_json.length() - 1);
 		}
-		pumpTree_json.append("]");
+		rpcTree_json.append("]");
 		
-		if(pipelineTree_json.toString().endsWith(",")){
-			pipelineTree_json.deleteCharAt(pipelineTree_json.length() - 1);
+		if(pcpTree_json.toString().endsWith(",")){
+			pcpTree_json.deleteCharAt(pcpTree_json.length() - 1);
 		}
-		pipelineTree_json.append("]");
+		pcpTree_json.append("]");
 		
 		result_json.append("[");
 		
-		result_json.append("{\"classes\":0,\"text\":\"泵设备\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pumpTree_json+"},");
-		result_json.append("{\"classes\":0,\"text\":\"管设备\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pipelineTree_json+"}");
+		result_json.append("{\"classes\":0,\"text\":\"抽油机\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
+		result_json.append("{\"classes\":0,\"text\":\"螺杆泵\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
 		result_json.append("]");
 		return result_json.toString();
 	}
@@ -1512,8 +1512,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	
 	public String modbusProtocolAlarmUnitTreeData(){
 		StringBuffer result_json = new StringBuffer();
-		StringBuffer pumpTree_json = new StringBuffer();
-		StringBuffer pipelineTree_json = new StringBuffer();
+		StringBuffer rpcTree_json = new StringBuffer();
+		StringBuffer pcpTree_json = new StringBuffer();
 		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
 		if(equipmentDriveMap.size()==0){
 			EquipmentDriverServerTask.loadProtocolConfig();
@@ -1521,8 +1521,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		}
 		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
 		
-		pumpTree_json.append("[");
-		pipelineTree_json.append("[");
+		rpcTree_json.append("[");
+		pcpTree_json.append("[");
 		
 		if(modbusProtocolConfig!=null){
 			String unitSql="select t.id,t.unit_code,t.unit_name,t.remark,t.protocol"
@@ -1535,86 +1535,86 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			
 			for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
 				if(modbusProtocolConfig.getProtocol().get(i).getDeviceType()==0){
-					pumpTree_json.append("{\"classes\":1,");
-					pumpTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
-					pumpTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
-					pumpTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
-					pumpTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
-					pumpTree_json.append("\"iconCls\": \"protocol\",");
-					pumpTree_json.append("\"expanded\": true,");
-					pumpTree_json.append("\"children\": [");
+					rpcTree_json.append("{\"classes\":1,");
+					rpcTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
+					rpcTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
+					rpcTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
+					rpcTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
+					rpcTree_json.append("\"iconCls\": \"protocol\",");
+					rpcTree_json.append("\"expanded\": true,");
+					rpcTree_json.append("\"children\": [");
 					for(int j=0;j<unitList.size();j++){
 						Object[] unitObj = (Object[]) unitList.get(j);
 						if(modbusProtocolConfig.getProtocol().get(i).getName().equalsIgnoreCase(unitObj[unitObj.length-1]+"")){
-							pumpTree_json.append("{\"classes\":3,");
-							pumpTree_json.append("\"id\":"+unitObj[0]+",");
-							pumpTree_json.append("\"code\":\""+unitObj[1]+"\",");
-							pumpTree_json.append("\"text\":\""+unitObj[2]+"\",");
-							pumpTree_json.append("\"remark\":\""+unitObj[3]+"\",");
-							pumpTree_json.append("\"protocol\":\""+unitObj[4]+"\",");
-							pumpTree_json.append("\"iconCls\": \"acqGroup\",");
-							pumpTree_json.append("\"leaf\": true");
-							pumpTree_json.append("},");
+							rpcTree_json.append("{\"classes\":3,");
+							rpcTree_json.append("\"id\":"+unitObj[0]+",");
+							rpcTree_json.append("\"code\":\""+unitObj[1]+"\",");
+							rpcTree_json.append("\"text\":\""+unitObj[2]+"\",");
+							rpcTree_json.append("\"remark\":\""+unitObj[3]+"\",");
+							rpcTree_json.append("\"protocol\":\""+unitObj[4]+"\",");
+							rpcTree_json.append("\"iconCls\": \"acqGroup\",");
+							rpcTree_json.append("\"leaf\": true");
+							rpcTree_json.append("},");
 						}
 					}
-					if(pumpTree_json.toString().endsWith(",")){
-						pumpTree_json.deleteCharAt(pumpTree_json.length() - 1);
+					if(rpcTree_json.toString().endsWith(",")){
+						rpcTree_json.deleteCharAt(rpcTree_json.length() - 1);
 					}
-					pumpTree_json.append("]},");
+					rpcTree_json.append("]},");
 				}else{
-					pipelineTree_json.append("{\"classes\":1,");
-					pipelineTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
-					pipelineTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
-					pipelineTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
-					pipelineTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
-					pipelineTree_json.append("\"iconCls\": \"protocol\",");
-					pipelineTree_json.append("\"expanded\": true,");
-					pipelineTree_json.append("\"children\": [");
+					pcpTree_json.append("{\"classes\":1,");
+					pcpTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
+					pcpTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
+					pcpTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
+					pcpTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
+					pcpTree_json.append("\"iconCls\": \"protocol\",");
+					pcpTree_json.append("\"expanded\": true,");
+					pcpTree_json.append("\"children\": [");
 					for(int j=0;j<unitList.size();j++){
 						Object[] unitObj = (Object[]) unitList.get(j);
 						if(modbusProtocolConfig.getProtocol().get(i).getName().equalsIgnoreCase(unitObj[unitObj.length-1]+"")){
-							pipelineTree_json.append("{\"classes\":3,");
-							pipelineTree_json.append("\"id\":"+unitObj[0]+",");
-							pipelineTree_json.append("\"code\":\""+unitObj[1]+"\",");
-							pipelineTree_json.append("\"text\":\""+unitObj[2]+"\",");
-							pipelineTree_json.append("\"remark\":\""+unitObj[3]+"\",");
-							pipelineTree_json.append("\"protocol\":\""+unitObj[4]+"\",");
-							pipelineTree_json.append("\"iconCls\": \"acqGroup\",");
-							pipelineTree_json.append("\"leaf\": true");
-							pipelineTree_json.append("},");
+							pcpTree_json.append("{\"classes\":3,");
+							pcpTree_json.append("\"id\":"+unitObj[0]+",");
+							pcpTree_json.append("\"code\":\""+unitObj[1]+"\",");
+							pcpTree_json.append("\"text\":\""+unitObj[2]+"\",");
+							pcpTree_json.append("\"remark\":\""+unitObj[3]+"\",");
+							pcpTree_json.append("\"protocol\":\""+unitObj[4]+"\",");
+							pcpTree_json.append("\"iconCls\": \"acqGroup\",");
+							pcpTree_json.append("\"leaf\": true");
+							pcpTree_json.append("},");
 						}
 					}
-					if(pipelineTree_json.toString().endsWith(",")){
-						pipelineTree_json.deleteCharAt(pipelineTree_json.length() - 1);
+					if(pcpTree_json.toString().endsWith(",")){
+						pcpTree_json.deleteCharAt(pcpTree_json.length() - 1);
 					}
-					pipelineTree_json.append("]},");
+					pcpTree_json.append("]},");
 				}
 			}
 		}
-		if(pumpTree_json.toString().endsWith(",")){
-			pumpTree_json.deleteCharAt(pumpTree_json.length() - 1);
+		if(rpcTree_json.toString().endsWith(",")){
+			rpcTree_json.deleteCharAt(rpcTree_json.length() - 1);
 		}
-		pumpTree_json.append("]");
+		rpcTree_json.append("]");
 		
-		if(pipelineTree_json.toString().endsWith(",")){
-			pipelineTree_json.deleteCharAt(pipelineTree_json.length() - 1);
+		if(pcpTree_json.toString().endsWith(",")){
+			pcpTree_json.deleteCharAt(pcpTree_json.length() - 1);
 		}
-		pipelineTree_json.append("]");
+		pcpTree_json.append("]");
 		
 		result_json.append("[");
 		
-		result_json.append("{\"classes\":0,\"text\":\"泵设备\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pumpTree_json+"},");
-		result_json.append("{\"classes\":0,\"text\":\"管设备\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pipelineTree_json+"}");
+		result_json.append("{\"classes\":0,\"text\":\"抽油机\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
+		result_json.append("{\"classes\":0,\"text\":\"螺杆泵\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
 		result_json.append("]");
 		return result_json.toString().replaceAll("null", "");
 	}
 	
 	public String getModbusProtocolInstanceConfigTreeData(){
 		StringBuffer result_json = new StringBuffer();
-		StringBuffer pumpTree_json = new StringBuffer();
-		StringBuffer pipelineTree_json = new StringBuffer();
-		pumpTree_json.append("[");
-		pipelineTree_json.append("[");
+		StringBuffer rpcTree_json = new StringBuffer();
+		StringBuffer pcpTree_json = new StringBuffer();
+		rpcTree_json.append("[");
+		pcpTree_json.append("[");
 		String sql="select t.id,t.name,t.code,t.acqprotocoltype,t.ctrlprotocoltype,t.signinprefix,t.signinsuffix,t.heartbeatprefix,t.heartbeatsuffix,"
 				+ " t.devicetype,t.sort,t.unitid,t2.unit_name "
 				+ " from tbl_protocolinstance t ,tbl_acq_unit_conf t2 where t.unitid=t2.id"
@@ -1628,122 +1628,122 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		for(int i=0;i<list.size();i++){
 			Object[] obj = (Object[]) list.get(i);
 			if(StringManagerUtils.stringToInteger(obj[9]+"")==0){
-				pumpTree_json.append("{\"classes\":1,");
-				pumpTree_json.append("\"id\":\""+obj[0]+"\",");
-				pumpTree_json.append("\"text\":\""+obj[1]+"\",");
-				pumpTree_json.append("\"code\":\""+obj[2]+"\",");
-				pumpTree_json.append("\"acqProtocolType\":\""+obj[3]+"\",");
-				pumpTree_json.append("\"ctrlProtocolType\":\""+obj[4]+"\",");
-				pumpTree_json.append("\"signInPrefix\":\""+obj[5]+"\",");
-				pumpTree_json.append("\"signInSuffix\":\""+obj[6]+"\",");
-				pumpTree_json.append("\"heartbeatPrefix\":\""+obj[7]+"\",");
-				pumpTree_json.append("\"heartbeatSuffix\":\""+obj[8]+"\",");
-				pumpTree_json.append("\"deviceType\":"+obj[9]+",");
-				pumpTree_json.append("\"sort\":\""+obj[10]+"\",");
-				pumpTree_json.append("\"unitId\":"+obj[11]+",");
-				pumpTree_json.append("\"unitName\":\""+obj[12]+"\",");
-				pumpTree_json.append("\"iconCls\": \"protocol\",");
+				rpcTree_json.append("{\"classes\":1,");
+				rpcTree_json.append("\"id\":\""+obj[0]+"\",");
+				rpcTree_json.append("\"text\":\""+obj[1]+"\",");
+				rpcTree_json.append("\"code\":\""+obj[2]+"\",");
+				rpcTree_json.append("\"acqProtocolType\":\""+obj[3]+"\",");
+				rpcTree_json.append("\"ctrlProtocolType\":\""+obj[4]+"\",");
+				rpcTree_json.append("\"signInPrefix\":\""+obj[5]+"\",");
+				rpcTree_json.append("\"signInSuffix\":\""+obj[6]+"\",");
+				rpcTree_json.append("\"heartbeatPrefix\":\""+obj[7]+"\",");
+				rpcTree_json.append("\"heartbeatSuffix\":\""+obj[8]+"\",");
+				rpcTree_json.append("\"deviceType\":"+obj[9]+",");
+				rpcTree_json.append("\"sort\":\""+obj[10]+"\",");
+				rpcTree_json.append("\"unitId\":"+obj[11]+",");
+				rpcTree_json.append("\"unitName\":\""+obj[12]+"\",");
+				rpcTree_json.append("\"iconCls\": \"protocol\",");
 
-				pumpTree_json.append("\"expanded\": true,");
-				pumpTree_json.append("\"children\": [");
-				pumpTree_json.append("{\"classes\":2,");
-				pumpTree_json.append("\"text\":\""+obj[12]+"\",");
-				pumpTree_json.append("\"id\":"+obj[11]+",");
-				pumpTree_json.append("\"iconCls\": \"acqUnit\","); 
+				rpcTree_json.append("\"expanded\": true,");
+				rpcTree_json.append("\"children\": [");
+				rpcTree_json.append("{\"classes\":2,");
+				rpcTree_json.append("\"text\":\""+obj[12]+"\",");
+				rpcTree_json.append("\"id\":"+obj[11]+",");
+				rpcTree_json.append("\"iconCls\": \"acqUnit\","); 
 				
-				pumpTree_json.append("\"expanded\": true,");
-				pumpTree_json.append("\"children\": [");
+				rpcTree_json.append("\"expanded\": true,");
+				rpcTree_json.append("\"children\": [");
 				for(int j=0;j<groupList.size();j++){
 					Object[] groupObj = (Object[]) groupList.get(j);
 					if((obj[11]+"").equalsIgnoreCase(groupObj[3]+"")){
-						pumpTree_json.append("{\"classes\":3,");
-						pumpTree_json.append("\"id\":"+groupObj[0]+",");
-						pumpTree_json.append("\"text\":\""+groupObj[1]+"\",");
-						pumpTree_json.append("\"code\":\""+groupObj[2]+"\",");
-						pumpTree_json.append("\"iconCls\": \"acqGroup\","); 
-						pumpTree_json.append("\"leaf\": true},");
+						rpcTree_json.append("{\"classes\":3,");
+						rpcTree_json.append("\"id\":"+groupObj[0]+",");
+						rpcTree_json.append("\"text\":\""+groupObj[1]+"\",");
+						rpcTree_json.append("\"code\":\""+groupObj[2]+"\",");
+						rpcTree_json.append("\"iconCls\": \"acqGroup\","); 
+						rpcTree_json.append("\"leaf\": true},");
 					}
 				}
-				if(pumpTree_json.toString().endsWith(",")){
-					pumpTree_json.deleteCharAt(pumpTree_json.length() - 1);
+				if(rpcTree_json.toString().endsWith(",")){
+					rpcTree_json.deleteCharAt(rpcTree_json.length() - 1);
 				}
 				
-				pumpTree_json.append("]");
+				rpcTree_json.append("]");
 				
-				pumpTree_json.append("}]");
+				rpcTree_json.append("}]");
 				
-				pumpTree_json.append("},");
+				rpcTree_json.append("},");
 			}else{
-				pipelineTree_json.append("{\"classes\":1,");
-				pipelineTree_json.append("\"id\":\""+obj[0]+"\",");
-				pipelineTree_json.append("\"text\":\""+obj[1]+"\",");
-				pipelineTree_json.append("\"code\":\""+obj[2]+"\",");
-				pipelineTree_json.append("\"acqProtocolType\":\""+obj[3]+"\",");
-				pipelineTree_json.append("\"ctrlProtocolType\":\""+obj[4]+"\",");
-				pipelineTree_json.append("\"signInPrefix\":\""+obj[5]+"\",");
-				pipelineTree_json.append("\"signInSuffix\":\""+obj[6]+"\",");
-				pipelineTree_json.append("\"heartbeatPrefix\":\""+obj[7]+"\",");
-				pipelineTree_json.append("\"heartbeatSuffix\":\""+obj[8]+"\",");
-				pipelineTree_json.append("\"deviceType\":"+obj[9]+",");
-				pipelineTree_json.append("\"sort\":\""+obj[10]+"\",");
-				pipelineTree_json.append("\"unitId\":"+obj[11]+",");
-				pipelineTree_json.append("\"unitName\":\""+obj[12]+"\",");
-				pipelineTree_json.append("\"iconCls\": \"protocol\",");
-				pipelineTree_json.append("\"expanded\": true,");
+				pcpTree_json.append("{\"classes\":1,");
+				pcpTree_json.append("\"id\":\""+obj[0]+"\",");
+				pcpTree_json.append("\"text\":\""+obj[1]+"\",");
+				pcpTree_json.append("\"code\":\""+obj[2]+"\",");
+				pcpTree_json.append("\"acqProtocolType\":\""+obj[3]+"\",");
+				pcpTree_json.append("\"ctrlProtocolType\":\""+obj[4]+"\",");
+				pcpTree_json.append("\"signInPrefix\":\""+obj[5]+"\",");
+				pcpTree_json.append("\"signInSuffix\":\""+obj[6]+"\",");
+				pcpTree_json.append("\"heartbeatPrefix\":\""+obj[7]+"\",");
+				pcpTree_json.append("\"heartbeatSuffix\":\""+obj[8]+"\",");
+				pcpTree_json.append("\"deviceType\":"+obj[9]+",");
+				pcpTree_json.append("\"sort\":\""+obj[10]+"\",");
+				pcpTree_json.append("\"unitId\":"+obj[11]+",");
+				pcpTree_json.append("\"unitName\":\""+obj[12]+"\",");
+				pcpTree_json.append("\"iconCls\": \"protocol\",");
+				pcpTree_json.append("\"expanded\": true,");
 				
-				pipelineTree_json.append("\"children\": [");
-				pipelineTree_json.append("{\"classes\":2,");
-				pipelineTree_json.append("\"text\":\""+obj[12]+"\",");
-				pipelineTree_json.append("\"id\":"+obj[11]+",");
-				pipelineTree_json.append("\"iconCls\": \"acqUnit\","); 
-				pipelineTree_json.append("\"expanded\": true,");
-				pipelineTree_json.append("\"children\": [");
+				pcpTree_json.append("\"children\": [");
+				pcpTree_json.append("{\"classes\":2,");
+				pcpTree_json.append("\"text\":\""+obj[12]+"\",");
+				pcpTree_json.append("\"id\":"+obj[11]+",");
+				pcpTree_json.append("\"iconCls\": \"acqUnit\","); 
+				pcpTree_json.append("\"expanded\": true,");
+				pcpTree_json.append("\"children\": [");
 				for(int j=0;j<groupList.size();j++){
 					Object[] groupObj = (Object[]) groupList.get(j);
 					if((obj[11]+"").equalsIgnoreCase(groupObj[3]+"")){
-						pipelineTree_json.append("{\"classes\":3,");
-						pipelineTree_json.append("\"id\":"+groupObj[0]+",");
-						pipelineTree_json.append("\"text\":\""+groupObj[1]+"\",");
-						pipelineTree_json.append("\"code\":\""+groupObj[2]+"\",");
-						pipelineTree_json.append("\"iconCls\": \"acqGroup\","); 
-						pipelineTree_json.append("\"leaf\": true},");
+						pcpTree_json.append("{\"classes\":3,");
+						pcpTree_json.append("\"id\":"+groupObj[0]+",");
+						pcpTree_json.append("\"text\":\""+groupObj[1]+"\",");
+						pcpTree_json.append("\"code\":\""+groupObj[2]+"\",");
+						pcpTree_json.append("\"iconCls\": \"acqGroup\","); 
+						pcpTree_json.append("\"leaf\": true},");
 					}
 				}
-				if(pipelineTree_json.toString().endsWith(",")){
-					pipelineTree_json.deleteCharAt(pipelineTree_json.length() - 1);
+				if(pcpTree_json.toString().endsWith(",")){
+					pcpTree_json.deleteCharAt(pcpTree_json.length() - 1);
 				}
 				
-				pipelineTree_json.append("]");
-				pipelineTree_json.append("}]");
+				pcpTree_json.append("]");
+				pcpTree_json.append("}]");
 				
-				pipelineTree_json.append("},");
+				pcpTree_json.append("},");
 			}
 		}
 		
-		if(pumpTree_json.toString().endsWith(",")){
-			pumpTree_json.deleteCharAt(pumpTree_json.length() - 1);
+		if(rpcTree_json.toString().endsWith(",")){
+			rpcTree_json.deleteCharAt(rpcTree_json.length() - 1);
 		}
-		pumpTree_json.append("]");
+		rpcTree_json.append("]");
 		
-		if(pipelineTree_json.toString().endsWith(",")){
-			pipelineTree_json.deleteCharAt(pipelineTree_json.length() - 1);
+		if(pcpTree_json.toString().endsWith(",")){
+			pcpTree_json.deleteCharAt(pcpTree_json.length() - 1);
 		}
-		pipelineTree_json.append("]");
+		pcpTree_json.append("]");
 		
 		result_json.append("[");
 		
-		result_json.append("{\"classes\":0,\"text\":\"泵设备\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pumpTree_json+"},");
-		result_json.append("{\"classes\":0,\"text\":\"管设备\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pipelineTree_json+"}");
+		result_json.append("{\"classes\":0,\"text\":\"抽油机\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
+		result_json.append("{\"classes\":0,\"text\":\"螺杆泵\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
 		result_json.append("]");
 		return result_json.toString().replaceAll("null", "");
 	}
 	
 	public String getModbusAlarmProtocolInstanceConfigTreeData(){
 		StringBuffer result_json = new StringBuffer();
-		StringBuffer pumpTree_json = new StringBuffer();
-		StringBuffer pipelineTree_json = new StringBuffer();
-		pumpTree_json.append("[");
-		pipelineTree_json.append("[");
+		StringBuffer rpcTree_json = new StringBuffer();
+		StringBuffer pcpTree_json = new StringBuffer();
+		rpcTree_json.append("[");
+		pcpTree_json.append("[");
 		String sql="select t.id,t.name,t.code,t.alarmUnitId,t2.unit_name,t.devicetype,t.sort   "
 				+ " from tbl_protocolalarminstance t ,tbl_alarm_unit_conf t2 where t.alarmunitid=t2.id "
 				+ " order by t.devicetype,t.sort";
@@ -1751,64 +1751,64 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		for(int i=0;i<list.size();i++){
 			Object[] obj = (Object[]) list.get(i);
 			if(StringManagerUtils.stringToInteger(obj[5]+"")==0){
-				pumpTree_json.append("{\"classes\":1,");
-				pumpTree_json.append("\"id\":\""+obj[0]+"\",");
-				pumpTree_json.append("\"text\":\""+obj[1]+"\",");
-				pumpTree_json.append("\"code\":\""+obj[2]+"\",");
-				pumpTree_json.append("\"alarmUnitId\":"+obj[3]+",");
-				pumpTree_json.append("\"alarmUnitName\":\""+obj[4]+"\",");
-				pumpTree_json.append("\"deviceType\":"+obj[5]+",");
-				pumpTree_json.append("\"sort\":\""+obj[6]+"\",");
-				pumpTree_json.append("\"iconCls\": \"protocol\",");
-				pumpTree_json.append("\"expanded\": true,");
-				pumpTree_json.append("\"children\": [");
-				pumpTree_json.append("{\"classes\":2,");
-				pumpTree_json.append("\"id\":"+obj[3]+",");
-				pumpTree_json.append("\"text\":\""+obj[4]+"\",");
-				pumpTree_json.append("\"iconCls\": \"acqGroup\","); 
-				pumpTree_json.append("\"leaf\": true}");
-				pumpTree_json.append("]");
+				rpcTree_json.append("{\"classes\":1,");
+				rpcTree_json.append("\"id\":\""+obj[0]+"\",");
+				rpcTree_json.append("\"text\":\""+obj[1]+"\",");
+				rpcTree_json.append("\"code\":\""+obj[2]+"\",");
+				rpcTree_json.append("\"alarmUnitId\":"+obj[3]+",");
+				rpcTree_json.append("\"alarmUnitName\":\""+obj[4]+"\",");
+				rpcTree_json.append("\"deviceType\":"+obj[5]+",");
+				rpcTree_json.append("\"sort\":\""+obj[6]+"\",");
+				rpcTree_json.append("\"iconCls\": \"protocol\",");
+				rpcTree_json.append("\"expanded\": true,");
+				rpcTree_json.append("\"children\": [");
+				rpcTree_json.append("{\"classes\":2,");
+				rpcTree_json.append("\"id\":"+obj[3]+",");
+				rpcTree_json.append("\"text\":\""+obj[4]+"\",");
+				rpcTree_json.append("\"iconCls\": \"acqGroup\","); 
+				rpcTree_json.append("\"leaf\": true}");
+				rpcTree_json.append("]");
 				
 				
 				
-				pumpTree_json.append("},");
+				rpcTree_json.append("},");
 			}else{
-				pipelineTree_json.append("{\"classes\":1,");
-				pipelineTree_json.append("\"id\":\""+obj[0]+"\",");
-				pipelineTree_json.append("\"text\":\""+obj[1]+"\",");
-				pipelineTree_json.append("\"code\":\""+obj[2]+"\",");
-				pipelineTree_json.append("\"alarmUnitId\":"+obj[3]+",");
-				pipelineTree_json.append("\"alarmUnitName\":\""+obj[4]+"\",");
-				pipelineTree_json.append("\"deviceType\":"+obj[5]+",");
-				pipelineTree_json.append("\"sort\":\""+obj[6]+"\",");
-				pipelineTree_json.append("\"iconCls\": \"protocol\",");
-				pipelineTree_json.append("\"expanded\": true,");
-				pipelineTree_json.append("\"children\": [");
-				pipelineTree_json.append("{\"classes\":2,");
-				pipelineTree_json.append("\"id\":"+obj[3]+",");
-				pipelineTree_json.append("\"text\":\""+obj[4]+"\",");
-				pipelineTree_json.append("\"iconCls\": \"acqGroup\","); 
-				pipelineTree_json.append("\"leaf\": true}");
-				pipelineTree_json.append("]");
+				pcpTree_json.append("{\"classes\":1,");
+				pcpTree_json.append("\"id\":\""+obj[0]+"\",");
+				pcpTree_json.append("\"text\":\""+obj[1]+"\",");
+				pcpTree_json.append("\"code\":\""+obj[2]+"\",");
+				pcpTree_json.append("\"alarmUnitId\":"+obj[3]+",");
+				pcpTree_json.append("\"alarmUnitName\":\""+obj[4]+"\",");
+				pcpTree_json.append("\"deviceType\":"+obj[5]+",");
+				pcpTree_json.append("\"sort\":\""+obj[6]+"\",");
+				pcpTree_json.append("\"iconCls\": \"protocol\",");
+				pcpTree_json.append("\"expanded\": true,");
+				pcpTree_json.append("\"children\": [");
+				pcpTree_json.append("{\"classes\":2,");
+				pcpTree_json.append("\"id\":"+obj[3]+",");
+				pcpTree_json.append("\"text\":\""+obj[4]+"\",");
+				pcpTree_json.append("\"iconCls\": \"acqGroup\","); 
+				pcpTree_json.append("\"leaf\": true}");
+				pcpTree_json.append("]");
 				
-				pipelineTree_json.append("},");
+				pcpTree_json.append("},");
 			}
 		}
 		
-		if(pumpTree_json.toString().endsWith(",")){
-			pumpTree_json.deleteCharAt(pumpTree_json.length() - 1);
+		if(rpcTree_json.toString().endsWith(",")){
+			rpcTree_json.deleteCharAt(rpcTree_json.length() - 1);
 		}
-		pumpTree_json.append("]");
+		rpcTree_json.append("]");
 		
-		if(pipelineTree_json.toString().endsWith(",")){
-			pipelineTree_json.deleteCharAt(pipelineTree_json.length() - 1);
+		if(pcpTree_json.toString().endsWith(",")){
+			pcpTree_json.deleteCharAt(pcpTree_json.length() - 1);
 		}
-		pipelineTree_json.append("]");
+		pcpTree_json.append("]");
 		
 		result_json.append("[");
 		
-		result_json.append("{\"classes\":0,\"text\":\"泵设备\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pumpTree_json+"},");
-		result_json.append("{\"classes\":0,\"text\":\"管设备\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pipelineTree_json+"}");
+		result_json.append("{\"classes\":0,\"text\":\"抽油机\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
+		result_json.append("{\"classes\":0,\"text\":\"螺杆泵\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
 		result_json.append("]");
 		return result_json.toString().replaceAll("null", "");
 	}
@@ -1839,7 +1839,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	public String getSMSInstanceList(String name,Page pager) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
 		
-//		String ddicName="pumpRealTimeOverview";
+//		String ddicName="rpcRealTimeOverview";
 //		DataDictionary ddic = null;
 //		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
 //		String columns = ddic.getTableHeader();
@@ -2040,9 +2040,9 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	
 	public void doAcquisitionUnitBulkDelete(final String ids,String deviceType) throws Exception {
 		int delorUpdateCount=0;
-		String tableName="tbl_pumpdevice";
+		String tableName="tbl_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="tbl_pipelinedevice";
+			tableName="tbl_pcpdevice";
 		}
 		String sql = "update "+tableName+" t set t.instancecode='' where t.instancecode in ( select t2.code from tbl_protocolinstance t2  where t2.unitid in ("+ids+") )";
 		delorUpdateCount=this.getBaseDao().updateOrDeleteBySql(sql);
@@ -2065,9 +2065,9 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	
 	public void doDeleteProtocolAssociation(int deviceType,String protocolName) throws Exception {
 		int delorUpdateCount=0;
-		String tableName="tbl_pumpdevice";
+		String tableName="tbl_rpcdevice";
 		if(deviceType==1){
-			tableName="tbl_pipelinedevice";
+			tableName="tbl_pcpdevice";
 		}
 		String sql = "update "+tableName+" t set t.instancecode='' where t.instancecode in ( select t2.code from tbl_protocolinstance t2,tbl_acq_unit_conf t3 where t2.unitid=t3.id and t3.protocol='"+protocolName+"' )";
 		delorUpdateCount=this.getBaseDao().updateOrDeleteBySql(sql);
@@ -2138,9 +2138,9 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	}
 	
 	public void doModbusProtocolInstanceBulkDelete(final String ids,int deviceType) throws Exception {
-		String tableName="tbl_pumpdevice";
+		String tableName="tbl_rpcdevice";
 		if(deviceType==1){
-			tableName="tbl_pipelinedevice";
+			tableName="tbl_pcpdevice";
 		}
 		String sql = "update "+tableName+" t set t.instancecode='' where t.instancecode in ( select t2.code from TBL_PROTOCOLINSTANCE t2 where t2.id in ("+ids+") )";
 		this.getBaseDao().updateOrDeleteBySql(sql);

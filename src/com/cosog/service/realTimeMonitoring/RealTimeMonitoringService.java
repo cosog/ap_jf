@@ -50,11 +50,11 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			EquipmentDriverServerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
-		String tableName="tbl_pumpacqdata_latest";
-		String deviceTableName="tbl_pumpdevice";
+		String tableName="tbl_rpcacqdata_latest";
+		String deviceTableName="tbl_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			tableName="tbl_pipelineacqdata_latest";
-			deviceTableName="tbl_pipelinedevice";
+			tableName="tbl_pcpacqdata_latest";
+			deviceTableName="tbl_pcpdevice";
 		}
 		
 		String sql="select t.commstatus,count(1) from "+tableName+" t,"+deviceTableName+" t2 "
@@ -110,11 +110,11 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			EquipmentDriverServerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
-		String tableName="tbl_pumpacqdata_latest";
-		String deviceTableName="viw_pumpdevice";
+		String tableName="tbl_rpcacqdata_latest";
+		String deviceTableName="viw_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			tableName="tbl_pipelineacqdata_latest";
-			deviceTableName="viw_pipelinedevice";
+			tableName="tbl_pcpacqdata_latest";
+			deviceTableName="viw_pcpdevice";
 		}
 		
 		String sql="select t2.commstatus,count(1) from "+deviceTableName+" t "
@@ -173,11 +173,11 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			EquipmentDriverServerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
-		String tableName="tbl_pumpacqdata_latest";
-		String deviceTableName="viw_pumpdevice";
+		String tableName="tbl_rpcacqdata_latest";
+		String deviceTableName="viw_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			tableName="tbl_pipelineacqdata_latest";
-			deviceTableName="viw_pipelinedevice";
+			tableName="tbl_pcpacqdata_latest";
+			deviceTableName="viw_pcpdevice";
 		}
 		
 		String sql="select t.devicetypename,t.devicetype,count(1) from "+deviceTableName+" t "
@@ -272,17 +272,17 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		}
 		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
 		
-		String tableName="tbl_pumpacqdata_latest";
-		String deviceTableName="tbl_pumpdevice";
-		String ddicName="pumpRealTimeOverview";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String tableName="tbl_rpcacqdata_latest";
+		String deviceTableName="tbl_rpcdevice";
+		String ddicName="rpcRealTimeOverview";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		DataDictionary ddic = null;
 		List<String> ddicColumnsList=new ArrayList<String>();
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			tableName="tbl_pipelineacqdata_latest";
-			deviceTableName="tbl_pipelinedevice";
-			ddicName="pipelineRealTimeOverview";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			tableName="tbl_pcpacqdata_latest";
+			deviceTableName="tbl_pcpdevice";
+			ddicName="pcpRealTimeOverview";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
@@ -493,17 +493,17 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		}
 		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
 		
-		String tableName="tbl_pumpacqdata_latest";
-		String deviceTableName="tbl_pumpdevice";
-		String ddicName="pumpRealTimeOverview";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String tableName="tbl_rpcacqdata_latest";
+		String deviceTableName="tbl_rpcdevice";
+		String ddicName="rpcRealTimeOverview";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		DataDictionary ddic = null;
 		List<String> ddicColumnsList=new ArrayList<String>();
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			tableName="tbl_pipelineacqdata_latest";
-			deviceTableName="tbl_pipelinedevice";
-			ddicName="pipelineRealTimeOverview";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			tableName="tbl_pcpacqdata_latest";
+			deviceTableName="tbl_pcpdevice";
+			ddicName="pcpRealTimeOverview";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
@@ -620,13 +620,13 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			EquipmentDriverServerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
-		String tableName="tbl_pumpacqdata_latest";
-		String deviceTableName="tbl_pumpdevice";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String tableName="tbl_rpcacqdata_latest";
+		String deviceTableName="tbl_rpcdevice";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			tableName="tbl_pipelineacqdata_latest";
-			deviceTableName="tbl_pipelinedevice";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			tableName="tbl_pcpacqdata_latest";
+			deviceTableName="tbl_pcpdevice";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
@@ -945,13 +945,13 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 	public String getDeviceControlandInfoData(String deviceId,String wellName,String deviceType,int userId)throws Exception {
 		StringBuffer result_json = new StringBuffer();
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
-		String deviceTableName="tbl_pumpdevice";
-		String infoTableName="tbl_pumpdeviceaddinfo";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String deviceTableName="tbl_rpcdevice";
+		String infoTableName="tbl_rpcdeviceaddinfo";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			deviceTableName="tbl_pipelinedevice";
-			infoTableName="tbl_pipelinedeviceaddinfo";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			deviceTableName="tbl_pcpdevice";
+			infoTableName="tbl_pcpdeviceaddinfo";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
@@ -1080,10 +1080,10 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			deviceInfoDataList.deleteCharAt(deviceInfoDataList.length() - 1);
 		}
 		
-		String tableName="tbl_pumpacqdata_latest";
+		String tableName="tbl_rpcacqdata_latest";
 		String sql="select t2.commStatus ";
 		if(StringManagerUtils.stringToInteger(deviceType)>0){
-			tableName="tbl_pipelineacqdata_latest";
+			tableName="tbl_pcpacqdata_latest";
 		}
 //		for(int i=0;i<controlColumns.size();i++){
 //			sql+=",t2."+controlColumns.get(i);
@@ -1120,9 +1120,9 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		StringBuffer result_json = new StringBuffer();
 		List<String> controlItems=new ArrayList<String>();
 		List<String> controlColumns=new ArrayList<String>();
-		String deviceTableName="tbl_pumpdevice";
+		String deviceTableName="tbl_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			deviceTableName="tbl_pipelinedevice";
+			deviceTableName="tbl_pcpdevice";
 		}
 		
 		
@@ -1167,11 +1167,11 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 	
 	public String getRealTimeCurveData(String deviceName,String item,String deviceType)throws Exception {
 		StringBuffer result_json = new StringBuffer();
-		String deviceTableName="tbl_pumpdevice";
-		String tableName="tbl_pumpacqdata_hist";
+		String deviceTableName="tbl_rpcdevice";
+		String tableName="tbl_rpcacqdata_hist";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			deviceTableName="tbl_pipelinedevice";
-			tableName="tbl_pipelineacqdata_hist";
+			deviceTableName="tbl_pcpdevice";
+			tableName="tbl_pcpacqdata_hist";
 		}
 		String protocolSql="select upper(t3.protocol) from "+deviceTableName+" t,tbl_protocolinstance t2,tbl_acq_unit_conf t3 where t.instancecode=t2.code and t2.unitid=t3.id"
 				+ " and  t.wellname='"+deviceName+"'";
@@ -1236,14 +1236,14 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
 		
-		String tableName="tbl_pumpacqdata_hist";
-		String deviceTableName="tbl_pumpdevice";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String tableName="tbl_rpcacqdata_hist";
+		String deviceTableName="tbl_rpcdevice";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="tbl_pipelineacqdata_hist";
-			deviceTableName="tbl_pipelinedevice";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			tableName="tbl_pcpacqdata_hist";
+			deviceTableName="tbl_pcpdevice";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){

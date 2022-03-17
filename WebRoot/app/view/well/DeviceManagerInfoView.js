@@ -5,8 +5,8 @@ Ext.define("AP.view.well.DeviceManagerInfoView", {
     border: false,
     initComponent: function () {
         var me = this;
-        var PumpDeviceInfoPanel = Ext.create('AP.view.well.PumpDeviceInfoPanel');
-        var PipelineDeviceInfoPanel = Ext.create('AP.view.well.PipelineDeviceInfoPanel');
+        var RPCDeviceInfoPanel = Ext.create('AP.view.well.RPCDeviceInfoPanel');
+        var PCPDeviceInfoPanel = Ext.create('AP.view.well.PCPDeviceInfoPanel');
         Ext.apply(me, {
         	items: [{
         		xtype: 'tabpanel',
@@ -15,25 +15,25 @@ Ext.define("AP.view.well.DeviceManagerInfoView", {
         		border: false,
         		tabPosition: 'bottom',
         		items: [{
-        				title: '泵设备',
+        				title: '抽油机',
         				layout: "fit",
-        				id:'PumpDeviceManagerPanel',
+        				id:'RPCDeviceManagerPanel',
         				border: false,
-        				items: [PumpDeviceInfoPanel]
+        				items: [RPCDeviceInfoPanel]
         			},{
-        				title: '管设备',
-        				id:'PipelineDeviceManagerPanel',
+        				title: '螺杆泵',
+        				id:'PCPDeviceManagerPanel',
         				layout: "fit",
         				border: false,
-        				items: [PipelineDeviceInfoPanel]
+        				items: [PCPDeviceInfoPanel]
         			}],
         			listeners: {
         				tabchange: function (tabPanel, newCard,oldCard, obj) {
         					Ext.getCmp("bottomTab_Id").setValue(newCard.id); //
-        					if(newCard.id=="PumpDeviceManagerPanel"){
-        						CreateAndLoadPumpDeviceInfoTable();
-        					}else if(newCard.id=="PipelineDeviceManagerPanel"){
-        						CreateAndLoadPipelineDeviceInfoTable();
+        					if(newCard.id=="RPCDeviceManagerPanel"){
+        						CreateAndLoadRPCDeviceInfoTable();
+        					}else if(newCard.id=="PCPDeviceManagerPanel"){
+        						CreateAndLoadPCPDeviceInfoTable();
         					}
         				}
         			}

@@ -81,51 +81,51 @@ END prd_reset_sequence;
 CREATE OR REPLACE PROCEDURE prd_clear_data is
 begin
 --清空所有数据
-EXECUTE IMMEDIATE 'truncate table tbl_pumpacqdata_latest';
-EXECUTE IMMEDIATE 'truncate table tbl_pumpacqdata_hist';
-EXECUTE IMMEDIATE 'truncate table tbl_pumpalarminfo_latest';
-EXECUTE IMMEDIATE 'truncate table tbl_pumpalarminfo_hist';
-EXECUTE IMMEDIATE 'truncate table tbl_pumpacqrawdata';
-EXECUTE IMMEDIATE 'truncate table tbl_pumpdeviceaddinfo';
-EXECUTE IMMEDIATE 'truncate table tbl_pumpdevicegraphicset';
-EXECUTE IMMEDIATE 'truncate table tbl_pipelineacqdata_latest';
-EXECUTE IMMEDIATE 'truncate table tbl_pipelineacqdata_hist';
-EXECUTE IMMEDIATE 'truncate table tbl_pipelinealarminfo_latest';
-EXECUTE IMMEDIATE 'truncate table tbl_pipelinepalarminfo_hist';
-EXECUTE IMMEDIATE 'truncate table tbl_pipelineacqrawdata';
-EXECUTE IMMEDIATE 'truncate table tbl_pipelinedeviceaddinfo';
-EXECUTE IMMEDIATE 'truncate table tbl_pipelinedevicegraphicset';
+EXECUTE IMMEDIATE 'truncate table tbl_rpcacqdata_latest';
+EXECUTE IMMEDIATE 'truncate table tbl_rpcacqdata_hist';
+EXECUTE IMMEDIATE 'truncate table tbl_rpcalarminfo_latest';
+EXECUTE IMMEDIATE 'truncate table tbl_rpcalarminfo_hist';
+EXECUTE IMMEDIATE 'truncate table tbl_rpcacqrawdata';
+EXECUTE IMMEDIATE 'truncate table tbl_rpcdeviceaddinfo';
+EXECUTE IMMEDIATE 'truncate table tbl_rpcdevicegraphicset';
+EXECUTE IMMEDIATE 'truncate table tbl_pcpacqdata_latest';
+EXECUTE IMMEDIATE 'truncate table tbl_pcpacqdata_hist';
+EXECUTE IMMEDIATE 'truncate table tbl_pcpalarminfo_latest';
+EXECUTE IMMEDIATE 'truncate table tbl_pcppalarminfo_hist';
+EXECUTE IMMEDIATE 'truncate table tbl_pcpacqrawdata';
+EXECUTE IMMEDIATE 'truncate table tbl_pcpdeviceaddinfo';
+EXECUTE IMMEDIATE 'truncate table tbl_pcpdevicegraphicset';
 EXECUTE IMMEDIATE 'truncate table tbl_deviceoperationlog';
 EXECUTE IMMEDIATE 'truncate table tbl_systemlog';
 EXECUTE IMMEDIATE 'truncate table tbl_resourcemonitoring';
 EXECUTE IMMEDIATE 'truncate table tbl_auxiliary2master';
 EXECUTE IMMEDIATE 'truncate table tbl_auxiliarydevice';
-EXECUTE IMMEDIATE 'truncate table tbl_pumpdevice';
-EXECUTE IMMEDIATE 'truncate table tbl_pipelinedevice';
+EXECUTE IMMEDIATE 'truncate table tbl_rpcdevice';
+EXECUTE IMMEDIATE 'truncate table tbl_pcpdevice';
 EXECUTE IMMEDIATE 'truncate table tbl_smsdevice';
 
 --重置所有序列
- prd_reset_sequence('seq_pumpacqdata_latest');
- prd_reset_sequence('seq_pumpacqdata_hist');
- prd_reset_sequence('seq_pumpalarminfo_latest');
- prd_reset_sequence('seq_pumpalarminfo_hist');
- prd_reset_sequence('seq_pumpacqrawdata');
- prd_reset_sequence('seq_pumpdeviceaddinfo');
- prd_reset_sequence('seq_pumpdevicegraphicset');
- prd_reset_sequence('seq_pipelineacqdata_latest');
- prd_reset_sequence('seq_pipelineacqdata_hist');
- prd_reset_sequence('seq_pipelinealarminfo_latest');
- prd_reset_sequence('seq_pipelinealarminfo_hist');
- prd_reset_sequence('seq_pipelineacqrawdata');
- prd_reset_sequence('seq_pipelinedeviceaddinfo');
- prd_reset_sequence('seq_pipelinedevicegraphicset');
+ prd_reset_sequence('seq_rpcacqdata_latest');
+ prd_reset_sequence('seq_rpcacqdata_hist');
+ prd_reset_sequence('seq_rpcalarminfo_latest');
+ prd_reset_sequence('seq_rpcalarminfo_hist');
+ prd_reset_sequence('seq_rpcacqrawdata');
+ prd_reset_sequence('seq_rpcdeviceaddinfo');
+ prd_reset_sequence('seq_rpcdevicegraphicset');
+ prd_reset_sequence('seq_pcpacqdata_latest');
+ prd_reset_sequence('seq_pcpacqdata_hist');
+ prd_reset_sequence('seq_pcpalarminfo_latest');
+ prd_reset_sequence('seq_pcpalarminfo_hist');
+ prd_reset_sequence('seq_pcpacqrawdata');
+ prd_reset_sequence('seq_pcpdeviceaddinfo');
+ prd_reset_sequence('seq_pcpdevicegraphicset');
  prd_reset_sequence('seq_deviceoperationlog');
  prd_reset_sequence('seq_systemlog');
  prd_reset_sequence('seq_resourcemonitoring');
  prd_reset_sequence('seq_auxiliary2master');
  prd_reset_sequence('seq_auxiliarydevice');
- prd_reset_sequence('seq_pumpdevice');
- prd_reset_sequence('seq_pipelinedevice');
+ prd_reset_sequence('seq_rpcdevice');
+ prd_reset_sequence('seq_pcpdevice');
  prd_reset_sequence('seq_smsdevice');
 end prd_clear_data;
 /
@@ -261,7 +261,7 @@ Exception
 end prd_save_deviceOperationLog;
 /
 
-CREATE OR REPLACE PROCEDURE prd_save_pipelinealarminfo (
+CREATE OR REPLACE PROCEDURE prd_save_pcpalarminfo (
   v_wellName in varchar2,
   v_deviceType in number,
   v_alarmTime in varchar2,
@@ -279,13 +279,13 @@ CREATE OR REPLACE PROCEDURE prd_save_pipelinealarminfo (
   counts number :=0;
   p_wellid number :=0;
 begin
-  select count(1) into counts from tbl_pipelinealarminfo_hist t
-  where t.wellid=( select t2.id from tbl_pipelinedevice t2 where t2.wellname=v_wellName and t2.devicetype=v_deviceType )
+  select count(1) into counts from tbl_pcpalarminfo_hist t
+  where t.wellid=( select t2.id from tbl_pcpdevice t2 where t2.wellname=v_wellName and t2.devicetype=v_deviceType )
   and t.alarmtime=to_date(v_alarmTime,'yyyy-mm-dd hh24:mi:ss')
   and t.itemname=v_itemName;
-  select t.id into p_wellid from tbl_pipelinedevice t where t.wellname=v_wellName and t.devicetype=v_deviceType ;
+  select t.id into p_wellid from tbl_pcpdevice t where t.wellname=v_wellName and t.devicetype=v_deviceType ;
   if counts=0 and p_wellid>0 then
-    insert into tbl_pipelinealarminfo_hist (wellid,alarmtime,itemname,alarmtype,alarmvalue,alarminfo,alarmlimit,
+    insert into tbl_pcpalarminfo_hist (wellid,alarmtime,itemname,alarmtype,alarmvalue,alarminfo,alarmlimit,
     hystersis,alarmlevel,issendmessage,issendmail)
     values(
          p_wellid,
@@ -303,7 +303,7 @@ begin
     commit;
     p_msg := '插入成功';
   elsif counts>0 then
-    update tbl_pipelinealarminfo_hist t set t.alarmtype=v_alarmType,alarmvalue=v_alarmValue,
+    update tbl_pcpalarminfo_hist t set t.alarmtype=v_alarmType,alarmvalue=v_alarmValue,
     alarminfo=v_alarmInfo,alarmlimit=v_alarmLimit,hystersis=v_hystersis,alarmlevel=v_alarmLevel,
     issendmessage=v_isSendMessage,issendmail=v_isSendMail
     where t.wellid=p_wellid
@@ -317,10 +317,10 @@ Exception
   When Others Then
     p_msg := Sqlerrm || ',' || '操作失败';
     dbms_output.put_line('p_msg:' || p_msg);
-end prd_save_pipelinealarminfo;
+end prd_save_pcpalarminfo;
 /
 
-CREATE OR REPLACE PROCEDURE prd_save_pipelinedevice (
+CREATE OR REPLACE PROCEDURE prd_save_pcpdevice (
                                                     v_orgId  in NUMBER,
                                                     v_wellName    in varchar2,
                                                     v_devicetype in NUMBER,
@@ -341,16 +341,16 @@ CREATE OR REPLACE PROCEDURE prd_save_pipelinedevice (
   otherDeviceAllPath varchar2(3000) := '';
   p_msg varchar2(3000) := 'error';
 begin
-  select count(1) into wellcount from tbl_pipelinedevice t where t.wellname=v_wellName and t.orgid=v_orgId;
+  select count(1) into wellcount from tbl_pcpdevice t where t.wellname=v_wellName and t.orgid=v_orgId;
   if v_isCheckout=0 then
     if wellcount>0 then
-      select t.id into wellId from tbl_pipelinedevice t where t.wellname=v_wellName and t.orgid=v_orgId;
+      select t.id into wellId from tbl_pcpdevice t where t.wellname=v_wellName and t.orgid=v_orgId;
       --判断signinid和slave是否已存在
-      select count(1) into othercount from tbl_pipelinedevice t 
+      select count(1) into othercount from tbl_pcpdevice t 
       where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null
       and t.id<>wellId;
       if othercount=0 then
-        Update tbl_pipelinedevice t
+        Update tbl_pcpdevice t
         Set t.orgid   = v_orgId,t.devicetype=v_devicetype,
           t.applicationscenarios=(select c.itemvalue from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' and c.itemname=v_applicationScenariosName),
           t.instancecode=decode(v_devicetype,2,(select t2.code from tbl_protocolsmsinstance t2 where t2.name=v_instance and rownum=1),(select t2.code from tbl_protocolinstance t2 where t2.name=v_instance and rownum=1)),
@@ -362,12 +362,12 @@ begin
         v_resultstr := '修改成功';
         p_msg := '修改成功';
       else
-        select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pipelinedevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
+        select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pcpdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
         from tbl_org org
         start with org.org_parent=0
         connect by   org.org_parent= prior org.org_id) v
         where t.orgid=v.org_id 
-        and t.id=(select t2.id from tbl_pipelinedevice t2
+        and t.id=(select t2.id from tbl_pcpdevice t2
             where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null
             and t2.id<>wellId);
         v_result:=-22;
@@ -377,12 +377,12 @@ begin
       
     elsif wellcount=0 then
       --判断signinid和slave是否已存在
-        select count(1) into othercount from tbl_pipelinedevice t where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null;
+        select count(1) into othercount from tbl_pcpdevice t where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null;
         if othercount=0 then
-          insert into tbl_pipelinedevice(orgId,wellName,devicetype,signinid,slave,videourl,status,Sortnum)
+          insert into tbl_pcpdevice(orgId,wellName,devicetype,signinid,slave,videourl,status,Sortnum)
           values(v_orgId,v_wellName,v_devicetype,v_signInId,v_slave,v_videourl,v_status,v_sortNum);
           commit;
-          update tbl_pipelinedevice t 
+          update tbl_pcpdevice t 
           set t.applicationscenarios=(select c.itemvalue from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' and c.itemname=v_applicationScenariosName),
             t.instancecode=(select t2.code from tbl_protocolinstance t2 where t2.name=v_instance and rownum=1),
             t.alarminstancecode=(select t2.code from tbl_protocolalarminstance t2 where t2.name=v_alarmInstance and rownum=1)
@@ -392,12 +392,12 @@ begin
           v_resultstr := '添加成功';
           p_msg := '添加成功';
         else
-          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pipelinedevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
+          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pcpdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
           from tbl_org org
           start with org.org_parent=0
           connect by   org.org_parent= prior org.org_id) v
           where t.orgid=v.org_id 
-          and t.id=(select t2.id from tbl_pipelinedevice t2 where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null);
+          and t.id=(select t2.id from tbl_pcpdevice t2 where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null);
           v_result:=-22;
           v_resultstr := '注册包ID和设备从地址与'||otherDeviceAllPath||'设备冲突';
           p_msg := '注册包ID和设备从地址与'||otherDeviceAllPath||'设备冲突';
@@ -411,12 +411,12 @@ begin
       p_msg := '所选组织下存在同名设备';
     elsif wellcount=0 then
       --判断signinid和slave是否已存在
-        select count(1) into othercount from tbl_pipelinedevice t where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null;
+        select count(1) into othercount from tbl_pcpdevice t where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null;
         if othercount=0 then
-          insert into tbl_pipelinedevice(orgId,wellName,devicetype,signinid,slave,videourl,status,Sortnum)
+          insert into tbl_pcpdevice(orgId,wellName,devicetype,signinid,slave,videourl,status,Sortnum)
           values(v_orgId,v_wellName,v_devicetype,v_signInId,v_slave,v_videourl,v_status,v_sortNum);
           commit;
-          update tbl_pipelinedevice t 
+          update tbl_pcpdevice t 
           set t.applicationscenarios=(select c.itemvalue from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' and c.itemname=v_applicationScenariosName),
             t.instancecode=(select t2.code from tbl_protocolinstance t2 where t2.name=v_instance and rownum=1),
             t.alarminstancecode=(select t2.code from tbl_protocolalarminstance t2 where t2.name=v_alarmInstance and rownum=1)
@@ -426,12 +426,12 @@ begin
           v_resultstr := '添加成功';
           p_msg := '添加成功';
         else
-          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pipelinedevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
+          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pcpdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
           from tbl_org org
           start with org.org_parent=0
           connect by   org.org_parent= prior org.org_id) v
           where t.orgid=v.org_id 
-          and t.id=(select t2.id from tbl_pipelinedevice t2 where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null);
+          and t.id=(select t2.id from tbl_pcpdevice t2 where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null);
           v_result:=-22;
           v_resultstr := '注册包ID和设备从地址与'||otherDeviceAllPath||'设备冲突';
           p_msg := '注册包ID和设备从地址与'||otherDeviceAllPath||'设备冲突';
@@ -443,10 +443,10 @@ begin
     When Others Then
     p_msg := Sqlerrm || ',' || '操作失败';
     dbms_output.put_line('p_msg:' || p_msg);
-end prd_save_pipelinedevice;
+end prd_save_pcpdevice;
 /
 
-CREATE OR REPLACE PROCEDURE prd_save_pumpalarminfo (
+CREATE OR REPLACE PROCEDURE prd_save_rpcalarminfo (
   v_wellName in varchar2,
   v_deviceType in number,
   v_alarmTime in varchar2,
@@ -464,13 +464,13 @@ CREATE OR REPLACE PROCEDURE prd_save_pumpalarminfo (
   counts number :=0;
   p_wellid number :=0;
 begin
-  select count(1) into counts from tbl_pumpalarminfo_hist t
-  where t.wellid=( select t2.id from tbl_pumpdevice t2 where t2.wellname=v_wellName and t2.devicetype=v_deviceType )
+  select count(1) into counts from tbl_rpcalarminfo_hist t
+  where t.wellid=( select t2.id from tbl_rpcdevice t2 where t2.wellname=v_wellName and t2.devicetype=v_deviceType )
   and t.alarmtime=to_date(v_alarmTime,'yyyy-mm-dd hh24:mi:ss')
   and t.itemname=v_itemName;
-  select t.id into p_wellid from tbl_pumpdevice t where t.wellname=v_wellName and t.devicetype=v_deviceType ;
+  select t.id into p_wellid from tbl_rpcdevice t where t.wellname=v_wellName and t.devicetype=v_deviceType ;
   if counts=0 and p_wellid>0 then
-    insert into tbl_pumpalarminfo_hist (wellid,alarmtime,itemname,alarmtype,alarmvalue,alarminfo,alarmlimit,
+    insert into tbl_rpcalarminfo_hist (wellid,alarmtime,itemname,alarmtype,alarmvalue,alarminfo,alarmlimit,
     hystersis,alarmlevel,issendmessage,issendmail)
     values(
          p_wellid,
@@ -488,7 +488,7 @@ begin
     commit;
     p_msg := '插入成功';
   elsif counts>0 then
-    update tbl_pumpalarminfo_hist t set t.alarmtype=v_alarmType,alarmvalue=v_alarmValue,
+    update tbl_rpcalarminfo_hist t set t.alarmtype=v_alarmType,alarmvalue=v_alarmValue,
     alarminfo=v_alarmInfo,alarmlimit=v_alarmLimit,hystersis=v_hystersis,alarmlevel=v_alarmLevel,
     issendmessage=v_isSendMessage,issendmail=v_isSendMail
     where t.wellid=p_wellid
@@ -502,10 +502,10 @@ Exception
   When Others Then
     p_msg := Sqlerrm || ',' || '操作失败';
     dbms_output.put_line('p_msg:' || p_msg);
-end prd_save_pumpalarminfo;
+end prd_save_rpcalarminfo;
 /
 
-CREATE OR REPLACE PROCEDURE prd_save_pumpdevice (
+CREATE OR REPLACE PROCEDURE prd_save_rpcdevice (
                                                     v_orgId  in NUMBER,
                                                     v_wellName    in varchar2,
                                                     v_devicetype in NUMBER,
@@ -526,16 +526,16 @@ CREATE OR REPLACE PROCEDURE prd_save_pumpdevice (
   otherDeviceAllPath varchar2(3000) := '';
   p_msg varchar2(3000) := 'error';
 begin
-  select count(1) into wellcount from tbl_pumpdevice t where t.wellname=v_wellName and t.orgid=v_orgId;
+  select count(1) into wellcount from tbl_rpcdevice t where t.wellname=v_wellName and t.orgid=v_orgId;
   if v_isCheckout=0 then
     if wellcount>0 then
-      select t.id into wellId from tbl_pumpdevice t where t.wellname=v_wellName and t.orgid=v_orgId;
+      select t.id into wellId from tbl_rpcdevice t where t.wellname=v_wellName and t.orgid=v_orgId;
       --判断signinid和slave是否已存在
-      select count(1) into othercount from tbl_pumpdevice t 
+      select count(1) into othercount from tbl_rpcdevice t 
       where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null
       and t.id<>wellId;
       if othercount=0 then
-        Update tbl_pumpdevice t
+        Update tbl_rpcdevice t
         Set t.orgid   = v_orgId,t.devicetype=v_devicetype,
           t.applicationscenarios=(select c.itemvalue from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' and c.itemname=v_applicationScenariosName),
           t.instancecode=decode(v_devicetype,2,(select t2.code from tbl_protocolsmsinstance t2 where t2.name=v_instance and rownum=1),(select t2.code from tbl_protocolinstance t2 where t2.name=v_instance and rownum=1)),
@@ -547,12 +547,12 @@ begin
         v_resultstr := '修改成功';
         p_msg := '修改成功';
       else
-        select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pumpdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
+        select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_rpcdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
         from tbl_org org
         start with org.org_parent=0
         connect by   org.org_parent= prior org.org_id) v
         where t.orgid=v.org_id 
-        and t.id=(select t2.id from tbl_pumpdevice t2
+        and t.id=(select t2.id from tbl_rpcdevice t2
             where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null
             and t2.id<>wellId);
         v_result:=-22;
@@ -562,12 +562,12 @@ begin
       
     elsif wellcount=0 then
       --判断signinid和slave是否已存在
-        select count(1) into othercount from tbl_pumpdevice t where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null;
+        select count(1) into othercount from tbl_rpcdevice t where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null;
         if othercount=0 then
-          insert into tbl_pumpdevice(orgId,wellName,devicetype,signinid,slave,videourl,status,Sortnum)
+          insert into tbl_rpcdevice(orgId,wellName,devicetype,signinid,slave,videourl,status,Sortnum)
           values(v_orgId,v_wellName,v_devicetype,v_signInId,v_slave,v_videourl,v_status,v_sortNum);
           commit;
-          update tbl_pumpdevice t 
+          update tbl_rpcdevice t 
           set t.applicationscenarios=(select c.itemvalue from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' and c.itemname=v_applicationScenariosName),
             t.instancecode=(select t2.code from tbl_protocolinstance t2 where t2.name=v_instance and rownum=1),
             t.alarminstancecode=(select t2.code from tbl_protocolalarminstance t2 where t2.name=v_alarmInstance and rownum=1)
@@ -577,12 +577,12 @@ begin
           v_resultstr := '添加成功';
           p_msg := '添加成功';
         else
-          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pumpdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
+          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_rpcdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
           from tbl_org org
           start with org.org_parent=0
           connect by   org.org_parent= prior org.org_id) v
           where t.orgid=v.org_id 
-          and t.id=(select t2.id from tbl_pumpdevice t2 where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null);
+          and t.id=(select t2.id from tbl_rpcdevice t2 where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null);
           v_result:=-22;
           v_resultstr := '注册包ID和设备从地址与'||otherDeviceAllPath||'设备冲突';
           p_msg := '注册包ID和设备从地址与'||otherDeviceAllPath||'设备冲突';
@@ -596,12 +596,12 @@ begin
       p_msg := '所选组织下存在同名设备';
     elsif wellcount=0 then
       --判断signinid和slave是否已存在
-        select count(1) into othercount from tbl_pumpdevice t where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null;
+        select count(1) into othercount from tbl_rpcdevice t where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null;
         if othercount=0 then
-          insert into tbl_pumpdevice(orgId,wellName,devicetype,signinid,slave,videourl,status,Sortnum)
+          insert into tbl_rpcdevice(orgId,wellName,devicetype,signinid,slave,videourl,status,Sortnum)
           values(v_orgId,v_wellName,v_devicetype,v_signInId,v_slave,v_videourl,v_status,v_sortNum);
           commit;
-          update tbl_pumpdevice t 
+          update tbl_rpcdevice t 
           set t.applicationscenarios=(select c.itemvalue from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' and c.itemname=v_applicationScenariosName),
             t.instancecode=(select t2.code from tbl_protocolinstance t2 where t2.name=v_instance and rownum=1),
             t.alarminstancecode=(select t2.code from tbl_protocolalarminstance t2 where t2.name=v_alarmInstance and rownum=1)
@@ -611,12 +611,12 @@ begin
           v_resultstr := '添加成功';
           p_msg := '添加成功';
         else
-          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pumpdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
+          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_rpcdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
           from tbl_org org
           start with org.org_parent=0
           connect by   org.org_parent= prior org.org_id) v
           where t.orgid=v.org_id 
-          and t.id=(select t2.id from tbl_pumpdevice t2 where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null);
+          and t.id=(select t2.id from tbl_rpcdevice t2 where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null);
           v_result:=-22;
           v_resultstr := '注册包ID和设备从地址与'||otherDeviceAllPath||'设备冲突';
           p_msg := '注册包ID和设备从地址与'||otherDeviceAllPath||'设备冲突';
@@ -628,7 +628,7 @@ begin
     When Others Then
     p_msg := Sqlerrm || ',' || '操作失败';
     dbms_output.put_line('p_msg:' || p_msg);
-end prd_save_pumpdevice;
+end prd_save_rpcdevice;
 /
 
 CREATE OR REPLACE PROCEDURE prd_save_resourcemonitoring (
@@ -806,7 +806,7 @@ Exception
 end prd_update_auxiliarydevice;
 /
 
-CREATE OR REPLACE PROCEDURE prd_update_pipelinedevice ( v_recordId in NUMBER,
+CREATE OR REPLACE PROCEDURE prd_update_pcpdevice ( v_recordId in NUMBER,
                                                     v_wellName    in varchar2,
                                                     v_devicetype in NUMBER,
                                                     v_applicationScenariosName    in varchar2,
@@ -824,16 +824,16 @@ CREATE OR REPLACE PROCEDURE prd_update_pipelinedevice ( v_recordId in NUMBER,
   p_msg varchar2(3000) := 'error';
 begin
   --验证权限
-  select count(1) into wellcount from tbl_pipelinedevice t 
+  select count(1) into wellcount from tbl_pcpdevice t 
   where t.wellname=v_wellName and t.id<>v_recordId 
-  and t.orgid=( select t2.orgid from tbl_pipelinedevice t2 where t2.id=v_recordId);
+  and t.orgid=( select t2.orgid from tbl_pcpdevice t2 where t2.id=v_recordId);
     if wellcount=0 then
-        select count(1) into othercount from tbl_pipelinedevice t 
+        select count(1) into othercount from tbl_pcpdevice t 
         where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null
         and t.id<>v_recordId;
         
         if v_recordId >0 and othercount=0 then
-          Update tbl_pipelinedevice t
+          Update tbl_pcpdevice t
            Set t.wellname=v_wellName,
                t.devicetype=v_devicetype,
                t.applicationscenarios=(select c.itemvalue from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' and c.itemname=v_applicationScenariosName),
@@ -848,12 +848,12 @@ begin
            v_resultstr := '修改成功';
            p_msg := '修改成功';
         elsif othercount>0 then
-          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pipelinedevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
+          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pcpdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
           from tbl_org org
           start with org.org_parent=0
           connect by   org.org_parent= prior org.org_id) v
           where t.orgid=v.org_id 
-          and t.id=(select t2.id from tbl_pipelinedevice t2
+          and t.id=(select t2.id from tbl_pcpdevice t2
             where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null
             and t2.id<>v_recordId);
           v_result:=-22;
@@ -870,10 +870,10 @@ Exception
   When Others Then
     p_msg := Sqlerrm || ',' || '操作失败';
     dbms_output.put_line('p_msg:' || p_msg);
-end prd_update_pipelinedevice;
+end prd_update_pcpdevice;
 /
 
-CREATE OR REPLACE PROCEDURE prd_update_pumpdevice ( v_recordId in NUMBER,
+CREATE OR REPLACE PROCEDURE prd_update_rpcdevice ( v_recordId in NUMBER,
                                                     v_wellName    in varchar2,
                                                     v_devicetype in NUMBER,
                                                     v_applicationScenariosName    in varchar2,
@@ -892,16 +892,16 @@ CREATE OR REPLACE PROCEDURE prd_update_pumpdevice ( v_recordId in NUMBER,
   p_msg varchar2(3000) := 'error';
 begin
   --验证权限
-  select count(1) into wellcount from tbl_pumpdevice t 
+  select count(1) into wellcount from tbl_rpcdevice t 
   where t.wellname=v_wellName and t.id<>v_recordId 
-  and t.orgid=( select t2.orgid from tbl_pumpdevice t2 where t2.id=v_recordId);
+  and t.orgid=( select t2.orgid from tbl_rpcdevice t2 where t2.id=v_recordId);
     if wellcount=0 then
-        select count(1) into othercount from tbl_pumpdevice t 
+        select count(1) into othercount from tbl_rpcdevice t 
         where t.signinid=v_signInId and t.slave=v_slave and t.signinid is not null and t.slave is not null
         and t.id<>v_recordId;
         
         if v_recordId >0 and othercount=0 then
-          Update tbl_pumpdevice t
+          Update tbl_rpcdevice t
            Set t.wellname=v_wellName,
                t.devicetype=v_devicetype,
                t.applicationscenarios=(select c.itemvalue from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' and c.itemname=v_applicationScenariosName),
@@ -917,12 +917,12 @@ begin
            v_resultstr := '修改成功';
            p_msg := '修改成功';
         elsif othercount>0 then
-          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_pumpdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
+          select substr(v.path||'/'||t.wellname,2) into otherDeviceAllPath  from tbl_rpcdevice t, (select org.org_id, sys_connect_by_path(org.org_name,'/') as path
           from tbl_org org
           start with org.org_parent=0
           connect by   org.org_parent= prior org.org_id) v
           where t.orgid=v.org_id 
-          and t.id=(select t2.id from tbl_pumpdevice t2
+          and t.id=(select t2.id from tbl_rpcdevice t2
             where t2.signinid=v_signInId and t2.slave=v_slave and t2.signinid is not null and t2.slave is not null
             and t2.id<>v_recordId);
           v_result:=-22;
@@ -939,7 +939,7 @@ Exception
   When Others Then
     p_msg := Sqlerrm || ',' || '操作失败';
     dbms_output.put_line('p_msg:' || p_msg);
-end prd_update_pumpdevice;
+end prd_update_rpcdevice;
 /
 
 CREATE OR REPLACE PROCEDURE prd_update_smsdevice (v_recordId   in NUMBER,

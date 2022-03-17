@@ -38,9 +38,9 @@ public class AlarmQueryService<T> extends BaseService<T>  {
 			ddicName="switchingValueAlarm";
 		}
 		
-		String tableName="viw_pumpalarminfo_hist";
+		String tableName="viw_rpcalarminfo_hist";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="viw_pipelinealarminfo_hist";
+			tableName="viw_pcpalarminfo_hist";
 		}
 		
 		DataDictionary ddic = null;
@@ -77,9 +77,9 @@ public class AlarmQueryService<T> extends BaseService<T>  {
 		}else if(StringManagerUtils.stringToInteger(alarmType)==3){
 			ddicName="switchingValueAlarm";
 		}
-		String tableName="viw_pumpalarminfo_hist";
+		String tableName="viw_rpcalarminfo_hist";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="viw_pipelinealarminfo_hist";
+			tableName="viw_pcpalarminfo_hist";
 		}
 		DataDictionary ddic = null;
 		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
@@ -107,9 +107,9 @@ public class AlarmQueryService<T> extends BaseService<T>  {
 	public String getAlarmOverviewData(String orgId,String deviceType,String deviceName,String alarmType,String alarmLevel,String isSendMessage,Page pager) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
 		
-		String tableName="viw_pumpalarminfo_latest";
+		String tableName="viw_rpcalarminfo_latest";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="viw_pipelinealarminfo_latest";
+			tableName="viw_pcpalarminfo_latest";
 		}
 		
 		String columns="["
@@ -161,9 +161,9 @@ public class AlarmQueryService<T> extends BaseService<T>  {
 	
 	public String getAlarmOverviewExportData(String orgId,String deviceType,String deviceName,String alarmType,String alarmLevel,String isSendMessage,Page pager) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
-		String tableName="viw_pumpalarminfo_latest";
+		String tableName="viw_rpcalarminfo_latest";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="viw_pipelinealarminfo_latest";
+			tableName="viw_pcpalarminfo_latest";
 		}
 		String sql="select v.wellid,v.wellname,v.devicetypename,v.alarmtype,v.alarmtime from "
 				+ " (select t.orgid,t.wellid,t.wellname,c1.itemname as devicetypename,t.alarmtype,max(t.alarmtime) as alarmtime "

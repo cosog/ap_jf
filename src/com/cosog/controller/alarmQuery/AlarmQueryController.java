@@ -61,9 +61,9 @@ public class AlarmQueryController extends BaseController{
 		endDate = ParamUtils.getParameter(request, "endDate");
 		this.pager = new Page("pagerForm", request);
 		
-		String tableName="viw_pumpalarminfo_hist";
+		String tableName="viw_rpcalarminfo_hist";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="viw_pipelinealarminfo_hist";
+			tableName="viw_pcpalarminfo_hist";
 		}
 		if(!StringManagerUtils.isNotNull(orgId)){
 			User user=null;
@@ -118,9 +118,9 @@ public class AlarmQueryController extends BaseController{
 		String title = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "title"),"utf-8");
 		
 		this.pager = new Page("pagerForm", request);
-		String tableName="viw_pumpalarminfo_hist";
+		String tableName="viw_rpcalarminfo_hist";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="viw_pipelinealarminfo_hist";
+			tableName="viw_pcpalarminfo_hist";
 		}
 		if(!StringManagerUtils.isNotNull(orgId)){
 			User user=null;

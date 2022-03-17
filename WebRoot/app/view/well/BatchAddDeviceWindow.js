@@ -292,21 +292,9 @@ var BatchAddDeviceHandsontableHelper = {
                 success: function (response) {
                     Ext.getCmp("BatchAddDeviceWindow_Id").close();
                     if(parseInt(deviceType)==101){
-                		CreateAndLoadDiaphragmPumpDeviceInfoTable();
-                	}else if(parseInt(deviceType)==102){
-                		CreateAndLoadScrewPumpDeviceInfoTable();
-                	}else if(parseInt(deviceType)==103){
-                		CreateAndLoadLinearMotorPumpDeviceInfoTable();
-                	}else if(parseInt(deviceType)==104){
-                		CreateAndLoadElectricSubmersiblePumpDeviceInfoTable();
-                	}else if(parseInt(deviceType)==105){
-                		CreateAndLoadJetPumpDeviceInfoTable();
+                		CreateAndLoadRPCDeviceInfoTable();
                 	}else if(parseInt(deviceType)==201){
-                		CreateAndLoadHeatingPipelineDeviceInfoTable();
-                	}else if(parseInt(deviceType)==202){
-                		CreateAndLoadWaterGatheringPipelineDeviceInfoTable();
-                	}else if(parseInt(deviceType)==203){
-                		CreateAndLoadGatheringPipelineDeviceInfoTable();
+                		CreateAndLoadPCPDeviceInfoTable();
                 	}
                 	rdata = Ext.JSON.decode(response.responseText);
                 	if (rdata.success&&rdata.collisionCount==0&&rdata.overlayCount==0) {

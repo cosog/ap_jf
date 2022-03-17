@@ -15,10 +15,10 @@ import com.cosog.model.AcquisitionGroup;
 import com.cosog.model.AcquisitionUnitGroup;
 import com.cosog.model.AuxiliaryDeviceInformation;
 import com.cosog.model.MasterAndAuxiliaryDevice;
-import com.cosog.model.PipelineDeviceAddInfo;
-import com.cosog.model.PipelineDeviceInformation;
-import com.cosog.model.PumpDeviceAddInfo;
-import com.cosog.model.PumpDeviceInformation;
+import com.cosog.model.PCPDeviceAddInfo;
+import com.cosog.model.PCPDeviceInformation;
+import com.cosog.model.RPCDeviceAddInfo;
+import com.cosog.model.RPCDeviceInformation;
 import com.cosog.model.SmsDeviceInformation;
 import com.cosog.model.User;
 import com.cosog.model.data.DataDictionary;
@@ -49,14 +49,14 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer sqlCuswhere = new StringBuffer();
 		int deviceType=StringManagerUtils.stringToInteger(deviceTypeStr);
-		String tableName="tbl_pumpdevice";
+		String tableName="tbl_rpcdevice";
 		if(deviceType>=200&&deviceType<300){
-			tableName="tbl_pipelinedevice";
+			tableName="tbl_pcpdevice";
 		}else if(deviceType>=300){
 			tableName="tbl_smsdevice";
 		}
 		if(deviceType==1){
-			tableName="tbl_pipelinedevice";
+			tableName="tbl_pcpdevice";
 		}else if(deviceType==2){
 			tableName="tbl_smsdevice";
 		}
@@ -105,9 +105,9 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		//String orgIds = this.getUserOrgIds(orgId);
 		StringBuffer result_json = new StringBuffer();
 		int deviceType=StringManagerUtils.stringToInteger(deviceTypeStr);
-		String tableName="tbl_pumpdevice";
+		String tableName="tbl_rpcdevice";
 		if(deviceType>=200&&deviceType<300){
-			tableName="tbl_pipelinedevice";
+			tableName="tbl_pcpdevice";
 		}else if(deviceType>=300){
 			tableName="tbl_smsdevice";
 		}
@@ -140,9 +140,9 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		//String orgIds = this.getUserOrgIds(orgId);
 		StringBuffer result_json = new StringBuffer();
 		int deviceType=StringManagerUtils.stringToInteger(deviceTypeStr);
-		String tableName="tbl_pumpdevice";
+		String tableName="tbl_rpcdevice";
 		if(deviceType>=200&&deviceType<300){
-			tableName="tbl_pipelinedevice";
+			tableName="tbl_pcpdevice";
 		}else if(deviceType>=300){
 			tableName="tbl_smsdevice";
 		}
@@ -283,10 +283,10 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 //		getBaseDao().saveWellEditerGridData(wellHandsontableChangedData,orgId,deviceType,user);
 //	}
 	
-	public String savePumpDeviceData(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,User user) throws Exception {
+	public String saveRPCDeviceData(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,User user) throws Exception {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer collisionbuff = new StringBuffer();
-		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().savePumpDeviceData(wellHandsontableChangedData,orgId,deviceType,user);
+		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().saveRPCDeviceData(wellHandsontableChangedData,orgId,deviceType,user);
 		int successCount=0;
 		int collisionCount=0;
 		collisionbuff.append("[");
@@ -307,7 +307,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		return result_json.toString().replaceAll("null", "");
 	}
 	
-	public String batchAddPumpDevice(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,String isCheckout,User user) throws Exception {
+	public String batchAddRPCDevice(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,String isCheckout,User user) throws Exception {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer  collisionBuff = new StringBuffer();
 		StringBuffer overlayBuff = new StringBuffer();
@@ -316,9 +316,9 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
 		int collisionCount=0;
 		int overlayCount=0;
-		String ddicName="pumpDeviceManager";
+		String ddicName="rpcDeviceManager";
 		String columns=service.showTableHeadersColumns(ddicName);
-		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().batchAddPumpDevice(wellHandsontableChangedData,orgId,deviceType,isCheckout,user);
+		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().batchAddRPCDevice(wellHandsontableChangedData,orgId,deviceType,isCheckout,user);
 		String instanceSql="select t.name from tbl_protocolinstance t where t.devicetype=0 order by t.sort";
 		String alarmInstanceSql="select t.name from tbl_protocolalarminstance t where t.devicetype=0 order by t.sort";
 		String applicationScenariosSql="select c.itemname from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' order by c.itemvalue";
@@ -409,10 +409,10 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		return result_json.toString().replaceAll("null", "");
 	}
 	
-	public String savePipelineDeviceData(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,User user) throws Exception {
+	public String savePCPDeviceData(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,User user) throws Exception {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer collisionbuff = new StringBuffer();
-		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().savePipelineDeviceData(wellHandsontableChangedData,orgId,deviceType,user);
+		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().savePCPDeviceData(wellHandsontableChangedData,orgId,deviceType,user);
 		int successCount=0;
 		int collisionCount=0;
 		collisionbuff.append("[");
@@ -433,7 +433,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		return result_json.toString().replaceAll("null", "");
 	}
 	
-	public String batchAddPipelineDevice(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,String isCheckout,User user) throws Exception {
+	public String batchAddPCPDevice(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,String isCheckout,User user) throws Exception {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer  collisionBuff = new StringBuffer();
 		StringBuffer overlayBuff = new StringBuffer();
@@ -442,9 +442,9 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
 		int collisionCount=0;
 		int overlayCount=0;
-		String ddicName="pumpDeviceManager";
+		String ddicName="rpcDeviceManager";
 		String columns=service.showTableHeadersColumns(ddicName);
-		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().batchAddPipelineDevice(wellHandsontableChangedData,orgId,deviceType,isCheckout,user);
+		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().batchAddPCPDevice(wellHandsontableChangedData,orgId,deviceType,isCheckout,user);
 		String instanceSql="select t.name from tbl_protocolinstance t where t.devicetype=0 order by t.sort";
 		String alarmInstanceSql="select t.name from tbl_protocolalarminstance t where t.devicetype=0 order by t.sort";
 		String applicationScenariosSql="select c.itemname from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' order by c.itemvalue";
@@ -539,16 +539,16 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		getBaseDao().saveSMSDeviceData(wellHandsontableChangedData,orgId,deviceType,user);
 	}
 	
-	public void doPumpDeviceAdd(PumpDeviceInformation pumpDeviceInformation) throws Exception {
-		getBaseDao().addObject(pumpDeviceInformation);
+	public void doRPCDeviceAdd(RPCDeviceInformation rpcDeviceInformation) throws Exception {
+		getBaseDao().addObject(rpcDeviceInformation);
 	}
 	
-	public void doPumpDeviceEdit(PumpDeviceInformation pumpDeviceInformation) throws Exception {
-		getBaseDao().updateObject(pumpDeviceInformation);
+	public void doRPCDeviceEdit(RPCDeviceInformation rpcDeviceInformation) throws Exception {
+		getBaseDao().updateObject(rpcDeviceInformation);
 	}
 	
-	public void doPipelineDeviceAdd(PipelineDeviceInformation pipelineDeviceInformation) throws Exception {
-		getBaseDao().addObject(pipelineDeviceInformation);
+	public void doPCPDeviceAdd(PCPDeviceInformation pcpDeviceInformation) throws Exception {
+		getBaseDao().addObject(pcpDeviceInformation);
 	}
 	
 	public void doSMSDeviceAdd(SmsDeviceInformation smsDeviceInformation) throws Exception {
@@ -565,9 +565,9 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	}
 	
 	public void deleteDeviceAdditionalInfo(final int deviceId,int deviceType) throws Exception {
-		String model="PumpDeviceAddInfo";
+		String model="RPCDeviceAddInfo";
 		if(deviceType>=200&&deviceType<300){
-			model="PipelineDeviceAddInfo";
+			model="PCPDeviceAddInfo";
 		}
 		final String hql = "DELETE "+model+" u where u.wellId ="+deviceId+"";
 		getBaseDao().bulkObjectDelete(hql);
@@ -577,11 +577,11 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		getBaseDao().saveOrUpdateObject(r);
 	}
 	
-	public void saveDeviceAdditionalInfo(PumpDeviceAddInfo r) throws Exception {
+	public void saveDeviceAdditionalInfo(RPCDeviceAddInfo r) throws Exception {
 		getBaseDao().saveOrUpdateObject(r);
 	}
 	
-	public void saveDeviceAdditionalInfo(PipelineDeviceAddInfo r) throws Exception {
+	public void saveDeviceAdditionalInfo(PCPDeviceAddInfo r) throws Exception {
 		getBaseDao().saveOrUpdateObject(r);
 	}
 	
@@ -640,12 +640,12 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		return result_json.toString().replaceAll("null", "");
 	}
 	
-	public void editPumpDeviceName(String oldWellName,String newWellName,String orgid) throws Exception {
-		getBaseDao().editPumpDeviceName(oldWellName,newWellName,orgid);
+	public void editRPCDeviceName(String oldWellName,String newWellName,String orgid) throws Exception {
+		getBaseDao().editRPCDeviceName(oldWellName,newWellName,orgid);
 	}
 	
-	public void editPipelineDeviceName(String oldWellName,String newWellName,String orgid) throws Exception {
-		getBaseDao().editPipelineDeviceName(oldWellName,newWellName,orgid);
+	public void editPCPDeviceName(String oldWellName,String newWellName,String orgid) throws Exception {
+		getBaseDao().editPCPDeviceName(oldWellName,newWellName,orgid);
 	}
 	
 	public void editSMSDeviceName(String oldWellName,String newWellName,String orgid) throws Exception {
@@ -775,8 +775,8 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer alarmInstanceDropdownData = new StringBuffer();
 		StringBuffer SMSInstanceDropdownData = new StringBuffer();
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
-		String ddicName="pumpDeviceManager";
-		String tableName="viw_pumpdevice";
+		String ddicName="rpcDeviceManager";
+		String tableName="viw_rpcdevice";
 		int protocolType=0;
 		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
 		if(equipmentDriveMap.size()==0){
@@ -791,12 +791,12 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			WellInformation_Str = " and t.wellname like '%" + wellInformationName+ "%'";
 		}
 		if(deviceType>=100&&deviceType<200){
-			ddicName="pumpDeviceManager";
-			tableName="viw_pumpdevice";
+			ddicName="rpcDeviceManager";
+			tableName="viw_rpcdevice";
 			protocolType=0;
 		}else if(deviceType>=200&&deviceType<300){
-			ddicName="pipelineDeviceManager";
-			tableName="viw_pipelinedevice";
+			ddicName="pcpDeviceManager";
+			tableName="viw_pcpdevice";
 			protocolType=1;
 		}else if(deviceType>=300){
 			ddicName="SMSDeviceManager";
@@ -805,7 +805,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		
 		String columns=service.showTableHeadersColumns(ddicName);
 		String sql = "select id,orgName,wellName,applicationScenariosName,instanceName,alarmInstanceName,signInId,slave,"
-				+ " factorynumber,model,productiondate,deliverydate,commissioningdate,controlcabinetmodel,t.pipelinelength,"
+				+ " factorynumber,model,productiondate,deliverydate,commissioningdate,controlcabinetmodel,t.pcplength,"
 				+ " videoUrl,sortNum"
 				+ " from "+tableName+" t where 1=1"
 				+ WellInformation_Str;
@@ -892,7 +892,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			result_json.append("\"commissioningDate\":\""+obj[12]+"\",");
 			result_json.append("\"controlcabinetDodel\":\""+obj[13]+"\",");
 			
-			result_json.append("\"pipelineLength\":\""+obj[14]+"\",");
+			result_json.append("\"pcpLength\":\""+obj[14]+"\",");
 			
 			result_json.append("\"videoUrl\":\""+obj[15]+"\",");
 			result_json.append("\"sortNum\":\""+obj[16]+"\"},");
@@ -909,13 +909,13 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public String getPumpDeviceInfoList(Map map,Page pager,int recordCount) {
+	public String getRPCDeviceInfoList(Map map,Page pager,int recordCount) {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer instanceDropdownData = new StringBuffer();
 		StringBuffer alarmInstanceDropdownData = new StringBuffer();
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
-		String ddicName="pumpDeviceManager";
-		String tableName="viw_pumpdevice";
+		String ddicName="rpcDeviceManager";
+		String tableName="viw_rpcdevice";
 		int protocolType=0;
 		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
 		if(equipmentDriveMap.size()==0){
@@ -1017,9 +1017,9 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public String getPumpDeviceInfoExportData(Map map,Page pager,int recordCount) {
+	public String getRPCDeviceInfoExportData(Map map,Page pager,int recordCount) {
 		StringBuffer result_json = new StringBuffer();
-		String tableName="viw_pumpdevice";
+		String tableName="viw_rpcdevice";
 		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
 		if(equipmentDriveMap.size()==0){
 			EquipmentDriverServerTask.loadProtocolConfig();
@@ -1077,8 +1077,8 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer instanceDropdownData = new StringBuffer();
 		StringBuffer alarmInstanceDropdownData = new StringBuffer();
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
-		String ddicName="pipelineDeviceManager";
-		String tableName="viw_pipelinedevice";
+		String ddicName="pcpDeviceManager";
+		String tableName="viw_pcpdevice";
 		int protocolType=1;
 		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
 		if(equipmentDriveMap.size()==0){
@@ -1183,7 +1183,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	@SuppressWarnings("rawtypes")
 	public String getPipeDeviceInfoExportData(Map map,Page pager,int recordCount) {
 		StringBuffer result_json = new StringBuffer();
-		String tableName="viw_pipelinedevice";
+		String tableName="viw_pcpdevice";
 		String wellInformationName = (String) map.get("wellInformationName");
 		int deviceType=StringManagerUtils.stringToInteger((String) map.get("deviceType"));
 		String orgId = (String) map.get("orgId");
@@ -1441,9 +1441,9 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"name\",width:120 ,children:[] },"
 				+ "{ \"header\":\"规格型号\",\"dataIndex\":\"model\",width:80 ,children:[] }"
 				+ "]";
-		String deviceTableName="tbl_pumpdevice";
+		String deviceTableName="tbl_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)>=200 && StringManagerUtils.stringToInteger(deviceType)<300){
-			deviceTableName="tbl_pipelinedevice";
+			deviceTableName="tbl_pcpdevice";
 		}
 		
 		String sql = "select t.id,t.name,decode(t.type,1,'管辅件','泵辅件') as type,t.model,t.remark,t.sort from tbl_auxiliarydevice t where 1=1";
@@ -1494,11 +1494,11 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 				+ "{ \"header\":\"值\",\"dataIndex\":\"itemValue\",width:120 ,children:[] },"
 				+ "{ \"header\":\"单位\",\"dataIndex\":\"itemUnit\",width:80 ,children:[] }"
 				+ "]";
-		String deviceTableName="tbl_pumpdevice";
-		String infoTableName="tbl_pumpdeviceaddinfo";
+		String deviceTableName="tbl_rpcdevice";
+		String infoTableName="tbl_rpcdeviceaddinfo";
 		if(StringManagerUtils.stringToInteger(deviceType)>=200 && StringManagerUtils.stringToInteger(deviceType)<300){
-			deviceTableName="tbl_pipelinedevice";
-			infoTableName="tbl_pipelinedeviceaddinfo";
+			deviceTableName="tbl_pcpdevice";
+			infoTableName="tbl_pcpdeviceaddinfo";
 		}
 		String sql = "select t2.id,t2.itemname,t2.itemvalue,t2.itemunit "
 				+ " from "+deviceTableName+" t,"+infoTableName+" t2 "
@@ -1545,7 +1545,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	
 	public String exportWellInformationData(Map map,Page pager,int recordCount) {
 		StringBuffer result_json = new StringBuffer();
-		String ddicName="pumpDeviceManager";
+		String ddicName="rpcDeviceManager";
 		String wellInformationName = (String) map.get("wellInformationName");
 		int deviceType=StringManagerUtils.stringToInteger((String) map.get("deviceType"));
 		String orgId = (String) map.get("orgId");
@@ -1554,14 +1554,14 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			WellInformation_Str = " and t.wellname like '%" + wellInformationName+ "%'";
 		}
 		if(deviceType==0){
-			ddicName="pumpDeviceManager";
+			ddicName="rpcDeviceManager";
 		}else if(deviceType==1){
-			ddicName="pipelineDeviceManager";
+			ddicName="pcpDeviceManager";
 		}else if(deviceType==2){
 			ddicName="SMSDeviceManager";
 		}
 		String sql = "select id,orgName,wellName,applicationScenariosName,instanceName,alarmInstanceName,signInId,slave,"
-				+ " factorynumber,model,productiondate,deliverydate,commissioningdate,controlcabinetmodel,t.pipelinelength,"
+				+ " factorynumber,model,productiondate,deliverydate,commissioningdate,controlcabinetmodel,t.pcplength,"
 				+ " videoUrl,sortNum"
 				+ " from viw_wellinformation t where 1=1"
 				+ WellInformation_Str;
@@ -1596,7 +1596,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			result_json.append("\"commissioningDate\":\""+obj[12]+"\",");
 			result_json.append("\"controlcabinetDodel\":\""+obj[13]+"\",");
 			
-			result_json.append("\"pipelineLength\":\""+obj[14]+"\",");
+			result_json.append("\"pcpLength\":\""+obj[14]+"\",");
 			
 			result_json.append("\"videoUrl\":\""+obj[15]+"\",");
 			result_json.append("\"sortNum\":\""+obj[16]+"\"},");
@@ -1611,11 +1611,11 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 
 	
 	@SuppressWarnings("rawtypes")
-	public String getPumpDeviceInformationData(String recordId) {
+	public String getRPCDeviceInformationData(String recordId) {
 		StringBuffer result_json = new StringBuffer();
 		String sql = "select t.id,t.wellname,t.orgid,t.orgName,t.devicetype,t.devicetypename,t.applicationscenarios,t.applicationScenariosName,t.signinid,t.slave,videoUrl,"
 				+ "t.instancecode,t.instancename,t.alarminstancecode,t.alarminstancename,t.sortnum "
-				+ "from viw_pumpdevice  t where t.id="+recordId;
+				+ "from viw_rpcdevice  t where t.id="+recordId;
 		String json = "";
 		List<?> list = this.findCallSql(sql);
 		if(list.size()>0){
@@ -1650,11 +1650,11 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer instanceDropdownData = new StringBuffer();
 		StringBuffer alarmInstanceDropdownData = new StringBuffer();
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
-		String ddicName="pumpDeviceManager";
+		String ddicName="rpcDeviceManager";
 		int protocolType=0;
 		int deviceType=StringManagerUtils.stringToInteger(deviceTypeStr);
 		if(deviceType>=200&&deviceType<300){
-			ddicName="pipelineDeviceManager";
+			ddicName="pcpDeviceManager";
 			protocolType=1;
 		}
 		
@@ -1722,9 +1722,9 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	public boolean judgeDeviceExistOrNot(String orgId,String deviceName,String deviceTypeStr) {
 		boolean flag = false;
 		int deviceType=StringManagerUtils.stringToInteger(deviceTypeStr);
-		String tableName="tbl_pumpdevice";
+		String tableName="tbl_rpcdevice";
 		if(deviceType>=200&&deviceType<300){
-			tableName="tbl_pipelinedevice";
+			tableName="tbl_pcpdevice";
 		}else if(deviceType>=300){
 			tableName="tbl_smsdevice";
 		}
@@ -1742,9 +1742,9 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		boolean flag = false;
 		int deviceType=StringManagerUtils.stringToInteger(deviceTypeStr);
 		int slave=StringManagerUtils.stringToInteger(slaveStr);
-		String tableName="tbl_pumpdevice";
+		String tableName="tbl_rpcdevice";
 		if(deviceType>=200&&deviceType<300){
-			tableName="tbl_pipelinedevice";
+			tableName="tbl_pcpdevice";
 		}else if(deviceType>=300){
 			tableName="tbl_smsdevice";
 		}
