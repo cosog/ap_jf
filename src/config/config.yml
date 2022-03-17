@@ -1,0 +1,51 @@
+server:
+   accessPath: http://127.0.0.1:16100/ap_jf
+spring:
+   datasource:
+      driverUrl: jdbc:oracle:thin:@127.0.0.1:1521:orcl
+      driver: oracle.jdbc.driver.OracleDriver
+      dialect: org.hibernate.dialect.Oracle10gDialect
+      user: ap_jf
+      password: ap123#
+viewInformation:
+   title: 智能化监控系统
+   profile: 智能化监控系统 主要针对泵设备和管设备系列产品，通过驱动配置，实现采集、控制与报警等功能。模块包括实时监控、历史查询、故障查询、日志查询、权限管理（单位管理、用户管理、角色管理）、设备管理（泵设备、管设备、短信设备）、驱动配置（协议配置、实例配置）和系统配置（模块配置、字典配置、报警配置）等功能。
+   copy: ""
+   linkaddress: http://www.cosogoil.com
+   linkshow: ""
+driverConfig:
+   server: http://39.99.42.182:19200/api/init/server
+   protocol: http://39.99.42.182:19200/api/init/protocol
+   instance: http://39.99.42.182:19200/api/init/instance
+   id: http://39.99.42.182:19200/api/init/id
+   SMS: http://39.99.42.182:19200/api/init/sms
+   readAddr: http://39.99.42.182:19200/api/read/addr
+   writeAddr: http://39.99.42.182:19200/api/write/addr
+   writeSMS: http://39.99.42.182:19200/api/write/sms
+   probe:
+      init: http://39.99.42.182:19200/api/probe/init
+      app: http://39.99.42.182:19200/api/probe/app
+      cpu: http://39.99.42.182:19200/api/probe/cpu
+      mem: http://39.99.42.182:19200/api/probe/mem
+      disk: http://39.99.42.182:19200/api/probe/disk
+      host: http://39.99.42.182:19200/api/probe/host
+email:
+   snedAccount:
+      account: shfzby@126.com
+      password: CANDRMRCDLKHUKQX
+      smtpHost: smtp.126.com
+      smtpPort: 465
+others:
+   cache: false
+   language: zh_CN
+   pageSize: 100
+   syncOrAsync: false
+   expandedAll: true
+   defaultComboxSize: 10000
+   defaultGraghSize: 60
+   productionUnit: 1
+   dataSaveMode: 1
+   showLogo: true
+   printLog: true
+   serialnumber: ""
+      

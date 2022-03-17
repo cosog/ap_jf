@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="ap_jf"
+  id="myeclipse.1392083156515"
+  context-root="/ap_jf"
+  j2ee-spec="6.0"
+  archive="ap_jf.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+
