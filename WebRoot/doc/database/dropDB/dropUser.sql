@@ -1,0 +1,1 @@
+drop user ap_fb cascade;
