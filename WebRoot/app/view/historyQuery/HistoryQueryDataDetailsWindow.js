@@ -49,7 +49,7 @@ Ext.define("AP.view.historyQuery.HistoryQueryDataDetailsWindow", {
                       var deviceType=0;
                       var tabPanel = Ext.getCmp("HistoryQueryTabPanel");
               			var activeId = tabPanel.getActiveTab().id;
-              			if(activeId=="PipelineHistoryQueryInfoPanel_Id"){
+              			if(activeId=="PCPHistoryQueryInfoPanel_Id"){
               				deviceType=1;
               			}
               			CreateDeviceHistoryQueryDataTable(recordId,deviceId,deviceName,deviceType);

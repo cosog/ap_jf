@@ -29,10 +29,10 @@ insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_COD
 values (31, 9999, '设备管理', '设备管理', '#', 'dataConfig', 2040000, null, null, 'dataConfig', 0, 'AP.controller.frame.MainIframeControl');
 
 insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
-values (34, 31, '泵设备', '泵设备', 'AP.view.well.PumpDeviceInfoPanel', 'PumpDeviceManager', 2040100, null, null, 'wellInformation', 0, 'AP.controller.well.WellInfoController');
+values (34, 31, '抽油机', '抽油机', 'AP.view.well.RPCDeviceInfoPanel', 'RPCDeviceManager', 2040100, null, null, 'wellInformation', 0, 'AP.controller.well.WellInfoController');
 
 insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
-values (2098, 31, '管设备', '管设备管理', 'AP.view.well.PipelineDeviceInfoPanel', 'PipelineDeviceManager', 2040200, null, null, 'pipelineDevice', 0, 'AP.controller.well.WellInfoController');
+values (2098, 31, '螺杆泵', '螺杆泵管理', 'AP.view.well.PCPDeviceInfoPanel', 'PCPDeviceManager', 2040200, null, null, 'pipelineDevice', 0, 'AP.controller.well.WellInfoController');
 
 insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
 values (2118, 31, '辅件设备', '辅件设备', 'AP.view.well.AuxiliaryDeviceInfoPanel', 'AuxiliaryDeviceManager', 2040300, null, null, 'auxiliaryDevice', 0, 'AP.controller.well.WellInfoController');

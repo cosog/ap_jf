@@ -26,10 +26,10 @@ import com.cosog.model.AcquisitionUnit;
 import com.cosog.model.AuxiliaryDeviceInformation;
 import com.cosog.model.MasterAndAuxiliaryDevice;
 import com.cosog.model.Org;
-import com.cosog.model.PipelineDeviceAddInfo;
-import com.cosog.model.PipelineDeviceInformation;
-import com.cosog.model.PumpDeviceAddInfo;
-import com.cosog.model.PumpDeviceInformation;
+import com.cosog.model.PCPDeviceAddInfo;
+import com.cosog.model.PCPDeviceInformation;
+import com.cosog.model.RPCDeviceAddInfo;
+import com.cosog.model.RPCDeviceInformation;
 import com.cosog.model.SmsDeviceInformation;
 import com.cosog.model.User;
 import com.cosog.model.gridmodel.AuxiliaryDeviceConfig;
@@ -58,9 +58,9 @@ public class WellInformationManagerController extends BaseController {
 	@Autowired
 	private WellInformationManagerService<?> wellInformationManagerService;
 	@Autowired
-	private WellInformationManagerService<PumpDeviceInformation> pumpDeviceManagerService;
+	private WellInformationManagerService<RPCDeviceInformation> rpcDeviceManagerService;
 	@Autowired
-	private WellInformationManagerService<PipelineDeviceInformation> pipelineDeviceManagerService;
+	private WellInformationManagerService<PCPDeviceInformation> pcpDeviceManagerService;
 	@Autowired
 	private WellInformationManagerService<SmsDeviceInformation> smsDeviceManagerService;
 	@Autowired
@@ -79,14 +79,14 @@ public class WellInformationManagerController extends BaseController {
 	private int totals;
 	
 	//添加绑定前缀 
-	@InitBinder("pumpDeviceInformation")
+	@InitBinder("rpcDeviceInformation")
 	public void initBinder(WebDataBinder binder) {
-		binder.setFieldDefaultPrefix("pumpDeviceInformation.");
+		binder.setFieldDefaultPrefix("rpcDeviceInformation.");
 	}
 	
-	@InitBinder("pipelineDeviceInformation")
+	@InitBinder("pcpDeviceInformation")
 	public void initBinder2(WebDataBinder binder) {
-		binder.setFieldDefaultPrefix("pipelineDeviceInformation.");
+		binder.setFieldDefaultPrefix("pcpDeviceInformation.");
 	}
 	
 	@InitBinder("auxiliaryDeviceInformation")
@@ -278,7 +278,7 @@ public class WellInformationManagerController extends BaseController {
 		this.pager = new Page("pagerForm", request);
 		String json="";
 		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-			json = this.wellInformationManagerService.getPumpDeviceInfoList(map, pager,recordCount);
+			json = this.wellInformationManagerService.getRPCDeviceInfoList(map, pager,recordCount);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
 			json = this.wellInformationManagerService.getPipeDeviceInfoList(map, pager,recordCount);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=300){
@@ -327,7 +327,7 @@ public class WellInformationManagerController extends BaseController {
 		this.pager = new Page("pagerForm", request);
 		String json="";
 		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-			json = this.wellInformationManagerService.getPumpDeviceInformationData(recordId);
+			json = this.wellInformationManagerService.getRPCDeviceInformationData(recordId);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
 //			json = this.wellInformationManagerService.getPipeDeviceInfoList(map, pager,recordCount);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=300){
@@ -494,7 +494,7 @@ public class WellInformationManagerController extends BaseController {
 		this.pager = new Page("pagerForm", request);// 新疆分页Page 工具类
 		String json="[]";
 		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-			json = this.wellInformationManagerService.getPumpDeviceInfoExportData(map, pager,recordCount);
+			json = this.wellInformationManagerService.getRPCDeviceInfoExportData(map, pager,recordCount);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
 			json = this.wellInformationManagerService.getPipeDeviceInfoExportData(map, pager,recordCount);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=300){
@@ -567,15 +567,15 @@ public class WellInformationManagerController extends BaseController {
 		String orgId = ParamUtils.getParameter(request, "orgId");
 		deviceType = ParamUtils.getParameter(request, "deviceType");
 		Gson gson = new Gson();
-		String deviceTableName="tbl_pumpdevice";
+		String deviceTableName="tbl_rpcdevice";
 		java.lang.reflect.Type type = new TypeToken<WellHandsontableChangedData>() {}.getType();
 		WellHandsontableChangedData wellHandsontableChangedData=gson.fromJson(data, type);
 		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-			deviceTableName="tbl_pumpdevice";
-			json=this.wellInformationManagerService.savePumpDeviceData(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),user);
+			deviceTableName="tbl_rpcdevice";
+			json=this.wellInformationManagerService.saveRPCDeviceData(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),user);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
-			deviceTableName="tbl_pipelinedevice";
-			json=this.wellInformationManagerService.savePipelineDeviceData(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),user);
+			deviceTableName="tbl_pcpdevice";
+			json=this.wellInformationManagerService.savePCPDeviceData(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),user);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=300){
 			this.wellInformationManagerService.saveSMSDeviceData(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),user);
 		}
@@ -602,19 +602,19 @@ public class WellInformationManagerController extends BaseController {
 				if(auxiliaryDeviceConfig.getAdditionalInfoList()!=null&&auxiliaryDeviceConfig.getAdditionalInfoList().size()>0){
 					for(int i=0;i<auxiliaryDeviceConfig.getAdditionalInfoList().size();i++){
 						if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-							PumpDeviceAddInfo pumpDeviceAddInfo=new PumpDeviceAddInfo();
-							pumpDeviceAddInfo.setWellId(deviceId);
-							pumpDeviceAddInfo.setItemName(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemName());
-							pumpDeviceAddInfo.setItemValue(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemValue());
-							pumpDeviceAddInfo.setItemUnit(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemUnit());
-							this.wellInformationManagerService.saveDeviceAdditionalInfo(pumpDeviceAddInfo);
+							RPCDeviceAddInfo rpcDeviceAddInfo=new RPCDeviceAddInfo();
+							rpcDeviceAddInfo.setWellId(deviceId);
+							rpcDeviceAddInfo.setItemName(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemName());
+							rpcDeviceAddInfo.setItemValue(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemValue());
+							rpcDeviceAddInfo.setItemUnit(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemUnit());
+							this.wellInformationManagerService.saveDeviceAdditionalInfo(rpcDeviceAddInfo);
 						}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
-							PipelineDeviceAddInfo pipelineDeviceAddInfo=new PipelineDeviceAddInfo();
-							pipelineDeviceAddInfo.setWellId(deviceId);
-							pipelineDeviceAddInfo.setItemName(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemName());
-							pipelineDeviceAddInfo.setItemValue(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemValue());
-							pipelineDeviceAddInfo.setItemUnit(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemUnit());
-							this.wellInformationManagerService.saveDeviceAdditionalInfo(pipelineDeviceAddInfo);
+							PCPDeviceAddInfo pcpDeviceAddInfo=new PCPDeviceAddInfo();
+							pcpDeviceAddInfo.setWellId(deviceId);
+							pcpDeviceAddInfo.setItemName(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemName());
+							pcpDeviceAddInfo.setItemValue(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemValue());
+							pcpDeviceAddInfo.setItemUnit(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemUnit());
+							this.wellInformationManagerService.saveDeviceAdditionalInfo(pcpDeviceAddInfo);
 						}
 					}
 				}
@@ -646,9 +646,9 @@ public class WellInformationManagerController extends BaseController {
 		java.lang.reflect.Type type = new TypeToken<WellHandsontableChangedData>() {}.getType();
 		WellHandsontableChangedData wellHandsontableChangedData=gson.fromJson(data, type);
 		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-			json=this.wellInformationManagerService.batchAddPumpDevice(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),isCheckout,user);
+			json=this.wellInformationManagerService.batchAddRPCDevice(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),isCheckout,user);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
-			json=this.wellInformationManagerService.batchAddPipelineDevice(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),isCheckout,user);
+			json=this.wellInformationManagerService.batchAddPCPDevice(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),isCheckout,user);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=300){
 			this.wellInformationManagerService.saveSMSDeviceData(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),user);
 		}
@@ -709,24 +709,24 @@ public class WellInformationManagerController extends BaseController {
 		return null;
 	}
 	
-	@RequestMapping("/doPumpDeviceAdd")
-	public String doPumpDeviceAdd(@ModelAttribute PumpDeviceInformation pumpDeviceInformation) throws IOException {
+	@RequestMapping("/doRPCDeviceAdd")
+	public String doRPCDeviceAdd(@ModelAttribute RPCDeviceInformation rpcDeviceInformation) throws IOException {
 		String result = "";
 		PrintWriter out = response.getWriter();
 		HttpSession session=request.getSession();
 		try {
 			User user = (User) session.getAttribute("userLogin");
-			if(pumpDeviceInformation.getOrgId()==null){
-				pumpDeviceInformation.setOrgId(user.getUserOrgid());
+			if(rpcDeviceInformation.getOrgId()==null){
+				rpcDeviceInformation.setOrgId(user.getUserOrgid());
 			}
-			this.pumpDeviceManagerService.doPumpDeviceAdd(pumpDeviceInformation);
+			this.rpcDeviceManagerService.doRPCDeviceAdd(rpcDeviceInformation);
 			EquipmentDriverServerTask.LoadDeviceCommStatus();
 			List<String> addWellList=new ArrayList<String>();
-			addWellList.add(pumpDeviceInformation.getWellName());
-			if(pumpDeviceInformation.getStatus()==1){
-				EquipmentDriverServerTask.initPumpDriverAcquisitionInfoConfig(addWellList,"update");
+			addWellList.add(rpcDeviceInformation.getWellName());
+			if(rpcDeviceInformation.getStatus()==1){
+				EquipmentDriverServerTask.initRPCDriverAcquisitionInfoConfig(addWellList,"update");
 			}
-			pumpDeviceManagerService.getBaseDao().saveDeviceOperationLog(null, addWellList, null, pumpDeviceInformation.getDeviceType(), user);
+			rpcDeviceManagerService.getBaseDao().saveDeviceOperationLog(null, addWellList, null, rpcDeviceInformation.getDeviceType(), user);
 			result = "{success:true,msg:true,resultCode:1}";
 			
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
@@ -740,21 +740,21 @@ public class WellInformationManagerController extends BaseController {
 		return null;
 	}
 	
-	@RequestMapping("/doPumpDeviceEdit")
-	public String doPumpDeviceEdit(@ModelAttribute PumpDeviceInformation pumpDeviceInformation) throws IOException {
+	@RequestMapping("/doRPCDeviceEdit")
+	public String doRPCDeviceEdit(@ModelAttribute RPCDeviceInformation rpcDeviceInformation) throws IOException {
 		String result = "";
 		PrintWriter out = response.getWriter();
 		HttpSession session=request.getSession();
 		try {
 			User user = (User) session.getAttribute("userLogin");
-			if(pumpDeviceInformation.getOrgId()==null){
-				pumpDeviceInformation.setOrgId(user.getUserOrgid());
+			if(rpcDeviceInformation.getOrgId()==null){
+				rpcDeviceInformation.setOrgId(user.getUserOrgid());
 			}
-			this.pumpDeviceManagerService.doPumpDeviceEdit(pumpDeviceInformation);
+			this.rpcDeviceManagerService.doRPCDeviceEdit(rpcDeviceInformation);
 			List<String> addWellList=new ArrayList<String>();
-			addWellList.add(pumpDeviceInformation.getWellName());
-			EquipmentDriverServerTask.initPumpDriverAcquisitionInfoConfig(addWellList,"update");
-			pumpDeviceManagerService.getBaseDao().saveDeviceOperationLog(null, addWellList, null, pumpDeviceInformation.getDeviceType(), user);
+			addWellList.add(rpcDeviceInformation.getWellName());
+			EquipmentDriverServerTask.initRPCDriverAcquisitionInfoConfig(addWellList,"update");
+			rpcDeviceManagerService.getBaseDao().saveDeviceOperationLog(null, addWellList, null, rpcDeviceInformation.getDeviceType(), user);
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
 			out.print(result);
@@ -767,21 +767,21 @@ public class WellInformationManagerController extends BaseController {
 		return null;
 	}
 	
-	@RequestMapping("/doPipelineDeviceAdd")
-	public String doPipelineDeviceAdd(@ModelAttribute PipelineDeviceInformation pipelineDeviceInformation) throws IOException {
+	@RequestMapping("/doPCPDeviceAdd")
+	public String doPCPDeviceAdd(@ModelAttribute PCPDeviceInformation pcpDeviceInformation) throws IOException {
 		String result = "";
 		PrintWriter out = response.getWriter();
 		HttpSession session=request.getSession();
 		try {
 			User user = (User) session.getAttribute("userLogin");
-			this.pipelineDeviceManagerService.doPipelineDeviceAdd(pipelineDeviceInformation);
+			this.pcpDeviceManagerService.doPCPDeviceAdd(pcpDeviceInformation);
 			EquipmentDriverServerTask.LoadDeviceCommStatus();
 			List<String> addWellList=new ArrayList<String>();
-			addWellList.add(pipelineDeviceInformation.getWellName());
-			if(pipelineDeviceInformation.getStatus()==1){
-				EquipmentDriverServerTask.initPipelineDriverAcquisitionInfoConfig(addWellList,"update");
+			addWellList.add(pcpDeviceInformation.getWellName());
+			if(pcpDeviceInformation.getStatus()==1){
+				EquipmentDriverServerTask.initPCPDriverAcquisitionInfoConfig(addWellList,"update");
 			}
-			pipelineDeviceManagerService.getBaseDao().saveDeviceOperationLog(null, addWellList, null, pipelineDeviceInformation.getDeviceType(), user);
+			pcpDeviceManagerService.getBaseDao().saveDeviceOperationLog(null, addWellList, null, pcpDeviceInformation.getDeviceType(), user);
 			result = "{success:true,msg:true,resultCode:1}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
 			out.print(result);
@@ -805,7 +805,7 @@ public class WellInformationManagerController extends BaseController {
 			List<String> addWellList=new ArrayList<String>();
 			addWellList.add(smsDeviceInformation.getWellName());
 			EquipmentDriverServerTask.initSMSDevice(addWellList,"update");
-			pipelineDeviceManagerService.getBaseDao().saveDeviceOperationLog(null, addWellList, null, 300, user);
+			pcpDeviceManagerService.getBaseDao().saveDeviceOperationLog(null, addWellList, null, 300, user);
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
 			out.print(result);

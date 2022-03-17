@@ -91,25 +91,25 @@ public class DriverAPIController extends BaseController{
 		StringBuffer webSocketSendData = new StringBuffer();
 		String functionCode="adExitAndDeviceOffline";
 		String time=StringManagerUtils.getCurrentTime("yyyy-MM-dd HH:mm:ss");
-		String updatePumpRealData="update tbl_pumpacqdata_latest t "
+		String updateRPCRealData="update tbl_rpcacqdata_latest t "
 				+ "set t.acqTime=to_date('"+time+"','yyyy-mm-dd hh24:mi:ss'), t.CommStatus=0 "
 				+ "where t.CommStatus=1";
-		String updatePumpHistData="update tbl_pumpacqdata_hist t "
+		String updateRPCHistData="update tbl_rpcacqdata_hist t "
 				+ " set t.acqTime=to_date('"+time+"','yyyy-mm-dd hh24:mi:ss'), t.CommStatus=0"
-				+ " where t.CommStatus=1 and t.acqtime=( select max(t2.acqtime) from tbl_pumpacqdata_hist t2 where t2.wellid=t.wellid ) ";
+				+ " where t.CommStatus=1 and t.acqtime=( select max(t2.acqtime) from tbl_rpcacqdata_hist t2 where t2.wellid=t.wellid ) ";
 		
-		String updatePipelineRealData="update tbl_pipelineacqdata_latest t "
+		String updatePCPRealData="update tbl_pcpacqdata_latest t "
 				+ "set t.acqTime=to_date('"+time+"','yyyy-mm-dd hh24:mi:ss'), t.CommStatus=0 "
 				+ "where t.CommStatus=1";
-		String updatePipelineHistData="update tbl_pipelineacqdata_hist t "
+		String updatePCPHistData="update tbl_pcpacqdata_hist t "
 				+ " set t.acqTime=to_date('"+time+"','yyyy-mm-dd hh24:mi:ss'), t.CommStatus=0"
-				+ " where t.CommStatus=1 and t.acqtime=( select max(t2.acqtime) from tbl_pipelineacqdata_hist t2 where t2.wellid=t.wellid ) ";
+				+ " where t.CommStatus=1 and t.acqtime=( select max(t2.acqtime) from tbl_pcpacqdata_hist t2 where t2.wellid=t.wellid ) ";
 		
-		int result=commonDataService.getBaseDao().updateOrDeleteBySql(updatePumpRealData);
-		result=commonDataService.getBaseDao().updateOrDeleteBySql(updatePumpHistData);
+		int result=commonDataService.getBaseDao().updateOrDeleteBySql(updateRPCRealData);
+		result=commonDataService.getBaseDao().updateOrDeleteBySql(updateRPCHistData);
 		
-		result=commonDataService.getBaseDao().updateOrDeleteBySql(updatePipelineRealData);
-		result=commonDataService.getBaseDao().updateOrDeleteBySql(updatePipelineHistData);
+		result=commonDataService.getBaseDao().updateOrDeleteBySql(updatePCPRealData);
+		result=commonDataService.getBaseDao().updateOrDeleteBySql(updatePCPHistData);
 		
 		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
 		List<CommStatus> commStatusList=(List<CommStatus>) dataModelMap.get("DeviceCommStatus");
@@ -163,8 +163,8 @@ public class DriverAPIController extends BaseController{
 					+ "t2.commtime"
 					+ "t2.commtimeefficiency,"
 					+ "t2.commrange,"
-					+ "t.devicetype,t.id from tbl_pumpdevice t "
-					+ " left outer join tbl_pumpacqdata_latest  t2 on t.id=t2.wellid "
+					+ "t.devicetype,t.id from tbl_rpcdevice t "
+					+ " left outer join tbl_rpcacqdata_latest  t2 on t.id=t2.wellid "
 					+ " left outer join tbl_protocolinstance t4 on t.instancecode=t4.code"
 					+ " left outer join tbl_acq_unit_conf t5 on t4.unitid=t5.id"
 					+ " where t5.protocol in("+protocols+")"
@@ -176,14 +176,14 @@ public class DriverAPIController extends BaseController{
 				String wellId=obj[obj.length-1]+"";
 				String devicetype=obj[obj.length-2]+"";
 				
-				String realtimeTable="tbl_pumpacqdata_latest";
-				String historyTable="tbl_pumpacqdata_hist";
-				if("0".equalsIgnoreCase(devicetype)){//如果是泵设备
-					realtimeTable="tbl_pumpacqdata_latest";
-					historyTable="tbl_pumpacqdata_hist";
-				}else{//否则管设备
-					realtimeTable="tbl_pipelineacqdata_latest";
-					historyTable="tbl_pipelineacqdata_hist";
+				String realtimeTable="tbl_rpcacqdata_latest";
+				String historyTable="tbl_rpcacqdata_hist";
+				if("0".equalsIgnoreCase(devicetype)){//如果是抽油机
+					realtimeTable="tbl_rpcacqdata_latest";
+					historyTable="tbl_rpcacqdata_hist";
+				}else{//否则螺杆泵
+					realtimeTable="tbl_pcpacqdata_latest";
+					historyTable="tbl_pcpacqdata_hist";
 				}
 				CommResponseData commResponseData=null;
 				String commRequest="{"
@@ -243,8 +243,8 @@ public class DriverAPIController extends BaseController{
 					+ "t2.commtime"
 					+ "t2.commtimeefficiency,"
 					+ "t2.commrange,"
-					+ "t.devicetype,t.id from tbl_pipelinedevice t "
-					+ " left outer join tbl_pipelineacqdata_latest t2 on t.id =t2.wellid"
+					+ "t.devicetype,t.id from tbl_pcpdevice t "
+					+ " left outer join tbl_pcpacqdata_latest t2 on t.id =t2.wellid"
 					+ " left outer join tbl_protocolinstance t4 on t.instancecode=t4.code"
 					+ " left outer join tbl_acq_unit_conf t5 on t4.unitid=t5.id"
 					+ " where t5.protocol in("+protocols+")"
@@ -255,14 +255,14 @@ public class DriverAPIController extends BaseController{
 				String wellId=obj[obj.length-1]+"";
 				String devicetype=obj[obj.length-2]+"";
 				
-				String realtimeTable="tbl_pumpacqdata_latest";
-				String historyTable="tbl_pumpacqdata_hist";
-				if("0".equalsIgnoreCase(devicetype)){//如果是泵设备
-					realtimeTable="tbl_pumpacqdata_latest";
-					historyTable="tbl_pumpacqdata_hist";
-				}else{//否则管设备
-					realtimeTable="tbl_pipelineacqdata_latest";
-					historyTable="tbl_pipelineacqdata_hist";
+				String realtimeTable="tbl_rpcacqdata_latest";
+				String historyTable="tbl_rpcacqdata_hist";
+				if("0".equalsIgnoreCase(devicetype)){//如果是抽油机
+					realtimeTable="tbl_rpcacqdata_latest";
+					historyTable="tbl_rpcacqdata_hist";
+				}else{//否则螺杆泵
+					realtimeTable="tbl_pcpacqdata_latest";
+					historyTable="tbl_pcpacqdata_hist";
 				}
 				CommResponseData commResponseData=null;
 				String commRequest="{"
@@ -344,15 +344,15 @@ public class DriverAPIController extends BaseController{
 			String historyTable="";
 			//判断设备类型
 			String deviceTypeSql="select t.devicetype"
-					+ " from tbl_pumpdevice t   "
+					+ " from tbl_rpcdevice t   "
 					+ " where t.signinid='"+acqOnline.getID()+"' and to_number(t.slave)="+acqOnline.getSlave();
 			List devicetypeList = this.commonDataService.findCallSql(deviceTypeSql);
 			if(devicetypeList.size()>0 && StringManagerUtils.isNotNull(devicetypeList.get(0)+"")){
 				deviceType=devicetypeList.get(0)+"";
 			}
-			if(!StringManagerUtils.isNotNull(deviceType)){//如果泵设备表中未找到对应设备，查找管设备表
+			if(!StringManagerUtils.isNotNull(deviceType)){//如果抽油机表中未找到对应设备，查找螺杆泵表
 				deviceTypeSql="select t.devicetype"
-						+ " from tbl_pipelinedevice t   "
+						+ " from tbl_pcpdevice t   "
 						+ " where t.signinid='"+acqOnline.getID()+"' and to_number(t.slave)="+acqOnline.getSlave();
 				devicetypeList = this.commonDataService.findCallSql(deviceTypeSql);
 				if(devicetypeList.size()>0 && StringManagerUtils.isNotNull(devicetypeList.get(0)+"")){
@@ -361,21 +361,21 @@ public class DriverAPIController extends BaseController{
 			}
 			
 			if(StringManagerUtils.isNotNull(deviceType)){
-				String functionCode="pumpDeviceRealTimeMonitoringStatusData";
-				String deviceTableName="tbl_pumpdevice";
-				String alarmTableName="tbl_pumpalarminfo_hist";
-				if(StringManagerUtils.stringToInteger(deviceType)>=100 && StringManagerUtils.stringToInteger(deviceType)<200){//如果是泵设备
-					deviceTableName="tbl_pumpdevice";
-					alarmTableName="tbl_pumpalarminfo_hist";
-					realtimeTable="tbl_pumpacqdata_latest";
-					historyTable="tbl_pumpacqdata_hist";
-					functionCode="pumpDeviceRealTimeMonitoringStatusData";
-				}else if(StringManagerUtils.stringToInteger(deviceType)>=200 && StringManagerUtils.stringToInteger(deviceType)<300){//否则管设备
-					deviceTableName="tbl_pipelinedevice";
-					alarmTableName="tbl_pipelinealarminfo_hist";
-					realtimeTable="tbl_pipelineacqdata_latest";
-					historyTable="tbl_pipelineacqdata_hist";
-					functionCode="pipelineDeviceRealTimeMonitoringStatusData";
+				String functionCode="rpcDeviceRealTimeMonitoringStatusData";
+				String deviceTableName="tbl_rpcdevice";
+				String alarmTableName="tbl_rpcalarminfo_hist";
+				if(StringManagerUtils.stringToInteger(deviceType)>=100 && StringManagerUtils.stringToInteger(deviceType)<200){//如果是抽油机
+					deviceTableName="tbl_rpcdevice";
+					alarmTableName="tbl_rpcalarminfo_hist";
+					realtimeTable="tbl_rpcacqdata_latest";
+					historyTable="tbl_rpcacqdata_hist";
+					functionCode="rpcDeviceRealTimeMonitoringStatusData";
+				}else if(StringManagerUtils.stringToInteger(deviceType)>=200 && StringManagerUtils.stringToInteger(deviceType)<300){//否则螺杆泵
+					deviceTableName="tbl_pcpdevice";
+					alarmTableName="tbl_pcpalarminfo_hist";
+					realtimeTable="tbl_pcpacqdata_latest";
+					historyTable="tbl_pcpacqdata_hist";
+					functionCode="pcpDeviceRealTimeMonitoringStatusData";
 				}
 				
 				String sql="select t.wellname ,to_char(t2.acqTime,'yyyy-mm-dd hh24:mi:ss'),"
@@ -545,7 +545,7 @@ public class DriverAPIController extends BaseController{
 		String json = "{success:true,flag:true}";
 		if(acqGroup!=null){
 			String sql="select t.wellname,t.devicetype ,t3.protocol"
-					+ " from tbl_pumpdevice t,tbl_protocolinstance t2,tbl_acq_unit_conf t3  "
+					+ " from tbl_rpcdevice t,tbl_protocolinstance t2,tbl_acq_unit_conf t3  "
 					+ " where t.instancecode=t2.code and t2.unitid=t3.id"
 					+ " and t.signinid='"+acqGroup.getID()+"' and to_number(t.slave)="+acqGroup.getSlave();
 			List list = this.commonDataService.findCallSql(sql);
@@ -559,9 +559,9 @@ public class DriverAPIController extends BaseController{
 				else{
 					this.DataProcessing(acqGroup, wellName,deviceType,protocolName);
 				}
-			}else{////如果泵设备表中未找到对应设备，查找管设备表
+			}else{////如果抽油机表中未找到对应设备，查找螺杆泵表
 				sql="select t.wellname,t.devicetype ,t3.protocol"
-						+ " from tbl_pipelinedevice t,tbl_protocolinstance t2,tbl_acq_unit_conf t3  "
+						+ " from tbl_pcpdevice t,tbl_protocolinstance t2,tbl_acq_unit_conf t3  "
 						+ " where t.instancecode=t2.code and t2.unitid=t3.id"
 						+ " and t.signinid='"+acqGroup.getID()+"' and to_number(t.slave)="+acqGroup.getSlave();
 				list = this.commonDataService.findCallSql(sql);
@@ -610,29 +610,29 @@ public class DriverAPIController extends BaseController{
 			EquipmentDriverServerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
-		String deviceTableName="tbl_pumpdevice";
-		String realtimeTable="tbl_pumpacqdata_latest";
-		String historyTable="tbl_pumpacqdata_hist";
-		String rawDataTable="tbl_pumpacqrawdata";
-		String functionCode="pumpDeviceRealTimeMonitoringData";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String deviceTableName="tbl_rpcdevice";
+		String realtimeTable="tbl_rpcacqdata_latest";
+		String historyTable="tbl_rpcacqdata_hist";
+		String rawDataTable="tbl_rpcacqrawdata";
+		String functionCode="rpcDeviceRealTimeMonitoringData";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		int DeviceType=0;
 		if(StringManagerUtils.stringToInteger(deviceType)>=100 && StringManagerUtils.stringToInteger(deviceType)<200){
 			DeviceType=0;
-			deviceTableName="tbl_pumpdevice";
-			realtimeTable="tbl_pumpacqdata_latest";
-			historyTable="tbl_pumpacqdata_hist";
-			rawDataTable="tbl_pumpacqrawdata";
-			functionCode="pumpDeviceRealTimeMonitoringData";
-			columnsKey="pumpDeviceAcquisitionItemColumns";
+			deviceTableName="tbl_rpcdevice";
+			realtimeTable="tbl_rpcacqdata_latest";
+			historyTable="tbl_rpcacqdata_hist";
+			rawDataTable="tbl_rpcacqrawdata";
+			functionCode="rpcDeviceRealTimeMonitoringData";
+			columnsKey="rpcDeviceAcquisitionItemColumns";
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=200 && StringManagerUtils.stringToInteger(deviceType)<300){
 			DeviceType=1;
-			deviceTableName="tbl_pipelinedevice";
-			realtimeTable="tbl_pipelineacqdata_latest";
-			historyTable="tbl_pipelineacqdata_hist";
-			rawDataTable="tbl_pipelineacqrawdata";
-			functionCode="pipelineDeviceRealTimeMonitoringData";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			deviceTableName="tbl_pcpdevice";
+			realtimeTable="tbl_pcpacqdata_latest";
+			historyTable="tbl_pcpacqdata_hist";
+			rawDataTable="tbl_pcpacqrawdata";
+			functionCode="pcpDeviceRealTimeMonitoringData";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){

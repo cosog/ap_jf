@@ -41,9 +41,9 @@ import oracle.sql.CLOB;
 public class CalculateDataService<T> extends BaseService<T> {
 	public void saveAlarmInfo(String wellName,String deviceType,String acqTime,List<AcquisitionItemInfo> acquisitionItemInfoList) throws SQLException{
 		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-			getBaseDao().savePumpAlarmInfo(wellName,deviceType,acqTime,acquisitionItemInfoList);
+			getBaseDao().saveRPCAlarmInfo(wellName,deviceType,acqTime,acquisitionItemInfoList);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
-			getBaseDao().savePipelineAlarmInfo(wellName,deviceType,acqTime,acquisitionItemInfoList);
+			getBaseDao().savePCPAlarmInfo(wellName,deviceType,acqTime,acquisitionItemInfoList);
 		}
 	}
 	
@@ -109,9 +109,9 @@ public class CalculateDataService<T> extends BaseService<T> {
 		}
 		if(saveAcquisitionItemInfoList.size()>0){
 			if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-				getBaseDao().savePumpAlarmInfo(wellName,deviceType,acqTime,saveAcquisitionItemInfoList);
+				getBaseDao().saveRPCAlarmInfo(wellName,deviceType,acqTime,saveAcquisitionItemInfoList);
 			}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
-				getBaseDao().savePipelineAlarmInfo(wellName,deviceType,acqTime,saveAcquisitionItemInfoList);
+				getBaseDao().savePCPAlarmInfo(wellName,deviceType,acqTime,saveAcquisitionItemInfoList);
 			}
 			
 			
@@ -123,11 +123,11 @@ public class CalculateDataService<T> extends BaseService<T> {
 	
 	public void sendAlarmSMS(String wellName,String deviceType,boolean isSendSMS,boolean isSendMail,String SMSContent,String EMailContent) throws SQLException{
 		String SMSUrl=Config.getInstance().configFile.getDriverConfig().getWriteSMS();
-		String deviceTableName="tbl_pumpdevice";
-		if(StringManagerUtils.stringToInteger(deviceType)>=100 && StringManagerUtils.stringToInteger(deviceType)<200){//如果是泵设备
-			deviceTableName="tbl_pumpdevice";
-		}else if(StringManagerUtils.stringToInteger(deviceType)>=200 && StringManagerUtils.stringToInteger(deviceType)<300){//否则管设备
-			deviceTableName="tbl_pipelinedevice";
+		String deviceTableName="tbl_rpcdevice";
+		if(StringManagerUtils.stringToInteger(deviceType)>=100 && StringManagerUtils.stringToInteger(deviceType)<200){//如果是抽油机
+			deviceTableName="tbl_rpcdevice";
+		}else if(StringManagerUtils.stringToInteger(deviceType)>=200 && StringManagerUtils.stringToInteger(deviceType)<300){//否则螺杆泵
+			deviceTableName="tbl_pcpdevice";
 		}
 		
 		String userSql="select u.user_id,u.user_phone,u.user_receivesms,u.user_in_email,u.user_receivemail "

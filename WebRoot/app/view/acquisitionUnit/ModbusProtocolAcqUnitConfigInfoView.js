@@ -408,7 +408,7 @@ var ProtocolConfigAcqUnitPropertiesHandsontableHelper = {
 	                    if(protocolConfigAcqUnitPropertiesHandsontableHelper.classes===1){
 	                    	if (visualColIndex === 2 && visualRowIndex===1) {
 		                    	this.type = 'dropdown';
-		                    	this.source = ['泵设备','管设备'];
+		                    	this.source = ['抽油机','螺杆泵'];
 		                    	this.strict = true;
 		                    	this.allowInvalid = false;
 		                    }

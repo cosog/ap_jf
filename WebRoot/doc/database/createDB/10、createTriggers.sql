@@ -6,24 +6,24 @@ BEGIN
 end;
 /
 
-CREATE OR REPLACE TRIGGER trg_a_pipelinedevice_i   after  insert or update  on tbl_pipelinedevice FOR EACH ROW
+CREATE OR REPLACE TRIGGER trg_a_pcpdevice_i   after  insert or update  on tbl_pcpdevice FOR EACH ROW
 declare
-  pipeline_RT   number(10);
+  pcp_RT   number(10);
 begin
-  select count(id) into pipeline_RT from tbl_pipelineacqdata_latest t where t.wellid = :new.id;
-    if pipeline_RT = 0  then
-       insert into tbl_pipelineacqdata_latest (wellId) (select :new.id from dual);
+  select count(id) into pcp_RT from tbl_pcpacqdata_latest t where t.wellid = :new.id;
+    if pcp_RT = 0  then
+       insert into tbl_pcpacqdata_latest (wellId) (select :new.id from dual);
     end if;
 end;
 /
 
-CREATE OR REPLACE TRIGGER trg_a_pumpdevice_i   after  insert or update  on tbl_pumpdevice FOR EACH ROW
+CREATE OR REPLACE TRIGGER trg_a_rpcdevice_i   after  insert or update  on tbl_rpcdevice FOR EACH ROW
 declare
-  pump_RT   number(10);
+  rpc_RT   number(10);
 begin
-  select count(id) into pump_RT from tbl_pumpacqdata_latest t where t.wellid = :new.id;
-    if pump_RT = 0  then
-       insert into tbl_pumpacqdata_latest (wellId) (select :new.id from dual);
+  select count(id) into rpc_RT from tbl_rpcacqdata_latest t where t.wellid = :new.id;
+    if rpc_RT = 0  then
+       insert into tbl_rpcacqdata_latest (wellId) (select :new.id from dual);
     end if;
 end;
 /
@@ -117,40 +117,40 @@ BEGIN
        when inserting then
             SELECT SEQ_ORG.nextval INTO :new.ORG_ID FROM dual;
        when updating then
-            update tbl_pumpdevice t set t.orgid=:new.org_id where t.orgid=:old.org_id;
-            update tbl_pipelinedevice t set t.orgid=:new.org_id where t.orgid=:old.org_id;
+            update tbl_rpcdevice t set t.orgid=:new.org_id where t.orgid=:old.org_id;
+            update tbl_pcpdevice t set t.orgid=:new.org_id where t.orgid=:old.org_id;
             update tbl_smsdevice t set t.orgid=:new.org_id where t.orgid=:old.org_id;
   end case;
 END;
 /
 
-CREATE OR REPLACE TRIGGER trg_b_pipelineacqdata_hist_i   before  insert on TBL_PIPELINEACQDATA_HIST FOR EACH ROW
+CREATE OR REPLACE TRIGGER trg_b_pcpacqdata_hist_i   before  insert on TBL_PCPACQDATA_HIST FOR EACH ROW
 BEGIN
-  SELECT seq_pipelineacqdata_hist.nextval INTO :new.id FROM dual;
+  SELECT seq_pcpacqdata_hist.nextval INTO :new.id FROM dual;
 end;
 /
 
-CREATE OR REPLACE TRIGGER trg_b_pipelineacqdata_latest_i   before  insert on TBL_PIPELINEACQDATA_LATEST FOR EACH ROW
+CREATE OR REPLACE TRIGGER trg_b_pcpacqdata_latest_i   before  insert on TBL_PCPACQDATA_LATEST FOR EACH ROW
 BEGIN
-  SELECT seq_pipelineacqdata_latest.nextval INTO :new.id FROM dual;
+  SELECT seq_pcpacqdata_latest.nextval INTO :new.id FROM dual;
 end;
 /
 
-create or replace trigger trg_b_pumpacqdata_hist_i   before  insert on tbl_pumpacqdata_hist FOR EACH ROW
+create or replace trigger trg_b_rpcacqdata_hist_i   before  insert on tbl_rpcacqdata_hist FOR EACH ROW
 BEGIN
-  SELECT seq_pumpacqdata_hist.nextval INTO :new.id FROM dual;
+  SELECT seq_rpcacqdata_hist.nextval INTO :new.id FROM dual;
 end;
 /
 
-create or replace trigger trg_b_pipelinealarminfo_hist_i   before  update or insert on tbl_pipelinealarminfo_hist FOR EACH ROW
+create or replace trigger trg_b_pcpalarminfo_hist_i   before  update or insert on tbl_pcpalarminfo_hist FOR EACH ROW
 declare
     recordCount number(8,2) :=0;
 BEGIN
-  SELECT seq_pipelinealarminfo_hist.nextval INTO :new.id FROM dual;
-  select count(1) into recordCount from tbl_pipelinealarminfo_latest t 
+  SELECT seq_pcpalarminfo_hist.nextval INTO :new.id FROM dual;
+  select count(1) into recordCount from tbl_pcpalarminfo_latest t 
   where t.wellid=:new.wellid and t.alarmtype=:new.alarmtype and t.itemname=:new.itemname; 
   if recordCount=0 then
-    insert into tbl_pipelinealarminfo_latest(
+    insert into tbl_pcpalarminfo_latest(
     wellid,alarmtime,itemname,alarmtype,alarmvalue,alarminfo,alarmlimit,
     hystersis,alarmlevel,recoverytime,issendmessage,issendmail
     )values(
@@ -158,7 +158,7 @@ BEGIN
     :new.hystersis,:new.alarmlevel,:new.recoverytime,:new.issendmessage,:new.issendmail
     );
   else
-    update tbl_pipelinealarminfo_latest t
+    update tbl_pcpalarminfo_latest t
     set t.alarmvalue=:new.alarmvalue,t.alarmtime=:new.alarmtime,
         t.alarminfo=:new.alarminfo,t.alarmlimit=:new.alarmlimit,
         t.hystersis=:new.hystersis,t.alarmlevel=:new.alarmlevel,t.recoverytime=:new.recoverytime,
@@ -168,28 +168,28 @@ BEGIN
 end;
 /
 
-create or replace trigger trg_b_pipelinealarminfo_l_i   before  insert on tbl_pipelinealarminfo_latest FOR EACH ROW
+create or replace trigger trg_b_pcpalarminfo_l_i   before  insert on tbl_pcpalarminfo_latest FOR EACH ROW
 BEGIN
-  SELECT seq_pipelinealarminfo_latest.nextval INTO :new.id FROM dual;
+  SELECT seq_pcpalarminfo_latest.nextval INTO :new.id FROM dual;
 end;
 /
 
-create or replace trigger trg_b_pipelinedevice_i   before  insert on tbl_pipelinedevice FOR EACH ROW
+create or replace trigger trg_b_pcpdevice_i   before  insert on tbl_pcpdevice FOR EACH ROW
 BEGIN
-  SELECT seq_pipelinedevice.nextval INTO :new.id FROM dual;
+  SELECT seq_pcpdevice.nextval INTO :new.id FROM dual;
 end;
 /
 
-create or replace trigger trg_b_pipelinedeviceaddinfo_i   before  insert on tbl_pipelinedeviceaddinfo FOR EACH ROW
+create or replace trigger trg_b_pcpdeviceaddinfo_i   before  insert on tbl_pcpdeviceaddinfo FOR EACH ROW
 BEGIN
-  SELECT seq_pipelinedeviceaddinfo.nextval INTO :new.id FROM dual;
+  SELECT seq_pcpdeviceaddinfo.nextval INTO :new.id FROM dual;
 end;
 /
 
 CREATE OR REPLACE TRIGGER 
-trg_b_pipelinedevicegraphset_i   before  insert on tbl_pipelinedevicegraphicset FOR EACH ROW
+trg_b_pcpdevicegraphset_i   before  insert on tbl_pcpdevicegraphicset FOR EACH ROW
 BEGIN
-  SELECT seq_pipelinedevicegraphicset.nextval INTO :new.id FROM dual;
+  SELECT seq_pcpdevicegraphicset.nextval INTO :new.id FROM dual;
 end;
 /
 
@@ -211,33 +211,33 @@ BEGIN
 end;
 /
 
-create or replace trigger trg_b_pumpacqdata_hist_i   before  insert on tbl_pumpacqdata_hist FOR EACH ROW
+create or replace trigger trg_b_rpcacqdata_hist_i   before  insert on tbl_rpcacqdata_hist FOR EACH ROW
 BEGIN
-  SELECT seq_pumpacqdata_hist.nextval INTO :new.id FROM dual;
+  SELECT seq_rpcacqdata_hist.nextval INTO :new.id FROM dual;
 end;
 /
 
-create or replace trigger trg_b_pumpacqdata_latest_i   before  insert on tbl_pumpacqdata_latest FOR EACH ROW
+create or replace trigger trg_b_rpcacqdata_latest_i   before  insert on tbl_rpcacqdata_latest FOR EACH ROW
 BEGIN
-  SELECT seq_pumpacqdata_latest.nextval INTO :new.id FROM dual;
+  SELECT seq_rpcacqdata_latest.nextval INTO :new.id FROM dual;
 end;
 /
 
-create or replace trigger trg_b_pumpacqrawdata_i   before  insert on tbl_pumpacqrawdata FOR EACH ROW
+create or replace trigger trg_b_rpcacqrawdata_i   before  insert on tbl_rpcacqrawdata FOR EACH ROW
 BEGIN
-  SELECT seq_pumpacqrawdata.nextval INTO :new.id FROM dual;
+  SELECT seq_rpcacqrawdata.nextval INTO :new.id FROM dual;
 end;
 /
 
-create or replace trigger trg_b_pumpalarminfo_hist_i   before  update or insert on tbl_pumpalarminfo_hist FOR EACH ROW
+create or replace trigger trg_b_rpcalarminfo_hist_i   before  update or insert on tbl_rpcalarminfo_hist FOR EACH ROW
 declare
     recordCount number(8,2) :=0;
 BEGIN
-  SELECT seq_pumpalarminfo_hist.nextval INTO :new.id FROM dual;
-  select count(1) into recordCount from tbl_pumpalarminfo_latest t 
+  SELECT seq_rpcalarminfo_hist.nextval INTO :new.id FROM dual;
+  select count(1) into recordCount from tbl_rpcalarminfo_latest t 
   where t.wellid=:new.wellid and t.alarmtype=:new.alarmtype and t.itemname=:new.itemname; 
   if recordCount=0 then
-    insert into tbl_pumpalarminfo_latest(
+    insert into tbl_rpcalarminfo_latest(
     wellid,alarmtime,itemname,alarmtype,alarmvalue,alarminfo,alarmlimit,
     hystersis,alarmlevel,recoverytime,issendmessage,issendmail
     )values(
@@ -245,7 +245,7 @@ BEGIN
     :new.hystersis,:new.alarmlevel,:new.recoverytime,:new.issendmessage,:new.issendmail
     );
   else
-    update tbl_pumpalarminfo_latest t
+    update tbl_rpcalarminfo_latest t
     set t.alarmvalue=:new.alarmvalue,t.alarmtime=:new.alarmtime,
         t.alarminfo=:new.alarminfo,t.alarmlimit=:new.alarmlimit,
         t.hystersis=:new.hystersis,t.alarmlevel=:new.alarmlevel,t.recoverytime=:new.recoverytime,
@@ -255,28 +255,28 @@ BEGIN
 end;
 /
 
-create or replace trigger trg_b_pumpalarminfo_latest_i   before  insert on tbl_pumpalarminfo_latest FOR EACH ROW
+create or replace trigger trg_b_rpcalarminfo_latest_i   before  insert on tbl_rpcalarminfo_latest FOR EACH ROW
 BEGIN
-  SELECT seq_pumpalarminfo_latest.nextval INTO :new.id FROM dual;
+  SELECT seq_rpcalarminfo_latest.nextval INTO :new.id FROM dual;
 end;
 /
 
-create or replace trigger trg_b_pumpdevice_i   before  insert on tbl_pumpdevice FOR EACH ROW
+create or replace trigger trg_b_rpcdevice_i   before  insert on tbl_rpcdevice FOR EACH ROW
 BEGIN
-  SELECT seq_pumpdevice.nextval INTO :new.id FROM dual;
+  SELECT seq_rpcdevice.nextval INTO :new.id FROM dual;
 end;
 /
 
-create or replace trigger trg_b_pumpdeviceaddinfo_i   before  insert on tbl_pumpdeviceaddinfo FOR EACH ROW
+create or replace trigger trg_b_rpcdeviceaddinfo_i   before  insert on tbl_rpcdeviceaddinfo FOR EACH ROW
 BEGIN
-  SELECT seq_pumpdeviceaddinfo.nextval INTO :new.id FROM dual;
+  SELECT seq_rpcdeviceaddinfo.nextval INTO :new.id FROM dual;
 end;
 /
 
 CREATE OR REPLACE TRIGGER 
-trg_b_pumpdevicegraphicset_i   before  insert on tbl_pumpdevicegraphicset FOR EACH ROW
+trg_b_rpcdevicegraphicset_i   before  insert on tbl_rpcdevicegraphicset FOR EACH ROW
 BEGIN
-  SELECT seq_pumpdevicegraphicset.nextval INTO :new.id FROM dual;
+  SELECT seq_rpcdevicegraphicset.nextval INTO :new.id FROM dual;
 end;
 /
 

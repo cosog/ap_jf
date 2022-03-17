@@ -214,9 +214,9 @@ public class RealTimeMonitoringController extends BaseController {
 		String title = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "title"),"utf-8");
 		
 		DataDictionary ddic = null;
-		String ddicName="pumpRealTimeOverview";
+		String ddicName="rpcRealTimeOverview";
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			ddicName="pipelineRealTimeOverview";
+			ddicName="pcpRealTimeOverview";
 		}
 		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
 		heads=StringUtils.join(ddic.getHeaders(), ",");
@@ -356,10 +356,10 @@ public class RealTimeMonitoringController extends BaseController {
 		boolean result=true;
 		try {
 			int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
-			String columnsKey="pumpDeviceAcquisitionItemColumns";
+			String columnsKey="rpcDeviceAcquisitionItemColumns";
 			int DeviceType=0;
 			if((StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300) || StringManagerUtils.stringToInteger(deviceType)==1){
-				columnsKey="pipelineDeviceAcquisitionItemColumns";
+				columnsKey="pcpDeviceAcquisitionItemColumns";
 				DeviceType=1;
 			}
 			Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
@@ -442,9 +442,9 @@ public class RealTimeMonitoringController extends BaseController {
 		String clientIP=StringManagerUtils.getIpAddr(request);
 		User userInfo = (User) request.getSession().getAttribute("userLogin");
 		
-		String deviceTableName="tbl_pumpdevice";
+		String deviceTableName="tbl_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			deviceTableName="tbl_pipelinedevice";
+			deviceTableName="tbl_pcpdevice";
 		}
 		
 		
@@ -509,9 +509,9 @@ public class RealTimeMonitoringController extends BaseController {
 		String clientIP=StringManagerUtils.getIpAddr(request);
 		User userInfo = (User) request.getSession().getAttribute("userLogin");
 		
-		String deviceTableName="tbl_pumpdevice";
+		String deviceTableName="tbl_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			deviceTableName="tbl_pipelinedevice";
+			deviceTableName="tbl_pcpdevice";
 		}
 		// 用户不存在
 		if (null != userInfo) {

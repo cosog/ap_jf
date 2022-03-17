@@ -29,14 +29,14 @@ Ext.define("AP.view.historyQuery.HistoryCurveSetWindow", {
                 handler: function (v, o) {
                 	var activeId = Ext.getCmp("HistoryQueryTabPanel").getActiveTab().id;
                 	var deviceType=0;
-                	var selectRowId="PumpHistoryQueryInfoDeviceListSelectRow_Id";
-                	var gridPanelId="PumpHistoryQueryDeviceListGridPanel_Id";
-                	var divId="pumpHistoryQueryCurveDiv_Id";
-                	if(activeId=="PipelineHistoryQueryInfoPanel_Id"){
+                	var selectRowId="RPCHistoryQueryInfoDeviceListSelectRow_Id";
+                	var gridPanelId="RPCHistoryQueryDeviceListGridPanel_Id";
+                	var divId="rpcHistoryQueryCurveDiv_Id";
+                	if(activeId=="PCPHistoryQueryInfoPanel_Id"){
                 		deviceType=1;
-                		selectRowId="PipelineHistoryQueryInfoDeviceListSelectRow_Id";
-                		gridPanelId="PipelineHistoryQueryDeviceListGridPanel_Id";
-                		divId="pipelineHistoryQueryCurveDiv_Id";
+                		selectRowId="PCPHistoryQueryInfoDeviceListSelectRow_Id";
+                		gridPanelId="PCPHistoryQueryDeviceListGridPanel_Id";
+                		divId="pcpHistoryQueryCurveDiv_Id";
                 	}
                 	
                 	var deviceName='';
@@ -121,15 +121,15 @@ function CreateDeviceHistoryCurveSetTable(){
 	var activeId = Ext.getCmp("HistoryQueryTabPanel").getActiveTab().id;
 	
 	var deviceType=0;
-	var selectRowId="PumpHistoryQueryInfoDeviceListSelectRow_Id";
-	var gridPanelId="PumpHistoryQueryDeviceListGridPanel_Id";
-	var divId="pumpHistoryQueryCurveDiv_Id";
+	var selectRowId="RPCHistoryQueryInfoDeviceListSelectRow_Id";
+	var gridPanelId="RPCHistoryQueryDeviceListGridPanel_Id";
+	var divId="rpcHistoryQueryCurveDiv_Id";
 	
-	if(activeId=="PipelineHistoryQueryInfoPanel_Id"){
+	if(activeId=="PCPHistoryQueryInfoPanel_Id"){
 		deviceType=1;
-		selectRowId="PipelineHistoryQueryInfoDeviceListSelectRow_Id";
-		gridPanelId="PipelineHistoryQueryDeviceListGridPanel_Id";
-		divId="pipelineHistoryQueryCurveDiv_Id";
+		selectRowId="PCPHistoryQueryInfoDeviceListSelectRow_Id";
+		gridPanelId="PCPHistoryQueryDeviceListGridPanel_Id";
+		divId="pcpHistoryQueryCurveDiv_Id";
 	}
 	var deviceName='';
 	var deviceId=0;

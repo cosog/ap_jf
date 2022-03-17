@@ -2,16 +2,16 @@
 /* 初始化tbl_dist_name数据                                          */
 /*==============================================================*/
 insert into TBL_DIST_NAME (SYSDATAID, TENANTID, CNAME, ENAME, SORTS, STATUS, CREATOR, UPDATEUSER, UPDATETIME, CREATEDATE)
-values ('7f13446d19b4497986980fa16a750f95', null, '泵设备实时概览', 'pumpRealTimeOverview', 11101, 0, '系统管理员', '系统管理员', to_date('25-11-2021 19:40:18', 'dd-mm-yyyy hh24:mi:ss'), to_date('25-11-2021 19:40:18', 'dd-mm-yyyy hh24:mi:ss'));
+values ('7f13446d19b4497986980fa16a750f95', null, '抽油机实时概览', 'rpcRealTimeOverview', 11101, 0, '系统管理员', '系统管理员', to_date('25-11-2021 19:40:18', 'dd-mm-yyyy hh24:mi:ss'), to_date('25-11-2021 19:40:18', 'dd-mm-yyyy hh24:mi:ss'));
 
 insert into TBL_DIST_NAME (SYSDATAID, TENANTID, CNAME, ENAME, SORTS, STATUS, CREATOR, UPDATEUSER, UPDATETIME, CREATEDATE)
-values ('e0f5f3ff8a1f46678c284fba9cc113e8', null, '管设备实时概览', 'pipelineRealTimeOverview', 11102, 0, '系统管理员', '系统管理员', to_date('25-11-2021 19:45:26', 'dd-mm-yyyy hh24:mi:ss'), to_date('25-11-2021 19:45:26', 'dd-mm-yyyy hh24:mi:ss'));
+values ('e0f5f3ff8a1f46678c284fba9cc113e8', null, '螺杆泵实时概览', 'pcpRealTimeOverview', 11102, 0, '系统管理员', '系统管理员', to_date('25-11-2021 19:45:26', 'dd-mm-yyyy hh24:mi:ss'), to_date('25-11-2021 19:45:26', 'dd-mm-yyyy hh24:mi:ss'));
 
 insert into TBL_DIST_NAME (SYSDATAID, TENANTID, CNAME, ENAME, SORTS, STATUS, CREATOR, UPDATEUSER, UPDATETIME, CREATEDATE)
-values ('cd7b24562b924d19b556de31256e22a1', null, '泵设备历史查询', 'pumpHistoryQuery', 12101, 0, '系统管理员', '系统管理员', to_date('25-11-2021 19:45:32', 'dd-mm-yyyy hh24:mi:ss'), to_date('25-11-2021 19:45:32', 'dd-mm-yyyy hh24:mi:ss'));
+values ('cd7b24562b924d19b556de31256e22a1', null, '抽油机历史查询', 'rpcHistoryQuery', 12101, 0, '系统管理员', '系统管理员', to_date('25-11-2021 19:45:32', 'dd-mm-yyyy hh24:mi:ss'), to_date('25-11-2021 19:45:32', 'dd-mm-yyyy hh24:mi:ss'));
 
 insert into TBL_DIST_NAME (SYSDATAID, TENANTID, CNAME, ENAME, SORTS, STATUS, CREATOR, UPDATEUSER, UPDATETIME, CREATEDATE)
-values ('fb7d070a349c403b8a26d71c12af7a05', null, '管设备历史查询', 'pipelineHistoryQuery', 12102, 0, '系统管理员', '系统管理员', to_date('25-11-2021 19:45:38', 'dd-mm-yyyy hh24:mi:ss'), to_date('25-11-2021 19:45:38', 'dd-mm-yyyy hh24:mi:ss'));
+values ('fb7d070a349c403b8a26d71c12af7a05', null, '螺杆泵历史查询', 'pcpHistoryQuery', 12102, 0, '系统管理员', '系统管理员', to_date('25-11-2021 19:45:38', 'dd-mm-yyyy hh24:mi:ss'), to_date('25-11-2021 19:45:38', 'dd-mm-yyyy hh24:mi:ss'));
 
 insert into TBL_DIST_NAME (SYSDATAID, TENANTID, CNAME, ENAME, SORTS, STATUS, CREATOR, UPDATEUSER, UPDATETIME, CREATEDATE)
 values ('ad646d19fcaa4fbd9077dbf7a826b107', 'system', '设备操作日志', 'deviceOperationLog', 13101, 0, '系统管理员', '系统管理员', to_date('07-09-2021 17:05:31', 'dd-mm-yyyy hh24:mi:ss'), to_date('07-09-2021 17:05:31', 'dd-mm-yyyy hh24:mi:ss'));
@@ -41,10 +41,10 @@ insert into TBL_DIST_NAME (SYSDATAID, TENANTID, CNAME, ENAME, SORTS, STATUS, CRE
 values ('220c349e246e47a39a818023f1c97a63', null, '角色管理', 'roleManage', 21103, 0, '系统管理员', '系统管理员', to_date('03-09-2018 13:46:02', 'dd-mm-yyyy hh24:mi:ss'), to_date('03-09-2018 13:46:02', 'dd-mm-yyyy hh24:mi:ss'));
 
 insert into TBL_DIST_NAME (SYSDATAID, TENANTID, CNAME, ENAME, SORTS, STATUS, CREATOR, UPDATEUSER, UPDATETIME, CREATEDATE)
-values ('87808f225d7240f68c2ab879347d818a', null, '泵设备管理', 'pumpDeviceManager', 22102, 0, '系统管理员', '系统管理员', to_date('21-12-2021 08:47:31', 'dd-mm-yyyy hh24:mi:ss'), to_date('21-12-2021 08:47:31', 'dd-mm-yyyy hh24:mi:ss'));
+values ('87808f225d7240f68c2ab879347d818a', null, '抽油机管理', 'rpcDeviceManager', 22102, 0, '系统管理员', '系统管理员', to_date('21-12-2021 08:47:31', 'dd-mm-yyyy hh24:mi:ss'), to_date('21-12-2021 08:47:31', 'dd-mm-yyyy hh24:mi:ss'));
 
 insert into TBL_DIST_NAME (SYSDATAID, TENANTID, CNAME, ENAME, SORTS, STATUS, CREATOR, UPDATEUSER, UPDATETIME, CREATEDATE)
-values ('b14377621d74442eb1127de094dfc903', null, '管设备管理', 'pipelineDeviceManager', 22103, 0, '系统管理员', '系统管理员', to_date('21-12-2021 17:41:33', 'dd-mm-yyyy hh24:mi:ss'), to_date('21-12-2021 17:41:33', 'dd-mm-yyyy hh24:mi:ss'));
+values ('b14377621d74442eb1127de094dfc903', null, '螺杆泵管理', 'pcpDeviceManager', 22103, 0, '系统管理员', '系统管理员', to_date('21-12-2021 17:41:33', 'dd-mm-yyyy hh24:mi:ss'), to_date('21-12-2021 17:41:33', 'dd-mm-yyyy hh24:mi:ss'));
 
 insert into TBL_DIST_NAME (SYSDATAID, TENANTID, CNAME, ENAME, SORTS, STATUS, CREATOR, UPDATEUSER, UPDATETIME, CREATEDATE)
 values ('2b4cd8cb8c6844769c66b038246c27bf', null, '短信设备管理', 'SMSDeviceManager', 22104, 0, '系统管理员', '系统管理员', to_date('21-12-2021 20:19:30', 'dd-mm-yyyy hh24:mi:ss'), to_date('21-12-2021 20:19:30', 'dd-mm-yyyy hh24:mi:ss'));

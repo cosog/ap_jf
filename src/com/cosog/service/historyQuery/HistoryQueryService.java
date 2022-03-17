@@ -44,11 +44,11 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			EquipmentDriverServerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
-		String tableName="tbl_pumpacqdata_latest";
-		String deviceTableName="viw_pumpdevice";
+		String tableName="tbl_rpcacqdata_latest";
+		String deviceTableName="viw_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			tableName="tbl_pipelineacqdata_latest";
-			deviceTableName="viw_pipelinedevice";
+			tableName="tbl_pcpacqdata_latest";
+			deviceTableName="viw_pcpdevice";
 		}
 		
 		String sql="select t2.commstatus,count(1) from "+deviceTableName+" t "
@@ -107,11 +107,11 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			EquipmentDriverServerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
-		String tableName="tbl_pumpacqdata_latest";
-		String deviceTableName="viw_pumpdevice";
+		String tableName="tbl_rpcacqdata_latest";
+		String deviceTableName="viw_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			tableName="tbl_pipelineacqdata_latest";
-			deviceTableName="viw_pipelinedevice";
+			tableName="tbl_pcpacqdata_latest";
+			deviceTableName="viw_pcpdevice";
 		}
 		
 		String sql="select t.devicetypename,t.devicetype,count(1) from "+deviceTableName+" t "
@@ -160,11 +160,11 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			EquipmentDriverServerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
-		String deviceTableName="tbl_pumpdevice";
-		String tableName="tbl_pumpacqdata_latest";
+		String deviceTableName="tbl_rpcdevice";
+		String tableName="tbl_rpcacqdata_latest";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="tbl_pipelineacqdata_latest";
-			deviceTableName="tbl_pipelinedevice";
+			tableName="tbl_pcpacqdata_latest";
+			deviceTableName="tbl_pcpdevice";
 		}
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50,children:[] },"
@@ -234,11 +234,11 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			EquipmentDriverServerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
-		String deviceTableName="tbl_pumpdevice";
-		String tableName="tbl_pumpacqdata_latest";
+		String deviceTableName="tbl_rpcdevice";
+		String tableName="tbl_rpcacqdata_latest";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="tbl_pipelineacqdata_latest";
-			deviceTableName="tbl_pipelinedevice";
+			tableName="tbl_pcpacqdata_latest";
+			deviceTableName="tbl_pcpdevice";
 		}
 		
 		String sql="select t2.id,t.wellname,t2.commstatus,"
@@ -298,17 +298,17 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
 		
-		String hisTableName="tbl_pumpacqdata_hist";
-		String deviceTableName="tbl_pumpdevice";
-		String ddicName="pumpHistoryQuery";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String hisTableName="tbl_rpcacqdata_hist";
+		String deviceTableName="tbl_rpcdevice";
+		String ddicName="rpcHistoryQuery";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		DataDictionary ddic = null;
 		List<String> ddicColumnsList=new ArrayList<String>();
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			hisTableName="tbl_pipelineacqdata_hist";
-			deviceTableName="tbl_pipelinedevice";
-			ddicName="pipelineHistoryQuery";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			hisTableName="tbl_pcpacqdata_hist";
+			deviceTableName="tbl_pcpdevice";
+			ddicName="pcpHistoryQuery";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
@@ -485,17 +485,17 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		StringBuffer result_json = new StringBuffer();
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
 		
-		String hisTableName="tbl_pumpacqdata_hist";
-		String deviceTableName="tbl_pumpdevice";
-		String ddicName="pumpHistoryQuery";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String hisTableName="tbl_rpcacqdata_hist";
+		String deviceTableName="tbl_rpcdevice";
+		String ddicName="rpcHistoryQuery";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		DataDictionary ddic = null;
 		List<String> ddicColumnsList=new ArrayList<String>();
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			hisTableName="tbl_pipelineacqdata_hist";
-			deviceTableName="tbl_pipelinedevice";
-			ddicName="pipelineHistoryQuery";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			hisTableName="tbl_pcpacqdata_hist";
+			deviceTableName="tbl_pcpdevice";
+			ddicName="pcpHistoryQuery";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
@@ -611,13 +611,13 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			EquipmentDriverServerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
-		String hisTableName="tbl_pumpacqdata_hist";
-		String deviceTableName="tbl_pumpdevice";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String hisTableName="tbl_rpcacqdata_hist";
+		String deviceTableName="tbl_rpcdevice";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			hisTableName="tbl_pipelineacqdata_hist";
-			deviceTableName="tbl_pipelinedevice";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			hisTableName="tbl_pcpacqdata_hist";
+			deviceTableName="tbl_pcpdevice";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
@@ -934,15 +934,15 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		StringBuffer itemsBuff = new StringBuffer();
 		StringBuffer curveColorBuff = new StringBuffer();
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
-		String tableName="tbl_pumpacqdata_hist";
-		String deviceTableName="tbl_pumpdevice";
-		String graphicSetTableName="tbl_pumpdevicegraphicset";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String tableName="tbl_rpcacqdata_hist";
+		String deviceTableName="tbl_rpcdevice";
+		String graphicSetTableName="tbl_rpcdevicegraphicset";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			tableName="tbl_pipelineacqdata_hist";
-			deviceTableName="tbl_pipelinedevice";
-			graphicSetTableName="tbl_pipelinedevicegraphicset";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			tableName="tbl_pcpacqdata_hist";
+			deviceTableName="tbl_pcpdevice";
+			graphicSetTableName="tbl_pcpdevicegraphicset";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
@@ -1068,13 +1068,13 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
-		String deviceTableName="tbl_pumpdevice";
-		String graphicSetTableName="tbl_pumpdevicegraphicset";
-		String columnsKey="pumpDeviceAcquisitionItemColumns";
+		String deviceTableName="tbl_rpcdevice";
+		String graphicSetTableName="tbl_rpcdevicegraphicset";
+		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			deviceTableName="tbl_pipelinedevice";
-			graphicSetTableName="tbl_pipelinedevicegraphicset";
-			columnsKey="pipelineDeviceAcquisitionItemColumns";
+			deviceTableName="tbl_pcpdevice";
+			graphicSetTableName="tbl_pcpdevicegraphicset";
+			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
@@ -1084,7 +1084,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		
 		String protocolSql="select upper(t3.protocol) from "+deviceTableName+" t,tbl_protocolinstance t2,tbl_acq_unit_conf t3 where t.instancecode=t2.code and t2.unitid=t3.id"
 				+ " and  t.id="+deviceId;
-		String graphicSetSql="select t.graphicstyle from tbl_pumpdevicegraphicset t where t.wellid="+deviceId;
+		String graphicSetSql="select t.graphicstyle from tbl_rpcdevicegraphicset t where t.wellid="+deviceId;
 		String curveItemsSql="select t6.itemname,t6.bitindex,t6.historycurvecolor "
 				+ " from "+deviceTableName+" t,tbl_protocolinstance t2,tbl_acq_unit_conf t3,tbl_acq_group2unit_conf t4,tbl_acq_group_conf t5,tbl_acq_item2group_conf t6 "
 				+ " where t.instancecode=t2.code and t2.unitid=t3.id and t3.id=t4.unitid and t4.groupid=t5.id and t5.id=t6.groupid "
@@ -1162,11 +1162,11 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 	public int setHistoryDataGraphicInfo(String deviceId,String deviceType,String graphicSetData)throws Exception {
 		int result=0;
 		if(StringManagerUtils.stringToInteger(deviceId)>0){
-			String deviceTableName="tbl_pumpdevice";
-			String graphicSetTableName="tbl_pumpdevicegraphicset";
+			String deviceTableName="tbl_rpcdevice";
+			String graphicSetTableName="tbl_rpcdevicegraphicset";
 			if(StringManagerUtils.stringToInteger(deviceType)==1){
-				deviceTableName="tbl_pipelinedevice";
-				graphicSetTableName="tbl_pipelinedevicegraphicset";
+				deviceTableName="tbl_pcpdevice";
+				graphicSetTableName="tbl_pcpdevicegraphicset";
 			}
 			String sql="select t.wellid from "+graphicSetTableName+" t where t.wellid="+deviceId;
 			String updateSql="";

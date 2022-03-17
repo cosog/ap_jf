@@ -71,7 +71,6 @@ import com.cosog.model.gridmodel.CalculateManagerHandsontableChangedData;
 import com.cosog.model.gridmodel.ElecInverCalculateManagerHandsontableChangedData;
 import com.cosog.model.gridmodel.InverOptimizeHandsontableChangedData;
 import com.cosog.model.gridmodel.ProductionOutGridPanelData;
-import com.cosog.model.gridmodel.PumpGridPanelData;
 import com.cosog.model.gridmodel.ResProHandsontableChangedData;
 import com.cosog.model.gridmodel.ReservoirPropertyGridPanelData;
 import com.cosog.model.gridmodel.WellGridPanelData;
@@ -919,7 +918,7 @@ public class BaseDao extends HibernateDaoSupport {
 	}
 	
 	@SuppressWarnings("resource")
-	public List<WellHandsontableChangedData.Updatelist> savePumpDeviceData(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,User user) throws SQLException {
+	public List<WellHandsontableChangedData.Updatelist> saveRPCDeviceData(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,User user) throws SQLException {
 		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
 		CallableStatement cs=null;
 		PreparedStatement ps=null;
@@ -935,7 +934,7 @@ public class BaseDao extends HibernateDaoSupport {
 		}
 		License license=LicenseMap.getMapObject().get(LicenseMap.SN);
 		try {
-			cs = conn.prepareCall("{call prd_update_pumpdevice(?,?,?,?,?,?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call prd_update_rpcdevice(?,?,?,?,?,?,?,?,?,?,?,?,?)}");
 			if(wellHandsontableChangedData.getUpdatelist()!=null){
 				for(int i=0;i<wellHandsontableChangedData.getUpdatelist().size();i++){
 					if(StringManagerUtils.isNotNull(wellHandsontableChangedData.getUpdatelist().get(i).getWellName())){
@@ -1021,7 +1020,7 @@ public class BaseDao extends HibernateDaoSupport {
 				}
 			}
 			if(disableWellIdList.size()>0){
-				EquipmentDriverServerTask.initPumpDriverAcquisitionInfoConfigById(disableWellIdList,"delete");
+				EquipmentDriverServerTask.initRPCDriverAcquisitionInfoConfigById(disableWellIdList,"delete");
 			}
 			if(wellHandsontableChangedData.getDelidslist()!=null&&wellHandsontableChangedData.getDelidslist().size()>0){
 				String delIds="";
@@ -1033,11 +1032,11 @@ public class BaseDao extends HibernateDaoSupport {
 						delIds+=",";
 					}
 				}
-				queryDeleteWellSql="select wellname from tbl_pumpdevice t "
+				queryDeleteWellSql="select wellname from tbl_rpcdevice t "
 						+ " where t.devicetype="+deviceType+" "
 						+ " and t.id in ("+StringUtils.join(wellHandsontableChangedData.getDelidslist(), ",")+")"
 						+ " and t.orgid in("+orgId+")";
-				delSql="delete from tbl_pumpdevice t "
+				delSql="delete from tbl_rpcdevice t "
 						+ " where t.devicetype="+deviceType+" "
 						+ " and t.id in ("+StringUtils.join(wellHandsontableChangedData.getDelidslist(), ",")+") "
 						+ " and t.orgid in("+orgId+")";
@@ -1046,7 +1045,7 @@ public class BaseDao extends HibernateDaoSupport {
 					deleteWellList.add(list.get(i)+"");
 				}
 				if(deleteWellList.size()>0){
-					EquipmentDriverServerTask.initPumpDriverAcquisitionInfoConfigById(wellHandsontableChangedData.getDelidslist(),"delete");
+					EquipmentDriverServerTask.initRPCDriverAcquisitionInfoConfigById(wellHandsontableChangedData.getDelidslist(),"delete");
 				}
 				ps=conn.prepareStatement(delSql);
 				int result=ps.executeUpdate();
@@ -1054,7 +1053,7 @@ public class BaseDao extends HibernateDaoSupport {
 			saveDeviceOperationLog(updateWellList,addWellList,deleteWellList,deviceType,user);
 			
 			if(initWellList.size()>0){
-				EquipmentDriverServerTask.initPumpDriverAcquisitionInfoConfig(initWellList,"update");
+				EquipmentDriverServerTask.initRPCDriverAcquisitionInfoConfig(initWellList,"update");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1071,7 +1070,7 @@ public class BaseDao extends HibernateDaoSupport {
 	}
 	
 	@SuppressWarnings("resource")
-	public List<WellHandsontableChangedData.Updatelist> batchAddPumpDevice(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,String isCheckout,User user) throws SQLException {
+	public List<WellHandsontableChangedData.Updatelist> batchAddRPCDevice(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,String isCheckout,User user) throws SQLException {
 		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
 		CallableStatement cs=null;
 		PreparedStatement ps=null;
@@ -1087,7 +1086,7 @@ public class BaseDao extends HibernateDaoSupport {
 		}
 //		License license=LicenseMap.getMapObject().get(LicenseMap.SN);
 		try {
-			cs = conn.prepareCall("{call prd_save_pumpdevice(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call prd_save_rpcdevice(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
 			if(wellHandsontableChangedData.getUpdatelist()!=null){
 				for(int i=0;i<wellHandsontableChangedData.getUpdatelist().size();i++){
 					if(StringManagerUtils.isNotNull(wellHandsontableChangedData.getUpdatelist().get(i).getWellName())){
@@ -1184,11 +1183,11 @@ public class BaseDao extends HibernateDaoSupport {
 						delIds+=",";
 					}
 				}
-				queryDeleteWellSql="select wellname from tbl_pumpdevice t "
+				queryDeleteWellSql="select wellname from tbl_rpcdevice t "
 						+ " where t.devicetype="+deviceType+" "
 						+ " and t.id in ("+StringUtils.join(wellHandsontableChangedData.getDelidslist(), ",")+")"
 						+ " and t.orgid in("+orgId+")";
-				delSql="delete from tbl_pumpdevice t "
+				delSql="delete from tbl_rpcdevice t "
 						+ " where t.devicetype="+deviceType+" "
 						+ " and t.id in ("+StringUtils.join(wellHandsontableChangedData.getDelidslist(), ",")+") "
 						+ " and t.orgid in("+orgId+")";
@@ -1202,7 +1201,7 @@ public class BaseDao extends HibernateDaoSupport {
 			saveDeviceOperationLog(updateWellList,addWellList,deleteWellList,deviceType,user);
 			
 			if(initWellList.size()>0){
-				EquipmentDriverServerTask.initPumpDriverAcquisitionInfoConfig(initWellList,"update");
+				EquipmentDriverServerTask.initRPCDriverAcquisitionInfoConfig(initWellList,"update");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1219,7 +1218,7 @@ public class BaseDao extends HibernateDaoSupport {
 	}
 	
 	@SuppressWarnings("resource")
-	public List<WellHandsontableChangedData.Updatelist> savePipelineDeviceData(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,User user) throws SQLException {
+	public List<WellHandsontableChangedData.Updatelist> savePCPDeviceData(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,User user) throws SQLException {
 		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
 		CallableStatement cs=null;
 		PreparedStatement ps=null;
@@ -1235,7 +1234,7 @@ public class BaseDao extends HibernateDaoSupport {
 		}
 		License license=LicenseMap.getMapObject().get(LicenseMap.SN);
 		try {
-			cs = conn.prepareCall("{call prd_update_pipelinedevice(?,?,?,?,?,?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call prd_update_pcpdevice(?,?,?,?,?,?,?,?,?,?,?,?,?)}");
 			if(wellHandsontableChangedData.getUpdatelist()!=null){
 				for(int i=0;i<wellHandsontableChangedData.getUpdatelist().size();i++){
 					if(StringManagerUtils.isNotNull(wellHandsontableChangedData.getUpdatelist().get(i).getWellName())){
@@ -1321,7 +1320,7 @@ public class BaseDao extends HibernateDaoSupport {
 				}
 			}
 			if(disableWellIdList.size()>0){
-				EquipmentDriverServerTask.initPipelineDriverAcquisitionInfoConfigById(disableWellIdList,"delete");
+				EquipmentDriverServerTask.initPCPDriverAcquisitionInfoConfigById(disableWellIdList,"delete");
 			}
 			if(wellHandsontableChangedData.getDelidslist()!=null&&wellHandsontableChangedData.getDelidslist().size()>0){
 				String delIds="";
@@ -1333,11 +1332,11 @@ public class BaseDao extends HibernateDaoSupport {
 						delIds+=",";
 					}
 				}
-				queryDeleteWellSql="select wellname from tbl_pipelinedevice t "
+				queryDeleteWellSql="select wellname from tbl_pcpdevice t "
 						+ " where t.devicetype="+deviceType+" "
 						+ " and t.id in ("+StringUtils.join(wellHandsontableChangedData.getDelidslist(), ",")+")"
 						+ " and t.orgid in("+orgId+")";
-				delSql="delete from tbl_pipelinedevice t "
+				delSql="delete from tbl_pcpdevice t "
 						+ " where t.devicetype="+deviceType+" "
 						+ " and t.id in ("+StringUtils.join(wellHandsontableChangedData.getDelidslist(), ",")+") "
 						+ " and t.orgid in("+orgId+")";
@@ -1346,7 +1345,7 @@ public class BaseDao extends HibernateDaoSupport {
 					deleteWellList.add(list.get(i)+"");
 				}
 				if(deleteWellList.size()>0){
-					EquipmentDriverServerTask.initPipelineDriverAcquisitionInfoConfigById(wellHandsontableChangedData.getDelidslist(),"delete");
+					EquipmentDriverServerTask.initPCPDriverAcquisitionInfoConfigById(wellHandsontableChangedData.getDelidslist(),"delete");
 				}
 				ps=conn.prepareStatement(delSql);
 				int result=ps.executeUpdate();
@@ -1354,7 +1353,7 @@ public class BaseDao extends HibernateDaoSupport {
 			saveDeviceOperationLog(updateWellList,addWellList,deleteWellList,deviceType,user);
 			
 			if(initWellList.size()>0){
-				EquipmentDriverServerTask.initPipelineDriverAcquisitionInfoConfig(initWellList,"update");
+				EquipmentDriverServerTask.initPCPDriverAcquisitionInfoConfig(initWellList,"update");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1371,7 +1370,7 @@ public class BaseDao extends HibernateDaoSupport {
 	}
 	
 	@SuppressWarnings("resource")
-	public List<WellHandsontableChangedData.Updatelist> batchAddPipelineDevice(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,String isCheckout,User user) throws SQLException {
+	public List<WellHandsontableChangedData.Updatelist> batchAddPCPDevice(WellHandsontableChangedData wellHandsontableChangedData,String orgId,int deviceType,String isCheckout,User user) throws SQLException {
 		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
 		CallableStatement cs=null;
 		PreparedStatement ps=null;
@@ -1387,7 +1386,7 @@ public class BaseDao extends HibernateDaoSupport {
 		}
 //		License license=LicenseMap.getMapObject().get(LicenseMap.SN);
 		try {
-			cs = conn.prepareCall("{call prd_save_pipelinedevice(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call prd_save_pcpdevice(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
 			if(wellHandsontableChangedData.getUpdatelist()!=null){
 				for(int i=0;i<wellHandsontableChangedData.getUpdatelist().size();i++){
 					if(StringManagerUtils.isNotNull(wellHandsontableChangedData.getUpdatelist().get(i).getWellName())){
@@ -1481,11 +1480,11 @@ public class BaseDao extends HibernateDaoSupport {
 						delIds+=",";
 					}
 				}
-				queryDeleteWellSql="select wellname from tbl_pipelinedevice t "
+				queryDeleteWellSql="select wellname from tbl_pcpdevice t "
 						+ " where t.devicetype="+deviceType+" "
 						+ " and t.id in ("+StringUtils.join(wellHandsontableChangedData.getDelidslist(), ",")+")"
 						+ " and t.orgid in("+orgId+")";
-				delSql="delete from tbl_pipelinedevice t "
+				delSql="delete from tbl_pcpdevice t "
 						+ " where t.devicetype="+deviceType+" "
 						+ " and t.id in ("+StringUtils.join(wellHandsontableChangedData.getDelidslist(), ",")+") "
 						+ " and t.orgid in("+orgId+")";
@@ -1499,7 +1498,7 @@ public class BaseDao extends HibernateDaoSupport {
 			saveDeviceOperationLog(updateWellList,addWellList,deleteWellList,deviceType,user);
 			
 			if(initWellList.size()>0){
-				EquipmentDriverServerTask.initPipelineDriverAcquisitionInfoConfig(initWellList,"update");
+				EquipmentDriverServerTask.initPCPDriverAcquisitionInfoConfig(initWellList,"update");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1847,11 +1846,11 @@ public class BaseDao extends HibernateDaoSupport {
 	
 	
 	
-	public Boolean editPumpDeviceName(String oldWellName,String newWellName,String orgid) throws SQLException {
+	public Boolean editRPCDeviceName(String oldWellName,String newWellName,String orgid) throws SQLException {
 		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
 		CallableStatement cs=null;
 		try {
-			cs = conn.prepareCall("{call prd_change_pumpdevicename(?,?,?)}");
+			cs = conn.prepareCall("{call prd_change_rpcdevicename(?,?,?)}");
 			cs.setString(1,oldWellName);
 			cs.setString(2, newWellName);
 			cs.setString(3, orgid);
@@ -1867,11 +1866,11 @@ public class BaseDao extends HibernateDaoSupport {
 		return true;
 	}
 	
-	public Boolean editPipelineDeviceName(String oldWellName,String newWellName,String orgid) throws SQLException {
+	public Boolean editPCPDeviceName(String oldWellName,String newWellName,String orgid) throws SQLException {
 		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
 		CallableStatement cs=null;
 		try {
-			cs = conn.prepareCall("{call prd_change_pipelinedevicename(?,?,?)}");
+			cs = conn.prepareCall("{call prd_change_pcpdevicename(?,?,?)}");
 			cs.setString(1,oldWellName);
 			cs.setString(2, newWellName);
 			cs.setString(3, orgid);
@@ -1895,30 +1894,6 @@ public class BaseDao extends HibernateDaoSupport {
 			cs.setString(1,oldWellName);
 			cs.setString(2, newWellName);
 			cs.setString(3, orgid);
-			cs.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}finally{
-			if(cs!=null){
-				cs.close();
-			}
-			conn.close();
-		}
-		return true;
-	}
-	
-	public Boolean savePumpEditerGridData(PumpGridPanelData p, String ids, String comandType) throws SQLException {
-		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
-		CallableStatement cs=null;
-		try {
-			cs = conn.prepareCall("{call PRO_savePumpData(?,?,?,?,?,?,?)}");
-			cs.setString(1, p.getSccj());
-			cs.setString(2, p.getCybxh());
-			cs.setString(3, p.getBlxName());
-			cs.setString(4, p.getBjbName());
-			cs.setString(5, p.getBtlxName());
-			cs.setDouble(6, p.getBj());
-			cs.setDouble(7, p.getZsc());
 			cs.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2058,12 +2033,12 @@ public class BaseDao extends HibernateDaoSupport {
 		}
 		return true;
 	}
-	public Boolean savePumpAlarmInfo(String wellName,String deviceType,String acqTime,List<AcquisitionItemInfo> acquisitionItemInfoList) throws SQLException {
+	public Boolean saveRPCAlarmInfo(String wellName,String deviceType,String acqTime,List<AcquisitionItemInfo> acquisitionItemInfoList) throws SQLException {
 		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
 		CallableStatement cs=null;
 		
 		try {
-			cs = conn.prepareCall("{call prd_save_pumpalarminfo(?,?,?,?,?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call prd_save_rpcalarminfo(?,?,?,?,?,?,?,?,?,?,?,?)}");
 			for(int i=0;i<acquisitionItemInfoList.size();i++){
 				if(acquisitionItemInfoList.get(i).getAlarmLevel()>0){
 					cs.setString(1, wellName);
@@ -2092,12 +2067,12 @@ public class BaseDao extends HibernateDaoSupport {
 		return true;
 	}
 	
-	public Boolean savePipelineAlarmInfo(String wellName,String deviceType,String acqTime,List<AcquisitionItemInfo> acquisitionItemInfoList) throws SQLException {
+	public Boolean savePCPAlarmInfo(String wellName,String deviceType,String acqTime,List<AcquisitionItemInfo> acquisitionItemInfoList) throws SQLException {
 		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
 		CallableStatement cs=null;
 		
 		try {
-			cs = conn.prepareCall("{call prd_save_pipelinealarminfo(?,?,?,?,?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call prd_save_pcpalarminfo(?,?,?,?,?,?,?,?,?,?,?,?)}");
 			for(int i=0;i<acquisitionItemInfoList.size();i++){
 				if(acquisitionItemInfoList.get(i).getAlarmLevel()>0){
 					cs.setString(1, wellName);

@@ -110,7 +110,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PIPELINEACQDATA_HIST
+create sequence SEQ_PCPACQDATA_HIST
 minvalue 1
 maxvalue 9999999999999999999999999
 start with 1
@@ -118,7 +118,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PIPELINEACQDATA_LATEST
+create sequence SEQ_PCPACQDATA_LATEST
 minvalue 0
 maxvalue 9999999999999999999999999
 start with 1
@@ -126,7 +126,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PIPELINEACQRAWDATA
+create sequence SEQ_PCPACQRAWDATA
 minvalue 0
 maxvalue 9999999999999999999999999
 start with 1
@@ -134,7 +134,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PIPELINEALARMINFO_HIST
+create sequence SEQ_PCPALARMINFO_HIST
 minvalue 0
 maxvalue 9999999999999999999999999
 start with 1
@@ -142,7 +142,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PIPELINEALARMINFO_LATEST
+create sequence SEQ_PCPALARMINFO_LATEST
 minvalue 0
 maxvalue 9999999999999999999999999
 start with 1
@@ -150,7 +150,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PIPELINEDEVICE
+create sequence SEQ_PCPDEVICE
 minvalue 0
 maxvalue 9999999999999999999999999
 start with 1
@@ -158,7 +158,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PIPELINEDEVICEADDINFO
+create sequence SEQ_PCPDEVICEADDINFO
 minvalue 1
 maxvalue 999999999999999999999999
 start with 1
@@ -166,7 +166,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PIPELINEDEVICEGRAPHICSET
+create sequence SEQ_PCPDEVICEGRAPHICSET
 minvalue 1
 maxvalue 999999999999999999999999
 start with 1
@@ -198,7 +198,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PUMPACQDATA_HIST
+create sequence SEQ_RPCACQDATA_HIST
 minvalue 0
 maxvalue 999999999999999999999999
 start with 1
@@ -206,7 +206,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PUMPACQDATA_LATEST
+create sequence SEQ_RPCACQDATA_LATEST
 minvalue 0
 maxvalue 999999999999999999999999
 start with 1
@@ -214,7 +214,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PUMPACQRAWDATA
+create sequence SEQ_RPCACQRAWDATA
 minvalue 0
 maxvalue 999999999999999999999999
 start with 1
@@ -222,7 +222,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PUMPALARMINFO_HIST
+create sequence SEQ_RPCALARMINFO_HIST
 minvalue 0
 maxvalue 999999999999999999999999
 start with 1
@@ -230,7 +230,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PUMPALARMINFO_LATEST
+create sequence SEQ_RPCALARMINFO_LATEST
 minvalue 0
 maxvalue 999999999999999999999999
 start with 1
@@ -238,7 +238,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PUMPDEVICE
+create sequence SEQ_RPCDEVICE
 minvalue 1
 maxvalue 999999999999999999999999
 start with 1
@@ -246,7 +246,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PUMPDEVICEADDINFO
+create sequence SEQ_RPCDEVICEADDINFO
 minvalue 1
 maxvalue 99999999999999999999999
 start with 1
@@ -254,7 +254,7 @@ increment by 1
 cache 20;
 /
 
-create sequence SEQ_PUMPDEVICEGRAPHICSET
+create sequence SEQ_RPCDEVICEGRAPHICSET
 minvalue 1
 maxvalue 99999999999999999999999
 start with 1
