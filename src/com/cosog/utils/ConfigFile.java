@@ -2,15 +2,28 @@ package com.cosog.utils;
 
 import java.util.List;
 
+import com.cosog.utils.ConfigFile.AgileCalculate;
+import com.cosog.utils.ConfigFile.ESDiagram;
+import com.cosog.utils.ConfigFile.Inversion;
+import com.cosog.utils.ConfigFile.InversionUrl;
+import com.cosog.utils.ConfigFile.Mqtt;
+import com.cosog.utils.ConfigFile.Plugin;
+import com.cosog.utils.ConfigFile.Probe;
+import com.cosog.utils.ConfigFile.TotalCalculation;
+
 public class ConfigFile {
 	
 	private Server server;
 
     private Spring spring;
+    
+    private AgileCalculate agileCalculate;
 
     private ViewInformation viewInformation;
     
     private DriverConfig driverConfig;
+    
+    private Mqtt mqtt;
     
     private Email email;
 
@@ -165,6 +178,256 @@ public class ConfigFile {
 	    }
 	}
 	
+	public static class InversionUrl
+	{
+	    private String[] motorauto;
+
+	    private String[] motorsemiauto;
+
+	    private String[] beam;
+
+	    public void setMotorauto(String[] motorauto){
+	        this.motorauto = motorauto;
+	    }
+	    public String[] getMotorauto(){
+	        return this.motorauto;
+	    }
+	    public void setMotorsemiauto(String[] motorsemiauto){
+	        this.motorsemiauto = motorsemiauto;
+	    }
+	    public String[] getMotorsemiauto(){
+	        return this.motorsemiauto;
+	    }
+	    public void setBeam(String[] beam){
+	        this.beam = beam;
+	    }
+	    public String[] getBeam(){
+	        return this.beam;
+	    }
+	}
+	
+	public static class Inversion
+	{
+	    private boolean inversionSwitch;
+
+	    private InversionUrl url;
+
+	    private String timerCorrectionStart;
+
+	    private String imerCorrectionEnd;
+
+	    private int timerCorrectionLimit;
+
+	    public void setInversionSwitch(boolean inversionSwitch){
+	        this.inversionSwitch = inversionSwitch;
+	    }
+	    public boolean getInversionSwitch(){
+	        return this.inversionSwitch;
+	    }
+	    public void setUrl(InversionUrl url){
+	        this.url = url;
+	    }
+	    public InversionUrl getUrl(){
+	        return this.url;
+	    }
+	    public void setTimerCorrectionStart(String timerCorrectionStart){
+	        this.timerCorrectionStart = timerCorrectionStart;
+	    }
+	    public String getTimerCorrectionStart(){
+	        return this.timerCorrectionStart;
+	    }
+	    public void setImerCorrectionEnd(String imerCorrectionEnd){
+	        this.imerCorrectionEnd = imerCorrectionEnd;
+	    }
+	    public String getImerCorrectionEnd(){
+	        return this.imerCorrectionEnd;
+	    }
+	    public void setTimerCorrectionLimit(int timerCorrectionLimit){
+	        this.timerCorrectionLimit = timerCorrectionLimit;
+	    }
+	    public int getTimerCorrectionLimit(){
+	        return this.timerCorrectionLimit;
+	    }
+	}
+
+	public static class ESDiagram
+	{
+	    private String[] balance;
+
+	    private Inversion inversion;
+
+	    public void setBalance(String[] balance){
+	        this.balance = balance;
+	    }
+	    public String[] getBalance(){
+	        return this.balance;
+	    }
+	    public void setInversion(Inversion inversion){
+	        this.inversion = inversion;
+	    }
+	    public Inversion getInversion(){
+	        return this.inversion;
+	    }
+	}
+	
+	public static class TotalCalculation
+	{
+	    private String[] well;
+
+	    public void setWell(String[] well){
+	        this.well = well;
+	    }
+	    public String[] getWell(){
+	        return this.well;
+	    }
+	}
+	
+	public static class Probe{
+		private String[] app;
+		private String[] mem;
+		private String[] disk;
+		private String[] host;
+		private String[] cpu;
+		public String[] getApp() {
+			return app;
+		}
+		public void setApp(String[] app) {
+			this.app = app;
+		}
+		public String[] getMem() {
+			return mem;
+		}
+		public void setMem(String[] mem) {
+			this.mem = mem;
+		}
+		public String[] getDisk() {
+			return disk;
+		}
+		public void setDisk(String[] disk) {
+			this.disk = disk;
+		}
+		public String[] getHost() {
+			return host;
+		}
+		public void setHost(String[] host) {
+			this.host = host;
+		}
+		public String[] getCpu() {
+			return cpu;
+		}
+		public void setCpu(String[] cpu) {
+			this.cpu = cpu;
+		}
+		
+	}
+	
+	public static class Plugin
+	{
+		private String wellboreTrajectory;
+		
+		private String fa2fs;
+		
+		public String getWellboreTrajectory() {
+			return wellboreTrajectory;
+		}
+		
+		public void setWellboreTrajectory(String wellboreTrajectory) {
+			this.wellboreTrajectory = wellboreTrajectory;
+		}
+		
+		public String getFa2fs() {
+			return fa2fs;
+		}
+		
+		public void setFa2fs(String fa2fs) {
+			this.fa2fs = fa2fs;
+		}
+	}
+	
+	public static class AgileCalculate
+	{
+		private Probe probe;
+		
+		private String[] FESDiagram;
+
+	    private String[] FSDiagram;
+
+	    private ESDiagram ESDiagram;
+
+	    private String[] pcpProduction;
+
+	    private String[] communication;
+
+	    private String[] run;
+
+	    private String[] energy;
+
+	    private TotalCalculation totalCalculation;
+	    
+	    private Plugin plugin;
+
+	    public Plugin getPlugin() {
+			return plugin;
+		}
+		public void setPlugin(Plugin plugin) {
+			this.plugin = plugin;
+		}
+		public void setFESDiagram(String[] FESDiagram){
+	        this.FESDiagram = FESDiagram;
+	    }
+	    public String[] getFESDiagram(){
+	        return this.FESDiagram;
+	    }
+	    public void setFSDiagram(String[] FSDiagram){
+	        this.FSDiagram = FSDiagram;
+	    }
+	    public String[] getFSDiagram(){
+	        return this.FSDiagram;
+	    }
+	    public void setESDiagram(ESDiagram ESDiagram){
+	        this.ESDiagram = ESDiagram;
+	    }
+	    public ESDiagram getESDiagram(){
+	        return this.ESDiagram;
+	    }
+	    public void setPcpProduction(String[] pcpProduction){
+	        this.pcpProduction = pcpProduction;
+	    }
+	    public String[] getPcpProduction(){
+	        return this.pcpProduction;
+	    }
+	    public void setCommunication(String[] communication){
+	        this.communication = communication;
+	    }
+	    public String[] getCommunication(){
+	        return this.communication;
+	    }
+	    public void setRun(String[] run){
+	        this.run = run;
+	    }
+	    public String[] getRun(){
+	        return this.run;
+	    }
+	    public void setEnergy(String[] energy){
+	        this.energy = energy;
+	    }
+	    public String[] getEnergy(){
+	        return this.energy;
+	    }
+	    public void setTotalCalculation(TotalCalculation totalCalculation){
+	        this.totalCalculation = totalCalculation;
+	    }
+	    public TotalCalculation getTotalCalculation(){
+	        return this.totalCalculation;
+	    }
+		public Probe getProbe() {
+			return probe;
+		}
+		public void setProbe(Probe probe) {
+			this.probe = probe;
+		}
+	}
+	
 	public static class DriverProbe{
 		private String init;
 		private String app;
@@ -273,6 +536,34 @@ public class ConfigFile {
 		}
 		public void setWriteSMS(String writeSMS) {
 			this.writeSMS = writeSMS;
+		}
+	}
+	
+	public static class Mqtt
+	{
+	    private String server;
+	    
+	    private String userName;
+	    
+	    private String passWord;
+
+	    public void setServer(String server){
+	        this.server = server;
+	    }
+	    public String getServer(){
+	        return this.server;
+	    }
+		public String getUserName() {
+			return userName;
+		}
+		public void setUserName(String userName) {
+			this.userName = userName;
+		}
+		public String getPassWord() {
+			return passWord;
+		}
+		public void setPassWord(String passWord) {
+			this.passWord = passWord;
 		}
 	}
 	
@@ -417,5 +708,18 @@ public class ConfigFile {
 		public void setPrintLog(boolean printLog) {
 			this.printLog = printLog;
 		}
+	}
+
+	public AgileCalculate getAgileCalculate() {
+		return agileCalculate;
+	}
+	public void setAgileCalculate(AgileCalculate agileCalculate) {
+		this.agileCalculate = agileCalculate;
+	}
+	public Mqtt getMqtt() {
+		return mqtt;
+	}
+	public void setMqtt(Mqtt mqtt) {
+		this.mqtt = mqtt;
 	}
 }
