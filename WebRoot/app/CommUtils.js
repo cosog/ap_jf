@@ -187,11 +187,14 @@ isNotVal = function(val) {
 isNumber = function(val) {
 	var regPos = /^\d+(\.\d+)?$/; //非负浮点数
     var regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/; //负浮点数
-    if(regPos.test(val) && regNeg.test(val)){
+    if(regPos.test(val) || regNeg.test(val)){
         return true;
     }else{
         return false;
     }
+}
+function isNumber2(val) {
+	return !isNaN(Number(val))
 }
 /**
  * 判断字符串是否已特定字符结尾

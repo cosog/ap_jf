@@ -1,7 +1,7 @@
 //抽油机
 var rpcDeviceInfoHandsontableHelper = null;
-var rpcAuxiliaryDeviceInfoHandsontableHelper = null;
-var rpcAdditionalInfoHandsontableHelper = null;
+var rpcPumpingModelHandsontableHelper = null;
+var rpcProductionHandsontableHelper = null;
 Ext.define('AP.view.well.RPCDeviceInfoPanel', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.rpcDeviceInfoPanel',
@@ -293,15 +293,15 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
             	},{
             		region: 'east',
             		width: '30%',
-            		title:'设备附加信息',
+            		title:'生产数据',
                 	id:'RPCAdditionalInfoPanel_Id',
                 	split: true,
                 	collapsible: true,
                 	html: '<div class="RPCAdditionalInfoContainer" style="width:100%;height:100%;"><div class="con" id="RPCAdditionalInfoTableDiv_id"></div></div>',
                     listeners: {
                         resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                        	if (rpcAdditionalInfoHandsontableHelper != null && rpcAdditionalInfoHandsontableHelper.hot != null && rpcAdditionalInfoHandsontableHelper.hot != undefined) {
-                        		rpcAdditionalInfoHandsontableHelper.hot.refreshDimensions();
+                        	if (rpcProductionHandsontableHelper != null && rpcProductionHandsontableHelper.hot != null && rpcProductionHandsontableHelper.hot != undefined) {
+                        		rpcProductionHandsontableHelper.hot.refreshDimensions();
                             }
                         }
                     }
@@ -309,22 +309,39 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
             },{
             	region: 'east',
                 width: '18%',
-                title:'辅件设备列表',
+                title:'抽油机型号列表',
                 id:'RPCAuxiliaryDevicePanel_Id',
                 split: true,
                 collapsible: true,
                 html: '<div class="RPCAuxiliaryDeviceContainer" style="width:100%;height:100%;"><div class="con" id="RPCAuxiliaryDeviceTableDiv_id"></div></div>',
                 listeners: {
                     resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                    	if (rpcAuxiliaryDeviceInfoHandsontableHelper != null && rpcAuxiliaryDeviceInfoHandsontableHelper.hot != null && rpcAuxiliaryDeviceInfoHandsontableHelper.hot != undefined) {
-                    		rpcAuxiliaryDeviceInfoHandsontableHelper.hot.refreshDimensions();
+                    	if (rpcPumpingModelHandsontableHelper != null && rpcPumpingModelHandsontableHelper.hot != null && rpcPumpingModelHandsontableHelper.hot != undefined) {
+                    		rpcPumpingModelHandsontableHelper.hot.refreshDimensions();
                         }
                     }
                 }
             }],
             listeners: {
                 beforeclose: function (panel, eOpts) {
-                    
+                	if (rpcDeviceInfoHandsontableHelper != null) {
+                        if (rpcDeviceInfoHandsontableHelper.hot != undefined) {
+                            rpcDeviceInfoHandsontableHelper.hot.destroy();
+                        }
+                        rpcDeviceInfoHandsontableHelper = null;
+                    }
+                    if (rpcPumpingModelHandsontableHelper != null) {
+                        if (rpcPumpingModelHandsontableHelper.hot != undefined) {
+                        	rpcPumpingModelHandsontableHelper.hot.destroy();
+                        }
+                        rpcPumpingModelHandsontableHelper = null;
+                    }
+                    if (rpcProductionHandsontableHelper != null) {
+                        if (rpcProductionHandsontableHelper.hot != undefined) {
+                        	rpcProductionHandsontableHelper.hot.destroy();
+                        }
+                        rpcProductionHandsontableHelper = null;
+                    }
                 }
             }
         })
@@ -417,12 +434,12 @@ function CreateAndLoadRPCDeviceInfoTable(isNew) {
             	Ext.getCmp("RPCDeviceSelectRow_Id").setValue('');
             	Ext.getCmp("RPCDeviceSelectEndRow_Id").setValue('');
             	CreateAndLoadRPCAuxiliaryDeviceInfoTable(0,'');
-            	CreateAndLoadRPCAdditionalInfoTable(0,'');
+            	CreateAndLoadRPCProductionDataTable(0,'');
             }else{
             	var selectedRow=Ext.getCmp("RPCDeviceSelectRow_Id").getValue();
             	var rowdata = rpcDeviceInfoHandsontableHelper.hot.getDataAtRow(selectedRow);
             	CreateAndLoadRPCAuxiliaryDeviceInfoTable(rowdata[0],rowdata[1]);
-            	CreateAndLoadRPCAdditionalInfoTable(rowdata[0],rowdata[1]);
+            	CreateAndLoadRPCProductionDataTable(rowdata[0],rowdata[1]);
             }
             Ext.getCmp("RPCDeviceTotalCount_Id").update({
                 count: result.totalCount
@@ -538,7 +555,7 @@ var RPCDeviceInfoHandsontableHelper = {
                 		Ext.getCmp("RPCDeviceSelectRow_Id").setValue('');
                     	Ext.getCmp("RPCDeviceSelectEndRow_Id").setValue('');
                     	CreateAndLoadRPCAuxiliaryDeviceInfoTable(0,'');
-                    	CreateAndLoadRPCAdditionalInfoTable(0,'');
+                    	CreateAndLoadRPCProductionDataTable(0,'');
                 	}else{
                 		if(row<0){
                     		row=0;
@@ -566,7 +583,7 @@ var RPCDeviceInfoHandsontableHelper = {
                     		deviceName=row1[1];
                     	}
                     	CreateAndLoadRPCAuxiliaryDeviceInfoTable(recordId,deviceName);
-                    	CreateAndLoadRPCAdditionalInfoTable(recordId,deviceName);
+                    	CreateAndLoadRPCProductionDataTable(recordId,deviceName);
                 	}
                 },
                 afterDestroy: function () {
@@ -659,42 +676,187 @@ var RPCDeviceInfoHandsontableHelper = {
         	var leftOrg_Id = Ext.getCmp('leftOrg_Id').getValue();
             //插入的数据的获取
             rpcDeviceInfoHandsontableHelper.insertExpressCount();
-            //获取辅件配置数据
-            var deviceAuxiliaryData={};
+            //获取设备ID
             var RPCDeviceSelectRow= Ext.getCmp("RPCDeviceSelectRow_Id").getValue();
-            if(isNotVal(RPCDeviceSelectRow)){
-            	var rowdata = rpcDeviceInfoHandsontableHelper.hot.getDataAtRow(RPCDeviceSelectRow);
-            	var deviceId=rowdata[0];
-            	if(isNotVal(deviceId) && parseInt(deviceId)>0 ){
-                	deviceAuxiliaryData.deviceType=101;
-                	deviceAuxiliaryData.deviceId=deviceId;
-                	//辅件设备
-                	deviceAuxiliaryData.auxiliaryDevice=[];
-                	if(rpcAuxiliaryDeviceInfoHandsontableHelper!=null && rpcAuxiliaryDeviceInfoHandsontableHelper.hot!=undefined){
-                		var auxiliaryDeviceData=rpcAuxiliaryDeviceInfoHandsontableHelper.hot.getData();
-                    	Ext.Array.each(auxiliaryDeviceData, function (name, index, countriesItSelf) {
-                            if (auxiliaryDeviceData[index][0]) {
-                            	var auxiliaryDeviceId = auxiliaryDeviceData[index][4];
-                            	deviceAuxiliaryData.auxiliaryDevice.push(auxiliaryDeviceId);
-                            }
-                        });
-                	}
-                	//附加信息
-                	deviceAuxiliaryData.additionalInfoList=[];
-                	if(rpcAdditionalInfoHandsontableHelper!=null && rpcAdditionalInfoHandsontableHelper.hot!=undefined){
-                		var additionalInfoData=rpcAdditionalInfoHandsontableHelper.hot.getData();
-                    	Ext.Array.each(additionalInfoData, function (name, index, countriesItSelf) {
-                            if (isNotVal(additionalInfoData[index][1])) {
-                            	var additionalInfo={};
-                            	additionalInfo.itemName=additionalInfoData[index][1];
-                            	additionalInfo.itemValue=isNotVal(additionalInfoData[index][2])?additionalInfoData[index][2]:"";
-                            	additionalInfo.itemUnit=isNotVal(additionalInfoData[index][3])?additionalInfoData[index][3]:"";
-                            	deviceAuxiliaryData.additionalInfoList.push(additionalInfo);
-                            }
-                        });
+            var rowdata = rpcDeviceInfoHandsontableHelper.hot.getDataAtRow(RPCDeviceSelectRow);
+        	var deviceId=rowdata[0];
+            //生产数据
+            var deviceProductionData={};
+            if(rpcProductionHandsontableHelper!=null && rpcProductionHandsontableHelper.hot!=undefined){
+        		var productionHandsontableData=rpcProductionHandsontableHelper.hot.getData();
+        		deviceProductionData.FluidPVT={};
+        		if(isNumber(parseFloat(productionHandsontableData[0][2]))){
+        			deviceProductionData.FluidPVT.CrudeOilDensity=parseFloat(productionHandsontableData[0][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[1][2]))){
+        			deviceProductionData.FluidPVT.WaterDensity=parseFloat(productionHandsontableData[1][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[2][2]))){
+        			deviceProductionData.FluidPVT.NaturalGasRelativeDensity=parseFloat(productionHandsontableData[2][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[3][2]))){
+        			deviceProductionData.FluidPVT.SaturationPressure=parseFloat(productionHandsontableData[3][2]);
+        		}
+        		
+        		deviceProductionData.Reservoir={};
+        		if(isNumber(parseFloat(productionHandsontableData[4][2]))){
+        			deviceProductionData.Reservoir.Depth=parseFloat(productionHandsontableData[4][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[5][2]))){
+        			deviceProductionData.Reservoir.Temperature=parseFloat(productionHandsontableData[5][2]);
+        		}
+        		
+        		deviceProductionData.Production={};
+        		if(isNumber(parseFloat(productionHandsontableData[6][2]))){
+        			deviceProductionData.Production.TubingPressure=parseFloat(productionHandsontableData[6][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[7][2]))){
+        			deviceProductionData.Production.CasingPressure=parseFloat(productionHandsontableData[7][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[8][2]))){
+        			deviceProductionData.Production.WellHeadFluidTemperature=parseFloat(productionHandsontableData[8][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[9][2]))){
+        			deviceProductionData.Production.WaterCut=parseFloat(productionHandsontableData[9][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[10][2]))){
+        			deviceProductionData.Production.ProductionGasOilRatio=parseFloat(productionHandsontableData[10][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[11][2]))){
+        			deviceProductionData.Production.ProducingfluidLevel=parseFloat(productionHandsontableData[11][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[12][2]))){
+        			deviceProductionData.Production.PumpSettingDepth=parseFloat(productionHandsontableData[12][2]);
+        		}
+        		
+        		deviceProductionData.Pump={};
+        		var PumpType=productionHandsontableData[13][2];
+        		var BarrelType=productionHandsontableData[14][2];
+        		if(productionHandsontableData[13][2]=='杆式泵'){
+        			PumpType='R';
+        		}else if(productionHandsontableData[13][2]=='管式泵'){
+        			PumpType='T';
+        		}
+        		if(productionHandsontableData[14][2]=='组合泵'){
+        			BarrelType='L';
+        		}else if(productionHandsontableData[14][2]=='整筒泵'){
+        			BarrelType='H';
+        		}
+        		if(isNotVal(PumpType)){
+        			deviceProductionData.Pump.PumpType=PumpType;
+        		}
+        		if(isNotVal(BarrelType)){
+        			deviceProductionData.Pump.BarrelType=BarrelType;
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[15][2]))){
+        			deviceProductionData.Pump.PumpGrade=parseInt(productionHandsontableData[15][2]);
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[16][2]))){
+        			deviceProductionData.Pump.PumpBoreDiameter=parseInt(productionHandsontableData[16][2]);
+        		}
+        		if(isNumber(parseFloat(productionHandsontableData[17][2]))){
+        			deviceProductionData.Pump.PlungerLength=parseFloat(productionHandsontableData[17][2]);
+        		}
+        		
+        		
+        		
+        		
+        		deviceProductionData.TubingString={};
+        		deviceProductionData.TubingString.EveryTubing=[];
+        		var EveryTubing={};
+        		if(isNumber(parseInt(productionHandsontableData[18][2]))){
+        			EveryTubing.InsideDiameter=parseInt(productionHandsontableData[18][2]);
+        		}
+        		deviceProductionData.TubingString.EveryTubing.push(EveryTubing);
+        		
+        		deviceProductionData.CasingString={};
+        		deviceProductionData.CasingString.EveryCasing=[];
+        		var EveryCasing={};
+        		if(isNumber(parseInt(productionHandsontableData[19][2]))){
+        			EveryCasing.InsideDiameter=parseInt(productionHandsontableData[19][2]);
+        		}
+        		deviceProductionData.CasingString.EveryCasing.push(EveryCasing);
+        		
+        		deviceProductionData.RodString={};
+        		deviceProductionData.RodString.EveryRod=[];
+        		var Rod1={};
+        		if(isNotVal(productionHandsontableData[20][2])){
+        			Rod1.Grade=productionHandsontableData[20][2];
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[21][2]))){
+        			Rod1.OutsideDiameter=parseInt(productionHandsontableData[21][2]);
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[22][2]))){
+        			Rod1.InsideDiameter=parseInt(productionHandsontableData[22][2]);
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[23][2]))){
+        			Rod1.Length=parseInt(productionHandsontableData[23][2]);
+        		}
+        		deviceProductionData.RodString.EveryRod.push(Rod1);
+        		var Rod2={};
+        		if(isNotVal(productionHandsontableData[24][2])){
+        			Rod2.Grade=productionHandsontableData[24][2];
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[25][2]))){
+        			Rod2.OutsideDiameter=parseInt(productionHandsontableData[25][2]);
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[26][2]))){
+        			Rod2.InsideDiameter=parseInt(productionHandsontableData[26][2]);
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[27][2]))){
+        			Rod2.Length=parseInt(productionHandsontableData[27][2]);
+        		}
+        		deviceProductionData.RodString.EveryRod.push(Rod2);
+        		var Rod3={};
+        		if(isNotVal(productionHandsontableData[28][2])){
+        			Rod3.Grade=productionHandsontableData[28][2];
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[29][2]))){
+        			Rod3.OutsideDiameter=parseInt(productionHandsontableData[29][2]);
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[30][2]))){
+        			Rod3.InsideDiameter=parseInt(productionHandsontableData[30][2]);
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[31][2]))){
+        			Rod3.Length=parseInt(productionHandsontableData[31][2]);
+        		}
+        		deviceProductionData.RodString.EveryRod.push(Rod3);
+        		var Rod4={};
+        		if(isNotVal(productionHandsontableData[32][2])){
+        			Rod4.Grade=productionHandsontableData[32][2];
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[33][2]))){
+        			Rod4.OutsideDiameter=parseInt(productionHandsontableData[33][2]);
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[34][2]))){
+        			Rod4.InsideDiameter=parseInt(productionHandsontableData[34][2]);
+        		}
+        		if(isNumber(parseInt(productionHandsontableData[35][2]))){
+        			Rod4.Length=parseInt(productionHandsontableData[35][2]);
+        		}
+        		deviceProductionData.RodString.EveryRod.push(Rod4);
+        		
+        		deviceProductionData.ManualIntervention={};
+        		if(isNumber(parseFloat(productionHandsontableData[36][2]))){
+        			deviceProductionData.ManualIntervention.NetGrossRatio=parseFloat(productionHandsontableData[36][2]);
+        		}
+        	}
+            
+            
+            
+            //获取辅件配置数据
+            var pumpingModelId='';
+            if(isNotVal(deviceId) && parseInt(deviceId)>0 ){
+            	if(rpcPumpingModelHandsontableHelper!=null && rpcPumpingModelHandsontableHelper.hot!=undefined){
+            		var rpcPumpingModelHandsontableData=rpcPumpingModelHandsontableHelper.hot.getData();
+                	for(var i=0;i<rpcPumpingModelHandsontableData.length;i++){
+                		if (rpcPumpingModelHandsontableData[i][0]) {
+                        	pumpingModelId = rpcPumpingModelHandsontableData[i][4];
+                        	break;
+                        }
                 	}
             	}
-            }
+        	}
         	Ext.Ajax.request({
                 method: 'POST',
                 url: context + '/wellInformationManagerController/saveWellHandsontableData',
@@ -722,8 +884,10 @@ var RPCDeviceInfoHandsontableHelper = {
                     rpcDeviceInfoHandsontableHelper.clearContainer();
                 },
                 params: {
-                    data: JSON.stringify(rpcDeviceInfoHandsontableHelper.AllData),
-                    deviceAuxiliaryData: JSON.stringify(deviceAuxiliaryData),
+                	deviceId: deviceId,
+                	data: JSON.stringify(rpcDeviceInfoHandsontableHelper.AllData),
+                	pumpingModelId: pumpingModelId,
+                    deviceProductionData: JSON.stringify(deviceProductionData),
                     orgId: leftOrg_Id,
                     deviceType: 101
                 }
@@ -825,11 +989,11 @@ var RPCDeviceInfoHandsontableHelper = {
 };
 
 function CreateAndLoadRPCAuxiliaryDeviceInfoTable(deviceId,deviceName,isNew){
-	if(isNew&&rpcAuxiliaryDeviceInfoHandsontableHelper!=null){
-		if(rpcAuxiliaryDeviceInfoHandsontableHelper.hot!=undefined){
-			rpcAuxiliaryDeviceInfoHandsontableHelper.hot.destroy();
+	if(isNew&&rpcPumpingModelHandsontableHelper!=null){
+		if(rpcPumpingModelHandsontableHelper.hot!=undefined){
+			rpcPumpingModelHandsontableHelper.hot.destroy();
 		}
-		rpcAuxiliaryDeviceInfoHandsontableHelper=null;
+		rpcPumpingModelHandsontableHelper=null;
 	}
 	Ext.Ajax.request({
 		method:'POST',
@@ -839,21 +1003,21 @@ function CreateAndLoadRPCAuxiliaryDeviceInfoTable(deviceId,deviceName,isNew){
 			if(!isNotVal(deviceName)){
 				deviceName='';
 			}
-			Ext.getCmp("RPCAuxiliaryDevicePanel_Id").setTitle(deviceName+"辅件设备列表");
-			if(rpcAuxiliaryDeviceInfoHandsontableHelper==null || rpcAuxiliaryDeviceInfoHandsontableHelper.hot==undefined){
-				rpcAuxiliaryDeviceInfoHandsontableHelper = RPCAuxiliaryDeviceInfoHandsontableHelper.createNew("RPCAuxiliaryDeviceTableDiv_id");
-				var colHeaders="['','序号','名称','规格型号','']";
-				var columns="[{data:'checked',type:'checkbox'},{data:'id'},{data:'name'},{data:'model'},{data:'realId'}]";
+//			Ext.getCmp("RPCAuxiliaryDevicePanel_Id").setTitle(deviceName+"辅件设备列表");
+			if(rpcPumpingModelHandsontableHelper==null || rpcPumpingModelHandsontableHelper.hot==undefined){
+				rpcPumpingModelHandsontableHelper = RPCPumpingModelHandsontableHelper.createNew("RPCAuxiliaryDeviceTableDiv_id");
+				var colHeaders="['','序号','厂家','型号','']";
+				var columns="[{data:'checked',type:'checkbox'},{data:'id'},{data:'manufacturer'},{data:'model'},{data:'realId'}]";
 				
-				rpcAuxiliaryDeviceInfoHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
-				rpcAuxiliaryDeviceInfoHandsontableHelper.columns=Ext.JSON.decode(columns);
+				rpcPumpingModelHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
+				rpcPumpingModelHandsontableHelper.columns=Ext.JSON.decode(columns);
 				if(result.totalRoot.length==0){
-					rpcAuxiliaryDeviceInfoHandsontableHelper.createTable([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+					rpcPumpingModelHandsontableHelper.createTable([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
 				}else{
-					rpcAuxiliaryDeviceInfoHandsontableHelper.createTable(result.totalRoot);
+					rpcPumpingModelHandsontableHelper.createTable(result.totalRoot);
 				}
 			}else{
-				rpcAuxiliaryDeviceInfoHandsontableHelper.hot.loadData(result.totalRoot);
+				rpcPumpingModelHandsontableHelper.hot.loadData(result.totalRoot);
 			}
 		},
 		failure:function(){
@@ -866,43 +1030,43 @@ function CreateAndLoadRPCAuxiliaryDeviceInfoTable(deviceId,deviceName,isNew){
 	});
 };
 
-var RPCAuxiliaryDeviceInfoHandsontableHelper = {
+var RPCPumpingModelHandsontableHelper = {
 		createNew: function (divid) {
-	        var rpcAuxiliaryDeviceInfoHandsontableHelper = {};
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.hot1 = '';
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.divid = divid;
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.validresult=true;//数据校验
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.colHeaders=[];
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.columns=[];
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.AllData=[];
+	        var rpcPumpingModelHandsontableHelper = {};
+	        rpcPumpingModelHandsontableHelper.hot1 = '';
+	        rpcPumpingModelHandsontableHelper.divid = divid;
+	        rpcPumpingModelHandsontableHelper.validresult=true;//数据校验
+	        rpcPumpingModelHandsontableHelper.colHeaders=[];
+	        rpcPumpingModelHandsontableHelper.columns=[];
+	        rpcPumpingModelHandsontableHelper.AllData=[];
 	        
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.addColBg = function (instance, td, row, col, prop, value, cellProperties) {
+	        rpcPumpingModelHandsontableHelper.addColBg = function (instance, td, row, col, prop, value, cellProperties) {
 	             Handsontable.renderers.TextRenderer.apply(this, arguments);
 	             td.style.backgroundColor = 'rgb(242, 242, 242)';    
 	        }
 	        
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
+	        rpcPumpingModelHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
 	            td.style.backgroundColor = 'rgb(184, 184, 184)';
 	        }
 	        
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.createTable = function (data) {
-	        	$('#'+rpcAuxiliaryDeviceInfoHandsontableHelper.divid).empty();
-	        	var hotElement = document.querySelector('#'+rpcAuxiliaryDeviceInfoHandsontableHelper.divid);
-	        	rpcAuxiliaryDeviceInfoHandsontableHelper.hot = new Handsontable(hotElement, {
+	        rpcPumpingModelHandsontableHelper.createTable = function (data) {
+	        	$('#'+rpcPumpingModelHandsontableHelper.divid).empty();
+	        	var hotElement = document.querySelector('#'+rpcPumpingModelHandsontableHelper.divid);
+	        	rpcPumpingModelHandsontableHelper.hot = new Handsontable(hotElement, {
 	        		licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
 	        		data: data,
 	        		hiddenColumns: {
 	                    columns: [4],
 	                    indicators: false
 	                },
-	        		colWidths: [25,50,80,80],
-	                columns:rpcAuxiliaryDeviceInfoHandsontableHelper.columns,
-	                columns:rpcAuxiliaryDeviceInfoHandsontableHelper.columns,
+	        		colWidths: [25,30,30,80],
+	                columns:rpcPumpingModelHandsontableHelper.columns,
+	                columns:rpcPumpingModelHandsontableHelper.columns,
 	                stretchH: 'all',//延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
 	                autoWrapRow: true,
 	                rowHeaders: false,//显示行头
-	                colHeaders:rpcAuxiliaryDeviceInfoHandsontableHelper.colHeaders,//显示列头
+	                colHeaders:rpcPumpingModelHandsontableHelper.colHeaders,//显示列头
 	                columnSorting: true,//允许排序
 	                sortIndicator: true,
 	                manualColumnResize:true,//当值为true时，允许拖动，当为false时禁止拖动
@@ -924,47 +1088,47 @@ var RPCAuxiliaryDeviceInfoHandsontableHelper = {
 	        	});
 	        }
 	        //保存数据
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.saveData = function () {}
-	        rpcAuxiliaryDeviceInfoHandsontableHelper.clearContainer = function () {
-	        	rpcAuxiliaryDeviceInfoHandsontableHelper.AllData = [];
+	        rpcPumpingModelHandsontableHelper.saveData = function () {}
+	        rpcPumpingModelHandsontableHelper.clearContainer = function () {
+	        	rpcPumpingModelHandsontableHelper.AllData = [];
 	        }
-	        return rpcAuxiliaryDeviceInfoHandsontableHelper;
+	        return rpcPumpingModelHandsontableHelper;
 	    }
 };
 
-function CreateAndLoadRPCAdditionalInfoTable(deviceId,deviceName,isNew){
-	if(isNew&&rpcAdditionalInfoHandsontableHelper!=null){
-		if(rpcAdditionalInfoHandsontableHelper.hot!=undefined){
-			rpcAdditionalInfoHandsontableHelper.hot.destroy();
+function CreateAndLoadRPCProductionDataTable(deviceId,deviceName,isNew){
+	if(isNew&&rpcProductionHandsontableHelper!=null){
+		if(rpcProductionHandsontableHelper.hot!=undefined){
+			rpcProductionHandsontableHelper.hot.destroy();
 		}
-		rpcAdditionalInfoHandsontableHelper=null;
+		rpcProductionHandsontableHelper=null;
 	}
 	Ext.Ajax.request({
 		method:'POST',
-		url:context + '/wellInformationManagerController/getDeviceAdditionalInfo',
+		url:context + '/wellInformationManagerController/getDeviceProductionDataInfo',
 		success:function(response) {
 			var result =  Ext.JSON.decode(response.responseText);
 			if(!isNotVal(deviceName)){
 				deviceName='';
 			}
-			Ext.getCmp("RPCAdditionalInfoPanel_Id").setTitle(deviceName+"附加信息");
-			if(rpcAdditionalInfoHandsontableHelper==null || rpcAdditionalInfoHandsontableHelper.hot==undefined){
-				rpcAdditionalInfoHandsontableHelper = RPCAdditionalInfoHandsontableHelper.createNew("RPCAdditionalInfoTableDiv_id");
+			Ext.getCmp("RPCAdditionalInfoPanel_Id").setTitle(deviceName+"生产数据");
+			if(rpcProductionHandsontableHelper==null || rpcProductionHandsontableHelper.hot==undefined){
+				rpcProductionHandsontableHelper = RPCProductionHandsontableHelper.createNew("RPCAdditionalInfoTableDiv_id");
 				var colHeaders="['序号','名称','值','单位']";
 				var columns="[{data:'id'},{data:'itemName'},{data:'itemValue'},{data:'itemUnit'}]";
 				
-				rpcAdditionalInfoHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
-				rpcAdditionalInfoHandsontableHelper.columns=Ext.JSON.decode(columns);
+				rpcProductionHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
+				rpcProductionHandsontableHelper.columns=Ext.JSON.decode(columns);
 				if(result.totalRoot.length==0){
-					rpcAdditionalInfoHandsontableHelper.createTable([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+					rpcProductionHandsontableHelper.createTable([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
 				}else{
-					rpcAdditionalInfoHandsontableHelper.createTable(result.totalRoot);
+					rpcProductionHandsontableHelper.createTable(result.totalRoot);
 				}
 			}else{
 				if(result.totalRoot.length==0){
-					rpcAdditionalInfoHandsontableHelper.hot.loadData([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+					rpcProductionHandsontableHelper.hot.loadData([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
 				}else{
-					rpcAdditionalInfoHandsontableHelper.hot.loadData(result.totalRoot);
+					rpcProductionHandsontableHelper.hot.loadData(result.totalRoot);
 				}
 			}
 		},
@@ -978,33 +1142,38 @@ function CreateAndLoadRPCAdditionalInfoTable(deviceId,deviceName,isNew){
 	});
 };
 
-var RPCAdditionalInfoHandsontableHelper = {
+var RPCProductionHandsontableHelper = {
 	    createNew: function (divid) {
-	        var rpcAdditionalInfoHandsontableHelper = {};
-	        rpcAdditionalInfoHandsontableHelper.hot = '';
-	        rpcAdditionalInfoHandsontableHelper.divid = divid;
-	        rpcAdditionalInfoHandsontableHelper.colHeaders = [];
-	        rpcAdditionalInfoHandsontableHelper.columns = [];
-	        rpcAdditionalInfoHandsontableHelper.addColBg = function (instance, td, row, col, prop, value, cellProperties) {
+	        var rpcProductionHandsontableHelper = {};
+	        rpcProductionHandsontableHelper.hot = '';
+	        rpcProductionHandsontableHelper.divid = divid;
+	        rpcProductionHandsontableHelper.colHeaders = [];
+	        rpcProductionHandsontableHelper.columns = [];
+	        rpcProductionHandsontableHelper.addColBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
 	            td.style.backgroundColor = 'rgb(242, 242, 242)';
 	        }
+	        
+	        rpcProductionHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
+	            Handsontable.renderers.TextRenderer.apply(this, arguments);
+	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	        }
 
-	        rpcAdditionalInfoHandsontableHelper.createTable = function (data) {
-	            $('#' + rpcAdditionalInfoHandsontableHelper.divid).empty();
-	            var hotElement = document.querySelector('#' + rpcAdditionalInfoHandsontableHelper.divid);
-	            rpcAdditionalInfoHandsontableHelper.hot = new Handsontable(hotElement, {
+	        rpcProductionHandsontableHelper.createTable = function (data) {
+	            $('#' + rpcProductionHandsontableHelper.divid).empty();
+	            var hotElement = document.querySelector('#' + rpcProductionHandsontableHelper.divid);
+	            rpcProductionHandsontableHelper.hot = new Handsontable(hotElement, {
 	            	licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
 	            	data: data,
 	                hiddenColumns: {
 	                    columns: [0],
 	                    indicators: false
 	                },
-	                columns: rpcAdditionalInfoHandsontableHelper.columns,
+	                columns: rpcProductionHandsontableHelper.columns,
 	                stretchH: 'all', //延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
 	                autoWrapRow: true,
 	                rowHeaders: true, //显示行头
-	                colHeaders: rpcAdditionalInfoHandsontableHelper.colHeaders, //显示列头
+	                colHeaders: rpcProductionHandsontableHelper.colHeaders, //显示列头
 	                columnSorting: true, //允许排序
 	                contextMenu: {
 	                    items: {
@@ -1054,9 +1223,43 @@ var RPCAdditionalInfoHandsontableHelper = {
 	                    var cellProperties = {};
 	                    var visualRowIndex = this.instance.toVisualRow(row);
 	                    var visualColIndex = this.instance.toVisualColumn(col);
+	                    if (visualColIndex !=2) {
+							cellProperties.readOnly = true;
+							cellProperties.renderer = rpcProductionHandsontableHelper.addBoldBg;
+		                }
+	                    
+	                    if (visualColIndex === 2 && visualRowIndex===13) {
+	                    	this.type = 'dropdown';
+	                    	this.source = ['杆式泵','管式泵'];
+	                    	this.strict = true;
+	                    	this.allowInvalid = false;
+	                    }
+	                    
+	                    if (visualColIndex === 2 && visualRowIndex===14) {
+	                    	this.type = 'dropdown';
+	                    	this.source = ['组合泵','整筒泵'];
+	                    	this.strict = true;
+	                    	this.allowInvalid = false;
+	                    }
+	                    
+	                    if (visualColIndex === 2 && visualRowIndex===15) {
+	                    	this.type = 'dropdown';
+	                    	this.source = ['1','2','3','4','5'];
+	                    	this.strict = true;
+	                    	this.allowInvalid = false;
+	                    }
+	                    
+	                    if (visualColIndex === 2 && (visualRowIndex===20 || visualRowIndex===24||visualRowIndex===28||visualRowIndex===32)) {
+	                    	this.type = 'dropdown';
+	                    	this.source = ['A','B','C','K','D','KD','HL','HY'];
+	                    	this.strict = true;
+	                    	this.allowInvalid = false;
+	                    }
+	                    
+	                    return cellProperties;
 	                }
 	            });
 	        }
-	        return rpcAdditionalInfoHandsontableHelper;
+	        return rpcProductionHandsontableHelper;
 	    }
 	};

@@ -375,14 +375,7 @@ Ext.define("AP.view.well.PCPDeviceInfoWindow", {
                             waitTitle: 'Please Wait...',
                             success: function (response, action) {
                                 Ext.getCmp('PCPDeviceInfoWindow_Id').close();
-                        		var activeId = Ext.getCmp("PCPDeviceManagerTabPanel").getActiveTab().id;
-                        		if(activeId=="PCPDeviceInfoTabPanel_Id"){
-                        			CreateAndLoadPCPDeviceInfoTable(true);
-                        		}else if(activeId=="WaterGatheringPCPDeviceInfoTabPanel_Id"){
-                        			CreateAndLoadWaterGatheringPCPDeviceInfoTable(true);
-                        		}else if(activeId=="GatheringPCPDeviceInfoTabPanel_Id"){
-                        			CreateAndLoadGatheringPCPDeviceInfoTable(true);
-                        		}
+                                CreateAndLoadPCPDeviceInfoTable();
                                 
                         		if (action.result.msg == true && action.result.resultCode==1) {
                                     Ext.Msg.alert(cosog.string.ts, "<font color=blue>" + cosog.string.success + "</font>");

@@ -27,9 +27,9 @@ import com.cosog.model.AuxiliaryDeviceInformation;
 import com.cosog.model.MasterAndAuxiliaryDevice;
 import com.cosog.model.Org;
 import com.cosog.model.PCPDeviceAddInfo;
-import com.cosog.model.PCPDeviceInformation;
+import com.cosog.model.PcpDeviceInformation;
 import com.cosog.model.RPCDeviceAddInfo;
-import com.cosog.model.RPCDeviceInformation;
+import com.cosog.model.RpcDeviceInformation;
 import com.cosog.model.SmsDeviceInformation;
 import com.cosog.model.User;
 import com.cosog.model.gridmodel.AuxiliaryDeviceConfig;
@@ -58,9 +58,9 @@ public class WellInformationManagerController extends BaseController {
 	@Autowired
 	private WellInformationManagerService<?> wellInformationManagerService;
 	@Autowired
-	private WellInformationManagerService<RPCDeviceInformation> rpcDeviceManagerService;
+	private WellInformationManagerService<RpcDeviceInformation> rpcDeviceManagerService;
 	@Autowired
-	private WellInformationManagerService<PCPDeviceInformation> pcpDeviceManagerService;
+	private WellInformationManagerService<PcpDeviceInformation> pcpDeviceManagerService;
 	@Autowired
 	private WellInformationManagerService<SmsDeviceInformation> smsDeviceManagerService;
 	@Autowired
@@ -426,13 +426,13 @@ public class WellInformationManagerController extends BaseController {
 		return null;
 	}
 	
-	@RequestMapping("/getDeviceAdditionalInfo")
-	public String getDeviceAdditionalInfo() throws IOException {
+	@RequestMapping("/getDeviceProductionDataInfo")
+	public String getDeviceProductionDataInfo() throws IOException {
 		Map<String, Object> map = new HashMap<String, Object>();
 		String deviceId= ParamUtils.getParameter(request, "deviceId");
 		deviceType= ParamUtils.getParameter(request, "deviceType");
 		this.pager = new Page("pagerForm", request);
-		String json = this.wellInformationManagerService.getDeviceAdditionalInfo(deviceId,deviceType);
+		String json = this.wellInformationManagerService.getDeviceProductionDataInfo(deviceId,deviceType);
 		response.setContentType("application/json;charset=" + Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -562,8 +562,10 @@ public class WellInformationManagerController extends BaseController {
 		HttpSession session=request.getSession();
 		String json ="{success:true}";
 		User user = (User) session.getAttribute("userLogin");
+		int deviceId = StringManagerUtils.stringToInteger(ParamUtils.getParameter(request, "deviceId"));
 		String data = ParamUtils.getParameter(request, "data").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
-		String deviceAuxiliaryData = ParamUtils.getParameter(request, "deviceAuxiliaryData").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
+		String pumpingModelId = ParamUtils.getParameter(request, "pumpingModelId");
+		String deviceProductionData = ParamUtils.getParameter(request, "deviceProductionData").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
 		String orgId = ParamUtils.getParameter(request, "orgId");
 		deviceType = ParamUtils.getParameter(request, "deviceType");
 		Gson gson = new Gson();
@@ -580,46 +582,11 @@ public class WellInformationManagerController extends BaseController {
 			this.wellInformationManagerService.saveSMSDeviceData(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),user);
 		}
 		
-		//处理辅助设备
-		if(StringManagerUtils.stringToInteger(deviceType)<300){
-			type = new TypeToken<AuxiliaryDeviceConfig>() {}.getType();
-			AuxiliaryDeviceConfig auxiliaryDeviceConfig=gson.fromJson(deviceAuxiliaryData, type);
-			if(auxiliaryDeviceConfig!=null){
-
-				int deviceId=auxiliaryDeviceConfig.getDeviceId();
-				this.wellInformationManagerService.deleteMasterAndAuxiliary(deviceId);
-				if(auxiliaryDeviceConfig.getAuxiliaryDevice()!=null&&auxiliaryDeviceConfig.getAuxiliaryDevice().size()>0){
-					for(int i=0;i<auxiliaryDeviceConfig.getAuxiliaryDevice().size();i++){
-						MasterAndAuxiliaryDevice masterAndAuxiliaryDevice=new MasterAndAuxiliaryDevice();
-						masterAndAuxiliaryDevice.setMasterid(deviceId);
-						masterAndAuxiliaryDevice.setAuxiliaryid(auxiliaryDeviceConfig.getAuxiliaryDevice().get(i));
-						masterAndAuxiliaryDevice.setMatrix("0,0,0");
-						this.wellInformationManagerService.grantMasterAuxiliaryDevice(masterAndAuxiliaryDevice);
-					}
-				}
-				
-				this.wellInformationManagerService.deleteDeviceAdditionalInfo(deviceId,StringManagerUtils.stringToInteger(deviceType));
-				if(auxiliaryDeviceConfig.getAdditionalInfoList()!=null&&auxiliaryDeviceConfig.getAdditionalInfoList().size()>0){
-					for(int i=0;i<auxiliaryDeviceConfig.getAdditionalInfoList().size();i++){
-						if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-							RPCDeviceAddInfo rpcDeviceAddInfo=new RPCDeviceAddInfo();
-							rpcDeviceAddInfo.setWellId(deviceId);
-							rpcDeviceAddInfo.setItemName(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemName());
-							rpcDeviceAddInfo.setItemValue(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemValue());
-							rpcDeviceAddInfo.setItemUnit(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemUnit());
-							this.wellInformationManagerService.saveDeviceAdditionalInfo(rpcDeviceAddInfo);
-						}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
-							PCPDeviceAddInfo pcpDeviceAddInfo=new PCPDeviceAddInfo();
-							pcpDeviceAddInfo.setWellId(deviceId);
-							pcpDeviceAddInfo.setItemName(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemName());
-							pcpDeviceAddInfo.setItemValue(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemValue());
-							pcpDeviceAddInfo.setItemUnit(auxiliaryDeviceConfig.getAdditionalInfoList().get(i).getItemUnit());
-							this.wellInformationManagerService.saveDeviceAdditionalInfo(pcpDeviceAddInfo);
-						}
-					}
-				}
-			}
-		}
+		//处理生产数据
+		this.wellInformationManagerService.saveProductionData(StringManagerUtils.stringToInteger(deviceType),deviceId,deviceProductionData);
+		
+		//处理抽油机型号
+		this.wellInformationManagerService.saveRPCPumpingModel(deviceId,pumpingModelId);
 		
 		EquipmentDriverServerTask.LoadDeviceCommStatus();
 		response.setContentType("application/json;charset=utf-8");
@@ -710,7 +677,7 @@ public class WellInformationManagerController extends BaseController {
 	}
 	
 	@RequestMapping("/doRPCDeviceAdd")
-	public String doRPCDeviceAdd(@ModelAttribute RPCDeviceInformation rpcDeviceInformation) throws IOException {
+	public String doRPCDeviceAdd(@ModelAttribute RpcDeviceInformation rpcDeviceInformation) throws IOException {
 		String result = "";
 		PrintWriter out = response.getWriter();
 		HttpSession session=request.getSession();
@@ -741,7 +708,7 @@ public class WellInformationManagerController extends BaseController {
 	}
 	
 	@RequestMapping("/doRPCDeviceEdit")
-	public String doRPCDeviceEdit(@ModelAttribute RPCDeviceInformation rpcDeviceInformation) throws IOException {
+	public String doRPCDeviceEdit(@ModelAttribute RpcDeviceInformation rpcDeviceInformation) throws IOException {
 		String result = "";
 		PrintWriter out = response.getWriter();
 		HttpSession session=request.getSession();
@@ -768,7 +735,7 @@ public class WellInformationManagerController extends BaseController {
 	}
 	
 	@RequestMapping("/doPCPDeviceAdd")
-	public String doPCPDeviceAdd(@ModelAttribute PCPDeviceInformation pcpDeviceInformation) throws IOException {
+	public String doPCPDeviceAdd(@ModelAttribute PcpDeviceInformation pcpDeviceInformation) throws IOException {
 		String result = "";
 		PrintWriter out = response.getWriter();
 		HttpSession session=request.getSession();
