@@ -294,7 +294,7 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
             		region: 'east',
             		width: '30%',
             		title:'生产数据',
-                	id:'RPCAdditionalInfoPanel_Id',
+                	id:'RPCProductionDataInfoPanel_Id',
                 	split: true,
                 	collapsible: true,
                 	html: '<div class="RPCAdditionalInfoContainer" style="width:100%;height:100%;"><div class="con" id="RPCAdditionalInfoTableDiv_id"></div></div>',
@@ -309,6 +309,9 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
             },{
             	region: 'east',
                 width: '18%',
+                
+                
+                
                 title:'抽油机型号列表',
                 id:'RPCAuxiliaryDevicePanel_Id',
                 split: true,
@@ -433,12 +436,12 @@ function CreateAndLoadRPCDeviceInfoTable(isNew) {
             if(result.totalRoot.length==0){
             	Ext.getCmp("RPCDeviceSelectRow_Id").setValue('');
             	Ext.getCmp("RPCDeviceSelectEndRow_Id").setValue('');
-            	CreateAndLoadRPCAuxiliaryDeviceInfoTable(0,'');
+            	CreateAndLoadRPCPumoingModelInfoTable(0,'');
             	CreateAndLoadRPCProductionDataTable(0,'');
             }else{
             	var selectedRow=Ext.getCmp("RPCDeviceSelectRow_Id").getValue();
             	var rowdata = rpcDeviceInfoHandsontableHelper.hot.getDataAtRow(selectedRow);
-            	CreateAndLoadRPCAuxiliaryDeviceInfoTable(rowdata[0],rowdata[1]);
+            	CreateAndLoadRPCPumoingModelInfoTable(rowdata[0],rowdata[1]);
             	CreateAndLoadRPCProductionDataTable(rowdata[0],rowdata[1]);
             }
             Ext.getCmp("RPCDeviceTotalCount_Id").update({
@@ -554,7 +557,7 @@ var RPCDeviceInfoHandsontableHelper = {
                 	if(row<0 && row2<0){//只选中表头
                 		Ext.getCmp("RPCDeviceSelectRow_Id").setValue('');
                     	Ext.getCmp("RPCDeviceSelectEndRow_Id").setValue('');
-                    	CreateAndLoadRPCAuxiliaryDeviceInfoTable(0,'');
+                    	CreateAndLoadRPCPumoingModelInfoTable(0,'');
                     	CreateAndLoadRPCProductionDataTable(0,'');
                 	}else{
                 		if(row<0){
@@ -582,7 +585,7 @@ var RPCDeviceInfoHandsontableHelper = {
                     	if(isNotVal(row1[1])){
                     		deviceName=row1[1];
                     	}
-                    	CreateAndLoadRPCAuxiliaryDeviceInfoTable(recordId,deviceName);
+                    	CreateAndLoadRPCPumoingModelInfoTable(recordId,deviceName);
                     	CreateAndLoadRPCProductionDataTable(recordId,deviceName);
                 	}
                 },
@@ -988,7 +991,7 @@ var RPCDeviceInfoHandsontableHelper = {
     }
 };
 
-function CreateAndLoadRPCAuxiliaryDeviceInfoTable(deviceId,deviceName,isNew){
+function CreateAndLoadRPCPumoingModelInfoTable(deviceId,deviceName,isNew){
 	if(isNew&&rpcPumpingModelHandsontableHelper!=null){
 		if(rpcPumpingModelHandsontableHelper.hot!=undefined){
 			rpcPumpingModelHandsontableHelper.hot.destroy();
@@ -997,13 +1000,12 @@ function CreateAndLoadRPCAuxiliaryDeviceInfoTable(deviceId,deviceName,isNew){
 	}
 	Ext.Ajax.request({
 		method:'POST',
-		url:context + '/wellInformationManagerController/getAuxiliaryDevice',
+		url:context + '/wellInformationManagerController/getRPCPumpingModelList',
 		success:function(response) {
 			var result =  Ext.JSON.decode(response.responseText);
 			if(!isNotVal(deviceName)){
 				deviceName='';
 			}
-//			Ext.getCmp("RPCAuxiliaryDevicePanel_Id").setTitle(deviceName+"辅件设备列表");
 			if(rpcPumpingModelHandsontableHelper==null || rpcPumpingModelHandsontableHelper.hot==undefined){
 				rpcPumpingModelHandsontableHelper = RPCPumpingModelHandsontableHelper.createNew("RPCAuxiliaryDeviceTableDiv_id");
 				var colHeaders="['','序号','厂家','型号','']";
@@ -1111,11 +1113,11 @@ function CreateAndLoadRPCProductionDataTable(deviceId,deviceName,isNew){
 			if(!isNotVal(deviceName)){
 				deviceName='';
 			}
-			Ext.getCmp("RPCAdditionalInfoPanel_Id").setTitle(deviceName+"生产数据");
+			Ext.getCmp("RPCProductionDataInfoPanel_Id").setTitle(deviceName+"生产数据");
 			if(rpcProductionHandsontableHelper==null || rpcProductionHandsontableHelper.hot==undefined){
 				rpcProductionHandsontableHelper = RPCProductionHandsontableHelper.createNew("RPCAdditionalInfoTableDiv_id");
-				var colHeaders="['序号','名称','值','单位']";
-				var columns="[{data:'id'},{data:'itemName'},{data:'itemValue'},{data:'itemUnit'}]";
+				var colHeaders="['序号','名称','值']";
+				var columns="[{data:'id'},{data:'itemName'},{data:'itemValue'}]";
 				
 				rpcProductionHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
 				rpcProductionHandsontableHelper.columns=Ext.JSON.decode(columns);

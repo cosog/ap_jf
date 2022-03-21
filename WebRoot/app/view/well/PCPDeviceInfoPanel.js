@@ -292,7 +292,7 @@ Ext.define('AP.view.well.PCPDeviceInfoPanel', {
             		region: 'east',
             		width: '30%',
             		title:'生产数据',
-                	id:'PCPAdditionalInfoPanel_Id',
+                	id:'PCPProductionDataInfoPanel_Id',
                 	split: true,
                 	collapsible: true,
                 	html: '<div class="PCPAdditionalInfoContainer" style="width:100%;height:100%;"><div class="con" id="PCPAdditionalInfoTableDiv_id"></div></div>',
@@ -903,11 +903,11 @@ function CreateAndLoadPCPProductionDataTable(deviceId,deviceName,isNew){
 			if(!isNotVal(deviceName)){
 				deviceName='';
 			}
-			Ext.getCmp("PCPAdditionalInfoPanel_Id").setTitle(deviceName+"生产数据");
+			Ext.getCmp("PCPProductionDataInfoPanel_Id").setTitle(deviceName+"生产数据");
 			if(pcpProductionHandsontableHelper==null || pcpProductionHandsontableHelper.hot==undefined){
 				pcpProductionHandsontableHelper = PCPProductionHandsontableHelper.createNew("PCPAdditionalInfoTableDiv_id");
-				var colHeaders="['序号','名称','值','单位']";
-				var columns="[{data:'id'},{data:'itemName'},{data:'itemValue'},{data:'itemUnit'}]";
+				var colHeaders="['序号','名称','值']";
+				var columns="[{data:'id'},{data:'itemName'},{data:'itemValue'}]";
 				
 				pcpProductionHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
 				pcpProductionHandsontableHelper.columns=Ext.JSON.decode(columns);
