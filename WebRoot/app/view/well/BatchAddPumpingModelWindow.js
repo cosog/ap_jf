@@ -1,8 +1,8 @@
-var batchAddAuxiliaryDeviceHandsontableHelper=null;
-Ext.define("AP.view.well.BatchAddAuxiliaryDeviceWindow", {
+var batchAddPumpingModelHandsontableHelper=null;
+Ext.define("AP.view.well.BatchAddPumpingModelWindow", {
     extend: 'Ext.window.Window',
-    id:'BatchAddAuxiliaryDeviceWindow_Id',
-    alias: 'widget.batchAddAuxiliaryDeviceWindow',
+    id:'BatchAddPumpingModelWindow_Id',
+    alias: 'widget.batchAddPumpingModelWindow',
     layout: 'fit',
     title:'辅件设备批量添加',
     border: false,
@@ -24,48 +24,48 @@ Ext.define("AP.view.well.BatchAddAuxiliaryDeviceWindow", {
         Ext.apply(me, {
         	tbar: [{
                 xtype: 'label',
-                id: 'batchAddAuxiliaryDeviceWinOgLabel_Id',
+                id: 'batchAddPumpingModelWinOgLabel_Id',
                 margin: '0 0 0 0',
                 html: ''
             },{
                 xtype: "hidden",
                 fieldLabel: '设备类型',
-                id: 'batchAddAuxiliaryDeviceType_Id',
+                id: 'batchAddPumpingModelType_Id',
                 value: ''
             },{
                 xtype: "hidden",
                 fieldLabel: '设备类型',
-                id: 'batchAddAuxiliaryDeviceOrg_Id',
+                id: 'batchAddPumpingModelOrg_Id',
                 value: ''
             },'->',{
                 xtype: 'button',
                 text: cosog.string.save,
                 iconCls: 'save',
                 handler: function (v, o) {
-                	batchAddAuxiliaryDeviceHandsontableHelper.saveData();
+                	batchAddPumpingModelHandsontableHelper.saveData();
                 }
             }],
             layout: 'border',
             items: [{
             	region: 'center',
-            	html: '<div id="BatchAddAuxiliaryDeviceTableDiv_Id" style="width:100%;height:100%;"></div>',
+            	html: '<div id="BatchAddPumpingModelTableDiv_Id" style="width:100%;height:100%;"></div>',
             	listeners: {
             		resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                    	if(batchAddAuxiliaryDeviceHandsontableHelper!=null&&batchAddAuxiliaryDeviceHandsontableHelper.hot!=null&&batchAddAuxiliaryDeviceHandsontableHelper.hot!=undefined){
-                    		batchAddAuxiliaryDeviceHandsontableHelper.hot.refreshDimensions();
+                    	if(batchAddPumpingModelHandsontableHelper!=null&&batchAddPumpingModelHandsontableHelper.hot!=null&&batchAddPumpingModelHandsontableHelper.hot!=undefined){
+                    		batchAddPumpingModelHandsontableHelper.hot.refreshDimensions();
                     	}else{
-                    		CreateAndLoadBatchAddAuxiliaryDeviceTable();
+                    		CreateAndLoadBatchAddPumpingModelTable();
                     	}
                     }
             	}
             }],
             listeners: {
                 beforeclose: function ( panel, eOpts) {
-                	if(batchAddAuxiliaryDeviceHandsontableHelper!=null){
-    					if(batchAddAuxiliaryDeviceHandsontableHelper.hot!=undefined){
-    						batchAddAuxiliaryDeviceHandsontableHelper.hot.destroy();
+                	if(batchAddPumpingModelHandsontableHelper!=null){
+    					if(batchAddPumpingModelHandsontableHelper.hot!=undefined){
+    						batchAddPumpingModelHandsontableHelper.hot.destroy();
     					}
-    					batchAddAuxiliaryDeviceHandsontableHelper=null;
+    					batchAddPumpingModelHandsontableHelper=null;
     				}
                 },
                 minimize: function (win, opts) {
@@ -76,30 +76,30 @@ Ext.define("AP.view.well.BatchAddAuxiliaryDeviceWindow", {
         me.callParent(arguments);
     }
 });
-function CreateAndLoadBatchAddAuxiliaryDeviceTable(isNew) {
-	if(isNew&&batchAddAuxiliaryDeviceHandsontableHelper!=null){
-		if (batchAddAuxiliaryDeviceHandsontableHelper.hot != undefined) {
-			batchAddAuxiliaryDeviceHandsontableHelper.hot.destroy();
+function CreateAndLoadBatchAddPumpingModelTable(isNew) {
+	if(isNew&&batchAddPumpingModelHandsontableHelper!=null){
+		if (batchAddPumpingModelHandsontableHelper.hot != undefined) {
+			batchAddPumpingModelHandsontableHelper.hot.destroy();
 		}
-		batchAddAuxiliaryDeviceHandsontableHelper = null;
+		batchAddPumpingModelHandsontableHelper = null;
 	}
-    var orgId = Ext.getCmp('batchAddAuxiliaryDeviceOrg_Id').getValue();
-    var deviceType = Ext.getCmp('batchAddAuxiliaryDeviceType_Id').getValue();
+    var orgId = Ext.getCmp('batchAddPumpingModelOrg_Id').getValue();
+    var deviceType = Ext.getCmp('batchAddPumpingModelType_Id').getValue();
     Ext.Ajax.request({
         method: 'POST',
-        url: context + '/wellInformationManagerController/getBatchAddAuxiliaryDeviceTableInfo',
+        url: context + '/wellInformationManagerController/getBatchAddPumpingModelTableInfo',
         success: function (response) {
             var result = Ext.JSON.decode(response.responseText);
-            if (batchAddAuxiliaryDeviceHandsontableHelper == null || batchAddAuxiliaryDeviceHandsontableHelper.hot == null || batchAddAuxiliaryDeviceHandsontableHelper.hot == undefined) {
-                batchAddAuxiliaryDeviceHandsontableHelper = BatchAddAuxiliaryDeviceHandsontableHelper.createNew("BatchAddAuxiliaryDeviceTableDiv_Id");
+            if (batchAddPumpingModelHandsontableHelper == null || batchAddPumpingModelHandsontableHelper.hot == null || batchAddPumpingModelHandsontableHelper.hot == undefined) {
+                batchAddPumpingModelHandsontableHelper = BatchAddPumpingModelHandsontableHelper.createNew("BatchAddPumpingModelTableDiv_Id");
                 var colHeaders = "[";
                 var columns = "[";
                 for (var i = 0; i < result.columns.length; i++) {
                     colHeaders += "'" + result.columns[i].header + "'";
-                    if (result.columns[i].dataIndex.toUpperCase() === "type".toUpperCase()) {
-                    	columns += "{data:'" + result.columns[i].dataIndex + "',type:'dropdown',strict:true,allowInvalid:false,source:['泵辅件', '管辅件']}";
+                    if (result.columns[i].dataIndex.toUpperCase() === "crankRotationDirection".toUpperCase()) {
+                    	columns += "{data:'" + result.columns[i].dataIndex + "',type:'dropdown',strict:true,allowInvalid:false,source:['顺时针', '逆时针']}";
                     } else if (result.columns[i].dataIndex.toUpperCase() === "sort".toUpperCase()) {
-                        columns += "{data:'" + result.columns[i].dataIndex + "',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,batchAddAuxiliaryDeviceHandsontableHelper);}}";
+                        columns += "{data:'" + result.columns[i].dataIndex + "',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,batchAddPumpingModelHandsontableHelper);}}";
                     } else {
                         columns += "{data:'" + result.columns[i].dataIndex + "'}";
                     }
@@ -110,11 +110,11 @@ function CreateAndLoadBatchAddAuxiliaryDeviceTable(isNew) {
                 }
                 colHeaders += "]";
                 columns += "]";
-                batchAddAuxiliaryDeviceHandsontableHelper.colHeaders = Ext.JSON.decode(colHeaders);
-                batchAddAuxiliaryDeviceHandsontableHelper.columns = Ext.JSON.decode(columns);
-                batchAddAuxiliaryDeviceHandsontableHelper.createTable(result.totalRoot);
+                batchAddPumpingModelHandsontableHelper.colHeaders = Ext.JSON.decode(colHeaders);
+                batchAddPumpingModelHandsontableHelper.columns = Ext.JSON.decode(columns);
+                batchAddPumpingModelHandsontableHelper.createTable(result.totalRoot);
             } else {
-            	batchAddAuxiliaryDeviceHandsontableHelper.hot.loadData(result.totalRoot);
+            	batchAddPumpingModelHandsontableHelper.hot.loadData(result.totalRoot);
             }
         },
         failure: function () {
@@ -126,40 +126,40 @@ function CreateAndLoadBatchAddAuxiliaryDeviceTable(isNew) {
     });
 };
 
-var BatchAddAuxiliaryDeviceHandsontableHelper = {
+var BatchAddPumpingModelHandsontableHelper = {
     createNew: function (divid) {
-        var batchAddAuxiliaryDeviceHandsontableHelper = {};
-        batchAddAuxiliaryDeviceHandsontableHelper.hot = '';
-        batchAddAuxiliaryDeviceHandsontableHelper.divid = divid;
-        batchAddAuxiliaryDeviceHandsontableHelper.validresult = true; //数据校验
-        batchAddAuxiliaryDeviceHandsontableHelper.colHeaders = [];
-        batchAddAuxiliaryDeviceHandsontableHelper.columns = [];
+        var batchAddPumpingModelHandsontableHelper = {};
+        batchAddPumpingModelHandsontableHelper.hot = '';
+        batchAddPumpingModelHandsontableHelper.divid = divid;
+        batchAddPumpingModelHandsontableHelper.validresult = true; //数据校验
+        batchAddPumpingModelHandsontableHelper.colHeaders = [];
+        batchAddPumpingModelHandsontableHelper.columns = [];
 
-        batchAddAuxiliaryDeviceHandsontableHelper.AllData = {};
-        batchAddAuxiliaryDeviceHandsontableHelper.updatelist = [];
-        batchAddAuxiliaryDeviceHandsontableHelper.delidslist = [];
-        batchAddAuxiliaryDeviceHandsontableHelper.insertlist = [];
+        batchAddPumpingModelHandsontableHelper.AllData = {};
+        batchAddPumpingModelHandsontableHelper.updatelist = [];
+        batchAddPumpingModelHandsontableHelper.delidslist = [];
+        batchAddPumpingModelHandsontableHelper.insertlist = [];
 
-        batchAddAuxiliaryDeviceHandsontableHelper.addColBg = function (instance, td, row, col, prop, value, cellProperties) {
+        batchAddPumpingModelHandsontableHelper.addColBg = function (instance, td, row, col, prop, value, cellProperties) {
             Handsontable.renderers.TextRenderer.apply(this, arguments);
             td.style.backgroundColor = 'rgb(242, 242, 242)';
         }
 
-        batchAddAuxiliaryDeviceHandsontableHelper.createTable = function (data) {
-            $('#' + batchAddAuxiliaryDeviceHandsontableHelper.divid).empty();
-            var hotElement = document.querySelector('#' + batchAddAuxiliaryDeviceHandsontableHelper.divid);
-            batchAddAuxiliaryDeviceHandsontableHelper.hot = new Handsontable(hotElement, {
+        batchAddPumpingModelHandsontableHelper.createTable = function (data) {
+            $('#' + batchAddPumpingModelHandsontableHelper.divid).empty();
+            var hotElement = document.querySelector('#' + batchAddPumpingModelHandsontableHelper.divid);
+            batchAddPumpingModelHandsontableHelper.hot = new Handsontable(hotElement, {
             	licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
             	data: data,
                 hiddenColumns: {
                     columns: [0],
                     indicators: false
                 },
-                columns: batchAddAuxiliaryDeviceHandsontableHelper.columns,
+                columns: batchAddPumpingModelHandsontableHelper.columns,
                 stretchH: 'all', //延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
                 autoWrapRow: true,
                 rowHeaders: true, //显示行头
-                colHeaders: batchAddAuxiliaryDeviceHandsontableHelper.colHeaders, //显示列头
+                colHeaders: batchAddPumpingModelHandsontableHelper.colHeaders, //显示列头
                 columnSorting: true, //允许排序
                 contextMenu: {
                     items: {
@@ -221,17 +221,17 @@ var BatchAddAuxiliaryDeviceHandsontableHelper = {
             });
         }
         //保存数据
-        batchAddAuxiliaryDeviceHandsontableHelper.saveData = function () {
+        batchAddPumpingModelHandsontableHelper.saveData = function () {
             var isCheckout=1;
             var saveDate={};
             saveDate.updatelist=[];
-            var batchAddData=batchAddAuxiliaryDeviceHandsontableHelper.hot.getData();
+            var batchAddData=batchAddPumpingModelHandsontableHelper.hot.getData();
             for(var i=0;i<batchAddData.length;i++){
             	if(isNotVal(batchAddData[i][1])){
             		var data = "{";
-                    for (var j = 0; j < batchAddAuxiliaryDeviceHandsontableHelper.columns.length; j++) {
-                        data += batchAddAuxiliaryDeviceHandsontableHelper.columns[j].data + ":'" + batchAddData[i][j] + "'";
-                        if (j < batchAddAuxiliaryDeviceHandsontableHelper.columns.length - 1) {
+                    for (var j = 0; j < batchAddPumpingModelHandsontableHelper.columns.length; j++) {
+                        data += batchAddPumpingModelHandsontableHelper.columns[j].data + ":'" + batchAddData[i][j] + "'";
+                        if (j < batchAddPumpingModelHandsontableHelper.columns.length - 1) {
                             data += ",";
                         }
                     }
@@ -243,27 +243,27 @@ var BatchAddAuxiliaryDeviceHandsontableHelper = {
             }
         	Ext.Ajax.request({
                 method: 'POST',
-                url: context + '/wellInformationManagerController/batchAddAuxiliaryDevice',
+                url: context + '/wellInformationManagerController/batchAddPumpingModel',
                 success: function (response) {
-                    Ext.getCmp("BatchAddAuxiliaryDeviceWindow_Id").close();
-                    CreateAndLoadAuxiliaryDeviceInfoTable();
+                    Ext.getCmp("BatchAddPumpingModelWindow_Id").close();
+                    CreateAndLoadPumpingModelInfoTable();
                 	rdata = Ext.JSON.decode(response.responseText);
                 	if (rdata.success&&rdata.overlayCount==0) {
                     	Ext.MessageBox.alert("信息", "保存成功");
-                        batchAddAuxiliaryDeviceHandsontableHelper.clearContainer();
+                        batchAddPumpingModelHandsontableHelper.clearContainer();
                     }else if(rdata.success&&rdata.overlayCount>0){
-                    	var window = Ext.create("AP.view.well.BatchAddAuxiliaryDeviceCollisionDataWindow", {
+                    	var window = Ext.create("AP.view.well.BatchAddPumpingModelCollisionDataWindow", {
                             title: '异常数据处理'
                         });
                         window.show();
-                        CreateAndLoadBatchAddAuxiliaryDeviceOverlayDataTable(rdata);
+                        CreateAndLoadBatchAddPumpingModelOverlayDataTable(rdata);
                     } else {
                         Ext.MessageBox.alert("信息", "数据保存失败");
                     }
                 },
                 failure: function () {
                     Ext.MessageBox.alert("信息", "请求失败");
-                    batchAddAuxiliaryDeviceHandsontableHelper.clearContainer();
+                    batchAddPumpingModelHandsontableHelper.clearContainer();
                 },
                 params: {
                     data: JSON.stringify(saveDate),
@@ -272,13 +272,13 @@ var BatchAddAuxiliaryDeviceHandsontableHelper = {
             });
         }
 
-        batchAddAuxiliaryDeviceHandsontableHelper.clearContainer = function () {
-            batchAddAuxiliaryDeviceHandsontableHelper.AllData = {};
-            batchAddAuxiliaryDeviceHandsontableHelper.updatelist = [];
-            batchAddAuxiliaryDeviceHandsontableHelper.delidslist = [];
-            batchAddAuxiliaryDeviceHandsontableHelper.insertlist = [];
+        batchAddPumpingModelHandsontableHelper.clearContainer = function () {
+            batchAddPumpingModelHandsontableHelper.AllData = {};
+            batchAddPumpingModelHandsontableHelper.updatelist = [];
+            batchAddPumpingModelHandsontableHelper.delidslist = [];
+            batchAddPumpingModelHandsontableHelper.insertlist = [];
         }
 
-        return batchAddAuxiliaryDeviceHandsontableHelper;
+        return batchAddPumpingModelHandsontableHelper;
     }
 };

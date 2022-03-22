@@ -3,6 +3,7 @@ var protocolAlarmUnitConfigNumItemsHandsontableHelper=null;
 var protocolAlarmUnitConfigSwitchItemsHandsontableHelper=null;
 var protocolAlarmUnitConfigEnumItemsHandsontableHelper=null;
 var protocolAlarmUnitConfigCommStatusItemsHandsontableHelper=null;
+var protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper=null;
 Ext.define('AP.view.acquisitionUnit.ModbusProtocolAlarmUnitConfigInfoView', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.modbusProtocolAlarmUnitConfigInfoView',
@@ -155,23 +156,6 @@ Ext.define('AP.view.acquisitionUnit.ModbusProtocolAlarmUnitConfigInfoView', {
                             listeners: {
                                 resize: function (abstractcomponent, adjWidth, adjHeight, options) {
                                 	if(protocolAlarmUnitConfigEnumItemsHandsontableHelper!=null && protocolAlarmUnitConfigEnumItemsHandsontableHelper.hot!=undefined){
-//                                		var selectRow= Ext.getCmp("ModbusProtocolAlarmUnitConfigSelectRow_Id").getValue();
-//                                		var gridPanel=Ext.getCmp("ModbusProtocolAlarmUnitConfigTreeGridPanel_Id");
-//                                		var selectItemRow= Ext.getCmp("ModbusProtocolAlarmUnitEnumItemsSelectRow_Id").getValue();
-//                                		var itemGridPanel=Ext.getCmp("ModbusProtocolAlarmUnitEnumItemsGridPanel_Id");
-//                                		if(isNotVal(gridPanel)&&isNotVal(itemGridPanel)){
-//                                			var selectedUnit=gridPanel.getStore().getAt(selectRow);
-//                                			var selectedItem=itemGridPanel.getStore().getAt(selectItemRow);
-//                                			if(selectedUnit.data.classes==0){
-//                                    			if(isNotVal(selectedUnit.data.children) && selectedUnit.data.children.length>0){
-//                                    				CreateProtocolAlarmUnitEnumItemsConfigInfoTable(selectedUnit.data.children[0].text,selectedUnit.data.children[0].classes,selectedUnit.data.children[0].code,selectedItem.data.addr);
-//                                    			}
-//                                    		}else if(selectedUnit.data.classes==1){
-//                                    			CreateProtocolAlarmUnitEnumItemsConfigInfoTable(selectedUnit.data.text,selectedUnit.data.classes,selectedUnit.data.code,selectedItem.data.addr);
-//                                        	}else if(selectedUnit.data.classes==2||selectedUnit.data.classes==3){
-//                                        		CreateProtocolAlarmUnitEnumItemsConfigInfoTable(selectedUnit.data.protocol,selectedUnit.data.classes,selectedUnit.data.code,selectedItem.data.addr);
-//                                        	}
-//                                		}
                                 		protocolAlarmUnitConfigEnumItemsHandsontableHelper.hot.refreshDimensions();
                                 	}
                                 }
@@ -185,21 +169,19 @@ Ext.define('AP.view.acquisitionUnit.ModbusProtocolAlarmUnitConfigInfoView', {
                         listeners: {
                             resize: function (abstractcomponent, adjWidth, adjHeight, options) {
                             	if(protocolAlarmUnitConfigCommStatusItemsHandsontableHelper!=null && protocolAlarmUnitConfigCommStatusItemsHandsontableHelper.hot!=undefined){
-//                            		var selectRow= Ext.getCmp("ModbusProtocolAlarmUnitConfigSelectRow_Id").getValue();
-//                            		var gridPanel=Ext.getCmp("ModbusProtocolAlarmUnitConfigTreeGridPanel_Id");
-//                            		if(isNotVal(gridPanel)){
-//                            			var selectedItem=gridPanel.getStore().getAt(selectRow);
-//                            			if(selectedItem.data.classes==0){
-//                                    		if(isNotVal(selectedItem.data.children) && selectedItem.data.children.length>0){
-//                                    			CreateProtocolAlarmUnitCommStatusItemsConfigInfoTable(selectedItem.data.children[0].text,selectedItem.data.children[0].classes,selectedItem.data.children[0].code);
-//                                    		}
-//                                    	}else if(selectedItem.data.classes==1){
-//                                    		CreateProtocolAlarmUnitCommStatusItemsConfigInfoTable(selectedItem.data.text,selectedItem.data.classes,selectedItem.data.code);
-//                                    	}else if(selectedItem.data.classes==2||selectedItem.data.classes==3){
-//                                    		CreateProtocolAlarmUnitCommStatusItemsConfigInfoTable(selectedItem.data.protocol,selectedItem.data.classes,selectedItem.data.code);
-//                                    	}
-//                            		}
                             		protocolAlarmUnitConfigCommStatusItemsHandsontableHelper.hot.refreshDimensions();
+                            	}
+                            }
+                        }
+                    },{
+                    	title:'工况',
+                    	id:"ModbusProtocolAlarmUnitFESDiagramConditionsConfigTableInfoPanel_Id",
+                        layout: 'fit',
+                        html:'<div class="ModbusProtocolAlarmUnitFESDiagramConditionsConfigTableInfoContainer" style="width:100%;height:100%;"><div class="con" id="ModbusProtocolAlarmUnitFESDiagramConditionsConfigTableInfoDiv_id"></div></div>',
+                        listeners: {
+                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                            	if(protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper!=null && protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot!=undefined){
+                            		protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot.refreshDimensions();
                             	}
                             }
                         }
@@ -243,6 +225,18 @@ Ext.define('AP.view.acquisitionUnit.ModbusProtocolAlarmUnitConfigInfoView', {
                             		CreateProtocolAlarmUnitCommStatusItemsConfigInfoTable(selectedItem.data.text,selectedItem.data.classes,selectedItem.data.code);
                             	}else if(selectedItem.data.classes==2||selectedItem.data.classes==3){
                             		CreateProtocolAlarmUnitCommStatusItemsConfigInfoTable(selectedItem.data.protocol,selectedItem.data.classes,selectedItem.data.code);
+                            	}
+                        	}else if(newCard.id=="ModbusProtocolAlarmUnitFESDiagramConditionsConfigTableInfoPanel_Id"){
+                    			var selectRow= Ext.getCmp("ModbusProtocolAlarmUnitConfigSelectRow_Id").getValue();
+                    			var selectedItem=Ext.getCmp("ModbusProtocolAlarmUnitConfigTreeGridPanel_Id").getStore().getAt(selectRow);
+                    			if(selectedItem.data.classes==0){
+                            		if(isNotVal(selectedItem.data.children) && selectedItem.data.children.length>0){
+                            			CreateProtocolAlarmUnitFESDiagramConditionsConfigInfoTable(selectedItem.data.children[0].text,selectedItem.data.children[0].classes,selectedItem.data.children[0].code);
+                            		}
+                            	}else if(selectedItem.data.classes==1){
+                            		CreateProtocolAlarmUnitFESDiagramConditionsConfigInfoTable(selectedItem.data.text,selectedItem.data.classes,selectedItem.data.code);
+                            	}else if(selectedItem.data.classes==2||selectedItem.data.classes==3){
+                            		CreateProtocolAlarmUnitFESDiagramConditionsConfigInfoTable(selectedItem.data.protocol,selectedItem.data.classes,selectedItem.data.code);
                             	}
                         	}
                     	}
@@ -867,6 +861,119 @@ var ProtocolAlarmUnitConfigCommStatusItemsHandsontableHelper = {
 	    }
 };
 
+function CreateProtocolAlarmUnitFESDiagramConditionsConfigInfoTable(protocolName,classes,code){
+	Ext.Ajax.request({
+		method:'POST',
+		url:context + '/acquisitionUnitManagerController/getModbusProtocolFESDiagramConditionsAlarmItemsConfigData',
+		success:function(response) {
+//			Ext.getCmp("DriverItemsConfigTableInfoPanel_Id").setTitle(protocolName+"采控项配置");
+			var result =  Ext.JSON.decode(response.responseText);
+			if(protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper==null || protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot==undefined){
+				protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper = ProtocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.createNew("ModbusProtocolAlarmUnitFESDiagramConditionsConfigTableInfoDiv_id");
+				var colHeaders="['','序号','名称','延时(s)','报警级别','报警使能','是否发送短信','是否发送邮件']";
+				var columns="[{data:'checked',type:'checkbox'},{data:'id'},{data:'title'},"
+					 	+"{data:'delay',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num(val, callback,this.row, this.col,protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper);}},"
+						+"{data:'alarmLevel',type:'dropdown',strict:true,allowInvalid:false,source:['正常','一级报警','二级报警','三级报警']}," 
+						+"{data:'alarmSign',type:'dropdown',strict:true,allowInvalid:false,source:['使能','失效']}," 
+						+"{data:'isSendMessage',type:'dropdown',strict:true,allowInvalid:false,source:['是','否']}," 
+						+"{data:'isSendMail',type:'dropdown',strict:true,allowInvalid:false,source:['是','否']}" 
+						+"]";
+				protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
+				protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.columns=Ext.JSON.decode(columns);
+				if(result.totalRoot.length==0){
+					protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.createTable([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+				}else{
+					protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.createTable(result.totalRoot);
+				}
+			}else{
+				if(result.totalRoot.length==0){
+					protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot.loadData([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+				}else{
+					protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot.loadData(result.totalRoot);
+				}
+			}
+		},
+		failure:function(){
+			Ext.MessageBox.alert("错误","与后台联系的时候出了问题");
+		},
+		params: {
+			protocolName:protocolName,
+			classes:classes,
+			code:code
+        }
+	});
+};
+
+var ProtocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper = {
+		createNew: function (divid) {
+			var protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper = {};
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot1 = '';
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.divid = divid;
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.validresult=true;//数据校验
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.colHeaders=[];
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.columns=[];
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.AllData=[];
+	        
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.addColBg = function (instance, td, row, col, prop, value, cellProperties) {
+	             Handsontable.renderers.TextRenderer.apply(this, arguments);
+	             td.style.backgroundColor = 'rgb(242, 242, 242)';    
+	        }
+	        
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
+	            Handsontable.renderers.TextRenderer.apply(this, arguments);
+	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	        }
+	        
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.createTable = function (data) {
+	        	$('#'+protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.divid).empty();
+	        	var hotElement = document.querySelector('#'+protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.divid);
+	        	protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot = new Handsontable(hotElement, {
+	        		licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
+	        		data: data,
+	        		colWidths: [25,50,80,80,80,80,80,80],
+	                columns:protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.columns,
+	                stretchH: 'all',//延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
+	                autoWrapRow: true,
+	                rowHeaders: false,//显示行头
+	                colHeaders:protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.colHeaders,//显示列头
+	                columnSorting: true,//允许排序
+	                sortIndicator: true,
+	                manualColumnResize:true,//当值为true时，允许拖动，当为false时禁止拖动
+	                manualRowResize:true,//当值为true时，允许拖动，当为false时禁止拖动
+	                filters: true,
+	                renderAllRows: true,
+	                search: true,
+	                cells: function (row, col, prop) {
+	                	var cellProperties = {};
+	                    var visualRowIndex = this.instance.toVisualRow(row);
+	                    var visualColIndex = this.instance.toVisualColumn(col);
+	                    
+	                    var selectRow= Ext.getCmp("ModbusProtocolAlarmUnitConfigSelectRow_Id").getValue();
+	                	if(selectRow!=''){
+	                		var selectedItem=Ext.getCmp("ModbusProtocolAlarmUnitConfigTreeGridPanel_Id").getStore().getAt(selectRow);
+	                		if(selectedItem.data.classes!=3){
+	                			cellProperties.readOnly = true;
+	                		}else{
+	                			if (visualColIndex >=1 && visualColIndex <=2) {
+	    							cellProperties.readOnly = true;
+	    		                }
+	                		}
+	                	}
+	                    return cellProperties;
+	                },
+	                afterSelectionEnd : function (row,column,row2,column2, preventScrolling,selectionLayerLevel) {
+	                }
+	        	});
+	        }
+	        //保存数据
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.saveData = function () {}
+	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.clearContainer = function () {
+	        	protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.AllData = [];
+	        }
+	        return protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper;
+	    }
+};
+
 
 function SaveModbusProtocolAlarmUnitConfigTreeData(){
 	var selectRow= Ext.getCmp("ModbusProtocolAlarmUnitConfigSelectRow_Id").getValue();
@@ -911,6 +1018,10 @@ function SaveModbusProtocolAlarmUnitConfigTreeData(){
         	}else if(activeId=="ModbusProtocolAlarmUnitCommStatusConfigTableInfoPanel_Id"){
         		saveData.resolutionMode=3;
         		alarmItemsData = protocolAlarmUnitConfigCommStatusItemsHandsontableHelper.hot.getData();
+        	}
+        	else if(activeId=="ModbusProtocolAlarmUnitFESDiagramConditionsConfigTableInfoPanel_Id"){
+        		saveData.resolutionMode=4;
+        		alarmItemsData = protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot.getData();
         	}
 			saveData.alarmItems=[];
 			Ext.Array.each(alarmItemsData, function (name, index, countriesItSelf) {
@@ -962,6 +1073,13 @@ function SaveModbusProtocolAlarmUnitConfigTreeData(){
 							item.isSendMail=alarmItemsData[index][8];
 						}
 					}else if(saveData.resolutionMode==3){//通信状态
+						item.itemName=alarmItemsData[index][2];
+						item.delay=alarmItemsData[index][3];
+						item.alarmLevel=alarmItemsData[index][4];
+						item.alarmSign=alarmItemsData[index][5];
+						item.isSendMessage=alarmItemsData[index][6];
+						item.isSendMail=alarmItemsData[index][7];
+					}else if(saveData.resolutionMode==4){//功图工况
 						item.itemName=alarmItemsData[index][2];
 						item.delay=alarmItemsData[index][3];
 						item.alarmLevel=alarmItemsData[index][4];

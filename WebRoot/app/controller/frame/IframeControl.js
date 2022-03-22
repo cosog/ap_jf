@@ -161,7 +161,7 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 		&& module_Code != "RPCDeviceManager"
 		&& module_Code != "PCPDeviceManager"
 		&& module_Code != "SMSDeviceManager"
-		&& module_Code != "AuxiliaryDeviceManager"
+		&& module_Code != "PumpingModelManager"
 		&& module_Code != "DeviceRealTimeMonitoring"
 		&& module_Code != "DeviceHistoryQuery"
 		&& module_Code != "LogQuery"
@@ -294,8 +294,8 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 		CreateAndLoadPCPDeviceInfoTable(true);
 	}else if(module_Code == "SMSDeviceManager"){
 		CreateAndLoadSMSDeviceInfoTable(true);
-	}else if(module_Code == "AuxiliaryDeviceManager"){
-		CreateAndLoadAuxiliaryDeviceInfoTable(true);
+	}else if(module_Code == "PumpingModelManager"){
+		CreateAndLoadPumpingModelInfoTable(true);
 	}else if(module_Code == "DeviceRealTimeMonitoring"){
 		var tabPanel = Ext.getCmp("RealTimeMonitoringTabPanel");
 		var activeId = tabPanel.getActiveTab().id;

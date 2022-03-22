@@ -24,6 +24,7 @@ import com.cosog.model.drive.KafkaConfig;
 import com.cosog.model.drive.ModbusProtocolAlarmUnitSaveData;
 import com.cosog.model.drive.ModbusProtocolConfig;
 import com.cosog.model.drive.ModbusProtocolConfig.Protocol;
+import com.cosog.model.gridmodel.DatabaseMappingProHandsontableChangedData;
 import com.cosog.service.base.BaseService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.data.DataitemsInfoService;
@@ -820,9 +821,10 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			}
 		}
 		
-		boolean checked=false;
-		String delay="",alarmLevel="",alarmSign="",isSendMessage="",isSendMail="";
+		
 		for(int i=0;i<commStatusItemsList.size();i++){
+			boolean checked=false;
+			String delay="",alarmLevel="",alarmSign="",isSendMessage="",isSendMail="";
 			if(StringManagerUtils.existOrNot(itemsList,commStatusItemsList.get(i),false)){
 				for(int j=0;j<list.size();j++){
 					Object[] obj = (Object[]) list.get(j);
@@ -840,6 +842,80 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			result_json.append("{\"checked\":"+checked+","
 					+ "\"id\":"+(i+1)+","
 					+ "\"title\":\""+commStatusItemsList.get(i)+"\","
+					+ "\"delay\":\""+delay+"\","
+					+ "\"alarmLevel\":\""+alarmLevel+"\","
+					+ "\"alarmSign\":\""+alarmSign+"\","
+					+ "\"isSendMessage\":\""+isSendMessage+"\","
+					+ "\"isSendMail\":\""+isSendMail+"\""
+					+ "},");
+		}
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		return result_json.toString();
+	}
+	
+	public String getModbusProtocolFESDiagramConditionsAlarmItemsConfigData(String protocolName,String classes,String code){
+		StringBuffer result_json = new StringBuffer();
+		String columns = "["
+				+ "{ \"header\":\"\",\"dataIndex\":\"checked\",width:20 ,children:[] },"
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"延时(s)\",\"dataIndex\":\"delay\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警级别\",\"dataIndex\":\"alarmLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警使能\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送短信\",\"dataIndex\":\"isSendMessage\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送邮件\",\"dataIndex\":\"isSendMail\",width:80 ,children:[] }"
+				+ "]";
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		
+		List<String> itemsList=new ArrayList<String>();
+		List<String> conditionsListItemsList=new ArrayList<String>();
+		
+		String conditionsSql="select t.resultname from tbl_rpc_worktype t order by t.resultcode";
+		List<?> conditionsList=this.findCallSql(conditionsSql);
+		for(int i=0;i<conditionsList.size();i++){
+			conditionsListItemsList.add(conditionsList.get(i).toString());
+		}
+		List<?> list=null;
+		if("3".equalsIgnoreCase(classes)){
+			String sql="select t.itemname,t.itemcode,t.delay,"
+					+ " t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') as alarmsign,"
+					+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_code t3  "
+					+ " where t.type=4 and t.unitid=t2.id and upper(t3.itemcode)=upper('BJJB') and t.alarmlevel=t3.itemvalue and t2.unit_code='"+code+"' "
+					+ " order by t.id";
+			list=this.findCallSql(sql);
+			for(int i=0;i<list.size();i++){
+				Object[] obj = (Object[]) list.get(i);
+				itemsList.add(obj[0]+"");
+			}
+		}
+		
+		
+		for(int i=0;i<conditionsListItemsList.size();i++){
+			boolean checked=false;
+			String delay="",alarmLevel="",alarmSign="",isSendMessage="",isSendMail="";
+			if(StringManagerUtils.existOrNot(itemsList,conditionsListItemsList.get(i),false)){
+				for(int j=0;j<list.size();j++){
+					Object[] obj = (Object[]) list.get(j);
+					if(conditionsListItemsList.get(i).equalsIgnoreCase(obj[0]+"")){
+						checked=true;
+						delay=obj[2]+"";
+						alarmLevel=obj[3]+"";
+						alarmSign=obj[4]+"";
+						isSendMessage=obj[5]+"";
+						isSendMail=obj[6]+"";
+						break;
+					}
+				}
+			}
+			result_json.append("{\"checked\":"+checked+","
+					+ "\"id\":"+(i+1)+","
+					+ "\"title\":\""+conditionsListItemsList.get(i)+"\","
 					+ "\"delay\":\""+delay+"\","
 					+ "\"alarmLevel\":\""+alarmLevel+"\","
 					+ "\"alarmSign\":\""+alarmSign+"\","
@@ -1908,11 +1984,12 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	
 	public String getDatabaseColumnMappingTable(String deviceType) {
 		StringBuffer result_json = new StringBuffer();
-		String sql="select t.id,t.name,t.mappingcolumn from tbl_datamapping t where t.protocoltype="+deviceType+" order by t.id";
+		String sql="select t.id,t.name,t.mappingcolumn,t.calcolumn from tbl_datamapping t where t.protocoltype="+deviceType+" order by t.id";
 		String columns="["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"itemName\" ,children:[] },"
-				+ "{ \"header\":\"字段\",\"dataIndex\":\"itemColumn\",children:[] }"
+				+ "{ \"header\":\"字段\",\"dataIndex\":\"itemColumn\",children:[] },"
+				+ "{ \"header\":\"计算字段\",\"dataIndex\":\"calColumn\",children:[] }"
 				+ "]";
 		List<?> list=this.findCallSql(sql);
 		result_json.append("{\"success\":true,\"totalCount\":" + list.size() + ",\"columns\":"+columns+",\"totalRoot\":[");
@@ -1920,13 +1997,27 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			Object[] obj = (Object[]) list.get(i);
 			result_json.append("{\"id\":\""+obj[0]+"\",");
 			result_json.append("\"itemName\":\""+obj[1]+"\",");
-			result_json.append("\"itemColumn\":\""+obj[2]+"\"},");
+			result_json.append("\"itemColumn\":\""+obj[2]+"\",");
+			result_json.append("\"calColumn\":\""+obj[3]+"\"},");
 		}
 		if(result_json.toString().endsWith(",")){
 			result_json.deleteCharAt(result_json.length() - 1);
 		}
 		result_json.append("]}");
 		return result_json.toString().replaceAll("null", "");
+	}
+	
+	public void saveDatabaseColumnMappingTable(DatabaseMappingProHandsontableChangedData databaseMappingProHandsontableChangedData,String protocolType) throws Exception {
+		if(databaseMappingProHandsontableChangedData.getUpdatelist()!=null){
+			String updateSql="";
+			for(int i=0;i<databaseMappingProHandsontableChangedData.getUpdatelist().size();i++){
+				updateSql="update tbl_datamapping t set t.calcolumn='"+databaseMappingProHandsontableChangedData.getUpdatelist().get(i).getCalColumn()+"'"
+						+ " where t.name='"+databaseMappingProHandsontableChangedData.getUpdatelist().get(i).getItemName()+"' "
+						+ " and t.mappingcolumn='"+databaseMappingProHandsontableChangedData.getUpdatelist().get(i).getItemColumn()+"' "
+						+ " and t.protocoltype="+protocolType;
+				getBaseDao().updateOrDeleteBySql(updateSql);
+			}
+		}
 	}
 	
 	public boolean judgeProtocolExistOrNot(int deviceType,String protocolName) {

@@ -405,6 +405,8 @@ public class RPCProductionData {
 	public static class EveryBalance
 	{
 	    private float Weight;
+	    
+	    private float Position;
 
 	    public void setWeight(float Weight){
 	        this.Weight = Weight;
@@ -412,6 +414,12 @@ public class RPCProductionData {
 	    public float getWeight(){
 	        return this.Weight;
 	    }
+		public float getPosition() {
+			return Position;
+		}
+		public void setPosition(float position) {
+			Position = position;
+		}
 	}
 	
 	public static class Balance
