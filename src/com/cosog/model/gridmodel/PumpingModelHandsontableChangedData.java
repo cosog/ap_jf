@@ -51,6 +51,8 @@ public class PumpingModelHandsontableChangedData {
 	    
 	    private String structuralUnbalance;
 	    
+	    private String balanceWeight="";
+	    
 	    private int saveSign;
 	    
 	    private String saveStr;
@@ -149,6 +151,14 @@ public class PumpingModelHandsontableChangedData {
 
 		public void setSaveStr(String saveStr) {
 			this.saveStr = saveStr;
+		}
+
+		public String getBalanceWeight() {
+			return balanceWeight;
+		}
+
+		public void setBalanceWeight(String balanceWeight) {
+			this.balanceWeight = balanceWeight;
 		}
 	}
 }

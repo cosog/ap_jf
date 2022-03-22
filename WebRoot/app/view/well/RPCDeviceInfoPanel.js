@@ -2,6 +2,7 @@
 var rpcDeviceInfoHandsontableHelper = null;
 var rpcPumpingModelHandsontableHelper = null;
 var rpcProductionHandsontableHelper = null;
+var rpcPumpingInfoHandsontableHelper = null;
 Ext.define('AP.view.well.RPCDeviceInfoPanel', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.rpcDeviceInfoPanel',
@@ -308,22 +309,42 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
             	}]
             },{
             	region: 'east',
-                width: '18%',
-                
-                
-                
-                title:'抽油机型号列表',
-                id:'RPCAuxiliaryDevicePanel_Id',
+                width: '20%',
+                layout: 'border',
                 split: true,
                 collapsible: true,
-                html: '<div class="RPCAuxiliaryDeviceContainer" style="width:100%;height:100%;"><div class="con" id="RPCAuxiliaryDeviceTableDiv_id"></div></div>',
-                listeners: {
-                    resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                    	if (rpcPumpingModelHandsontableHelper != null && rpcPumpingModelHandsontableHelper.hot != null && rpcPumpingModelHandsontableHelper.hot != undefined) {
-                    		rpcPumpingModelHandsontableHelper.hot.refreshDimensions();
+                items: [{
+                	region: 'center',
+                	title:'抽油机型号列表',
+                    id:'RPCPumpingModelListPanel_Id',
+                    split: true,
+                    collapsible: true,
+                    html: '<div class="RPCPumpingModelListContainer" style="width:100%;height:100%;"><div class="con" id="RPCPumpingModelListTableDiv_id"></div></div>',
+                    listeners: {
+                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                        	if (rpcPumpingModelHandsontableHelper != null && rpcPumpingModelHandsontableHelper.hot != null && rpcPumpingModelHandsontableHelper.hot != undefined) {
+                        		rpcPumpingModelHandsontableHelper.hot.refreshDimensions();
+                            }
                         }
                     }
-                }
+                },{
+                	region: 'south',
+                	height:'50%',
+                	split: true,
+                    collapsible: true,
+                	title:'抽油机详情',
+                	id:'RPCPumpingInfoPanel_Id',
+                    split: true,
+                    collapsible: true,
+                    html: '<div class="RPCPumpingInfoContainer" style="width:100%;height:100%;"><div class="con" id="RPCPumpingInfoTableDiv_id"></div></div>',
+                    listeners: {
+                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                        	if (rpcPumpingInfoHandsontableHelper != null && rpcPumpingInfoHandsontableHelper.hot != null && rpcPumpingInfoHandsontableHelper.hot != undefined) {
+                        		rpcPumpingInfoHandsontableHelper.hot.refreshDimensions();
+                            }
+                        }
+                    }
+                }]
             }],
             listeners: {
                 beforeclose: function (panel, eOpts) {
@@ -344,6 +365,12 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
                         	rpcProductionHandsontableHelper.hot.destroy();
                         }
                         rpcProductionHandsontableHelper = null;
+                    }
+                    if (rpcPumpingInfoHandsontableHelper != null) {
+                        if (rpcPumpingInfoHandsontableHelper.hot != undefined) {
+                        	rpcPumpingInfoHandsontableHelper.hot.destroy();
+                        }
+                        rpcPumpingInfoHandsontableHelper = null;
                     }
                 }
             }
@@ -438,11 +465,13 @@ function CreateAndLoadRPCDeviceInfoTable(isNew) {
             	Ext.getCmp("RPCDeviceSelectEndRow_Id").setValue('');
             	CreateAndLoadRPCPumoingModelInfoTable(0,'');
             	CreateAndLoadRPCProductionDataTable(0,'');
+            	CreateAndLoadRPCPumpingInfoTable(0,'');
             }else{
             	var selectedRow=Ext.getCmp("RPCDeviceSelectRow_Id").getValue();
             	var rowdata = rpcDeviceInfoHandsontableHelper.hot.getDataAtRow(selectedRow);
             	CreateAndLoadRPCPumoingModelInfoTable(rowdata[0],rowdata[1]);
             	CreateAndLoadRPCProductionDataTable(rowdata[0],rowdata[1]);
+            	CreateAndLoadRPCPumpingInfoTable(rowdata[0],rowdata[1]);
             }
             Ext.getCmp("RPCDeviceTotalCount_Id").update({
                 count: result.totalCount
@@ -559,6 +588,7 @@ var RPCDeviceInfoHandsontableHelper = {
                     	Ext.getCmp("RPCDeviceSelectEndRow_Id").setValue('');
                     	CreateAndLoadRPCPumoingModelInfoTable(0,'');
                     	CreateAndLoadRPCProductionDataTable(0,'');
+                    	CreateAndLoadRPCPumpingInfoTable(0,'');
                 	}else{
                 		if(row<0){
                     		row=0;
@@ -587,6 +617,7 @@ var RPCDeviceInfoHandsontableHelper = {
                     	}
                     	CreateAndLoadRPCPumoingModelInfoTable(recordId,deviceName);
                     	CreateAndLoadRPCProductionDataTable(recordId,deviceName);
+                    	CreateAndLoadRPCPumpingInfoTable(recordId,deviceName);
                 	}
                 },
                 afterDestroy: function () {
@@ -683,6 +714,7 @@ var RPCDeviceInfoHandsontableHelper = {
             var RPCDeviceSelectRow= Ext.getCmp("RPCDeviceSelectRow_Id").getValue();
             var rowdata = rpcDeviceInfoHandsontableHelper.hot.getDataAtRow(RPCDeviceSelectRow);
         	var deviceId=rowdata[0];
+        	
             //生产数据
             var deviceProductionData={};
             if(rpcProductionHandsontableHelper!=null && rpcProductionHandsontableHelper.hot!=undefined){
@@ -760,9 +792,6 @@ var RPCDeviceInfoHandsontableHelper = {
         		if(isNumber(parseFloat(productionHandsontableData[17][2]))){
         			deviceProductionData.Pump.PlungerLength=parseFloat(productionHandsontableData[17][2]);
         		}
-        		
-        		
-        		
         		
         		deviceProductionData.TubingString={};
         		deviceProductionData.TubingString.EveryTubing=[];
@@ -845,9 +874,7 @@ var RPCDeviceInfoHandsontableHelper = {
         		}
         	}
             
-            
-            
-            //获取辅件配置数据
+            //获取抽油机型号配置数据
             var pumpingModelId='';
             if(isNotVal(deviceId) && parseInt(deviceId)>0 ){
             	if(rpcPumpingModelHandsontableHelper!=null && rpcPumpingModelHandsontableHelper.hot!=undefined){
@@ -860,6 +887,23 @@ var RPCDeviceInfoHandsontableHelper = {
                 	}
             	}
         	}
+            
+            //抽油机详情
+            var balanceInfo={};
+            var stroke="";
+            if(rpcPumpingInfoHandsontableHelper!=null && rpcPumpingInfoHandsontableHelper.hot!=undefined){
+            	var rpcPumpingInfoHandsontableData=rpcPumpingInfoHandsontableHelper.hot.getData();
+            	stroke=rpcPumpingInfoHandsontableData[0][2];
+            	balanceInfo.EveryBalance=[];
+            	for(var i=1;i<rpcPumpingInfoHandsontableData.length;i++){
+            		if(isNotVal(rpcPumpingInfoHandsontableData[i][2]) || isNotVal(rpcPumpingInfoHandsontableData[i][3])){
+                		var EveryBalance={};
+                		EveryBalance.Position=rpcPumpingInfoHandsontableData[i][2];
+                		EveryBalance.Weight=rpcPumpingInfoHandsontableData[i][3];
+                		balanceInfo.EveryBalance.push(EveryBalance);
+                	}
+            	}
+            }
         	Ext.Ajax.request({
                 method: 'POST',
                 url: context + '/wellInformationManagerController/saveWellHandsontableData',
@@ -890,6 +934,8 @@ var RPCDeviceInfoHandsontableHelper = {
                 	deviceId: deviceId,
                 	data: JSON.stringify(rpcDeviceInfoHandsontableHelper.AllData),
                 	pumpingModelId: pumpingModelId,
+                	stroke: stroke,
+                	balanceInfo: JSON.stringify(balanceInfo),
                     deviceProductionData: JSON.stringify(deviceProductionData),
                     orgId: leftOrg_Id,
                     deviceType: 101
@@ -1007,7 +1053,7 @@ function CreateAndLoadRPCPumoingModelInfoTable(deviceId,deviceName,isNew){
 				deviceName='';
 			}
 			if(rpcPumpingModelHandsontableHelper==null || rpcPumpingModelHandsontableHelper.hot==undefined){
-				rpcPumpingModelHandsontableHelper = RPCPumpingModelHandsontableHelper.createNew("RPCAuxiliaryDeviceTableDiv_id");
+				rpcPumpingModelHandsontableHelper = RPCPumpingModelHandsontableHelper.createNew("RPCPumpingModelListTableDiv_id");
 				var colHeaders="['','序号','厂家','型号','']";
 				var columns="[{data:'checked',type:'checkbox'},{data:'id'},{data:'manufacturer'},{data:'model'},{data:'realId'}]";
 				
@@ -1118,7 +1164,6 @@ function CreateAndLoadRPCProductionDataTable(deviceId,deviceName,isNew){
 				rpcProductionHandsontableHelper = RPCProductionHandsontableHelper.createNew("RPCAdditionalInfoTableDiv_id");
 				var colHeaders="['序号','名称','值']";
 				var columns="[{data:'id'},{data:'itemName'},{data:'itemValue'}]";
-				
 				rpcProductionHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
 				rpcProductionHandsontableHelper.columns=Ext.JSON.decode(columns);
 				if(result.totalRoot.length==0){
@@ -1263,5 +1308,148 @@ var RPCProductionHandsontableHelper = {
 	            });
 	        }
 	        return rpcProductionHandsontableHelper;
+	    }
+	};
+
+function CreateAndLoadRPCPumpingInfoTable(deviceId,deviceName,isNew){
+	if(isNew&&rpcPumpingInfoHandsontableHelper!=null){
+		if(rpcPumpingInfoHandsontableHelper.hot!=undefined){
+			rpcPumpingInfoHandsontableHelper.hot.destroy();
+		}
+		rpcPumpingInfoHandsontableHelper=null;
+	}
+	Ext.Ajax.request({
+		method:'POST',
+		url:context + '/wellInformationManagerController/getDevicePumpingInfo',
+		success:function(response) {
+			var result =  Ext.JSON.decode(response.responseText);
+			if(!isNotVal(deviceName)){
+				deviceName='';
+			}
+			Ext.getCmp("RPCPumpingInfoPanel_Id").setTitle(deviceName+"抽油机详情");
+			if(rpcPumpingInfoHandsontableHelper==null || rpcPumpingInfoHandsontableHelper.hot==undefined){
+				rpcPumpingInfoHandsontableHelper = RPCPumpingInfoHandsontableHelper.createNew("RPCPumpingInfoTableDiv_id");
+				var colHeaders="['序号','名称','值','']";
+				var columns="[{data:'id'},{data:'itemName'},{data:'itemValue'},{data:'itemValue2'}]";
+				rpcPumpingInfoHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
+				rpcPumpingInfoHandsontableHelper.columns=Ext.JSON.decode(columns);
+				if(result.totalRoot.length==0){
+					rpcPumpingInfoHandsontableHelper.createTable([{},{},{},{},{},{},{},{},{}]);
+				}else{
+					rpcPumpingInfoHandsontableHelper.createTable(result.totalRoot);
+				}
+			}else{
+				if(result.totalRoot.length==0){
+					rpcPumpingInfoHandsontableHelper.hot.loadData([{},{},{},{},{},{},{},{},{}]);
+				}else{
+					rpcPumpingInfoHandsontableHelper.hot.loadData(result.totalRoot);
+				}
+			}
+		},
+		failure:function(){
+			Ext.MessageBox.alert("错误","与后台联系的时候出了问题");
+		},
+		params: {
+			deviceId:deviceId,
+			deviceType:101
+        }
+	});
+};
+
+var RPCPumpingInfoHandsontableHelper = {
+	    createNew: function (divid) {
+	        var rpcPumpingInfoHandsontableHelper = {};
+	        rpcPumpingInfoHandsontableHelper.hot = '';
+	        rpcPumpingInfoHandsontableHelper.divid = divid;
+	        rpcPumpingInfoHandsontableHelper.colHeaders = [];
+	        rpcPumpingInfoHandsontableHelper.columns = [];
+	        rpcPumpingInfoHandsontableHelper.addColBg = function (instance, td, row, col, prop, value, cellProperties) {
+	            Handsontable.renderers.TextRenderer.apply(this, arguments);
+	            td.style.backgroundColor = 'rgb(242, 242, 242)';
+	        }
+	        
+	        rpcPumpingInfoHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
+	            Handsontable.renderers.TextRenderer.apply(this, arguments);
+	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	        }
+
+	        rpcPumpingInfoHandsontableHelper.createTable = function (data) {
+	            $('#' + rpcPumpingInfoHandsontableHelper.divid).empty();
+	            var hotElement = document.querySelector('#' + rpcPumpingInfoHandsontableHelper.divid);
+	            rpcPumpingInfoHandsontableHelper.hot = new Handsontable(hotElement, {
+	            	licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
+	            	data: data,
+	                hiddenColumns: {
+	                    columns: [0],
+	                    indicators: false
+	                },
+	                columns: rpcPumpingInfoHandsontableHelper.columns,
+	                stretchH: 'all', //延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
+	                autoWrapRow: true,
+	                rowHeaders: true, //显示行头
+	                colHeaders: rpcPumpingInfoHandsontableHelper.colHeaders, //显示列头
+	                columnSorting: true, //允许排序
+	                sortIndicator: true,
+	                manualColumnResize: true, //当值为true时，允许拖动，当为false时禁止拖动
+	                manualRowResize: true, //当值为true时，允许拖动，当为false时禁止拖动
+	                filters: true,
+	                renderAllRows: true,
+	                search: true,
+	                nestedHeaders:[[{
+	                	label:'序号'
+	                },{
+	                	label:'名称'
+	                },{
+	                	label:'值',
+	                	colspan:2
+	                }]],
+	                mergeCells: [{
+	                	"row": 0,
+                        "col": 2,
+                        "rowspan": 1,
+                        "colspan": 2
+	                }],
+	                cells: function (row, col, prop) {
+	                    var cellProperties = {};
+	                    var visualRowIndex = this.instance.toVisualRow(row);
+	                    var visualColIndex = this.instance.toVisualColumn(col);
+	                    if (visualColIndex <2) {
+							cellProperties.readOnly = true;
+							cellProperties.renderer = rpcPumpingInfoHandsontableHelper.addBoldBg;
+		                }
+	                    
+//	                    if (visualColIndex === 2 && visualRowIndex===13) {
+//	                    	this.type = 'dropdown';
+//	                    	this.source = ['杆式泵','管式泵'];
+//	                    	this.strict = true;
+//	                    	this.allowInvalid = false;
+//	                    }
+//	                    
+//	                    if (visualColIndex === 2 && visualRowIndex===14) {
+//	                    	this.type = 'dropdown';
+//	                    	this.source = ['组合泵','整筒泵'];
+//	                    	this.strict = true;
+//	                    	this.allowInvalid = false;
+//	                    }
+//	                    
+//	                    if (visualColIndex === 2 && visualRowIndex===15) {
+//	                    	this.type = 'dropdown';
+//	                    	this.source = ['1','2','3','4','5'];
+//	                    	this.strict = true;
+//	                    	this.allowInvalid = false;
+//	                    }
+//	                    
+//	                    if (visualColIndex === 2 && (visualRowIndex===20 || visualRowIndex===24||visualRowIndex===28||visualRowIndex===32)) {
+//	                    	this.type = 'dropdown';
+//	                    	this.source = ['A','B','C','K','D','KD','HL','HY'];
+//	                    	this.strict = true;
+//	                    	this.allowInvalid = false;
+//	                    }
+	                    
+	                    return cellProperties;
+	                }
+	            });
+	        }
+	        return rpcPumpingInfoHandsontableHelper;
 	    }
 	};

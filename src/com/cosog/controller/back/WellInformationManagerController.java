@@ -64,7 +64,7 @@ public class WellInformationManagerController extends BaseController {
 	@Autowired
 	private WellInformationManagerService<SmsDeviceInformation> smsDeviceManagerService;
 	@Autowired
-	private WellInformationManagerService<PumpingModelInformation> auxiliaryDeviceManagerService;
+	private WellInformationManagerService<PumpingModelInformation> pumpingModelManagerService;
 	@Autowired
 	private CommonDataService service;
 	private String limit;
@@ -366,12 +366,12 @@ public class WellInformationManagerController extends BaseController {
 		return null;
 	}
 	
-	@RequestMapping("/getBatchAddAuxiliaryDeviceTableInfo")
-	public String getBatchAddAuxiliaryDeviceTableInfo() throws IOException {
+	@RequestMapping("/getBatchAddPumpingModelTableInfo")
+	public String getBatchAddPumpingModelTableInfo() throws IOException {
 		Map<String, Object> map = new HashMap<String, Object>();
 		int recordCount =StringManagerUtils.stringToInteger(ParamUtils.getParameter(request, "recordCount"));
 		this.pager = new Page("pagerForm", request);
-		String json = this.wellInformationManagerService.getBatchAddAuxiliaryDeviceTableInfo(recordCount);
+		String json = this.wellInformationManagerService.getBatchAddPumpingModelTableInfo(recordCount);
 		response.setContentType("application/json;charset=" + Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -433,6 +433,22 @@ public class WellInformationManagerController extends BaseController {
 		deviceType= ParamUtils.getParameter(request, "deviceType");
 		this.pager = new Page("pagerForm", request);
 		String json = this.wellInformationManagerService.getDeviceProductionDataInfo(deviceId,deviceType);
+		response.setContentType("application/json;charset=" + Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/getDevicePumpingInfo")
+	public String getDevicePumpingInfo() throws IOException {
+		Map<String, Object> map = new HashMap<String, Object>();
+		String deviceId= ParamUtils.getParameter(request, "deviceId");
+		deviceType= ParamUtils.getParameter(request, "deviceType");
+		this.pager = new Page("pagerForm", request);
+		String json = this.wellInformationManagerService.getDevicePumpingInfo(deviceId,deviceType);
 		response.setContentType("application/json;charset=" + Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -565,6 +581,8 @@ public class WellInformationManagerController extends BaseController {
 		int deviceId = StringManagerUtils.stringToInteger(ParamUtils.getParameter(request, "deviceId"));
 		String data = ParamUtils.getParameter(request, "data").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
 		String pumpingModelId = ParamUtils.getParameter(request, "pumpingModelId");
+		String stroke = ParamUtils.getParameter(request, "stroke");
+		String balanceInfo = ParamUtils.getParameter(request, "balanceInfo").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
 		String deviceProductionData = ParamUtils.getParameter(request, "deviceProductionData").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
 		String orgId = ParamUtils.getParameter(request, "orgId");
 		deviceType = ParamUtils.getParameter(request, "deviceType");
@@ -587,6 +605,9 @@ public class WellInformationManagerController extends BaseController {
 		
 		//处理抽油机型号
 		this.wellInformationManagerService.saveRPCPumpingModel(deviceId,pumpingModelId);
+		
+		//处理抽油机详情
+		this.wellInformationManagerService.saveRPCPumpingInfo(deviceId,stroke,balanceInfo);
 		
 		EquipmentDriverServerTask.LoadDeviceCommStatus();
 		response.setContentType("application/json;charset=utf-8");
@@ -657,15 +678,15 @@ public class WellInformationManagerController extends BaseController {
 		return null;
 	}
 	
-	@RequestMapping("/batchAddAuxiliaryDevice")
-	public String batchAddAuxiliaryDevice() throws Exception {
+	@RequestMapping("/batchAddPumpingModel")
+	public String batchAddPumpingModel() throws Exception {
 		HttpSession session=request.getSession();
 		String data = ParamUtils.getParameter(request, "data").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
 		String isCheckout = ParamUtils.getParameter(request, "isCheckout");
 		Gson gson = new Gson();
 		java.lang.reflect.Type type = new TypeToken<PumpingModelHandsontableChangedData>() {}.getType();
 		PumpingModelHandsontableChangedData pumpingModelHandsontableChangedData=gson.fromJson(data, type);
-		String json=this.wellInformationManagerService.batchAddAuxiliaryDevice(pumpingModelHandsontableChangedData,isCheckout);
+		String json=this.wellInformationManagerService.batchAddPumpingModel(pumpingModelHandsontableChangedData,isCheckout);
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -785,12 +806,12 @@ public class WellInformationManagerController extends BaseController {
 		return null;
 	}
 	
-	@RequestMapping("/doAuxiliaryDeviceAdd")
-	public String doAuxiliaryDeviceAdd(@ModelAttribute PumpingModelInformation pumpingModelInformation) throws IOException {
+	@RequestMapping("/doPumpingModelAdd")
+	public String doPumpingModelAdd(@ModelAttribute PumpingModelInformation pumpingModelInformation) throws IOException {
 		String result = "";
 		PrintWriter out = response.getWriter();
 		try {
-			this.auxiliaryDeviceManagerService.doAuxiliaryDeviceAdd(pumpingModelInformation);
+			this.pumpingModelManagerService.doPumpingModelAdd(pumpingModelInformation);
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
 			out.print(result);

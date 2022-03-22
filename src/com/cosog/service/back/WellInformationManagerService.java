@@ -559,7 +559,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		getBaseDao().addObject(smsDeviceInformation);
 	}
 	
-	public void doAuxiliaryDeviceAdd(PumpingModelInformation auxiliaryDeviceInformation) throws Exception {
+	public void doPumpingModelAdd(PumpingModelInformation auxiliaryDeviceInformation) throws Exception {
 		getBaseDao().addObject(auxiliaryDeviceInformation);
 	}
 	
@@ -598,6 +598,14 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		this.getBaseDao().updateOrDeleteBySql(sql);
 	}
 	
+	public void saveRPCPumpingInfo(int deviceId,String strokeStr,String balanceInfo) throws Exception {
+		if(!StringManagerUtils.isNumber(strokeStr)){
+			strokeStr="null";
+		}
+		String sql = "update tbl_rpcdevice t set t.stroke="+strokeStr+",t.balanceinfo='"+balanceInfo+"' where t.id="+deviceId;
+		this.getBaseDao().updateOrDeleteBySql(sql);
+	}
+	
 	public void saveDeviceAdditionalInfo(RPCDeviceAddInfo r) throws Exception {
 		getBaseDao().saveOrUpdateObject(r);
 	}
@@ -630,26 +638,31 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		return result_json.toString().replaceAll("null", "");
 	}
 	
-	public String batchAddAuxiliaryDevice(PumpingModelHandsontableChangedData auxiliaryDeviceHandsontableChangedData,String isCheckout) throws Exception {
+	public String batchAddPumpingModel(PumpingModelHandsontableChangedData auxiliaryDeviceHandsontableChangedData,String isCheckout) throws Exception {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer overlayBuff = new StringBuffer();
 		int overlayCount=0;
 		String ddicName="pumpingModelManager";
 		String columns=service.showTableHeadersColumns(ddicName);
-		List<PumpingModelHandsontableChangedData.Updatelist> list=getBaseDao().batchAddAuxiliaryDevice(auxiliaryDeviceHandsontableChangedData,StringManagerUtils.stringToInteger(isCheckout));
+		List<PumpingModelHandsontableChangedData.Updatelist> list=getBaseDao().batchAddPumpingModel(auxiliaryDeviceHandsontableChangedData,StringManagerUtils.stringToInteger(isCheckout));
 		
 		overlayBuff.append("[");
 		if(list!=null){
 			for(int i=0;i<list.size();i++){
 				if(list.get(i).getSaveSign()==-33){//覆盖信息
 					overlayCount+=1;
-//					overlayBuff.append("{\"id\":\""+list.get(i).getId()+"\",");
-//					overlayBuff.append("\"name\":\""+list.get(i).getName()+"\",");
-//					overlayBuff.append("\"type\":\""+list.get(i).getType()+"\",");
-//					overlayBuff.append("\"model\":\""+list.get(i).getModel()+"\",");
-//					overlayBuff.append("\"remark\":\""+list.get(i).getRemark()+"\",");
-//					overlayBuff.append("\"sort\":\""+list.get(i).getSort()+"\",");
-//					overlayBuff.append("\"dataInfo\":\""+list.get(i).getSaveStr()+"\"},");
+					overlayBuff.append("{\"id\":\""+list.get(i).getId()+"\",");
+					overlayBuff.append("\"manufacturer\":\""+list.get(i).getManufacturer()+"\",");
+					overlayBuff.append("\"model\":\""+list.get(i).getModel()+"\",");
+					overlayBuff.append("\"stroke\":\""+list.get(i).getStroke()+"\",");
+					overlayBuff.append("\"crankRotationDirection\":\""+list.get(i).getCrankRotationDirection()+"\",");
+					overlayBuff.append("\"offsetAngleOfCrank\":\""+list.get(i).getOffsetAngleOfCrank()+"\",");
+					overlayBuff.append("\"crankGravityRadius\":\""+list.get(i).getCrankGravityRadius()+"\",");
+					overlayBuff.append("\"singleCrankWeight\":\""+list.get(i).getSingleCrankWeight()+"\",");
+					overlayBuff.append("\"singleCrankPinWeight\":\""+list.get(i).getSingleCrankPinWeight()+"\",");
+					overlayBuff.append("\"structuralUnbalance\":\""+list.get(i).getStructuralUnbalance()+"\",");
+					overlayBuff.append("\"balanceWeight\":\""+list.get(i).getBalanceWeight()+"\",");
+					overlayBuff.append("\"dataInfo\":\""+list.get(i).getSaveStr()+"\"},");
 				}
 			}
 			if (overlayBuff.toString().endsWith(",")) {
@@ -1372,7 +1385,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		String ddicName="pumpingModelManager";
 		String columns=service.showTableHeadersColumns(ddicName);
 		String sql = "select t.id,t.manufacturer,t.model,t.stroke,decode(t.crankrotationdirection,'Anticlockwise','逆时针','Clockwise','顺时针','') as crankrotationdirection,"
-				+ " t.offsetangleofcrank,t.crankgravityradius,t.singlecrankweight,t.singlecrankpinweight,t.structuralunbalance "
+				+ " t.offsetangleofcrank,t.crankgravityradius,t.singlecrankweight,t.singlecrankpinweight,t.structuralunbalance,t.balanceweight "
 				+ " from tbl_pumpingmodel t"
 				+ " order by t.manufacturer,t.model";
 		
@@ -1392,7 +1405,8 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			result_json.append("\"crankGravityRadius\":\""+obj[6]+"\",");
 			result_json.append("\"singleCrankWeight\":\""+obj[7]+"\",");
 			result_json.append("\"singleCrankPinWeight\":\""+obj[8]+"\",");
-			result_json.append("\"structuralUnbalance\":\""+obj[9]+"\"},");
+			result_json.append("\"structuralUnbalance\":\""+obj[9]+"\",");
+			result_json.append("\"balanceWeight\":\""+obj[10]+"\"},");
 		}
 		if(result_json.toString().endsWith(",")){
 			result_json.deleteCharAt(result_json.length() - 1);
@@ -1403,7 +1417,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public String getBatchAddAuxiliaryDeviceTableInfo(int recordCount) {
+	public String getBatchAddPumpingModelTableInfo(int recordCount) {
 		StringBuffer result_json = new StringBuffer();
 		String ddicName="pumpingModelManager";
 		String columns=service.showTableHeadersColumns(ddicName);
@@ -1424,7 +1438,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	public String getPumpingModelExportData(Map map,Page pager,String deviceType,int recordCount) {
 		StringBuffer result_json = new StringBuffer();
 		String sql = "select t.id,t.manufacturer,t.model,t.stroke,decode(t.crankrotationdirection,'Anticlockwise','逆时针','Clockwise','顺时针','') as crankrotationdirection,"
-				+ " t.offsetangleofcrank,t.crankgravityradius,t.singlecrankweight,t.singlecrankpinweight,t.structuralunbalance "
+				+ " t.offsetangleofcrank,t.crankgravityradius,t.singlecrankweight,t.singlecrankpinweight,t.structuralunbalance,t.balanceweight "
 				+ " from tbl_pumpingmodel t"
 				+ " order by t.manufacturer,t.model";
 		
@@ -1444,7 +1458,8 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			result_json.append("\"crankGravityRadius\":\""+obj[6]+"\",");
 			result_json.append("\"singleCrankWeight\":\""+obj[7]+"\",");
 			result_json.append("\"singleCrankPinWeight\":\""+obj[8]+"\",");
-			result_json.append("\"structuralUnbalance\":\""+obj[9]+"\"},");
+			result_json.append("\"structuralUnbalance\":\""+obj[9]+"\"}");
+			result_json.append("\"balanceWeight\":\""+obj[10]+"\"},");
 		}
 		if(result_json.toString().endsWith(",")){
 			result_json.deleteCharAt(result_json.length() - 1);
@@ -1456,30 +1471,20 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	
 	public String getRPCPumpingModelList(String deviceId,String deviceType) {
 		StringBuffer result_json = new StringBuffer();
-		List<Integer> auxiliaryIdList=new ArrayList<Integer>();
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"name\",width:120 ,children:[] },"
 				+ "{ \"header\":\"规格型号\",\"dataIndex\":\"model\",width:80 ,children:[] }"
 				+ "]";
-		String deviceTableName="tbl_rpcdevice";
-		if(StringManagerUtils.stringToInteger(deviceType)>=200 && StringManagerUtils.stringToInteger(deviceType)<300){
-			deviceTableName="tbl_pcpdevice";
-		}
-		
 		String sql = "select t.id,t.manufacturer,t.model from tbl_pumpingmodel t order by t.manufacturer,t.model";
 		String devicePumpingModelSql="select t.pumpingmodelid from tbl_rpcdevice t where t.id="+deviceId;
-		
-		
 		String json = "";
-		
 		List<?> list = this.findCallSql(sql);
 		List<?> devicePumpingModel = this.findCallSql(devicePumpingModelSql);
 		int devicePumpingModelId=0;
 		if(devicePumpingModel.size()>0&&devicePumpingModel.get(0)!=null){
 			devicePumpingModelId=StringManagerUtils.stringToInteger(devicePumpingModel.get(0).toString());
 		}
-		
 		result_json.append("{\"success\":true,\"totalCount\":"+list.size()+",\"columns\":"+columns+",\"totalRoot\":[");
 		for(int i=0;i<list.size();i++){
 			Object[] obj = (Object[]) list.get(i);
@@ -1496,6 +1501,77 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		if(result_json.toString().endsWith(",")){
 			result_json.deleteCharAt(result_json.length() - 1);
 		}
+		result_json.append("]}");
+		json=result_json.toString().replaceAll("null", "");
+		return json;
+	}
+	
+	public String getDevicePumpingInfo(String deviceId,String deviceType) {
+		StringBuffer result_json = new StringBuffer();
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"itemName\",width:120 ,children:[] },"
+				+ "{ \"header\":\"值\",\"dataIndex\":\"itemValue\",width:80 ,children:[] },"
+				+ "{ \"header\":\"\",\"dataIndex\":\"itemValue2\",width:80 ,children:[] }"
+				+ "]";
+		String sql = "select t.stroke,t.balanceinfo from tbl_rpcdevice t where t.id="+deviceId;
+		String json = "";
+		List<?> list = this.findCallSql(sql);
+		String stroke="",balanceInfo="";
+		String losition1="",weight1="",losition2="",weight2="",losition3="",weight3="",losition4="",weight4="",losition5="",weight5="",losition6="",weight6="",losition7="",weight7="",losition8="",weight8="";
+		result_json.append("{\"success\":true,\"totalCount\":9,\"columns\":"+columns+",\"totalRoot\":[");
+		if(list.size()>0){
+			Object[] obj = (Object[]) list.get(0);
+			stroke=obj[0]+"";
+			balanceInfo=obj[1]+"";
+		}
+		type = new TypeToken<RPCProductionData.Balance>() {}.getType();
+		RPCProductionData.Balance balance=gson.fromJson(balanceInfo, type);
+		if(balance!=null&&balance.getEveryBalance()!=null&&balance.getEveryBalance().size()>0){
+			if(balance.getEveryBalance().size()>0){
+				weight1=balance.getEveryBalance().get(0).getWeight()+"";
+				weight1=balance.getEveryBalance().get(0).getPosition()+"";
+			}
+			if(balance.getEveryBalance().size()>1){
+				weight2=balance.getEveryBalance().get(1).getWeight()+"";
+				weight2=balance.getEveryBalance().get(1).getPosition()+"";
+			}
+			if(balance.getEveryBalance().size()>2){
+				weight3=balance.getEveryBalance().get(2).getWeight()+"";
+				weight3=balance.getEveryBalance().get(2).getPosition()+"";
+			}
+			if(balance.getEveryBalance().size()>3){
+				weight4=balance.getEveryBalance().get(3).getWeight()+"";
+				weight4=balance.getEveryBalance().get(3).getPosition()+"";
+			}
+			if(balance.getEveryBalance().size()>4){
+				weight5=balance.getEveryBalance().get(4).getWeight()+"";
+				weight5=balance.getEveryBalance().get(4).getPosition()+"";
+			}
+			if(balance.getEveryBalance().size()>5){
+				weight6=balance.getEveryBalance().get(5).getWeight()+"";
+				weight6=balance.getEveryBalance().get(5).getPosition()+"";
+			}
+			if(balance.getEveryBalance().size()>6){
+				weight7=balance.getEveryBalance().get(6).getWeight()+"";
+				weight7=balance.getEveryBalance().get(6).getPosition()+"";
+			}
+			if(balance.getEveryBalance().size()>7){
+				weight8=balance.getEveryBalance().get(7).getWeight()+"";
+				weight8=balance.getEveryBalance().get(7).getPosition()+"";
+			}
+		}
+		result_json.append("{\"id\":1,\"itemName\":\"冲程(m)\",\"itemValue\":\""+stroke+"\",\"itemValue2\":\"\"},");
+		result_json.append("{\"id\":2,\"itemName\":\"平衡块1位置/重量\",\"itemValue\":\""+losition1+"\",\"itemValue2\":\""+weight1+"\"},");
+		result_json.append("{\"id\":3,\"itemName\":\"平衡块2位置/重量\",\"itemValue\":\""+losition2+"\",\"itemValue2\":\""+weight2+"\"},");
+		result_json.append("{\"id\":4,\"itemName\":\"平衡块3位置/重量\",\"itemValue\":\""+losition3+"\",\"itemValue2\":\""+weight3+"\"},");
+		result_json.append("{\"id\":5,\"itemName\":\"平衡块4位置/重量\",\"itemValue\":\""+losition4+"\",\"itemValue2\":\""+weight4+"\"},");
+		result_json.append("{\"id\":6,\"itemName\":\"平衡块5位置/重量\",\"itemValue\":\""+losition5+"\",\"itemValue2\":\""+weight5+"\"},");
+		result_json.append("{\"id\":7,\"itemName\":\"平衡块6位置/重量\",\"itemValue\":\""+losition6+"\",\"itemValue2\":\""+weight6+"\"},");
+		result_json.append("{\"id\":8,\"itemName\":\"平衡块7位置/重量\",\"itemValue\":\""+losition7+"\",\"itemValue2\":\""+weight7+"\"},");
+		result_json.append("{\"id\":9,\"itemName\":\"平衡块8位置/重量\",\"itemValue\":\""+losition8+"\",\"itemValue2\":\""+weight8+"\"}");
 		result_json.append("]}");
 		json=result_json.toString().replaceAll("null", "");
 		return json;
@@ -2036,7 +2112,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	public boolean judgePumpingModelExistOrNot(String manufacturer,String model) {
 		boolean flag = false;
 		if (StringManagerUtils.isNotNull(manufacturer)&&StringManagerUtils.isNotNull(model)) {
-			String sql = "select t.id from tbl_pumpingmodel t where t.manufacturer='"+manufacturer+"' and t.model='"+model+"'";
+			String sql = "select t.id from tbl_pumpingmodel t where t.manufacturer='"+manufacturer+"' and upper(t.model)=upper('"+model+"')";
 			List<?> list = this.findCallSql(sql);
 			if (list.size() > 0) {
 				flag = true;

@@ -32,7 +32,7 @@ Ext.define("AP.view.well.PumpingModelInfoWindow", {
                 	blur: function (t, e) {
                 		var manufacturer=Ext.getCmp("pumpingManufacturer_Id").getValue();
                         var model=Ext.getCmp("pumpingModel_Id").getValue();
-                		if(name!=''&&typeName!=''&&model!=''){
+                		if(manufacturer!=''&&model!=''){
                     		Ext.Ajax.request({
                                 method: 'POST',
                                 params: {
@@ -70,7 +70,7 @@ Ext.define("AP.view.well.PumpingModelInfoWindow", {
                 	blur: function (t, e) {
                 		var manufacturer=Ext.getCmp("pumpingManufacturer_Id").getValue();
                         var model=Ext.getCmp("pumpingModel_Id").getValue();
-                		if(name!=''&&typeName!=''&&model!=''){
+                		if(manufacturer!=''&&model!=''){
                     		Ext.Ajax.request({
                                 method: 'POST',
                                 params: {
@@ -174,6 +174,14 @@ Ext.define("AP.view.well.PumpingModelInfoWindow", {
          		allowBlank: false,
          		anchor: '95%',
          		name: "pumpingModelInformation.structuralUnbalance",
+         		value:''
+            }, {
+         		xtype: "textfield",
+         		fieldLabel: '平衡块重量(kN)<font color=red>*</font>',
+         		id: 'pumpingBalanceWeight_Id',
+         		allowBlank: false,
+         		anchor: '95%',
+         		name: "pumpingModelInformation.balanceWeight",
          		value:''
             }],
             buttons: [{

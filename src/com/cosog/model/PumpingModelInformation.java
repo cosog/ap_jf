@@ -22,14 +22,14 @@ public class PumpingModelInformation implements java.io.Serializable {
 	private Integer id;
 	private String manufacturer;
 	private String model;
-	private float stroke;
+	private String stroke;
 	private String crankRotationDirection;
 	private float offsetAngleOfCrank;
 	private float crankGravityRadius;
 	private float singleCrankWeight;
 	private float singleCrankPinWeight;
 	private float structuralUnbalance;
-	
+	private String balanceWeight;
 
 	// Constructors
 	/** default constructor */
@@ -37,9 +37,9 @@ public class PumpingModelInformation implements java.io.Serializable {
 	}
 
 	/** full constructor */
-	public PumpingModelInformation(Integer id, String manufacturer, String model, float stroke,
+	public PumpingModelInformation(Integer id, String manufacturer, String model, String stroke,
 			String crankRotationDirection, float offsetAngleOfCrank, float crankGravityRadius, float singleCrankWeight,
-			float singleCrankPinWeight, float structuralUnbalance) {
+			float singleCrankPinWeight, float structuralUnbalance,String balanceWeight) {
 		super();
 		this.id = id;
 		this.manufacturer = manufacturer;
@@ -51,6 +51,7 @@ public class PumpingModelInformation implements java.io.Serializable {
 		this.singleCrankWeight = singleCrankWeight;
 		this.singleCrankPinWeight = singleCrankPinWeight;
 		this.structuralUnbalance = structuralUnbalance;
+		this.balanceWeight = balanceWeight;
 	}
 	@Id
 	@GeneratedValue
@@ -81,12 +82,12 @@ public class PumpingModelInformation implements java.io.Serializable {
 		this.model = model;
 	}
 	
-	@Column(name = "stroke", precision = 8)
-	public float getStroke() {
+	@Column(name = "stroke", nullable = false, length = 50)
+	public String getStroke() {
 		return stroke;
 	}
 
-	public void setStroke(float stroke) {
+	public void setStroke(String stroke) {
 		this.stroke = stroke;
 	}
 
@@ -142,6 +143,15 @@ public class PumpingModelInformation implements java.io.Serializable {
 
 	public void setStructuralUnbalance(float structuralUnbalance) {
 		this.structuralUnbalance = structuralUnbalance;
+	}
+
+	@Column(name = "balanceWeight", nullable = false, length = 50)
+	public String getBalanceWeight() {
+		return balanceWeight;
+	}
+
+	public void setBalanceWeight(String balanceWeight) {
+		this.balanceWeight = balanceWeight;
 	}
 
 	

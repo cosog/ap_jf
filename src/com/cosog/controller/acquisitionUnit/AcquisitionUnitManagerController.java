@@ -47,6 +47,7 @@ import com.cosog.model.drive.ModbusProtocolConfig.ItemsMeaning;
 import com.cosog.model.drive.ModbusProtocolInstanceSaveData;
 import com.cosog.model.gridmodel.AcquisitionGroupHandsontableChangeData;
 import com.cosog.model.gridmodel.AcquisitionUnitHandsontableChangeData;
+import com.cosog.model.gridmodel.DatabaseMappingProHandsontableChangedData;
 import com.cosog.service.acquisitionUnit.AcquisitionUnitManagerService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.right.RoleManagerService;
@@ -677,6 +678,22 @@ public class AcquisitionUnitManagerController extends BaseController {
 			json = acquisitionUnitItemManagerService.getModbusProtocolSwitchAlarmItemsConfigData(protocolName,classes,unitCode,itemAddr,itemResolutionMode);
 		}
 		
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/getModbusProtocolFESDiagramConditionsAlarmItemsConfigData")
+	public String getModbusProtocolFESDiagramConditionsAlarmItemsConfigData() throws Exception {
+		String protocolName = ParamUtils.getParameter(request, "protocolName");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String code = ParamUtils.getParameter(request, "code");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getModbusProtocolFESDiagramConditionsAlarmItemsConfigData(protocolName,classes,code);
 		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -1611,6 +1628,26 @@ public class AcquisitionUnitManagerController extends BaseController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		String deviceType = ParamUtils.getParameter(request, "deviceType");
 		String json = this.acquisitionUnitManagerService.getDatabaseColumnMappingTable(deviceType);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/saveDatabaseColumnMappingTable")
+	public String saveDatabaseColumnMappingTable() throws Exception {
+		String data = ParamUtils.getParameter(request, "data").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
+		String protocolType = ParamUtils.getParameter(request, "protocolType");
+		Gson gson = new Gson();
+		java.lang.reflect.Type type = new TypeToken<DatabaseMappingProHandsontableChangedData>() {}.getType();
+		DatabaseMappingProHandsontableChangedData databaseMappingProHandsontableChangedData=gson.fromJson(data, type);
+		if(databaseMappingProHandsontableChangedData!=null){
+			this.acquisitionUnitManagerService.saveDatabaseColumnMappingTable(databaseMappingProHandsontableChangedData,protocolType);
+		}
+		String json ="{success:true}";
 		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
