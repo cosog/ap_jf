@@ -572,7 +572,7 @@ public class RPCProductionData {
 
 	    private float CasingPressure;
 
-	    private float WellHeadFluidTemperature;
+	    private float WellHeadTemperature;
 
 	    private float ProducingfluidLevel;
 
@@ -604,11 +604,11 @@ public class RPCProductionData {
 	    public float getCasingPressure(){
 	        return this.CasingPressure;
 	    }
-	    public void setWellHeadFluidTemperature(float WellHeadFluidTemperature){
-	        this.WellHeadFluidTemperature = WellHeadFluidTemperature;
+	    public void setWellHeadTemperature(float WellHeadTemperature){
+	        this.WellHeadTemperature = WellHeadTemperature;
 	    }
-	    public float getWellHeadFluidTemperature(){
-	        return this.WellHeadFluidTemperature;
+	    public float getWellHeadTemperature(){
+	        return this.WellHeadTemperature;
 	    }
 	    public void setProducingfluidLevel(float ProducingfluidLevel){
 	        this.ProducingfluidLevel = ProducingfluidLevel;

@@ -1520,7 +1520,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		String json = "";
 		List<?> list = this.findCallSql(sql);
 		String stroke="",balanceInfo="";
-		String losition1="",weight1="",losition2="",weight2="",losition3="",weight3="",losition4="",weight4="",losition5="",weight5="",losition6="",weight6="",losition7="",weight7="",losition8="",weight8="";
+		String position1="",weight1="",position2="",weight2="",position3="",weight3="",position4="",weight4="",position5="",weight5="",position6="",weight6="",position7="",weight7="",position8="",weight8="";
 		result_json.append("{\"success\":true,\"totalCount\":9,\"columns\":"+columns+",\"totalRoot\":[");
 		if(list.size()>0){
 			Object[] obj = (Object[]) list.get(0);
@@ -1532,46 +1532,46 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		if(balance!=null&&balance.getEveryBalance()!=null&&balance.getEveryBalance().size()>0){
 			if(balance.getEveryBalance().size()>0){
 				weight1=balance.getEveryBalance().get(0).getWeight()+"";
-				weight1=balance.getEveryBalance().get(0).getPosition()+"";
+				position1=balance.getEveryBalance().get(0).getPosition()+"";
 			}
 			if(balance.getEveryBalance().size()>1){
 				weight2=balance.getEveryBalance().get(1).getWeight()+"";
-				weight2=balance.getEveryBalance().get(1).getPosition()+"";
+				position2=balance.getEveryBalance().get(1).getPosition()+"";
 			}
 			if(balance.getEveryBalance().size()>2){
 				weight3=balance.getEveryBalance().get(2).getWeight()+"";
-				weight3=balance.getEveryBalance().get(2).getPosition()+"";
+				position3=balance.getEveryBalance().get(2).getPosition()+"";
 			}
 			if(balance.getEveryBalance().size()>3){
 				weight4=balance.getEveryBalance().get(3).getWeight()+"";
-				weight4=balance.getEveryBalance().get(3).getPosition()+"";
+				position4=balance.getEveryBalance().get(3).getPosition()+"";
 			}
 			if(balance.getEveryBalance().size()>4){
 				weight5=balance.getEveryBalance().get(4).getWeight()+"";
-				weight5=balance.getEveryBalance().get(4).getPosition()+"";
+				position5=balance.getEveryBalance().get(4).getPosition()+"";
 			}
 			if(balance.getEveryBalance().size()>5){
 				weight6=balance.getEveryBalance().get(5).getWeight()+"";
-				weight6=balance.getEveryBalance().get(5).getPosition()+"";
+				position6=balance.getEveryBalance().get(5).getPosition()+"";
 			}
 			if(balance.getEveryBalance().size()>6){
 				weight7=balance.getEveryBalance().get(6).getWeight()+"";
-				weight7=balance.getEveryBalance().get(6).getPosition()+"";
+				position7=balance.getEveryBalance().get(6).getPosition()+"";
 			}
 			if(balance.getEveryBalance().size()>7){
 				weight8=balance.getEveryBalance().get(7).getWeight()+"";
-				weight8=balance.getEveryBalance().get(7).getPosition()+"";
+				position8=balance.getEveryBalance().get(7).getPosition()+"";
 			}
 		}
 		result_json.append("{\"id\":1,\"itemName\":\"冲程(m)\",\"itemValue\":\""+stroke+"\",\"itemValue2\":\"\"},");
-		result_json.append("{\"id\":2,\"itemName\":\"平衡块1位置/重量\",\"itemValue\":\""+losition1+"\",\"itemValue2\":\""+weight1+"\"},");
-		result_json.append("{\"id\":3,\"itemName\":\"平衡块2位置/重量\",\"itemValue\":\""+losition2+"\",\"itemValue2\":\""+weight2+"\"},");
-		result_json.append("{\"id\":4,\"itemName\":\"平衡块3位置/重量\",\"itemValue\":\""+losition3+"\",\"itemValue2\":\""+weight3+"\"},");
-		result_json.append("{\"id\":5,\"itemName\":\"平衡块4位置/重量\",\"itemValue\":\""+losition4+"\",\"itemValue2\":\""+weight4+"\"},");
-		result_json.append("{\"id\":6,\"itemName\":\"平衡块5位置/重量\",\"itemValue\":\""+losition5+"\",\"itemValue2\":\""+weight5+"\"},");
-		result_json.append("{\"id\":7,\"itemName\":\"平衡块6位置/重量\",\"itemValue\":\""+losition6+"\",\"itemValue2\":\""+weight6+"\"},");
-		result_json.append("{\"id\":8,\"itemName\":\"平衡块7位置/重量\",\"itemValue\":\""+losition7+"\",\"itemValue2\":\""+weight7+"\"},");
-		result_json.append("{\"id\":9,\"itemName\":\"平衡块8位置/重量\",\"itemValue\":\""+losition8+"\",\"itemValue2\":\""+weight8+"\"}");
+		result_json.append("{\"id\":2,\"itemName\":\"平衡块1位置/重量\",\"itemValue\":\""+position1+"\",\"itemValue2\":\""+weight1+"\"},");
+		result_json.append("{\"id\":3,\"itemName\":\"平衡块2位置/重量\",\"itemValue\":\""+position2+"\",\"itemValue2\":\""+weight2+"\"},");
+		result_json.append("{\"id\":4,\"itemName\":\"平衡块3位置/重量\",\"itemValue\":\""+position3+"\",\"itemValue2\":\""+weight3+"\"},");
+		result_json.append("{\"id\":5,\"itemName\":\"平衡块4位置/重量\",\"itemValue\":\""+position4+"\",\"itemValue2\":\""+weight4+"\"},");
+		result_json.append("{\"id\":6,\"itemName\":\"平衡块5位置/重量\",\"itemValue\":\""+position5+"\",\"itemValue2\":\""+weight5+"\"},");
+		result_json.append("{\"id\":7,\"itemName\":\"平衡块6位置/重量\",\"itemValue\":\""+position6+"\",\"itemValue2\":\""+weight6+"\"},");
+		result_json.append("{\"id\":8,\"itemName\":\"平衡块7位置/重量\",\"itemValue\":\""+position7+"\",\"itemValue2\":\""+weight7+"\"},");
+		result_json.append("{\"id\":9,\"itemName\":\"平衡块8位置/重量\",\"itemValue\":\""+position8+"\",\"itemValue2\":\""+weight8+"\"}");
 		result_json.append("]}");
 		json=result_json.toString().replaceAll("null", "");
 		return json;
@@ -1612,7 +1612,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					
 					result_json.append("{\"id\":7,\"itemName\":\"油压(MPa)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getTubingPressure():"")+"\"},");
 					result_json.append("{\"id\":8,\"itemName\":\"套压(MPa)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getCasingPressure():"")+"\"},");
-					result_json.append("{\"id\":9,\"itemName\":\"井口油温(℃)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getWellHeadFluidTemperature():"")+"\"},");
+					result_json.append("{\"id\":9,\"itemName\":\"井口油温(℃)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getWellHeadTemperature():"")+"\"},");
 					result_json.append("{\"id\":10,\"itemName\":\"含水率(%)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getWaterCut():"")+"\"},");
 					result_json.append("{\"id\":11,\"itemName\":\"生产气油比(m^3/t)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getProductionGasOilRatio():"")+"\"},");
 					result_json.append("{\"id\":12,\"itemName\":\"动液面(m)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getProducingfluidLevel():"")+"\"},");
@@ -1757,7 +1757,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					
 					result_json.append("{\"id\":7,\"itemName\":\"油压(MPa)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getTubingPressure():"")+"\"},");
 					result_json.append("{\"id\":8,\"itemName\":\"套压(MPa)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getCasingPressure():"")+"\"},");
-					result_json.append("{\"id\":9,\"itemName\":\"井口油温(℃)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getWellHeadFluidTemperature():"")+"\"},");
+					result_json.append("{\"id\":9,\"itemName\":\"井口油温(℃)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getWellHeadTemperature():"")+"\"},");
 					result_json.append("{\"id\":10,\"itemName\":\"含水率(%)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getWaterCut():"")+"\"},");
 					result_json.append("{\"id\":11,\"itemName\":\"生产气油比(m^3/t)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getProductionGasOilRatio():"")+"\"},");
 					result_json.append("{\"id\":12,\"itemName\":\"动液面(m)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getProducingfluidLevel():"")+"\"},");

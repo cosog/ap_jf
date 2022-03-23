@@ -238,9 +238,9 @@ StoreAcqTP					    存储采集油压记录数										 缺省：1000
 
 StoreCalcTP					   存储计算油压记录数										 缺省：1000
 
-StoreAcqTT					    存储采集井口流温记录数								 缺省：1000
+StoreAcqTT					    存储采集井口温度记录数								 缺省：1000
 
-StoreCalcTT					   存储计算井口流温记录数							     缺省：1000
+StoreCalcTT					   存储计算井口温度记录数							     缺省：1000
 
 StoreAcqCP					   存储采集套压记录数									     缺省：1000
 
