@@ -1,4 +1,4 @@
-package com.cosog.controller.acquisitionUnit;
+package com.cosog.controller.acqUnit;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -31,6 +31,7 @@ import com.cosog.model.AcquisitionUnit;
 import com.cosog.model.AcquisitionUnitGroup;
 import com.cosog.model.AlarmUnit;
 import com.cosog.model.AlarmUnitItem;
+import com.cosog.model.DisplayUnit;
 import com.cosog.model.Module;
 import com.cosog.model.ProtocolAlarmInstance;
 import com.cosog.model.ProtocolInstance;
@@ -48,7 +49,7 @@ import com.cosog.model.drive.ModbusProtocolInstanceSaveData;
 import com.cosog.model.gridmodel.AcquisitionGroupHandsontableChangeData;
 import com.cosog.model.gridmodel.AcquisitionUnitHandsontableChangeData;
 import com.cosog.model.gridmodel.DatabaseMappingProHandsontableChangedData;
-import com.cosog.service.acquisitionUnit.AcquisitionUnitManagerService;
+import com.cosog.service.acqUnit.AcquisitionUnitManagerService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.right.RoleManagerService;
 import com.cosog.task.EquipmentDriverServerTask;
@@ -91,6 +92,9 @@ public class AcquisitionUnitManagerController extends BaseController {
 	private AcquisitionUnitManagerService<AlarmUnitItem> alarmUnitItemManagerService;
 	
 	@Autowired
+	private AcquisitionUnitManagerService<DisplayUnit> displayUnitManagerService;
+	
+	@Autowired
 	private AcquisitionUnitManagerService<ProtocolInstance> protocolInstanceManagerService;
 	
 	@Autowired
@@ -105,6 +109,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 	private AcquisitionUnit acquisitionUnit;
 	private AcquisitionGroup acquisitionGroup;
 	private AlarmUnit alarmUnit;
+	private DisplayUnit displayUnit;
 	
 	private ProtocolInstance protocolInstance;
 	private ProtocolAlarmInstance protocolAlarmInstance;
@@ -148,6 +153,12 @@ public class AcquisitionUnitManagerController extends BaseController {
 	@InitBinder("protocolSMSInstance")
 	public void initBinder6(WebDataBinder binder) {
 		binder.setFieldDefaultPrefix("protocolSMSInstance.");
+	}
+	
+	//添加绑定前缀 
+	@InitBinder("displayUnit")
+	public void initBinder7(WebDataBinder binder) {
+		binder.setFieldDefaultPrefix("displayUnit.");
 	}
 
 	/**<p>描述：采集类型数据显示方法</p>
@@ -798,6 +809,18 @@ public class AcquisitionUnitManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/displayUnitTreeData")
+	public String displayUnitTreeData() throws IOException {
+		String json = acquisitionUnitItemManagerService.getDisplayUnitTreeData();
+		response.setContentType("application/json;charset=utf-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	@RequestMapping("/modbusProtocolAddrMappingTreeData")
 	public String modbusProtocolAddrMappingTreeData() throws IOException {
 		String json = acquisitionUnitItemManagerService.modbusProtocolAddrMappingTreeData();
@@ -813,7 +836,8 @@ public class AcquisitionUnitManagerController extends BaseController {
 	@RequestMapping("/modbusProtocolAndAcqUnitTreeData")
 	public String modbusProtocolAndAcqUnitTreeData() throws IOException {
 		String deviceType=ParamUtils.getParameter(request, "deviceType");
-		String json = acquisitionUnitItemManagerService.modbusProtocolAndAcqUnitTreeData(deviceType);
+		String protocol=ParamUtils.getParameter(request, "protocol");
+		String json = acquisitionUnitItemManagerService.modbusProtocolAndAcqUnitTreeData(deviceType,protocol);
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -1286,6 +1310,24 @@ public class AcquisitionUnitManagerController extends BaseController {
 		PrintWriter out = response.getWriter();
 		try {
 			this.alarmUnitManagerService.doAlarmUnitAdd(alarmUnit);
+			result = "{success:true,msg:true}";
+			response.setCharacterEncoding(Constants.ENCODING_UTF8);
+			out.print(result);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result = "{success:false,msg:false}";
+			out.print(result);
+		}
+		return null;
+	}
+	
+	@RequestMapping("/doDisplayUnitAdd")
+	public String doDisplayUnitAdd(@ModelAttribute DisplayUnit displayUnit) throws IOException {
+		String result = "";
+		PrintWriter out = response.getWriter();
+		try {
+			this.displayUnitManagerService.doDisplayUnitAdd(displayUnit);
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
 			out.print(result);
@@ -1854,5 +1896,11 @@ public class AcquisitionUnitManagerController extends BaseController {
 	}
 	public void setProtocolAlarmInstance(ProtocolAlarmInstance protocolAlarmInstance) {
 		this.protocolAlarmInstance = protocolAlarmInstance;
+	}
+	public DisplayUnit getDisplayUnit() {
+		return displayUnit;
+	}
+	public void setDisplayUnit(DisplayUnit displayUnit) {
+		this.displayUnit = displayUnit;
 	}
 }

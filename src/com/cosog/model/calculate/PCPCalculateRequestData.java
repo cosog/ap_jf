@@ -611,7 +611,7 @@ public class PCPCalculateRequestData {
 
 	    private float CasingPressure;//套压
 
-	    private float WellHeadFluidTemperature;//井口流温
+	    private float WellHeadTemperature;//井口温度
 
 	    private float ProducingfluidLevel;//动液面
 
@@ -649,11 +649,11 @@ public class PCPCalculateRequestData {
 	    public float getCasingPressure(){
 	        return this.CasingPressure;
 	    }
-	    public void setWellHeadFluidTemperature(float WellHeadFluidTemperature){
-	        this.WellHeadFluidTemperature = WellHeadFluidTemperature;
+	    public void setWellHeadTemperature(float WellHeadTemperature){
+	        this.WellHeadTemperature = WellHeadTemperature;
 	    }
-	    public float getWellHeadFluidTemperature(){
-	        return this.WellHeadFluidTemperature;
+	    public float getWellHeadTemperature(){
+	        return this.WellHeadTemperature;
 	    }
 	    public void setProducingfluidLevel(float ProducingfluidLevel){
 	        this.ProducingfluidLevel = ProducingfluidLevel;

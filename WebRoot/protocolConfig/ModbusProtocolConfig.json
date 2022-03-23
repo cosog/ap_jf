@@ -211,7 +211,7 @@
                     "AcqMode": "passive"
                 },
                 {
-                    "Title": "井口流温",
+                    "Title": "井口温度",
                     "Addr": 40306,
                     "StoreDataType": "float32",
                     "IFDataType": "float32",
@@ -615,7 +615,7 @@
                     "AcqMode": "passive"
                 },
                 {
-                    "Title": "井口流温",
+                    "Title": "井口温度",
                     "Addr": 40306,
                     "StoreDataType": "float32",
                     "IFDataType": "float32",

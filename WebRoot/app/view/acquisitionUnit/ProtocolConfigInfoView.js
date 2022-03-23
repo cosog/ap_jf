@@ -124,6 +124,12 @@ Ext.define('AP.view.acquisitionUnit.ProtocolConfigInfoView', {
     					}
     					protocolAlarmUnitConfigCommStatusItemsHandsontableHelper=null;
     				}
+    				if(protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper!=null){
+    					if(protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot!=undefined){
+    						protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot.destroy();
+    					}
+    					protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper=null;
+    				}
     				
     				//采控实例HandsontableHelper资源
     				if(protocolInstanceConfigItemsHandsontableHelper!=null){
@@ -163,6 +169,26 @@ Ext.define('AP.view.acquisitionUnit.ProtocolConfigInfoView', {
     						protocolAlarmInstancePropertiesHandsontableHelper.hot.destroy();
     					}
     					protocolAlarmInstancePropertiesHandsontableHelper=null;
+    				}
+    				
+    				//显示单元
+    				if(protocolDisplayUnitAcqItemsConfigHandsontableHelper!=null){
+    					if(protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot!=undefined){
+    						protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot.destroy();
+    					}
+    					protocolDisplayUnitAcqItemsConfigHandsontableHelper=null;
+    				}
+    				if(protocolDisplayUnitCalItemsConfigHandsontableHelper!=null){
+    					if(protocolDisplayUnitCalItemsConfigHandsontableHelper.hot!=undefined){
+    						protocolDisplayUnitCalItemsConfigHandsontableHelper.hot.destroy();
+    					}
+    					protocolDisplayUnitCalItemsConfigHandsontableHelper=null;
+    				}
+    				if(protocolDisplayUnitPropertiesHandsontableHelper!=null){
+    					if(protocolDisplayUnitPropertiesHandsontableHelper.hot!=undefined){
+    						protocolDisplayUnitPropertiesHandsontableHelper.hot.destroy();
+    					}
+    					protocolDisplayUnitPropertiesHandsontableHelper=null;
     				}
     			},
     			afterrender: function ( panel, eOpts) {}
