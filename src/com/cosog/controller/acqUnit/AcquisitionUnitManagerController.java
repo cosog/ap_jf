@@ -730,6 +730,39 @@ public class AcquisitionUnitManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/getProtocolDisplayUnitAcqItemsConfigData")
+	public String getProtocolDisplayUnitAcqItemsConfigData() throws Exception {
+		String protocolName = ParamUtils.getParameter(request, "protocolName");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String code = ParamUtils.getParameter(request, "code");
+		String unitId = ParamUtils.getParameter(request, "unitId");
+		String acqUnitId = ParamUtils.getParameter(request, "acqUnitId");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getProtocolDisplayUnitAcqItemsConfigData(protocolName,classes,code,unitId,acqUnitId);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/getProtocolDisplayUnitCalItemsConfigData")
+	public String getProtocolDisplayUnitCalItemsConfigData() throws Exception {
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String unitId = ParamUtils.getParameter(request, "unitId");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getProtocolDisplayUnitCalItemsConfigData(deviceType,classes,unitId);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
 	
 	@RequestMapping("/getProtocolInstanceItemsConfigData")
 	public String getProtocolInstanceItemsConfigData() throws Exception {

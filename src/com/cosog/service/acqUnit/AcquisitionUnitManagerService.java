@@ -32,9 +32,11 @@ import com.cosog.task.EquipmentDriverServerTask;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.DataSourceConfig;
 import com.cosog.utils.EquipmentDriveMap;
+import com.cosog.utils.MemoryData;
 import com.cosog.utils.Page;
 import com.cosog.utils.StringManagerUtils;
 import com.cosog.utils.TcpServerConfigMap;
+import com.cosog.utils.MemoryData.CalItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -931,6 +933,284 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		return result_json.toString();
 	}
 	
+	public String getProtocolDisplayUnitAcqItemsConfigData(String protocolName,String classes,String code,String unitId,String acqUnitId){
+		StringBuffer result_json = new StringBuffer();
+		Gson gson = new Gson();
+		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		if(equipmentDriveMap.size()==0){
+			EquipmentDriverServerTask.loadProtocolConfig();
+			equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		}
+		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"地址\",\"dataIndex\":\"addr\",width:80 ,children:[] },"
+				+ "{ \"header\":\"单位\",\"dataIndex\":\"unit\",width:80 ,children:[] },"
+				+ "{ \"header\":\"显示级别\",\"dataIndex\":\"showLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"显示顺序\",\"dataIndex\":\"sort\",width:80 ,children:[] },"
+				+ "{ \"header\":\"实时曲线\",\"dataIndex\":\"realtimeCurve\",width:80 ,children:[] },"
+				+ "{ \"header\":\"实时曲线颜色\",\"dataIndex\":\"realtimeCurveColor\",width:80 ,children:[] },"
+				+ "{ \"header\":\"历史曲线\",\"dataIndex\":\"historyCurve\",width:80 ,children:[] },"
+				+ "{ \"header\":\"历史曲线颜色\",\"dataIndex\":\"historyCurveColor\",width:80 ,children:[] }"
+				+ "]";
+		
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		
+		List<String> acqItemsList=new ArrayList<String>();
+		List<String> acqItemsBitIndexList=new ArrayList<String>();
+		
+		List<String> itemsList=new ArrayList<String>();
+		List<String> itemsSortList=new ArrayList<String>();
+		List<String> itemsBitIndexList=new ArrayList<String>();
+		List<String> itemsShowLevelList=new ArrayList<String>();
+		List<String> realtimeCurveList=new ArrayList<String>();
+		List<String> realtimeCurveColorList=new ArrayList<String>();
+		List<String> historyCurveList=new ArrayList<String>();
+		List<String> historyCurveColorList=new ArrayList<String>();
+		if("2".equalsIgnoreCase(classes)){
+			String acqUnitIiemsSql="select distinct t.itemname,t.bitindex "
+					+ "from TBL_ACQ_ITEM2GROUP_CONF t,tbl_acq_group_conf t2,tbl_acq_group2unit_conf t3,tbl_acq_unit_conf t4 "
+					+ "where t.groupid=t2.id  and t2.id=t3.groupid and t3.unitid=t4.id and t4.id="+acqUnitId+" and t2.type=0";
+			
+			String sql="select t.itemname,t.bitindex,t.sort,t.showlevel,t.realtimeCurve,t.realtimeCurveColor,historyCurve,historyCurveColor "
+					+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2 "
+					+ " where t.unitid=t2.id and t2.id= "+unitId+" and t.type=0"
+					+ " order by t.sort";
+			List<?> acqItemList=this.findCallSql(acqUnitIiemsSql);
+			List<?> list=this.findCallSql(sql);
+			for(int i=0;i<acqItemList.size();i++){
+				Object[] obj=(Object[])acqItemList.get(i);
+				acqItemsList.add(obj[0]+"");
+				acqItemsBitIndexList.add(obj[1]+"");
+			}
+			for(int i=0;i<list.size();i++){
+				Object[] obj=(Object[])list.get(i);
+				itemsList.add(obj[0]+"");
+				itemsSortList.add(obj[1]+"");
+				itemsBitIndexList.add(obj[2]+"");
+				itemsShowLevelList.add(obj[3]+"");
+				realtimeCurveList.add(obj[4]+"");
+				realtimeCurveColorList.add(obj[5]+"");
+				historyCurveList.add(obj[6]+"");
+				historyCurveColorList.add(obj[7]+"");
+			}
+		}
+		for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
+			ModbusProtocolConfig.Protocol protocolConfig=modbusProtocolConfig.getProtocol().get(i);
+			if(protocolName.equalsIgnoreCase(protocolConfig.getName())){
+				Collections.sort(protocolConfig.getItems());
+				int index=1;
+				for(int j=0;j<protocolConfig.getItems().size();j++){
+					boolean sign=false;
+					if(!"2".equalsIgnoreCase(classes)){
+						sign=true;
+					}else{
+						if(StringManagerUtils.existOrNot(acqItemsList, protocolConfig.getItems().get(j).getTitle(), false)){
+							sign=true;
+						}
+					}
+					if(sign){
+						boolean checked=false;
+						String sort="";
+						String showLevel="";
+						String isRealtimeCurve="";
+						String realtimeCurveColor="";
+						String isHistoryCurve="";
+						String historyCurveColor="";
+						String resolutionMode="数据量";
+						if(protocolConfig.getItems().get(j).getResolutionMode()==0){
+							resolutionMode="开关量";
+						}else if(protocolConfig.getItems().get(j).getResolutionMode()==1){
+							resolutionMode="枚举量";
+						}
+						String RWType="只读";
+						if("r".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+							RWType="只读";
+						}else if("w".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+							RWType="只写";
+						}else if("rw".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+							RWType="读写";
+						}
+						if(protocolConfig.getItems().get(j).getResolutionMode()==0
+								&&protocolConfig.getItems().get(j).getMeaning()!=null
+								&&protocolConfig.getItems().get(j).getMeaning().size()>0){
+							Collections.sort(protocolConfig.getItems().get(j).getMeaning());//排序
+							for(int k=0;k<protocolConfig.getItems().get(j).getMeaning().size();k++){
+								checked=false;
+								sort="";
+								showLevel="";
+								isRealtimeCurve="";
+								realtimeCurveColor="";
+								isHistoryCurve="";
+								historyCurveColor="";
+								for(int m=0;m<itemsList.size();m++){
+									if(itemsList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())
+											&&itemsBitIndexList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getMeaning().get(k).getValue()+"")
+										){
+										checked=true;
+										sort=itemsSortList.get(m);
+										showLevel=itemsShowLevelList.get(m);
+										isRealtimeCurve=realtimeCurveList.get(m);
+										realtimeCurveColor=realtimeCurveColorList.get(m);
+										isHistoryCurve=historyCurveList.get(m);
+										historyCurveColor=historyCurveColorList.get(m);
+										break;
+									}
+								}
+								
+								result_json.append("{"
+										+ "\"checked\":"+checked+","
+										+ "\"id\":"+(index)+","
+										+ "\"title\":\""+protocolConfig.getItems().get(j).getMeaning().get(k).getMeaning()+"\","
+										+ "\"addr\":"+protocolConfig.getItems().get(j).getAddr()+","
+										+ "\"RWType\":\""+RWType+"\","
+										+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
+										+ "\"resolutionMode\":\""+resolutionMode+"\","
+										+ "\"showLevel\":\""+showLevel+"\","
+										+ "\"sort\":\""+sort+"\","
+										+ "\"isRealtimeCurve\":\""+isRealtimeCurve+"\","
+										+ "\"realtimeCurveColor\":\""+realtimeCurveColor+"\","
+										+ "\"isHistoryCurve\":\""+isHistoryCurve+"\","
+										+ "\"historyCurveColor\":\""+historyCurveColor+"\""
+										+ "},");
+								index++;
+							}
+						}else{
+							checked=StringManagerUtils.existOrNot(itemsList, protocolConfig.getItems().get(j).getTitle(),false);
+							if(checked){
+								for(int k=0;k<itemsList.size();k++){
+									if(itemsList.get(k).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())){
+										sort=itemsSortList.get(k);
+										showLevel=itemsShowLevelList.get(k);
+										isRealtimeCurve=realtimeCurveList.get(k);
+										realtimeCurveColor=realtimeCurveColorList.get(k);
+										isHistoryCurve=historyCurveList.get(k);
+										historyCurveColor=historyCurveColorList.get(k);
+										break;
+									}
+								}
+							}
+							result_json.append("{\"checked\":"+checked+","
+									+ "\"id\":"+(index)+","
+									+ "\"title\":\""+protocolConfig.getItems().get(j).getTitle()+"\","
+									+ "\"addr\":"+protocolConfig.getItems().get(j).getAddr()+","
+									+ "\"RWType\":\""+RWType+"\","
+									+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
+									+ "\"resolutionMode\":\""+resolutionMode+"\","
+									+ "\"showLevel\":\""+showLevel+"\","
+									+ "\"sort\":\""+sort+"\","
+									+ "\"isRealtimeCurve\":\""+isRealtimeCurve+"\","
+									+ "\"realtimeCurveColor\":\""+realtimeCurveColor+"\","
+									+ "\"isHistoryCurve\":\""+isHistoryCurve+"\","
+									+ "\"historyCurveColor\":\""+historyCurveColor+"\""
+									+ "},");
+							index++;
+						}
+					}
+				}
+				break;
+			}
+		}
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		return result_json.toString().replaceAll("null", "");
+	}
+	
+	public String getProtocolDisplayUnitCalItemsConfigData(String deviceType,String classes,String unitId){
+		StringBuffer result_json = new StringBuffer();
+		Gson gson = new Gson();
+		List<CalItem> calItemList=MemoryData.calItemList;
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"单位\",\"dataIndex\":\"unit\",width:80 ,children:[] },"
+				+ "{ \"header\":\"显示级别\",\"dataIndex\":\"showLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"显示顺序\",\"dataIndex\":\"sort\",width:80 ,children:[] },"
+				+ "{ \"header\":\"实时曲线\",\"dataIndex\":\"realtimeCurve\",width:80 ,children:[] },"
+				+ "{ \"header\":\"实时曲线颜色\",\"dataIndex\":\"realtimeCurveColor\",width:80 ,children:[] },"
+				+ "{ \"header\":\"历史曲线\",\"dataIndex\":\"historyCurve\",width:80 ,children:[] },"
+				+ "{ \"header\":\"历史曲线颜色\",\"dataIndex\":\"historyCurveColor\",width:80 ,children:[] }"
+				+ "]";
+		
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		
+		List<String> itemsList=new ArrayList<String>();
+		List<String> itemsSortList=new ArrayList<String>();
+		List<String> itemsShowLevelList=new ArrayList<String>();
+		List<String> realtimeCurveList=new ArrayList<String>();
+		List<String> realtimeCurveColorList=new ArrayList<String>();
+		List<String> historyCurveList=new ArrayList<String>();
+		List<String> historyCurveColorList=new ArrayList<String>();
+		if("2".equalsIgnoreCase(classes)){
+			String sql="select t.itemname,t.sort,t.showlevel,t.realtimeCurve,t.realtimeCurveColor,historyCurve,historyCurveColor "
+					+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2 "
+					+ " where t.unitid=t2.id and t2.id= "+unitId+" and t.type=1"
+					+ " order by t.sort";
+			List<?> list=this.findCallSql(sql);
+			for(int i=0;i<list.size();i++){
+				Object[] obj=(Object[])list.get(i);
+				itemsList.add(obj[0]+"");
+				itemsSortList.add(obj[1]+"");
+				itemsShowLevelList.add(obj[2]+"");
+				realtimeCurveList.add(obj[3]+"");
+				realtimeCurveColorList.add(obj[4]+"");
+				historyCurveList.add(obj[5]+"");
+				historyCurveColorList.add(obj[6]+"");
+			}
+		}
+		
+		int index=1;
+		for(int j=0;j<calItemList.size();j++){
+			boolean checked=false;
+			String sort="";
+			String showLevel="";
+			String isRealtimeCurve="";
+			String realtimeCurveColor="";
+			String isHistoryCurve="";
+			String historyCurveColor="";
+
+			checked=StringManagerUtils.existOrNot(itemsList, calItemList.get(j).getName(),false);
+			if(checked){
+				for(int k=0;k<itemsList.size();k++){
+					if(itemsList.get(k).equalsIgnoreCase(calItemList.get(j).getName())){
+						sort=itemsSortList.get(k);
+						showLevel=itemsShowLevelList.get(k);
+						isRealtimeCurve=realtimeCurveList.get(k);
+						realtimeCurveColor=realtimeCurveColorList.get(k);
+						isHistoryCurve=historyCurveList.get(k);
+						historyCurveColor=historyCurveColorList.get(k);
+						break;
+					}
+				}
+			}
+			result_json.append("{\"checked\":"+checked+","
+					+ "\"id\":"+(index)+","
+					+ "\"title\":\""+calItemList.get(j).getName()+"\","
+					+ "\"unit\":\""+calItemList.get(j).getUnit()+"\","
+					+ "\"showLevel\":\""+showLevel+"\","
+					+ "\"sort\":\""+sort+"\","
+					+ "\"isRealtimeCurve\":\""+isRealtimeCurve+"\","
+					+ "\"realtimeCurveColor\":\""+realtimeCurveColor+"\","
+					+ "\"isHistoryCurve\":\""+isHistoryCurve+"\","
+					+ "\"historyCurveColor\":\""+historyCurveColor+"\""
+					+ "},");
+			index++;
+		
+		}
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		return result_json.toString().replaceAll("null", "");
+	}
+	
 	public String getProtocolInstanceItemsConfigData(String id,String classes){
 		StringBuffer result_json = new StringBuffer();
 		Gson gson = new Gson();
@@ -1505,8 +1785,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		
 		result_json.append("[");
 		
-		result_json.append("{\"classes\":0,\"text\":\"抽油机\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
-		result_json.append("{\"classes\":0,\"text\":\"螺杆泵\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
+		result_json.append("{\"classes\":0,\"text\":\"抽油机\",\"deviceType\":0,\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
+		result_json.append("{\"classes\":0,\"text\":\"螺杆泵\",\"deviceType\":1,\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
 		result_json.append("]");
 		return result_json.toString().replaceAll("null", "");
 	}

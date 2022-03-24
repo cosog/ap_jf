@@ -107,12 +107,17 @@ Ext.define('AP.view.acquisitionUnit.ModbusProtocolDisplayUnitConfigInfoView', {
     }
 });
 
-function CreateProtocolDisplayUnitAcqItemsConfigInfoTable(protocolName,classes,code,type){
+function CreateProtocolDisplayUnitAcqItemsConfigInfoTable(protocolName,classes,code,unitId,acqUnitId,unitName){
 	Ext.Ajax.request({
 		method:'POST',
-		url:context + '/acquisitionUnitManagerController/getProtocolDisplayUnitItemsConfigData',
+		url:context + '/acquisitionUnitManagerController/getProtocolDisplayUnitAcqItemsConfigData',
 		success:function(response) {
 			var result =  Ext.JSON.decode(response.responseText);
+			if(classes==2){
+				Ext.getCmp("ModbusProtocolDisplayUnitAcqItemsConfigTableInfoPanel_Id").setTitle(unitName+'/采集项配置');
+			}else{
+				Ext.getCmp("ModbusProtocolDisplayUnitAcqItemsConfigTableInfoPanel_Id").setTitle('采集项配置');
+			}
 			if(protocolDisplayUnitAcqItemsConfigHandsontableHelper==null || protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot==undefined){
 				protocolDisplayUnitAcqItemsConfigHandsontableHelper = ProtocolDisplayUnitAcqItemsConfigHandsontableHelper.createNew("ModbusProtocolDisplayUnitAcqItemsConfigTableInfoDiv_id");
 				var colHeaders="['','序号','名称','地址','读写类型','单位','解析模式','显示级别','显示顺序','实时曲线','实时曲线颜色','历史曲线','历史曲线曲线']";
@@ -135,18 +140,8 @@ function CreateProtocolDisplayUnitAcqItemsConfigInfoTable(protocolName,classes,c
 				
 				protocolDisplayUnitAcqItemsConfigHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
 				protocolDisplayUnitAcqItemsConfigHandsontableHelper.columns=Ext.JSON.decode(columns);
-//				if(result.totalRoot.length==0){
-//					protocolDisplayUnitAcqItemsConfigHandsontableHelper.createTable([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
-//				}else{
-//					protocolDisplayUnitAcqItemsConfigHandsontableHelper.createTable(result.totalRoot);
-//				}
 				protocolDisplayUnitAcqItemsConfigHandsontableHelper.createTable(result.totalRoot);
 			}else{
-//				if(result.totalRoot.length==0){
-//					protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot.loadData([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
-//				}else{
-//					protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot.loadData(result.totalRoot);
-//				}
 				protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot.loadData(result.totalRoot);
 			}
 		},
@@ -157,7 +152,8 @@ function CreateProtocolDisplayUnitAcqItemsConfigInfoTable(protocolName,classes,c
 			protocolName:protocolName,
 			classes:classes,
 			code:code,
-			type:type
+			unitId:unitId,
+			acqUnitId:acqUnitId
         }
 	});
 };
@@ -217,7 +213,7 @@ var ProtocolDisplayUnitAcqItemsConfigHandsontableHelper = {
 	                    var ScadaDriverModbusConfigSelectRow= Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").getValue();
 	                	if(ScadaDriverModbusConfigSelectRow!=''){
 	                		var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(ScadaDriverModbusConfigSelectRow);
-	                		if(selectedItem.data.classes!=3){
+	                		if(selectedItem.data.classes!=2){
 	                			cellProperties.readOnly = true;
 	                		}else{
 	                			if (visualColIndex >=1 && visualColIndex<=6) {
@@ -235,7 +231,7 @@ var ProtocolDisplayUnitAcqItemsConfigHandsontableHelper = {
 	                		var ScadaDriverModbusConfigSelectRow= Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").getValue();
 	                		if(ScadaDriverModbusConfigSelectRow!=''){
 	                			var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(ScadaDriverModbusConfigSelectRow);
-	                			if(selectedItem.data.classes==3 && selectedItem.data.type==0){
+	                			if(selectedItem.data.classes==2){
 	                				var CurveColorSelectWindow=Ext.create("AP.view.acquisitionUnit.CurveColorSelectWindow");
 	                				Ext.getCmp("curveColorSelectedRow_Id").setValue(row);
 	                				Ext.getCmp("curveColorSelectedCol_Id").setValue(column);
@@ -266,6 +262,153 @@ var ProtocolDisplayUnitAcqItemsConfigHandsontableHelper = {
 	    }
 };
 
+function CreateProtocolDisplayUnitCalItemsConfigInfoTable(deviceType,classes,unitId,unitName){
+	Ext.Ajax.request({
+		method:'POST',
+		url:context + '/acquisitionUnitManagerController/getProtocolDisplayUnitCalItemsConfigData',
+		success:function(response) {
+			var result =  Ext.JSON.decode(response.responseText);
+			if(classes==2){
+				Ext.getCmp("ModbusProtocolDisplayUnitCalItemsConfigTableInfoPanel_Id").setTitle(unitName+'/计算项配置');
+			}else{
+				Ext.getCmp("ModbusProtocolDisplayUnitCalItemsConfigTableInfoPanel_Id").setTitle('计算项配置');
+			}
+			if(protocolDisplayUnitCalItemsConfigHandsontableHelper==null || protocolDisplayUnitCalItemsConfigHandsontableHelper.hot==undefined){
+				protocolDisplayUnitCalItemsConfigHandsontableHelper = ProtocolDisplayUnitCalItemsConfigHandsontableHelper.createNew("ModbusProtocolDisplayUnitCalItemsConfigTableInfoDiv_id");
+				var colHeaders="['','序号','名称','单位','显示级别','显示顺序','实时曲线','实时曲线颜色','历史曲线','历史曲线曲线']";
+				var columns="[" 
+						+"{data:'checked',type:'checkbox'}," 
+						+"{data:'id'}," 
+						+"{data:'title'},"
+					 	+"{data:'unit'},"
+						+"{data:'showLevel',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitCalItemsConfigHandsontableHelper);}}," 
+						+"{data:'sort',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitCalItemsConfigHandsontableHelper);}}," 
+						+"{data:'isRealtimeCurve',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitCalItemsConfigHandsontableHelper);}}," 
+						+"{data:'realtimeCurveColor'},"
+						+"{data:'isHistoryCurve',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitCalItemsConfigHandsontableHelper);}},"
+						+"{data:'historyCurveColor'}"
+						+"]";
+				protocolDisplayUnitCalItemsConfigHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
+				protocolDisplayUnitCalItemsConfigHandsontableHelper.columns=Ext.JSON.decode(columns);
+				protocolDisplayUnitCalItemsConfigHandsontableHelper.createTable(result.totalRoot);
+			}else{
+				protocolDisplayUnitCalItemsConfigHandsontableHelper.hot.loadData(result.totalRoot);
+			}
+		},
+		failure:function(){
+			Ext.MessageBox.alert("错误","与后台联系的时候出了问题");
+		},
+		params: {
+			deviceType:deviceType,
+			classes:classes,
+			unitId:unitId
+        }
+	});
+};
+
+var ProtocolDisplayUnitCalItemsConfigHandsontableHelper = {
+		createNew: function (divid) {
+	        var protocolDisplayUnitCalItemsConfigHandsontableHelper = {};
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.hot1 = '';
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.divid = divid;
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.validresult=true;//数据校验
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.colHeaders=[];
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.columns=[];
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.AllData=[];
+	        
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.addColBg = function (instance, td, row, col, prop, value, cellProperties) {
+	             Handsontable.renderers.TextRenderer.apply(this, arguments);
+	             td.style.backgroundColor = 'rgb(242, 242, 242)';    
+	        }
+	        
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.addCurveBg = function (instance, td, row, col, prop, value, cellProperties) {
+	            Handsontable.renderers.TextRenderer.apply(this, arguments);
+	            if(value!=null){
+	            	td.style.backgroundColor = '#'+value;
+	            }
+	            
+	            
+	            
+	        }
+	        
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.createTable = function (data) {
+	        	$('#'+protocolDisplayUnitCalItemsConfigHandsontableHelper.divid).empty();
+	        	var hotElement = document.querySelector('#'+protocolDisplayUnitCalItemsConfigHandsontableHelper.divid);
+	        	protocolDisplayUnitCalItemsConfigHandsontableHelper.hot = new Handsontable(hotElement, {
+	        		licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
+	        		data: data,
+	        		hiddenColumns: {
+	                    columns: [13],
+	                    indicators: false
+	                },
+	                colWidths: [25,50,140,80,60,60,60,70,60,70],
+	                columns:protocolDisplayUnitCalItemsConfigHandsontableHelper.columns,
+	                stretchH: 'all',//延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
+	                autoWrapRow: true,
+	                rowHeaders: false,//显示行头
+	                colHeaders:protocolDisplayUnitCalItemsConfigHandsontableHelper.colHeaders,//显示列头
+	                columnSorting: true,//允许排序
+	                sortIndicator: true,
+	                manualColumnResize:true,//当值为true时，允许拖动，当为false时禁止拖动
+	                manualRowResize:true,//当值为true时，允许拖动，当为false时禁止拖动
+	                filters: true,
+	                renderAllRows: true,
+	                search: true,
+	                cells: function (row, col, prop) {
+	                	var cellProperties = {};
+	                    var visualRowIndex = this.instance.toVisualRow(row);
+	                    var visualColIndex = this.instance.toVisualColumn(col);
+	                    var ScadaDriverModbusConfigSelectRow= Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").getValue();
+	                	if(ScadaDriverModbusConfigSelectRow!=''){
+	                		var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(ScadaDriverModbusConfigSelectRow);
+	                		if(selectedItem.data.classes!=2){
+	                			cellProperties.readOnly = true;
+	                		}else{
+	                			if (visualColIndex >=1 && visualColIndex<=3) {
+	    							cellProperties.readOnly = true;
+	    		                }else if(visualColIndex==7||visualColIndex==9){
+	    		                	cellProperties.renderer = protocolDisplayUnitCalItemsConfigHandsontableHelper.addCurveBg;
+	    		                }
+	                		}
+	                	}
+	                    return cellProperties;
+	                },
+	                afterBeginEditing:function(row,column){
+	                	var row1=protocolDisplayUnitCalItemsConfigHandsontableHelper.hot.getDataAtRow(row);
+	                	if(row1[0] && (column==10||column==12)){
+	                		var ScadaDriverModbusConfigSelectRow= Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").getValue();
+	                		if(ScadaDriverModbusConfigSelectRow!=''){
+	                			var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(ScadaDriverModbusConfigSelectRow);
+	                			if(selectedItem.data.classes==2){
+	                				var CurveColorSelectWindow=Ext.create("AP.view.acquisitionUnit.CurveColorSelectWindow");
+	                				Ext.getCmp("curveColorSelectedRow_Id").setValue(row);
+	                				Ext.getCmp("curveColorSelectedCol_Id").setValue(column);
+	                				CurveColorSelectWindow.show();
+	                				var value=row1[column];
+	                				if(value==null||value==''){
+	                					value='ff0000';
+	                				}
+	                				Ext.getCmp('CurveColorSelectWindowColor_id').setValue(value);
+                		        	var BackgroundColor=Ext.getCmp('CurveColorSelectWindowColor_id').color;
+                		        	BackgroundColor.a=1;
+                		        	Ext.getCmp('CurveColorSelectWindowColor_id').setColor(BackgroundColor);
+	                			}
+	                		}
+	                	}
+	                },
+	                afterSelectionEnd : function (row,column,row2,column2, preventScrolling,selectionLayerLevel) {
+	                	
+	                }
+	        	});
+	        }
+	        //保存数据
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.saveData = function () {}
+	        protocolDisplayUnitCalItemsConfigHandsontableHelper.clearContainer = function () {
+	        	protocolDisplayUnitCalItemsConfigHandsontableHelper.AllData = [];
+	        }
+	        return protocolDisplayUnitCalItemsConfigHandsontableHelper;
+	    }
+};
 
 function CreateProtocolDisplayUnitConfigPropertiesInfoTable(data){
 	var root=[];
@@ -392,23 +535,8 @@ function SaveModbusProtocolDisplayUnitConfigTreeData(){
 			protocolProperties.id=selectedItem.data.id;
 			protocolProperties.unitCode=selectedItem.data.code;
 			protocolProperties.unitName=propertiesData[0][2];
-			protocolProperties.remark=propertiesData[1][2];
-		}else if(selectedItem.data.classes==3){//选中的是采控单元组
-			protocolProperties.classes=selectedItem.data.classes;
-			protocolProperties.id=selectedItem.data.id;
-			protocolProperties.groupCode=selectedItem.data.code;
-			protocolProperties.groupName=propertiesData[0][2];
-			protocolProperties.typeName=propertiesData[1][2];
-			if(selectedItem.data.type==0){//采集组
-				protocolProperties.acqCycle=propertiesData[2][2];
-				protocolProperties.saveCycle=propertiesData[3][2];
-				protocolProperties.remark=propertiesData[4][2];
-			}else if(selectedItem.data.type==1){//控制组
-//				protocolProperties.acqCycle=propertiesData[2][2];
-//				protocolProperties.saveCycle=propertiesData[3][2];
-				protocolProperties.remark=propertiesData[2][2];
-			}
-			
+			protocolProperties.acqUnitName=propertiesData[1][2];
+			protocolProperties.remark=propertiesData[2][2];
 		}
 		if(selectedItem.data.classes==2){//保存采控单元
 			var acqUnitSaveData={};
