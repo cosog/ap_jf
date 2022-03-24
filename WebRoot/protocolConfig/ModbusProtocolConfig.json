@@ -31,6 +31,30 @@
                     "AcqMode": "passive"
                 },
                 {
+                    "Title": "光杆温度",
+                    "Addr": 40329,
+                    "StoreDataType": "float32",
+                    "IFDataType": "float32",
+                    "Quantity": 2,
+                    "Ratio": 1.0,
+                    "RWType": "r",
+                    "Unit": "℃",
+                    "ResolutionMode": 2,
+                    "AcqMode": "passive"
+                },
+                {
+                    "Title": "盘根盒温度",
+                    "Addr": 40331,
+                    "StoreDataType": "float32",
+                    "IFDataType": "float32",
+                    "Quantity": 2,
+                    "Ratio": 1.0,
+                    "RWType": "r",
+                    "Unit": "℃",
+                    "ResolutionMode": 2,
+                    "AcqMode": "passive"
+                },
+                {
                     "Title": "A相电流",
                     "Addr": 40351,
                     "StoreDataType": "float32",

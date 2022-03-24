@@ -55,18 +55,21 @@ Ext.define('AP.store.acquisitionUnit.ModbusProtocolDisplayUnitTreeInfoStore', {
                         selectionchange ( view, selected, eOpts ){
                         	
                         },select( v, record, index, eOpts ){
-//                        	Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").setValue(index);
-//                        	if(record.data.classes==0){
-//                        		if(isNotVal(record.data.children) && record.data.children.length>0){
-//                        			CreateProtocolDisplayUnitAcqItemsConfigInfoTable(record.data.children[0].text,record.data.children[0].classes,record.data.children[0].code);
-//                        		}
-//                        	}else if(record.data.classes==1){
-//                        		CreateProtocolDisplayUnitAcqItemsConfigInfoTable(record.data.text,record.data.classes,record.data.code);
-//                        	}else if(record.data.classes==2){
-//                        		CreateProtocolDisplayUnitAcqItemsConfigInfoTable(record.data.protocol,record.data.classes,record.data.code);
-//                        	}else if(record.data.classes==3){
-//                        		CreateProtocolDisplayUnitAcqItemsConfigInfoTable(record.data.protocol,record.data.classes,record.data.code,record.data.type);
-//                        	}
+                        	Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").setValue(index);
+                        	if(record.data.classes==0){
+                        		if(isNotVal(record.data.children) && record.data.children.length>0){
+                        			CreateProtocolDisplayUnitAcqItemsConfigInfoTable(record.data.children[0].text,record.data.children[0].classes,record.data.children[0].code);
+                        		}else{
+                        			CreateProtocolDisplayUnitAcqItemsConfigInfoTable('',1,'');
+                            	}
+                        		CreateProtocolDisplayUnitCalItemsConfigInfoTable(record.data.deviceType,record.data.children[0].classes);
+                        	}else if(record.data.classes==1){
+                        		CreateProtocolDisplayUnitAcqItemsConfigInfoTable(record.data.text,record.data.classes,record.data.code);
+                        		CreateProtocolDisplayUnitCalItemsConfigInfoTable(record.parentNode.data.deviceType,record.data.classes);
+                        	}else if(record.data.classes==2){
+                        		CreateProtocolDisplayUnitAcqItemsConfigInfoTable(record.data.protocol,record.data.classes,record.data.code,record.data.id,record.data.acqUnitId,record.data.text);
+                        		CreateProtocolDisplayUnitCalItemsConfigInfoTable(record.parentNode.parentNode.data.deviceType,record.data.classes,record.data.id,record.data.text);
+                        	}
                         	CreateProtocolDisplayUnitConfigPropertiesInfoTable(record.data);
                         },beforecellcontextmenu: function (pl, td, cellIndex, record, tr, rowIndex, e, eOpts) {//右键事件
                         	e.preventDefault();//去掉点击右键是浏览器的菜单

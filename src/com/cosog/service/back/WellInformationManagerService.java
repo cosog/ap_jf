@@ -1612,7 +1612,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					
 					result_json.append("{\"id\":7,\"itemName\":\"油压(MPa)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getTubingPressure():"")+"\"},");
 					result_json.append("{\"id\":8,\"itemName\":\"套压(MPa)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getCasingPressure():"")+"\"},");
-					result_json.append("{\"id\":9,\"itemName\":\"井口油温(℃)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getWellHeadTemperature():"")+"\"},");
+					result_json.append("{\"id\":9,\"itemName\":\"井口温度(℃)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getWellHeadTemperature():"")+"\"},");
 					result_json.append("{\"id\":10,\"itemName\":\"含水率(%)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getWaterCut():"")+"\"},");
 					result_json.append("{\"id\":11,\"itemName\":\"生产气油比(m^3/t)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getProductionGasOilRatio():"")+"\"},");
 					result_json.append("{\"id\":12,\"itemName\":\"动液面(m)\",\"itemValue\":\""+(rpcProductionData.getProduction()!=null?rpcProductionData.getProduction().getProducingfluidLevel():"")+"\"},");
@@ -1705,7 +1705,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					
 					result_json.append("{\"id\":7,\"itemName\":\"油压(MPa)\",\"itemValue\":\"\"},");
 					result_json.append("{\"id\":8,\"itemName\":\"套压(MPa)\",\"itemValue\":\"\"},");
-					result_json.append("{\"id\":9,\"itemName\":\"井口油温(℃)\",\"itemValue\":\"\"},");
+					result_json.append("{\"id\":9,\"itemName\":\"井口温度(℃)\",\"itemValue\":\"\"},");
 					result_json.append("{\"id\":10,\"itemName\":\"含水率(%)\",\"itemValue\":\"\"},");
 					result_json.append("{\"id\":11,\"itemName\":\"生产气油比(m^3/t)\",\"itemValue\":\"\"},");
 					result_json.append("{\"id\":12,\"itemName\":\"动液面(m)\",\"itemValue\":\"\"},");
@@ -1757,7 +1757,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					
 					result_json.append("{\"id\":7,\"itemName\":\"油压(MPa)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getTubingPressure():"")+"\"},");
 					result_json.append("{\"id\":8,\"itemName\":\"套压(MPa)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getCasingPressure():"")+"\"},");
-					result_json.append("{\"id\":9,\"itemName\":\"井口油温(℃)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getWellHeadTemperature():"")+"\"},");
+					result_json.append("{\"id\":9,\"itemName\":\"井口温度(℃)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getWellHeadTemperature():"")+"\"},");
 					result_json.append("{\"id\":10,\"itemName\":\"含水率(%)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getWaterCut():"")+"\"},");
 					result_json.append("{\"id\":11,\"itemName\":\"生产气油比(m^3/t)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getProductionGasOilRatio():"")+"\"},");
 					result_json.append("{\"id\":12,\"itemName\":\"动液面(m)\",\"itemValue\":\""+(pcpProductionData.getProduction()!=null?pcpProductionData.getProduction().getProducingfluidLevel():"")+"\"},");
@@ -1833,7 +1833,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					
 					result_json.append("{\"id\":7,\"itemName\":\"油压(MPa)\",\"itemValue\":\"\"},");
 					result_json.append("{\"id\":8,\"itemName\":\"套压(MPa)\",\"itemValue\":\"\"},");
-					result_json.append("{\"id\":9,\"itemName\":\"井口油温(℃)\",\"itemValue\":\"\"},");
+					result_json.append("{\"id\":9,\"itemName\":\"井口温度(℃)\",\"itemValue\":\"\"},");
 					result_json.append("{\"id\":10,\"itemName\":\"含水率(%)\",\"itemValue\":\"\"},");
 					result_json.append("{\"id\":11,\"itemName\":\"生产气油比(m^3/t)\",\"itemValue\":\"\"},");
 					result_json.append("{\"id\":12,\"itemName\":\"动液面(m)\",\"itemValue\":\"\"},");
