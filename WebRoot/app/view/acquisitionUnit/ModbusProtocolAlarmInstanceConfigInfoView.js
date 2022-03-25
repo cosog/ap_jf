@@ -61,12 +61,6 @@ Ext.define('AP.view.acquisitionUnit.ModbusProtocolAlarmInstanceConfigInfoView', 
                         listeners: {
                             resize: function (abstractcomponent, adjWidth, adjHeight, options) {
                             	if(protocolAlarmInstancePropertiesHandsontableHelper!=null && protocolAlarmInstancePropertiesHandsontableHelper.hot!=undefined){
-//                            		var selectRow= Ext.getCmp("ModbusProtocolAlarmInstanceTreeSelectRow_Id").getValue();
-//                            		var gridPanel=Ext.getCmp("ModbusProtocolAlarmInstanceConfigTreeGridPanel_Id");
-//                            		if(isNotVal(gridPanel)){
-//                            			var selectedItem=gridPanel.getStore().getAt(selectRow);
-//                            			CreateProtocolAlarmInstancePropertiesInfoTable(selectedItem.data);
-//                            		}
                             		protocolAlarmInstancePropertiesHandsontableHelper.hot.refreshDimensions();
                             	}
                             }
@@ -89,18 +83,6 @@ Ext.define('AP.view.acquisitionUnit.ModbusProtocolAlarmInstanceConfigInfoView', 
                         listeners: {
                             resize: function (abstractcomponent, adjWidth, adjHeight, options) {
                             	if(protocolAlarmInstanceConfigNumItemsHandsontableHelper!=null && protocolAlarmInstanceConfigNumItemsHandsontableHelper.hot!=undefined){
-//                            		var selectRow= Ext.getCmp("ModbusProtocolAlarmInstanceTreeSelectRow_Id").getValue();
-//                            		var gridPanel=Ext.getCmp("ModbusProtocolAlarmInstanceConfigTreeGridPanel_Id");
-//                            		if(isNotVal(gridPanel)){
-//                            			var selectedItem=gridPanel.getStore().getAt(selectRow);
-//                                	    if(selectedItem.data.classes==0){
-//                                	    	if(isNotVal(selectedItem.data.children) && selectedItem.data.children.length>0){
-//                                    			CreateProtocolAlarmInstanceNumItemsConfigInfoTable(selectedItem.data.children[0].text);
-//                                    		}
-//                                    	}else if(selectedItem.data.classes==1){
-//                                    		CreateProtocolAlarmInstanceNumItemsConfigInfoTable(selectedItem.data.text);
-//                                    	}
-//                            		}
                             		protocolAlarmInstanceConfigNumItemsHandsontableHelper.hot.refreshDimensions();
                             	}
                             }
@@ -113,20 +95,6 @@ Ext.define('AP.view.acquisitionUnit.ModbusProtocolAlarmInstanceConfigInfoView', 
                         listeners: {
                             resize: function (abstractcomponent, adjWidth, adjHeight, options) {
                             	if(protocolAlarmInstanceConfigSwitchItemsHandsontableHelper!=null && protocolAlarmInstanceConfigSwitchItemsHandsontableHelper.hot!=undefined){
-//                            		var selectRow= Ext.getCmp("ModbusProtocolAlarmInstanceTreeSelectRow_Id").getValue();
-//                            		var gridPanel=Ext.getCmp("ModbusProtocolAlarmInstanceConfigTreeGridPanel_Id");
-//                            		if(isNotVal(gridPanel)){
-//                            			var selectedItem=gridPanel.getStore().getAt(selectRow);
-//                            			if(selectedItem.data.classes==0){
-//                                    		if(isNotVal(selectedItem.data.children) && selectedItem.data.children.length>0){
-//                                    			CreateProtocolAlarmInstanceSwitchItemsConfigInfoTable(selectedItem.data.children[0].text);
-//                                    		}else{
-//                                    			CreateProtocolAlarmInstanceSwitchItemsConfigInfoTable('');
-//                                    		}
-//                                    	}else if(selectedItem.data.classes==1){
-//                                    		CreateProtocolAlarmInstanceSwitchItemsConfigInfoTable(selectedItem.data.text);
-//                                    	}
-//                            		}
                             		protocolAlarmInstanceConfigSwitchItemsHandsontableHelper.hot.refreshDimensions();
                             	}
                             }
@@ -139,20 +107,6 @@ Ext.define('AP.view.acquisitionUnit.ModbusProtocolAlarmInstanceConfigInfoView', 
                         listeners: {
                             resize: function (abstractcomponent, adjWidth, adjHeight, options) {
                             	if(protocolAlarmInstanceConfigEnumItemsHandsontableHelper!=null && protocolAlarmInstanceConfigEnumItemsHandsontableHelper.hot!=undefined){
-//                            		var selectRow= Ext.getCmp("ModbusProtocolAlarmInstanceTreeSelectRow_Id").getValue();
-//                            		var gridPanel=Ext.getCmp("ModbusProtocolAlarmInstanceConfigTreeGridPanel_Id");
-//                            		if(isNotVal(gridPanel)){
-//                            			var selectedItem=gridPanel.getStore().getAt(selectRow);
-//                            			if(selectedItem.data.classes==0){
-//                                    		if(isNotVal(selectedItem.data.children) && selectedItem.data.children.length>0){
-//                                    			CreateProtocolAlarmInstanceEnumItemsConfigInfoTable(selectedItem.data.children[0].text);
-//                                    		}else{
-//                                    			CreateProtocolAlarmInstanceEnumItemsConfigInfoTable('');
-//                                    		}
-//                                    	}else if(selectedItem.data.classes==1){
-//                                    		CreateProtocolAlarmInstanceEnumItemsConfigInfoTable(selectedItem.data.text);
-//                                    	}
-//                            		}
                             		protocolAlarmInstanceConfigEnumItemsHandsontableHelper.hot.refreshDimensions();
                             	}
                             }

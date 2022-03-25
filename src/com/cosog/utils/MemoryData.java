@@ -7,6 +7,7 @@ import java.util.Map;
 
 public final class MemoryData {
 	public static List<CalItem> calItemList;
+	public static List<CalItem> pcpCalItemList;
 	static {
 		calItemList=new ArrayList<CalItem>();
 		calItemList.add(new CalItem("运行状态",""));
@@ -16,8 +17,8 @@ public final class MemoryData {
 		calItemList.add(new CalItem("日有功电能","kW·h"));
 		
 		calItemList.add(new CalItem("工况",""));
-		calItemList.add(new CalItem("最大载荷",""));
-		calItemList.add(new CalItem("最小载荷",""));
+		calItemList.add(new CalItem("最大载荷","kN"));
+		calItemList.add(new CalItem("最小载荷","kN"));
 		calItemList.add(new CalItem("充满系数",""));
 		
 		calItemList.add(new CalItem("产液量","m^3/d"));
@@ -39,6 +40,20 @@ public final class MemoryData {
 		calItemList.add(new CalItem("气影响","t/d"));
 		
 		calItemList.add(new CalItem("沉没度","m"));
+		
+		
+		pcpCalItemList=new ArrayList<CalItem>();
+		pcpCalItemList.add(new CalItem("运行状态",""));
+		pcpCalItemList.add(new CalItem("运行时间","h"));
+		pcpCalItemList.add(new CalItem("运行区间",""));
+		
+		pcpCalItemList.add(new CalItem("理论排量","m^3/d"));
+		pcpCalItemList.add(new CalItem("产液量","m^3/d"));
+		pcpCalItemList.add(new CalItem("产油量","m^3/d"));
+		pcpCalItemList.add(new CalItem("产水量","m^3/d"));
+		pcpCalItemList.add(new CalItem("产液量","t/d"));
+		pcpCalItemList.add(new CalItem("产油量","t/d"));
+		pcpCalItemList.add(new CalItem("产水量","t/d"));
 	}
 	
 	

@@ -145,6 +145,26 @@ Ext.define('AP.view.acquisitionUnit.ProtocolConfigInfoView', {
     					protocolConfigInstancePropertiesHandsontableHelper=null;
     				}
     				
+    				//显示实例HandsontableHelper资源
+    				if(protocolDisplayInstancePropertiesHandsontableHelper!=null){
+    					if(protocolDisplayInstancePropertiesHandsontableHelper.hot!=undefined){
+    						protocolDisplayInstancePropertiesHandsontableHelper.hot.destroy();
+    					}
+    					protocolDisplayInstancePropertiesHandsontableHelper=null;
+    				}
+    				if(protocolDisplayInstanceAcqItemsHandsontableHelper!=null){
+    					if(protocolDisplayInstanceAcqItemsHandsontableHelper.hot!=undefined){
+    						protocolDisplayInstanceAcqItemsHandsontableHelper.hot.destroy();
+    					}
+    					protocolDisplayInstanceAcqItemsHandsontableHelper=null;
+    				}
+    				if(protocolDisplayInstanceCalItemsHandsontableHelper!=null){
+    					if(protocolDisplayInstanceCalItemsHandsontableHelper.hot!=undefined){
+    						protocolDisplayInstanceCalItemsHandsontableHelper.hot.destroy();
+    					}
+    					protocolDisplayInstanceCalItemsHandsontableHelper=null;
+    				}
+    				
     				//报警实例HandsontableHelper资源
     				if(protocolAlarmInstanceConfigNumItemsHandsontableHelper!=null){
     					if(protocolAlarmInstanceConfigNumItemsHandsontableHelper.hot!=undefined){

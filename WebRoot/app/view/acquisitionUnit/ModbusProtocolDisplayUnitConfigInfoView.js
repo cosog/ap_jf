@@ -120,21 +120,20 @@ function CreateProtocolDisplayUnitAcqItemsConfigInfoTable(protocolName,classes,c
 			}
 			if(protocolDisplayUnitAcqItemsConfigHandsontableHelper==null || protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot==undefined){
 				protocolDisplayUnitAcqItemsConfigHandsontableHelper = ProtocolDisplayUnitAcqItemsConfigHandsontableHelper.createNew("ModbusProtocolDisplayUnitAcqItemsConfigTableInfoDiv_id");
-				var colHeaders="['','序号','名称','地址','读写类型','单位','解析模式','显示级别','显示顺序','实时曲线','实时曲线颜色','历史曲线','历史曲线曲线']";
+				var colHeaders="['','序号','名称','单位','显示级别','显示顺序','实时曲线','实时曲线颜色','历史曲线','历史曲线曲线']";
 				var columns="[" 
 						+"{data:'checked',type:'checkbox'}," 
 						+"{data:'id'}," 
 						+"{data:'title'},"
-					 	+"{data:'addr',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num(val, callback,this.row, this.col,protocolDisplayUnitAcqItemsConfigHandsontableHelper);}},"
-						+"{data:'RWType',type:'dropdown',strict:true,allowInvalid:false,source:['只读', '读写']}," 
 						+"{data:'unit'},"
-						+"{data:'resolutionMode',type:'dropdown',strict:true,allowInvalid:false,source:['开关量', '枚举量','数据量']}," 
 						+"{data:'showLevel',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitAcqItemsConfigHandsontableHelper);}}," 
 						+"{data:'sort',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitAcqItemsConfigHandsontableHelper);}}," 
 						+"{data:'isRealtimeCurve',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitAcqItemsConfigHandsontableHelper);}}," 
 						+"{data:'realtimeCurveColor'},"
 						+"{data:'isHistoryCurve',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitAcqItemsConfigHandsontableHelper);}},"
 						+"{data:'historyCurveColor'},"
+						+"{data:'resolutionMode',type:'dropdown',strict:true,allowInvalid:false,source:['开关量', '枚举量','数据量']}," 
+						+"{data:'addr',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num(val, callback,this.row, this.col,protocolDisplayUnitAcqItemsConfigHandsontableHelper);}},"
 						+"{data:'bitIndex'}"
 						+"]";
 				
@@ -190,10 +189,10 @@ var ProtocolDisplayUnitAcqItemsConfigHandsontableHelper = {
 	        		licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
 	        		data: data,
 	        		hiddenColumns: {
-	                    columns: [13],
+	                    columns: [10,11,12],
 	                    indicators: false
 	                },
-	        		colWidths: [25,50,140,60,80,80,80,60,60,60,70,60,70],
+	                colWidths: [25,50,140,80,60,60,60,70,60,70],
 	                columns:protocolDisplayUnitAcqItemsConfigHandsontableHelper.columns,
 	                stretchH: 'all',//延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
 	                autoWrapRow: true,
@@ -216,9 +215,9 @@ var ProtocolDisplayUnitAcqItemsConfigHandsontableHelper = {
 	                		if(selectedItem.data.classes!=2){
 	                			cellProperties.readOnly = true;
 	                		}else{
-	                			if (visualColIndex >=1 && visualColIndex<=6) {
+	                			if (visualColIndex >=1 && visualColIndex<=3) {
 	    							cellProperties.readOnly = true;
-	    		                }else if(visualColIndex==10||visualColIndex==12){
+	    		                }else if(visualColIndex==7||visualColIndex==9){
 	    		                	cellProperties.renderer = protocolDisplayUnitAcqItemsConfigHandsontableHelper.addCurveBg;
 	    		                }
 	                		}
@@ -227,12 +226,13 @@ var ProtocolDisplayUnitAcqItemsConfigHandsontableHelper = {
 	                },
 	                afterBeginEditing:function(row,column){
 	                	var row1=protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot.getDataAtRow(row);
-	                	if(row1[0] && (column==10||column==12)){
+	                	if(row1[0] && (column==7||column==9)){
 	                		var ScadaDriverModbusConfigSelectRow= Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").getValue();
 	                		if(ScadaDriverModbusConfigSelectRow!=''){
 	                			var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(ScadaDriverModbusConfigSelectRow);
 	                			if(selectedItem.data.classes==2){
 	                				var CurveColorSelectWindow=Ext.create("AP.view.acquisitionUnit.CurveColorSelectWindow");
+	                				Ext.getCmp("curveColorSelectedTableType_Id").setValue(0);//采集项表
 	                				Ext.getCmp("curveColorSelectedRow_Id").setValue(row);
 	                				Ext.getCmp("curveColorSelectedCol_Id").setValue(column);
 	                				CurveColorSelectWindow.show();
@@ -375,12 +375,13 @@ var ProtocolDisplayUnitCalItemsConfigHandsontableHelper = {
 	                },
 	                afterBeginEditing:function(row,column){
 	                	var row1=protocolDisplayUnitCalItemsConfigHandsontableHelper.hot.getDataAtRow(row);
-	                	if(row1[0] && (column==10||column==12)){
+	                	if(row1[0] && (column==7||column==9)){
 	                		var ScadaDriverModbusConfigSelectRow= Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").getValue();
 	                		if(ScadaDriverModbusConfigSelectRow!=''){
 	                			var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(ScadaDriverModbusConfigSelectRow);
 	                			if(selectedItem.data.classes==2){
 	                				var CurveColorSelectWindow=Ext.create("AP.view.acquisitionUnit.CurveColorSelectWindow");
+	                				Ext.getCmp("curveColorSelectedTableType_Id").setValue(1);//计算项表
 	                				Ext.getCmp("curveColorSelectedRow_Id").setValue(row);
 	                				Ext.getCmp("curveColorSelectedCol_Id").setValue(column);
 	                				CurveColorSelectWindow.show();
@@ -529,59 +530,28 @@ function SaveModbusProtocolDisplayUnitConfigTreeData(){
 	if(ScadaDriverModbusConfigSelectRow!=''){
 		var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(ScadaDriverModbusConfigSelectRow);
 		var propertiesData=protocolDisplayUnitPropertiesHandsontableHelper.hot.getData();
-		var protocolProperties={};
-		if(selectedItem.data.classes==2){//选中的是采控单元
-			protocolProperties.classes=selectedItem.data.classes;
-			protocolProperties.id=selectedItem.data.id;
-			protocolProperties.unitCode=selectedItem.data.code;
-			protocolProperties.unitName=propertiesData[0][2];
-			protocolProperties.acqUnitName=propertiesData[1][2];
-			protocolProperties.remark=propertiesData[2][2];
+		var displayUnitProperties={};
+		if(selectedItem.data.classes==2){//选中的是单元
+			displayUnitProperties.classes=selectedItem.data.classes;
+			displayUnitProperties.id=selectedItem.data.id;
+			displayUnitProperties.unitCode=selectedItem.data.code;
+			displayUnitProperties.unitName=propertiesData[0][2];
+			displayUnitProperties.acqUnitId=selectedItem.data.acqUnitId;
+			displayUnitProperties.acqUnitName=propertiesData[1][2];
+			displayUnitProperties.remark=propertiesData[2][2];
 		}
-		if(selectedItem.data.classes==2){//保存采控单元
-			var acqUnitSaveData={};
-			acqUnitSaveData.updatelist=[];
-			acqUnitSaveData.updatelist.push(protocolProperties);
-			saveDisplayUnitConfigData(acqUnitSaveData,selectedItem.data.protocol,selectedItem.parentNode.data.deviceType);
+		if(selectedItem.data.classes==2){//保存单元
+			var displayUnitSaveData={};
+			displayUnitSaveData.updatelist=[];
+			displayUnitSaveData.updatelist.push(displayUnitProperties);
+			saveDisplayUnitConfigData(displayUnitSaveData,selectedItem.data.protocol,selectedItem.parentNode.data.deviceType);
+			grantDisplayAcqItemsPermission();
+			grantDisplayCalItemsPermission();
 		}
-		
-		if(selectedItem.data.classes==3){//选中的是采控单元组
-			var acqGroupSaveData={};
-			acqGroupSaveData.updatelist=[];
-			acqGroupSaveData.updatelist.push(protocolProperties);
-			
-			saveDisplayGroupConfigData(acqGroupSaveData,selectedItem.data.protocol,selectedItem.parentNode.data.id);
-			//给采控组授予采控项
-			grantDisplayItemsPermission();
-		}
-		
 	}
 };
 
-function saveModbusProtocolConfigData(configInfo){
-	Ext.Ajax.request({
-		method:'POST',
-		url:context + '/acquisitionUnitManagerController/saveModbusProtocolConfigData',
-		success:function(response) {
-			var data=Ext.JSON.decode(response.responseText);
-			protocolDisplayUnitAcqItemsConfigHandsontableHelper.clearContainer();
-			if (data.success) {
-            	Ext.MessageBox.alert("信息","保存成功");
-            	Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().load();
-            } else {
-            	Ext.MessageBox.alert("信息","数据保存失败");
-            }
-		},
-		failure:function(){
-			Ext.MessageBox.alert("信息","请求失败");
-		},
-		params: {
-			data:JSON.stringify(configInfo)
-        }
-	});
-}
-
-function saveDisplayUnitConfigData(acqUnitSaveData,protocol,deviceType){
+function saveDisplayUnitConfigData(displayUnitSaveData,protocol,deviceType){
 	Ext.Ajax.request({
 		method:'POST',
 		url:context + '/acquisitionUnitManagerController/saveDisplayUnitHandsontableData',
@@ -599,33 +569,178 @@ function saveDisplayUnitConfigData(acqUnitSaveData,protocol,deviceType){
             displayUnitConfigHandsontableHelper.clearContainer();
 		},
 		params: {
-        	data: JSON.stringify(acqUnitSaveData),
+        	data: JSON.stringify(displayUnitSaveData),
         	protocol: protocol,
         	deviceType:deviceType
         }
 	});
 }
 
-function saveDisplayGroupConfigData(acqGroupSaveData,protocol,unitId){
-	Ext.Ajax.request({
-		method:'POST',
-		url:context + '/acquisitionUnitManagerController/saveDisplayGroupHandsontableData',
-		success:function(response) {
-			rdata=Ext.JSON.decode(response.responseText);
-			if (rdata.success) {
-            	Ext.MessageBox.alert("信息","保存成功");
-            	Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().load();
-            } else {
-            	Ext.MessageBox.alert("信息","采控组数据保存失败");
+var grantDisplayAcqItemsPermission = function () {
+	var DisplayUnitConfigTreeSelectRow= Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").getValue();
+	if (protocolDisplayUnitAcqItemsConfigHandsontableHelper == null ||DisplayUnitConfigTreeSelectRow=='') {
+        return false;
+    }
+	var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(DisplayUnitConfigTreeSelectRow);
+    var acqItemsData = protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot.getData();
+    var addUrl = context + '/acquisitionUnitManagerController/grantAcqItemsToDisplayUnitPermission'
+    // 添加条件
+    var addjson = [];
+    var addItemSort=[];
+    var matrixData = "";
+    var matrixDataArr = "";
+    Ext.MessageBox.msgButtons['ok'].text = "<img   style=\"border:0;position:absolute;right:50px;top:1px;\"  src=\'" + context + "/images/zh_CN/accept.png'/>&nbsp;&nbsp;&nbsp;确定";
+    
+    var unitCode = selectedItem.data.code;
+    var unitId = selectedItem.data.id;
+    var protocol=selectedItem.data.protocol;
+    if (!isNotVal(unitCode)) {
+        return false
+    }
+    if (acqItemsData.length > 0) {
+        Ext.Array.each(acqItemsData, function (name, index, countriesItSelf) {
+            if ((acqItemsData[index][0]+'')==='true') {
+            	var itemName = acqItemsData[index][2];
+            	
+            	var itemShowLevel = acqItemsData[index][4];
+            	var itemSort = acqItemsData[index][5];
+            	var isRealtimeCurve=acqItemsData[index][6];
+            	var realtimeCurveColor=acqItemsData[index][7];
+            	var isHistoryCurve=acqItemsData[index][8];
+            	var historyCurveColor=acqItemsData[index][9];
+            	
+            	var resolutionMode = acqItemsData[index][10];
+            	var itemAddr = acqItemsData[index][11];
+            	var bitIndex=acqItemsData[index][12];
+                
+                addjson.push(itemName);
+                addItemSort.push(itemSort);
+                var matrix_value = '0,0,0';
+                matrixData += itemName + ":"
+                + itemSort+ ":"
+                + itemShowLevel+ ":" 
+                + isRealtimeCurve+ ":" 
+                + realtimeCurveColor+ ":" 
+                + isHistoryCurve + ":" 
+                + historyCurveColor + ":" 
+                
+                + resolutionMode+ ":"
+                + itemAddr + ":" 
+                + bitIndex +":"
+                
+                + matrix_value+ "|";
             }
-		},
-		failure:function(){
-			Ext.MessageBox.alert("信息","请求失败");
-		},
-		params: {
-        	data: JSON.stringify(acqGroupSaveData),
-        	protocol: protocol,
-        	unitId: unitId
+        });
+        if (addjson.length > 0) {
+            matrixData = matrixData.substring(0, matrixData.length - 1);
+            var addparams = "" + addjson.join(",");
+            var addSortParams = "" + addItemSort.join(",");
+            var matrixCodes_ = "" + matrixData;
+            Ext.Ajax.request({
+                url: addUrl,
+                method: "POST",
+                params: {
+                    params: addparams,
+                    sorts: addSortParams,
+                    protocol :protocol,
+                    unitCode: unitCode,
+                    unitId:unitId,
+                    itemType:0,
+                    matrixCodes: matrixCodes_
+                },
+                success: function (response) {
+                    var result = Ext.JSON.decode(response.responseText);
+                    if (result.msg == true) {
+                        Ext.Msg.alert(cosog.string.ts, "<font color=blue>保存成功</font>");
+                    }
+                    if (result.msg == false) {
+                        Ext.Msg.alert('info', "<font color=red>SORRY！" + '采集项安排失败' + "。</font>");
+                    }
+                },
+                failure: function () {
+                    Ext.Msg.alert("warn", "【<font color=red>" + cosog.string.execption + " </font>】：" + cosog.string.contactadmin + "！");
+                }
+            });
         }
-	});
-};
+    }
+    return false;
+}
+
+var grantDisplayCalItemsPermission = function () {
+	var DisplayUnitConfigTreeSelectRow= Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").getValue();
+	if (protocolDisplayUnitCalItemsConfigHandsontableHelper == null ||DisplayUnitConfigTreeSelectRow=='') {
+        return false;
+    }
+	var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(DisplayUnitConfigTreeSelectRow);
+    var calItemsData = protocolDisplayUnitCalItemsConfigHandsontableHelper.hot.getData();
+    var addUrl = context + '/acquisitionUnitManagerController/grantCalItemsToDisplayUnitPermission'
+    // 添加条件
+    var addjson = [];
+    var addItemSort=[];
+    var matrixData = "";
+    var matrixDataArr = "";
+    Ext.MessageBox.msgButtons['ok'].text = "<img   style=\"border:0;position:absolute;right:50px;top:1px;\"  src=\'" + context + "/images/zh_CN/accept.png'/>&nbsp;&nbsp;&nbsp;确定";
+    
+    var unitCode = selectedItem.data.code;
+    var unitId = selectedItem.data.id;
+    var protocol=selectedItem.data.protocol;
+    if (!isNotVal(unitCode)) {
+        return false
+    }
+    if (calItemsData.length > 0) {
+        Ext.Array.each(calItemsData, function (name, index, countriesItSelf) {
+            if ((calItemsData[index][0]+'')==='true') {
+            	var itemName = calItemsData[index][2];
+            	
+            	var itemShowLevel = calItemsData[index][4];
+            	var itemSort = calItemsData[index][5];
+            	var isRealtimeCurve=calItemsData[index][6];
+            	var realtimeCurveColor=calItemsData[index][7];
+            	var isHistoryCurve=calItemsData[index][8];
+            	var historyCurveColor=calItemsData[index][9];
+            	
+                addjson.push(itemName);
+                addItemSort.push(itemSort);
+                var matrix_value = '0,0,0';
+                matrixData += itemName + ":"
+                + itemSort+ ":"
+                + itemShowLevel+ ":" 
+                + isRealtimeCurve+ ":" 
+                + realtimeCurveColor+ ":" 
+                + isHistoryCurve + ":" 
+                + historyCurveColor + ":" 
+                + matrix_value+ "|";
+            }
+        });
+        matrixData = matrixData.substring(0, matrixData.length - 1);
+        var addparams = "" + addjson.join(",");
+        var addSortParams = "" + addItemSort.join(",");
+        var matrixCodes_ = "" + matrixData;
+        Ext.Ajax.request({
+            url: addUrl,
+            method: "POST",
+            params: {
+                params: addparams,
+                sorts: addSortParams,
+                protocol :protocol,
+                unitCode: unitCode,
+                unitId:unitId,
+                itemType:1,
+                matrixCodes: matrixCodes_
+            },
+            success: function (response) {
+                var result = Ext.JSON.decode(response.responseText);
+                if (result.msg == true) {
+                    Ext.Msg.alert(cosog.string.ts, "<font color=blue>保存成功</font>");
+                }
+                if (result.msg == false) {
+                    Ext.Msg.alert('info', "<font color=red>SORRY！" + '计算项安排失败' + "。</font>");
+                }
+            },
+            failure: function () {
+                Ext.Msg.alert("warn", "【<font color=red>" + cosog.string.execption + " </font>】：" + cosog.string.contactadmin + "！");
+            }
+        });
+    }
+    return false;
+}

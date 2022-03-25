@@ -32,8 +32,10 @@ import com.cosog.model.AcquisitionUnitGroup;
 import com.cosog.model.AlarmUnit;
 import com.cosog.model.AlarmUnitItem;
 import com.cosog.model.DisplayUnit;
+import com.cosog.model.DisplayUnitItem;
 import com.cosog.model.Module;
 import com.cosog.model.ProtocolAlarmInstance;
+import com.cosog.model.ProtocolDisplayInstance;
 import com.cosog.model.ProtocolInstance;
 import com.cosog.model.ProtocolSMSInstance;
 import com.cosog.model.Role;
@@ -45,10 +47,12 @@ import com.cosog.model.drive.ModbusProtocolAlarmUnitSaveData;
 import com.cosog.model.drive.ModbusProtocolAlarmInstanceSaveData;
 import com.cosog.model.drive.ModbusProtocolConfig;
 import com.cosog.model.drive.ModbusProtocolConfig.ItemsMeaning;
+import com.cosog.model.drive.ModbusProtocolDisplayInstanceSaveData;
 import com.cosog.model.drive.ModbusProtocolInstanceSaveData;
 import com.cosog.model.gridmodel.AcquisitionGroupHandsontableChangeData;
 import com.cosog.model.gridmodel.AcquisitionUnitHandsontableChangeData;
 import com.cosog.model.gridmodel.DatabaseMappingProHandsontableChangedData;
+import com.cosog.model.gridmodel.DisplayUnitHandsontableChangeData;
 import com.cosog.service.acqUnit.AcquisitionUnitManagerService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.right.RoleManagerService;
@@ -95,7 +99,13 @@ public class AcquisitionUnitManagerController extends BaseController {
 	private AcquisitionUnitManagerService<DisplayUnit> displayUnitManagerService;
 	
 	@Autowired
+	private AcquisitionUnitManagerService<DisplayUnitItem> displayUnitItemManagerService;
+	
+	@Autowired
 	private AcquisitionUnitManagerService<ProtocolInstance> protocolInstanceManagerService;
+	
+	@Autowired
+	private AcquisitionUnitManagerService<ProtocolDisplayInstance> protocolDisplayInstanceManagerService;
 	
 	@Autowired
 	private AcquisitionUnitManagerService<ProtocolAlarmInstance> protocolAlarmInstanceManagerService;
@@ -159,6 +169,12 @@ public class AcquisitionUnitManagerController extends BaseController {
 	@InitBinder("displayUnit")
 	public void initBinder7(WebDataBinder binder) {
 		binder.setFieldDefaultPrefix("displayUnit.");
+	}
+	
+	//添加绑定前缀 
+	@InitBinder("protocolDisplayInstance")
+	public void initBinder8(WebDataBinder binder) {
+		binder.setFieldDefaultPrefix("protocolDisplayInstance.");
 	}
 
 	/**<p>描述：采集类型数据显示方法</p>
@@ -530,9 +546,9 @@ public class AcquisitionUnitManagerController extends BaseController {
 						acquisitionGroupItem.setBitIndex(bitIndex>=0?bitIndex:null);
 						acquisitionGroupItem.setShowLevel(StringManagerUtils.isNumber(module_[4])?StringManagerUtils.stringTransferInteger(module_[4]):null);
 						acquisitionGroupItem.setRealtimeCurve((StringManagerUtils.isNumber(module_[5]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[5]):null);
-						acquisitionGroupItem.setRealtimeCurveColor(StringManagerUtils.isNumber(module_[5]) && !"开关量".equalsIgnoreCase(resolutionMode)&&StringManagerUtils.isColor16("#"+module_[6])?module_[6]:"");
+						acquisitionGroupItem.setRealtimeCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[6])?module_[6]:"");
 						acquisitionGroupItem.setHistoryCurve((StringManagerUtils.isNumber(module_[7]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[7]):null);
-						acquisitionGroupItem.setHistoryCurveColor(StringManagerUtils.isNumber(module_[7]) && !"开关量".equalsIgnoreCase(resolutionMode)&&StringManagerUtils.isColor16("#"+module_[8])?module_[8]:"");
+						acquisitionGroupItem.setHistoryCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[8])?module_[8]:"");
 						acquisitionGroupItem.setMatrix(module_[10]);
 						this.acquisitionUnitItemManagerService.grantAcquisitionItemsPermission(acquisitionGroupItem);
 					}
@@ -583,6 +599,155 @@ public class AcquisitionUnitManagerController extends BaseController {
 				}
 				EquipmentDriverServerTask.initInstanceConfigByAcqUnitId(unitId,"update");
 			}
+			result = "{success:true,msg:true}";
+			response.setCharacterEncoding(Constants.ENCODING_UTF8);
+			out.print(result);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result = "{success:false,msg:false}";
+			out.print(result);
+		}
+		return null;
+	}
+	
+	/**
+	 * @return NUll
+	 * @throws IOException
+	 * 显示单元安排采集项
+	 */
+	@RequestMapping("/grantAcqItemsToDisplayUnitPermission")
+	public String grantAcqItemsToDisplayUnitPermission() throws IOException {
+		String result = "";
+		PrintWriter out = response.getWriter();
+		DisplayUnitItem displayUnitItem = null;
+		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		if(equipmentDriveMap.size()==0){
+			EquipmentDriverServerTask.loadProtocolConfig();
+			equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		}
+		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		try {
+			String params = ParamUtils.getParameter(request, "params");
+			String matrixCodes = ParamUtils.getParameter(request, "matrixCodes");
+			String unitId = ParamUtils.getParameter(request, "unitId");
+			String protocolName = ParamUtils.getParameter(request, "protocol");
+			String itemType = ParamUtils.getParameter(request, "itemType");
+			log.debug("grantAcquisitionItemsPermission params==" + params);
+			String paramsArr[] = StringManagerUtils.split(params, ",");
+			
+			ModbusProtocolConfig.Protocol protocol=null;
+			for(int j=0;j<modbusProtocolConfig.getProtocol().size();j++){
+				if(protocolName.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(j).getName())){
+					protocol=modbusProtocolConfig.getProtocol().get(j);
+					break;
+				}
+			}
+			
+			if (paramsArr.length > 0 && StringManagerUtils.isNotNull(unitId) && protocol!=null) {
+				this.displayUnitItemManagerService.deleteCurrentDisplayUnitOwnItems(unitId,itemType);
+				if (matrixCodes != "" || matrixCodes != null) {
+					String module_matrix[] = matrixCodes.split("\\|");
+					List<String> itemsList=new ArrayList<String>();
+					for (int i = 0; i < module_matrix.length; i++) {
+						String module_[] = module_matrix[i].split("\\:");
+						String itemName=module_[0];
+						int itemAddr=StringManagerUtils.stringTransferInteger(module_[8]);
+						String resolutionMode=module_[7];
+						String bitIndexStr=module_[9];
+						int bitIndex=-99;
+						if("开关量".equalsIgnoreCase(resolutionMode)){//如果是开关量
+							for(int j=0;j<protocol.getItems().size();j++){
+								if(itemAddr==protocol.getItems().get(j).getAddr()){
+									for(int k=0;protocol.getItems().get(j).getMeaning()!=null&&k<protocol.getItems().get(j).getMeaning().size();k++){
+										if(itemName.equalsIgnoreCase(protocol.getItems().get(j).getMeaning().get(k).getMeaning())
+												&&(StringManagerUtils.isNotNull(bitIndexStr)&&StringManagerUtils.stringToInteger(bitIndexStr)==protocol.getItems().get(j).getMeaning().get(k).getValue())  ){
+											itemName=protocol.getItems().get(j).getTitle();
+											bitIndex=protocol.getItems().get(j).getMeaning().get(k).getValue();
+											break;
+										}
+									}
+									break;
+								}
+							}
+						}
+						if(StringManagerUtils.isNotNull(module_[4])){
+							StringManagerUtils.printLog("#"+module_[4]+"isColor16:"+StringManagerUtils.isColor16("#"+module_[4]));
+						}
+						
+						displayUnitItem = new DisplayUnitItem();
+						displayUnitItem.setUnitId(StringManagerUtils.stringToInteger(unitId));
+						displayUnitItem.setItemName(itemName);
+						displayUnitItem.setType(StringManagerUtils.stringToInteger(itemType));
+						displayUnitItem.setSort(StringManagerUtils.isNumber(module_[1])?StringManagerUtils.stringTransferInteger(module_[1]):null);
+						displayUnitItem.setBitIndex(bitIndex>=0?bitIndex:null);
+						displayUnitItem.setShowLevel(StringManagerUtils.isNumber(module_[2])?StringManagerUtils.stringTransferInteger(module_[2]):null);
+						displayUnitItem.setRealtimeCurve((StringManagerUtils.isNumber(module_[3]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[3]):null);
+						displayUnitItem.setRealtimeCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[4])?module_[4]:"");
+						displayUnitItem.setHistoryCurve((StringManagerUtils.isNumber(module_[5]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[5]):null);
+						displayUnitItem.setHistoryCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[6])?module_[6]:"");
+						displayUnitItem.setMatrix(module_[10]);
+						this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
+					}
+				}
+			}
+			result = "{success:true,msg:true}";
+			response.setCharacterEncoding(Constants.ENCODING_UTF8);
+			out.print(result);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result = "{success:false,msg:false}";
+			out.print(result);
+		}
+		return null;
+	}
+	
+	/**
+	 * @return NUll
+	 * @throws IOException
+	 * 显示单元安排采集项
+	 */
+	@RequestMapping("/grantCalItemsToDisplayUnitPermission")
+	public String grantCalItemsToDisplayUnitPermission() throws IOException {
+		String result = "";
+		PrintWriter out = response.getWriter();
+		DisplayUnitItem displayUnitItem = null;
+		try {
+			String params = ParamUtils.getParameter(request, "params");
+			String matrixCodes = ParamUtils.getParameter(request, "matrixCodes");
+			String unitId = ParamUtils.getParameter(request, "unitId");
+			String protocolName = ParamUtils.getParameter(request, "protocol");
+			String itemType = ParamUtils.getParameter(request, "itemType");
+			log.debug("grantAcquisitionItemsPermission params==" + params);
+			String paramsArr[] = StringManagerUtils.split(params, ",");
+
+			this.displayUnitItemManagerService.deleteCurrentDisplayUnitOwnItems(unitId,itemType);
+			if (matrixCodes != "" || matrixCodes != null) {
+				String module_matrix[] = matrixCodes.split("\\|");
+				List<String> itemsList=new ArrayList<String>();
+				for (int i = 0; i < module_matrix.length; i++) {
+					String module_[] = module_matrix[i].split("\\:");
+					
+					if(StringManagerUtils.isNotNull(module_[4])){
+						StringManagerUtils.printLog("#"+module_[4]+"isColor16:"+StringManagerUtils.isColor16("#"+module_[4]));
+					}
+					String itemName=module_[0];
+					displayUnitItem = new DisplayUnitItem();
+					displayUnitItem.setUnitId(StringManagerUtils.stringToInteger(unitId));
+					displayUnitItem.setItemName(itemName);
+					displayUnitItem.setType(StringManagerUtils.stringToInteger(itemType));
+					displayUnitItem.setSort(StringManagerUtils.isNumber(module_[1])?StringManagerUtils.stringTransferInteger(module_[1]):null);
+					displayUnitItem.setShowLevel(StringManagerUtils.isNumber(module_[2])?StringManagerUtils.stringTransferInteger(module_[2]):null);
+					displayUnitItem.setRealtimeCurve((StringManagerUtils.isNumber(module_[3]))?StringManagerUtils.stringTransferInteger(module_[3]):null);
+					displayUnitItem.setRealtimeCurveColor(StringManagerUtils.isColor16("#"+module_[4])?module_[4]:"");
+					displayUnitItem.setHistoryCurve((StringManagerUtils.isNumber(module_[5]))?StringManagerUtils.stringTransferInteger(module_[5]):null);
+					displayUnitItem.setHistoryCurveColor(StringManagerUtils.isColor16("#"+module_[6])?module_[6]:"");
+					displayUnitItem.setMatrix(module_[7]);
+					this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
+				}
+			}
+		
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
 			out.print(result);
@@ -880,6 +1045,19 @@ public class AcquisitionUnitManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/modbusProtocolAndDisplayUnitTreeData")
+	public String modbusProtocolAndDisplayUnitTreeData() throws IOException {
+		String deviceType=ParamUtils.getParameter(request, "deviceType");
+		String json = acquisitionUnitItemManagerService.modbusProtocolAndDisplayUnitTreeData(deviceType);
+		response.setContentType("application/json;charset=utf-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	@RequestMapping("/modbusProtocolAndAlarmUnitTreeData")
 	public String modbusProtocolAndAlarmUnitTreeData() throws IOException {
 		String deviceType=ParamUtils.getParameter(request, "deviceType");
@@ -911,6 +1089,18 @@ public class AcquisitionUnitManagerController extends BaseController {
 	@RequestMapping("/modbusInstanceConfigTreeData")
 	public String modbusInstanceConfigTreeData() throws IOException {
 		String json = acquisitionUnitItemManagerService.getModbusProtocolInstanceConfigTreeData();
+		response.setContentType("application/json;charset=utf-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/modbusDisplayInstanceConfigTreeData")
+	public String modbusDisplayInstanceConfigTreeData() throws IOException {
+		String json = acquisitionUnitItemManagerService.getModbusDisplayProtocolInstanceConfigTreeData();
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -1314,6 +1504,60 @@ public class AcquisitionUnitManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/saveDisplayUnitHandsontableData")
+	public String saveDisplayUnitHandsontableData() throws Exception {
+		String data = ParamUtils.getParameter(request, "data").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
+		String protocol = ParamUtils.getParameter(request, "protocol");
+		String deviceType=ParamUtils.getParameter(request, "deviceType");
+		Gson gson = new Gson();
+		java.lang.reflect.Type type = new TypeToken<DisplayUnitHandsontableChangeData>() {}.getType();
+		DisplayUnitHandsontableChangeData displayUnitHandsontableChangeData=gson.fromJson(data, type);
+		if(displayUnitHandsontableChangeData!=null){
+			if(displayUnitHandsontableChangeData.getDelidslist()!=null){
+				for(int i=0;i<displayUnitHandsontableChangeData.getDelidslist().size();i++){
+					this.displayUnitManagerService.doDisplayUnitBulkDelete(displayUnitHandsontableChangeData.getDelidslist().get(i),deviceType);
+				}
+			}
+			if(displayUnitHandsontableChangeData.getUpdatelist()!=null){
+				for(int i=0;i<displayUnitHandsontableChangeData.getUpdatelist().size();i++){
+					DisplayUnit displayUnit=new DisplayUnit();
+					displayUnit.setId(StringManagerUtils.stringToInteger(displayUnitHandsontableChangeData.getUpdatelist().get(i).getId()));
+					displayUnit.setUnitCode(displayUnitHandsontableChangeData.getUpdatelist().get(i).getUnitCode());
+					displayUnit.setUnitName(displayUnitHandsontableChangeData.getUpdatelist().get(i).getUnitName());
+					displayUnit.setRemark(displayUnitHandsontableChangeData.getUpdatelist().get(i).getRemark());
+					displayUnit.setProtocol(protocol);
+					displayUnit.setAcqUnitId(StringManagerUtils.stringToInteger(displayUnitHandsontableChangeData.getUpdatelist().get(i).getAcqUnitId()));
+					this.displayUnitManagerService.doDisplayUnitEdit(displayUnit);
+				}
+			}
+			
+			if(displayUnitHandsontableChangeData.getInsertlist()!=null){
+				for(int i=0;i<displayUnitHandsontableChangeData.getInsertlist().size();i++){
+					DisplayUnit displayUnit=new DisplayUnit();
+					acquisitionUnit.setProtocol(protocol);
+					displayUnit.setUnitCode(displayUnitHandsontableChangeData.getInsertlist().get(i).getUnitCode());
+					displayUnit.setUnitName(displayUnitHandsontableChangeData.getInsertlist().get(i).getUnitName());
+					displayUnit.setRemark(displayUnitHandsontableChangeData.getInsertlist().get(i).getRemark());
+					displayUnit.setProtocol(protocol);
+					displayUnit.setAcqUnitId(StringManagerUtils.stringToInteger(displayUnitHandsontableChangeData.getUpdatelist().get(i).getAcqUnitId()));
+					this.displayUnitManagerService.doDisplayUnitAdd(displayUnit);
+				}
+			}
+			
+		}
+		String json ="{success:true}";
+		response.setContentType("application/json;charset=utf-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		log.warn("jh json is ==" + json);
+		pw.flush();
+		pw.close();
+//		EquipmentDriverServerTask beeTechDriverServerTast=EquipmentDriverServerTask.getInstance();
+//		beeTechDriverServerTast.updateWellConfif(wellHandsontableChangedData);
+		return null;
+	}
+	
 	@RequestMapping("/doModbusProtocolInstanceAdd")
 	public String doModbusProtocolInstanceAdd(@ModelAttribute ProtocolInstance protocolInstance) throws IOException {
 		String result = "";
@@ -1556,6 +1800,73 @@ public class AcquisitionUnitManagerController extends BaseController {
 						e.printStackTrace();
 						json = "{success:false,msg:false}";
 					}
+				}
+			}
+		}
+		response.setContentType("application/json;charset=utf-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		log.warn("jh json is ==" + json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/doModbusProtocolDisplayInstanceAdd")
+	public String doModbusProtocolDisplayInstanceAdd(@ModelAttribute ProtocolDisplayInstance protocolDisplayInstance) throws IOException {
+		String result = "";
+		try {
+			this.protocolDisplayInstanceManagerService.doModbusProtocolDisplayInstanceAdd(protocolDisplayInstance);
+			result = "{success:true,msg:true}";
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result = "{success:false,msg:false}";
+		}
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(result);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/saveProtocolDisplayInstanceData")
+	public String saveProtocolDisplayInstanceData() throws Exception {
+		Gson gson=new Gson();
+		String json ="{success:true}";
+		String data = ParamUtils.getParameter(request, "data");
+		java.lang.reflect.Type type = new TypeToken<ModbusProtocolDisplayInstanceSaveData>() {}.getType();
+		ModbusProtocolDisplayInstanceSaveData modbusProtocolDisplayInstanceSaveData=gson.fromJson(data, type);
+		
+		if(modbusProtocolDisplayInstanceSaveData!=null){
+			if(modbusProtocolDisplayInstanceSaveData.getDelidslist()!=null){
+				for(int i=0;i<modbusProtocolDisplayInstanceSaveData.getDelidslist().size();i++){
+					this.protocolDisplayInstanceManagerService.doModbusProtocolDisplayInstanceBulkDelete(modbusProtocolDisplayInstanceSaveData.getDelidslist().get(i));
+				}
+			}
+			
+			if(StringManagerUtils.isNotNull(modbusProtocolDisplayInstanceSaveData.getName())){
+				ProtocolDisplayInstance protocolDisplayInstance=new ProtocolDisplayInstance();
+				protocolDisplayInstance.setId(modbusProtocolDisplayInstanceSaveData.getId());
+				protocolDisplayInstance.setCode(modbusProtocolDisplayInstanceSaveData.getCode());
+				protocolDisplayInstance.setName(modbusProtocolDisplayInstanceSaveData.getName());
+				protocolDisplayInstance.setDeviceType(modbusProtocolDisplayInstanceSaveData.getDeviceType());
+				protocolDisplayInstance.setDisplayUnitId(modbusProtocolDisplayInstanceSaveData.getDisplayUnitId());
+				if(StringManagerUtils.isNum(modbusProtocolDisplayInstanceSaveData.getSort())){
+					protocolDisplayInstance.setSort(StringManagerUtils.stringToInteger(modbusProtocolDisplayInstanceSaveData.getSort()));
+				}else{
+					protocolDisplayInstance.setSort(null);
+				}
+				try {
+					this.protocolDisplayInstanceManagerService.doModbusProtocolDisplayInstanceEdit(protocolDisplayInstance);
+					json = "{success:true,msg:true}";
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					json = "{success:false,msg:false}";
 				}
 			}
 		}
@@ -1838,6 +2149,26 @@ public class AcquisitionUnitManagerController extends BaseController {
 		String deviceType = ParamUtils.getParameter(request, "deviceType");
 		String instanceName = ParamUtils.getParameter(request, "instanceName");
 		boolean flag = this.acquisitionUnitManagerService.judgeAlarmInstanceExistOrNot(StringManagerUtils.stringToInteger(deviceType),instanceName);
+		response.setContentType("application/json;charset=" + Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		String json = "";
+		if (flag) {
+			json = "{success:true,msg:'1'}";
+		} else {
+			json = "{success:true,msg:'0'}";
+		}
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/judgeDisplayInstanceExistOrNot")
+	public String judgeDisplayInstanceExistOrNot() throws IOException {
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
+		String instanceName = ParamUtils.getParameter(request, "instanceName");
+		boolean flag = this.acquisitionUnitManagerService.judgeDisplayInstanceExistOrNot(StringManagerUtils.stringToInteger(deviceType),instanceName);
 		response.setContentType("application/json;charset=" + Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		String json = "";
