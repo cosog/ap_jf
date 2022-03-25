@@ -68,58 +68,61 @@ Ext.define("AP.view.acquisitionUnit.DisplayUnitInfoWindow", {
 					}
 				});
         
-        var ProtocolAndAcqUnitTreeStore=Ext.create('Ext.data.TreeStore', {
-            fields: ['orgId', 'text', 'leaf'],
-            autoLoad: true,
-            proxy: {
-                type: 'ajax',
-                url: context + '/acquisitionUnitManagerController/modbusProtocolAndAcqUnitTreeData',
-                reader: 'json'
-            },
-            root: {
-                expanded: true,
-                text: 'orgName'
-            },
-            listeners: {
-            	beforeload: function (store, options) {
-            		var protocolObj=Ext.getCmp('formDisplayUnitProtocolComb_Id');
-            		var protocol='';
-            		if(isNotVal(protocolObj)){
-            			protocol=protocolObj.getValue();
-            		}
-            		var new_params = {
-            				protocol:protocol
-    					};
-    					Ext.apply(store.proxy.extraParams,new_params);
-            	}
-            }
-        });
-        
-        var protocolAndAcqUnitTree=Ext.create('AP.view.well.TreePicker',{
-        	id:'formDisplayUnitProtocolAndAcqUnit_Id',
-        	anchor: '100%',
-        	fieldLabel: '采控单元<font color=red>*</font>',
-            emptyText: '请选择采控单元...',
-            blankText: '请选择采控单元...',
-            displayField: 'text',
-            autoScroll:true,
-            forceSelection : true,// 只能选择下拉框里面的内容
-            rootVisible: false,
-            allowBlank: false,
-            store:ProtocolAndAcqUnitTreeStore,
-            listeners: {
-            	expand: function (sm, selections) {
-            		protocolAndAcqUnitTree.getStore().load();
+        var acqUnitStore = new Ext.data.SimpleStore({
+        	fields: [{
+                name: "boxkey",
+                type: "string"
+            }, {
+                name: "boxval",
+                type: "string"
+            }],
+			proxy : {
+				url : context+ '/acquisitionUnitManagerController/getAcquisitionUnitCombList',
+				type : "ajax",
+				actionMethods: {
+                    read: 'POST'
                 },
-            	select: function (picker,record,eOpts) {
-                	if(record.data.classes==1){
-                		Ext.Msg.alert('info', "<font color=red>当前选中为协议，请选择采控单元！</font>");
-                	}else{
-                		Ext.getCmp("formDisplayUnitAcqUnit_Id").setValue(record.data.id);
-                	}
+                reader: {
+                	type: 'json',
+                    rootProperty: 'list',
+                    totalProperty: 'totals'
                 }
-            }
-        });
+			},
+			autoLoad : true,
+			listeners : {
+				beforeload : function(store, options) {
+					var protocol=Ext.getCmp('formDisplayUnitProtocolComb_Id').getValue();
+					var new_params = {
+						protocol:protocol
+					};
+					Ext.apply(store.proxy.extraParams,new_params);
+				}
+			}
+		});
+        
+        var acqUnitComb = Ext.create(
+        		'Ext.form.field.ComboBox', {
+					fieldLabel :  '采控单元<font color=red>*</font>',
+					id : 'formDisplayUnitAcqUnitComb_Id',
+					anchor : '100%',
+					store: acqUnitStore,
+					queryMode : 'remote',
+					typeAhead : true,
+					autoSelect : false,
+					allowBlank : false,
+					triggerAction : 'all',
+					editable : false,
+					displayField : "boxval",
+					valueField : "boxkey",
+					listeners : {
+						expand: function (sm, selections) {
+							acqUnitComb.getStore().load();
+		                },
+						select: function (v,o) {
+							Ext.getCmp("formDisplayUnitAcqUnit_Id").setValue(this.value);
+	                    }
+					}
+				});
         
         var postDisplayUnitEditForm = Ext.create('Ext.form.Panel', {
             baseCls: 'x-plain',
@@ -135,7 +138,7 @@ Ext.define("AP.view.acquisitionUnit.DisplayUnitInfoWindow", {
 				id : 'formDisplayUnitProtocol_Id',
 				value:'',
 				name : "displayUnit.protocol"
-			},modbusProtocolComb, {
+			},modbusProtocolComb,acqUnitComb, {
                 id: 'formDisplayUnitName_Id',
                 name: "displayUnit.unitName",
                 fieldLabel: '单元名称<font color=red>*</font>',
@@ -172,7 +175,7 @@ Ext.define("AP.view.acquisitionUnit.DisplayUnitInfoWindow", {
                         }
                     }
                 }
-            },protocolAndAcqUnitTree,{
+            },{
 				xtype : "hidden",
 				id : 'formDisplayUnitAcqUnit_Id',
 				value:'',
