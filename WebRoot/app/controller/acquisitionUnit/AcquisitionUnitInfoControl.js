@@ -463,13 +463,13 @@ var grantAcquisitionItemsPermission = function () {
             	var itemName = driverConfigItemsData[index][2];
             	var itemAddr = driverConfigItemsData[index][3];
             	var resolutionMode = driverConfigItemsData[index][6];
-            	var itemShowLevel = driverConfigItemsData[index][7];
-            	var itemSort = driverConfigItemsData[index][8];
-            	var isRealtimeCurve=driverConfigItemsData[index][9];
-            	var realtimeCurveColor=driverConfigItemsData[index][10];
-            	var isHistoryCurve=driverConfigItemsData[index][11];
-            	var historyCurveColor=driverConfigItemsData[index][12];
-            	var bitIndex=driverConfigItemsData[index][13];
+//            	var itemShowLevel = driverConfigItemsData[index][7];
+//            	var itemSort = driverConfigItemsData[index][8];
+//            	var isRealtimeCurve=driverConfigItemsData[index][9];
+//            	var realtimeCurveColor=driverConfigItemsData[index][10];
+//            	var isHistoryCurve=driverConfigItemsData[index][11];
+//            	var historyCurveColor=driverConfigItemsData[index][12];
+            	var bitIndex=driverConfigItemsData[index][7];
                 
                 addjson.push(itemName);
                 addItemSort.push(itemSort);
@@ -478,7 +478,17 @@ var grantAcquisitionItemsPermission = function () {
                 if (matrix_value != "" || matrix_value != null) {
                     matrix_value = matrix_value.substring(0, matrix_value.length - 1);
                 }
-                matrixData += itemName + ":"+itemAddr+ ":"+resolutionMode+ ":"+itemSort+ ":"+itemShowLevel  + ":" + isRealtimeCurve+ ":" + realtimeCurveColor+ ":" + isHistoryCurve + ":" + historyCurveColor + ":" + bitIndex +":"+matrix_value+ "|";
+                matrixData += itemName + ":"
+                +itemAddr+ ":"
+                +resolutionMode+ ":"
+//                +itemSort+ ":"
+//                +itemShowLevel+ ":" 
+//                + isRealtimeCurve+ ":" 
+//                + realtimeCurveColor+ ":" 
+//                + isHistoryCurve + ":" 
+//                + historyCurveColor + ":" 
+                + bitIndex +":"
+                +matrix_value+ "|";
             }
         });
         if (addjson.length > 0) {

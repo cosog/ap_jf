@@ -227,6 +227,16 @@ function CreateAndLoadBatchAddDeviceCollisionDataTable(result) {
                 }
                 source += "]";
                 columns += "{data:'" + result.columns[i].dataIndex + "',type:'dropdown',strict:true,allowInvalid:false,source:" + source + "}";
+            } else if (result.columns[i].dataIndex.toUpperCase() === "displayInstanceName".toUpperCase()) {
+                var source = "[";
+                for (var j = 0; j < result.displayInstanceDropdownData.length; j++) {
+                    source += "\'" + result.displayInstanceDropdownData[j] + "\'";
+                    if (j < result.displayInstanceDropdownData.length - 1) {
+                        source += ",";
+                    }
+                }
+                source += "]";
+                columns += "{data:'" + result.columns[i].dataIndex + "',type:'dropdown',strict:true,allowInvalid:false,source:" + source + "}";
             } else if (result.columns[i].dataIndex.toUpperCase() === "alarmInstanceName".toUpperCase()) {
                 var source = "[";
                 for (var j = 0; j < result.alarmInstanceDropdownData.length; j++) {
@@ -410,6 +420,16 @@ function CreateAndLoadBatchAddDeviceOverlayDataTable(result) {
                 for (var j = 0; j < result.instanceDropdownData.length; j++) {
                     source += "\'" + result.instanceDropdownData[j] + "\'";
                     if (j < result.instanceDropdownData.length - 1) {
+                        source += ",";
+                    }
+                }
+                source += "]";
+                columns += "{data:'" + result.columns[i].dataIndex + "',type:'dropdown',strict:true,allowInvalid:false,source:" + source + "}";
+            } else if (result.columns[i].dataIndex.toUpperCase() === "displayInstanceName".toUpperCase()) {
+                var source = "[";
+                for (var j = 0; j < result.displayInstanceDropdownData.length; j++) {
+                    source += "\'" + result.displayInstanceDropdownData[j] + "\'";
+                    if (j < result.displayInstanceDropdownData.length - 1) {
                         source += ",";
                     }
                 }

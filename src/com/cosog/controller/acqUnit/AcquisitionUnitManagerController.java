@@ -524,7 +524,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 								if(itemAddr==protocol.getItems().get(j).getAddr()){
 									for(int k=0;protocol.getItems().get(j).getMeaning()!=null&&k<protocol.getItems().get(j).getMeaning().size();k++){
 										if(itemName.equalsIgnoreCase(protocol.getItems().get(j).getMeaning().get(k).getMeaning())
-												&&(StringManagerUtils.isNotNull(module_[9])&&StringManagerUtils.stringToInteger(module_[9])==protocol.getItems().get(j).getMeaning().get(k).getValue())  ){
+												&&(StringManagerUtils.isNotNull(module_[3])&&StringManagerUtils.stringToInteger(module_[3])==protocol.getItems().get(j).getMeaning().get(k).getValue())  ){
 											itemName=protocol.getItems().get(j).getTitle();
 											bitIndex=protocol.getItems().get(j).getMeaning().get(k).getValue();
 											break;
@@ -534,22 +534,19 @@ public class AcquisitionUnitManagerController extends BaseController {
 								}
 							}
 						}
-						if(StringManagerUtils.isNotNull(module_[6])){
-							StringManagerUtils.printLog("#"+module_[6]+"isColor16:"+StringManagerUtils.isColor16("#"+module_[6]));
-						}
 						
 						acquisitionGroupItem = new AcquisitionGroupItem();
 						acquisitionGroupItem.setGroupId(Integer.parseInt(groupId));
 						log.debug("groupCode==" + groupCode);
 						acquisitionGroupItem.setItemName(itemName);
-						acquisitionGroupItem.setSort(StringManagerUtils.isNumber(module_[3])?StringManagerUtils.stringTransferInteger(module_[3]):null);
+//						acquisitionGroupItem.setSort(StringManagerUtils.isNumber(module_[3])?StringManagerUtils.stringTransferInteger(module_[3]):null);
 						acquisitionGroupItem.setBitIndex(bitIndex>=0?bitIndex:null);
-						acquisitionGroupItem.setShowLevel(StringManagerUtils.isNumber(module_[4])?StringManagerUtils.stringTransferInteger(module_[4]):null);
-						acquisitionGroupItem.setRealtimeCurve((StringManagerUtils.isNumber(module_[5]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[5]):null);
-						acquisitionGroupItem.setRealtimeCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[6])?module_[6]:"");
-						acquisitionGroupItem.setHistoryCurve((StringManagerUtils.isNumber(module_[7]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[7]):null);
-						acquisitionGroupItem.setHistoryCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[8])?module_[8]:"");
-						acquisitionGroupItem.setMatrix(module_[10]);
+//						acquisitionGroupItem.setShowLevel(StringManagerUtils.isNumber(module_[4])?StringManagerUtils.stringTransferInteger(module_[4]):null);
+//						acquisitionGroupItem.setRealtimeCurve((StringManagerUtils.isNumber(module_[5]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[5]):null);
+//						acquisitionGroupItem.setRealtimeCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[6])?module_[6]:"");
+//						acquisitionGroupItem.setHistoryCurve((StringManagerUtils.isNumber(module_[7]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[7]):null);
+//						acquisitionGroupItem.setHistoryCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[8])?module_[8]:"");
+						acquisitionGroupItem.setMatrix(module_[4]);
 						this.acquisitionUnitItemManagerService.grantAcquisitionItemsPermission(acquisitionGroupItem);
 					}
 				}
@@ -736,14 +733,15 @@ public class AcquisitionUnitManagerController extends BaseController {
 					displayUnitItem = new DisplayUnitItem();
 					displayUnitItem.setUnitId(StringManagerUtils.stringToInteger(unitId));
 					displayUnitItem.setItemName(itemName);
+					displayUnitItem.setItemCode(module_[1]);
 					displayUnitItem.setType(StringManagerUtils.stringToInteger(itemType));
-					displayUnitItem.setSort(StringManagerUtils.isNumber(module_[1])?StringManagerUtils.stringTransferInteger(module_[1]):null);
-					displayUnitItem.setShowLevel(StringManagerUtils.isNumber(module_[2])?StringManagerUtils.stringTransferInteger(module_[2]):null);
-					displayUnitItem.setRealtimeCurve((StringManagerUtils.isNumber(module_[3]))?StringManagerUtils.stringTransferInteger(module_[3]):null);
-					displayUnitItem.setRealtimeCurveColor(StringManagerUtils.isColor16("#"+module_[4])?module_[4]:"");
-					displayUnitItem.setHistoryCurve((StringManagerUtils.isNumber(module_[5]))?StringManagerUtils.stringTransferInteger(module_[5]):null);
-					displayUnitItem.setHistoryCurveColor(StringManagerUtils.isColor16("#"+module_[6])?module_[6]:"");
-					displayUnitItem.setMatrix(module_[7]);
+					displayUnitItem.setSort(StringManagerUtils.isNumber(module_[2])?StringManagerUtils.stringTransferInteger(module_[2]):null);
+					displayUnitItem.setShowLevel(StringManagerUtils.isNumber(module_[3])?StringManagerUtils.stringTransferInteger(module_[3]):null);
+					displayUnitItem.setRealtimeCurve((StringManagerUtils.isNumber(module_[4]))?StringManagerUtils.stringTransferInteger(module_[4]):null);
+					displayUnitItem.setRealtimeCurveColor(StringManagerUtils.isColor16("#"+module_[5])?module_[5]:"");
+					displayUnitItem.setHistoryCurve((StringManagerUtils.isNumber(module_[6]))?StringManagerUtils.stringTransferInteger(module_[6]):null);
+					displayUnitItem.setHistoryCurveColor(StringManagerUtils.isColor16("#"+module_[7])?module_[7]:"");
+					displayUnitItem.setMatrix(module_[8]);
 					this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
 				}
 			}
@@ -935,6 +933,37 @@ public class AcquisitionUnitManagerController extends BaseController {
 		String classes = ParamUtils.getParameter(request, "classes");
 		String json = "";
 		json = acquisitionUnitItemManagerService.getProtocolInstanceItemsConfigData(id,classes);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/getProtocolDisplayInstanceAcqItemsConfigData")
+	public String getProtocolDisplayInstanceAcqItemsConfigData() throws Exception {
+		String id = ParamUtils.getParameter(request, "id");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getProtocolDisplayInstanceAcqItemsConfigData(id,classes);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/getProtocolDisplayInstanceCalItemsConfigData")
+	public String getProtocolDisplayInstanceCalItemsConfigData() throws Exception {
+		String id = ParamUtils.getParameter(request, "id");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getProtocolDisplayInstanceCalItemsConfigData(id,classes,deviceType);
 		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();

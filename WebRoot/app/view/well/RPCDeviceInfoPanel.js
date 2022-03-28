@@ -286,7 +286,6 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
                     listeners: {
                         resize: function (abstractcomponent, adjWidth, adjHeight, options) {
                             if (rpcDeviceInfoHandsontableHelper != null && rpcDeviceInfoHandsontableHelper.hot != null && rpcDeviceInfoHandsontableHelper.hot != undefined) {
-//                            	CreateAndLoadRPCDeviceInfoTable();
                             	rpcDeviceInfoHandsontableHelper.hot.refreshDimensions();
                             }
                         }
@@ -419,6 +418,16 @@ function CreateAndLoadRPCDeviceInfoTable(isNew) {
                         }
                         source += "]";
                         columns += "{data:'" + result.columns[i].dataIndex + "',type:'dropdown',strict:true,allowInvalid:false,source:" + source + "}";
+                    } else if (result.columns[i].dataIndex.toUpperCase() === "displayInstanceName".toUpperCase()) {
+                        var source = "[";
+                        for (var j = 0; j < result.displayInstanceDropdownData.length; j++) {
+                            source += "\'" + result.displayInstanceDropdownData[j] + "\'";
+                            if (j < result.displayInstanceDropdownData.length - 1) {
+                                source += ",";
+                            }
+                        }
+                        source += "]";
+                        columns += "{data:'" + result.columns[i].dataIndex + "',type:'dropdown',strict:true,allowInvalid:false,source:" + source + "}";
                     } else if (result.columns[i].dataIndex.toUpperCase() === "alarmInstanceName".toUpperCase()) {
                         var source = "[";
                         for (var j = 0; j < result.alarmInstanceDropdownData.length; j++) {
@@ -529,44 +538,6 @@ var RPCDeviceInfoHandsontableHelper = {
                 colHeaders: rpcDeviceInfoHandsontableHelper.colHeaders, //显示列头
                 columnSorting: true, //允许排序
                 allowInsertRow:false,
-//                contextMenu: {
-//                    items: {
-//                        "row_above": {
-//                            name: '向上插入一行',
-//                        },
-//                        "row_below": {
-//                            name: '向下插入一行',
-//                        },
-//                        "col_left": {
-//                            name: '向左插入一列',
-//                        },
-//                        "col_right": {
-//                            name: '向右插入一列',
-//                        },
-//                        "remove_row": {
-//                            name: '删除行',
-//                        },
-//                        "remove_col": {
-//                            name: '删除列',
-//                        },
-//                        "merge_cell": {
-//                            name: '合并单元格',
-//                        },
-//                        "copy": {
-//                            name: '复制',
-//                        },
-//                        "cut": {
-//                            name: '剪切',
-//                        },
-//                        "paste": {
-//                            name: '粘贴',
-//                            disabled: function () {
-//                            },
-//                            callback: function () {
-//                            }
-//                        }
-//                    }
-//                }, //右键菜单展示
                 sortIndicator: true,
                 manualColumnResize: true, //当值为true时，允许拖动，当为false时禁止拖动
                 manualRowResize: true, //当值为true时，允许拖动，当为false时禁止拖动
