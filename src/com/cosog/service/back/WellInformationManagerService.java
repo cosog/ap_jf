@@ -178,6 +178,30 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		return result_json.toString();
 	}
 	
+	public String getDisplayInstanceCombList(String deviceTypeStr){
+		int deviceType=StringManagerUtils.stringToInteger(deviceTypeStr);
+		StringBuffer result_json = new StringBuffer();
+		int protocolType=0;
+		if((deviceType>=200&&deviceType<300)||deviceType==1){
+			protocolType=1;
+		}
+		
+		String sql="select t.code,t.name from tbl_protocoldisplayinstance t where t.devicetype="+protocolType+" order by t.sort";
+		
+		List<?> list = this.findCallSql(sql);
+		result_json.append("{\"totals\":"+(list.size()+1)+",\"list\":[{\"boxkey\":\"\",\"boxval\":\"&nbsp;\"},");
+		for(int i=0;i<list.size();i++){
+			Object[] obj = (Object[])list.get(i);
+			result_json.append("{\"boxkey\":\"" + obj[0] + "\",");
+			result_json.append("\"boxval\":\"" + obj[1] + "\"},");
+		}
+		if (result_json.toString().endsWith(",")) {
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]}");
+		return result_json.toString();
+	}
+	
 	public String getAlarmInstanceCombList(String deviceTypeStr){
 		int deviceType=StringManagerUtils.stringToInteger(deviceTypeStr);
 		StringBuffer result_json = new StringBuffer();
@@ -316,6 +340,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer  collisionBuff = new StringBuffer();
 		StringBuffer overlayBuff = new StringBuffer();
 		StringBuffer instanceDropdownData = new StringBuffer();
+		StringBuffer displayInstanceDropdownData = new StringBuffer();
 		StringBuffer alarmInstanceDropdownData = new StringBuffer();
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
 		int collisionCount=0;
@@ -324,13 +349,16 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		String columns=service.showTableHeadersColumns(ddicName);
 		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().batchAddRPCDevice(wellHandsontableChangedData,orgId,deviceType,isCheckout,user);
 		String instanceSql="select t.name from tbl_protocolinstance t where t.devicetype=0 order by t.sort";
+		String displayInstanceSql="select t.name from tbl_protocoldisplayinstance t where t.devicetype=0 order by t.sort";
 		String alarmInstanceSql="select t.name from tbl_protocolalarminstance t where t.devicetype=0 order by t.sort";
 		String applicationScenariosSql="select c.itemname from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' order by c.itemvalue";
 		instanceDropdownData.append("[");
+		displayInstanceDropdownData.append("[");
 		alarmInstanceDropdownData.append("[");
 		applicationScenariosDropdownData.append("[");
 
 		List<?> instanceList = this.findCallSql(instanceSql);
+		List<?> displayInstanceList = this.findCallSql(displayInstanceSql);
 		List<?> alarmInstanceList = this.findCallSql(alarmInstanceSql);
 		List<?> applicationScenariosList = this.findCallSql(applicationScenariosSql);
 		
@@ -344,6 +372,15 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			}
 		}
 		
+		if(displayInstanceList.size()>0){
+			displayInstanceDropdownData.append("\"\",");
+			for(int i=0;i<displayInstanceList.size();i++){
+				displayInstanceDropdownData.append("'"+displayInstanceList.get(i)+"',");
+			}
+			if(displayInstanceDropdownData.toString().endsWith(",")){
+				displayInstanceDropdownData.deleteCharAt(displayInstanceDropdownData.length() - 1);
+			}
+		}
 		
 		if(alarmInstanceList.size()>0){
 			alarmInstanceDropdownData.append("\"\",");
@@ -363,6 +400,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			applicationScenariosDropdownData.deleteCharAt(applicationScenariosDropdownData.length() - 1);
 		}
 		instanceDropdownData.append("]");
+		displayInstanceDropdownData.append("]");
 		alarmInstanceDropdownData.append("]");
 		applicationScenariosDropdownData.append("]");
 		collisionBuff.append("[");
@@ -375,6 +413,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					collisionBuff.append("\"wellName\":\""+list.get(i).getWellName()+"\",");
 					collisionBuff.append("\"applicationScenariosName\":\""+list.get(i).getApplicationScenariosName()+"\",");
 					collisionBuff.append("\"instanceName\":\""+list.get(i).getInstanceName()+"\",");
+					collisionBuff.append("\"displayInstanceName\":\""+list.get(i).getDisplayInstanceName()+"\",");
 					collisionBuff.append("\"alarmInstanceName\":\""+list.get(i).getAlarmInstanceName()+"\",");
 					collisionBuff.append("\"signInId\":\""+list.get(i).getSignInId()+"\",");
 					collisionBuff.append("\"slave\":\""+list.get(i).getSlave()+"\",");
@@ -387,6 +426,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					overlayBuff.append("\"wellName\":\""+list.get(i).getWellName()+"\",");
 					overlayBuff.append("\"applicationScenariosName\":\""+list.get(i).getApplicationScenariosName()+"\",");
 					overlayBuff.append("\"instanceName\":\""+list.get(i).getInstanceName()+"\",");
+					overlayBuff.append("\"displayInstanceName\":\""+list.get(i).getDisplayInstanceName()+"\",");
 					overlayBuff.append("\"alarmInstanceName\":\""+list.get(i).getAlarmInstanceName()+"\",");
 					overlayBuff.append("\"signInId\":\""+list.get(i).getSignInId()+"\",");
 					overlayBuff.append("\"slave\":\""+list.get(i).getSlave()+"\",");
@@ -406,10 +446,10 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		overlayBuff.append("]");
 		result_json.append("{\"success\":true,\"collisionCount\":"+collisionCount+",\"overlayCount\":"+overlayCount+","
 				+ "\"instanceDropdownData\":"+instanceDropdownData.toString()+","
+				+ "\"displayInstanceDropdownData\":"+displayInstanceDropdownData.toString()+","
 				+ "\"alarmInstanceDropdownData\":"+alarmInstanceDropdownData.toString()+","
 				+ "\"applicationScenariosDropdownData\":"+applicationScenariosDropdownData.toString()+","
 				+ "\"columns\":"+columns+",\"collisionList\":"+collisionBuff+",\"overlayList\":"+overlayBuff+"}");
-		
 		return result_json.toString().replaceAll("null", "");
 	}
 	
@@ -442,6 +482,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer  collisionBuff = new StringBuffer();
 		StringBuffer overlayBuff = new StringBuffer();
 		StringBuffer instanceDropdownData = new StringBuffer();
+		StringBuffer displayInstanceDropdownData = new StringBuffer();
 		StringBuffer alarmInstanceDropdownData = new StringBuffer();
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
 		int collisionCount=0;
@@ -449,14 +490,17 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		String ddicName="rpcDeviceManager";
 		String columns=service.showTableHeadersColumns(ddicName);
 		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().batchAddPCPDevice(wellHandsontableChangedData,orgId,deviceType,isCheckout,user);
-		String instanceSql="select t.name from tbl_protocolinstance t where t.devicetype=0 order by t.sort";
-		String alarmInstanceSql="select t.name from tbl_protocolalarminstance t where t.devicetype=0 order by t.sort";
+		String instanceSql="select t.name from tbl_protocolinstance t where t.devicetype=1 order by t.sort";
+		String displayInstanceSql="select t.name from tbl_protocoldisplayinstance t where t.devicetype=1 order by t.sort";
+		String alarmInstanceSql="select t.name from tbl_protocolalarminstance t where t.devicetype=1 order by t.sort";
 		String applicationScenariosSql="select c.itemname from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' order by c.itemvalue";
 		instanceDropdownData.append("[");
+		displayInstanceDropdownData.append("[");
 		alarmInstanceDropdownData.append("[");
 		applicationScenariosDropdownData.append("[");
 
 		List<?> instanceList = this.findCallSql(instanceSql);
+		List<?> displayInstanceList = this.findCallSql(displayInstanceSql);
 		List<?> alarmInstanceList = this.findCallSql(alarmInstanceSql);
 		List<?> applicationScenariosList = this.findCallSql(applicationScenariosSql);
 		
@@ -470,6 +514,15 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			}
 		}
 		
+		if(displayInstanceList.size()>0){
+			displayInstanceDropdownData.append("\"\",");
+			for(int i=0;i<displayInstanceList.size();i++){
+				displayInstanceDropdownData.append("'"+displayInstanceList.get(i)+"',");
+			}
+			if(displayInstanceDropdownData.toString().endsWith(",")){
+				displayInstanceDropdownData.deleteCharAt(displayInstanceDropdownData.length() - 1);
+			}
+		}
 		
 		if(alarmInstanceList.size()>0){
 			alarmInstanceDropdownData.append("\"\",");
@@ -489,6 +542,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			applicationScenariosDropdownData.deleteCharAt(applicationScenariosDropdownData.length() - 1);
 		}
 		instanceDropdownData.append("]");
+		displayInstanceDropdownData.append("]");
 		alarmInstanceDropdownData.append("]");
 		applicationScenariosDropdownData.append("]");
 		collisionBuff.append("[");
@@ -501,6 +555,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					collisionBuff.append("\"wellName\":\""+list.get(i).getWellName()+"\",");
 					collisionBuff.append("\"applicationScenariosName\":\""+list.get(i).getApplicationScenariosName()+"\",");
 					collisionBuff.append("\"instanceName\":\""+list.get(i).getInstanceName()+"\",");
+					collisionBuff.append("\"displayInstanceName\":\""+list.get(i).getDisplayInstanceName()+"\",");
 					collisionBuff.append("\"alarmInstanceName\":\""+list.get(i).getAlarmInstanceName()+"\",");
 					collisionBuff.append("\"signInId\":\""+list.get(i).getSignInId()+"\",");
 					collisionBuff.append("\"slave\":\""+list.get(i).getSlave()+"\",");
@@ -513,6 +568,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					overlayBuff.append("\"wellName\":\""+list.get(i).getWellName()+"\",");
 					overlayBuff.append("\"applicationScenariosName\":\""+list.get(i).getApplicationScenariosName()+"\",");
 					overlayBuff.append("\"instanceName\":\""+list.get(i).getInstanceName()+"\",");
+					overlayBuff.append("\"displayInstanceName\":\""+list.get(i).getDisplayInstanceName()+"\",");
 					overlayBuff.append("\"alarmInstanceName\":\""+list.get(i).getAlarmInstanceName()+"\",");
 					overlayBuff.append("\"signInId\":\""+list.get(i).getSignInId()+"\",");
 					overlayBuff.append("\"slave\":\""+list.get(i).getSlave()+"\",");
@@ -532,6 +588,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		overlayBuff.append("]");
 		result_json.append("{\"success\":true,\"collisionCount\":"+collisionCount+",\"overlayCount\":"+overlayCount+","
 				+ "\"instanceDropdownData\":"+instanceDropdownData.toString()+","
+				+ "\"displayInstanceDropdownData\":"+displayInstanceDropdownData.toString()+","
 				+ "\"alarmInstanceDropdownData\":"+alarmInstanceDropdownData.toString()+","
 				+ "\"applicationScenariosDropdownData\":"+applicationScenariosDropdownData.toString()+","
 				+ "\"columns\":"+columns+",\"collisionList\":"+collisionBuff+",\"overlayList\":"+overlayBuff+"}");
@@ -946,6 +1003,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	public String getRPCDeviceInfoList(Map map,Page pager,int recordCount) {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer instanceDropdownData = new StringBuffer();
+		StringBuffer displayInstanceDropdownData = new StringBuffer();
 		StringBuffer alarmInstanceDropdownData = new StringBuffer();
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
 		String ddicName="rpcDeviceManager";
@@ -965,7 +1023,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		}
 		
 		String columns=service.showTableHeadersColumns(ddicName);
-		String sql = "select id,orgName,wellName,applicationScenariosName,instanceName,alarmInstanceName,signInId,slave,"
+		String sql = "select id,orgName,wellName,applicationScenariosName,instanceName,displayInstanceName,alarmInstanceName,signInId,slave,"
 				+ " videoUrl,sortNum,status,statusName"
 				+ " from "+tableName+" t where 1=1"
 				+ WellInformation_Str;
@@ -973,14 +1031,17 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		sql+= " and t.devicetype="+deviceType;
 		sql+= " order by t.sortnum,t.wellname ";
 		String instanceSql="select t.name from tbl_protocolinstance t where t.devicetype="+protocolType+" order by t.sort";
+		String displayInstanceSql="select t.name from tbl_protocoldisplayinstance t where t.devicetype="+protocolType+" order by t.sort";
 		String alarmInstanceSql="select t.name from tbl_protocolalarminstance t where t.devicetype="+protocolType+" order by t.sort";
 		String applicationScenariosSql="select c.itemname from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' order by c.itemvalue";
 		
 		instanceDropdownData.append("[");
+		displayInstanceDropdownData.append("[");
 		alarmInstanceDropdownData.append("[");
 		applicationScenariosDropdownData.append("[");
 
 		List<?> instanceList = this.findCallSql(instanceSql);
+		List<?> displayInstanceList = this.findCallSql(displayInstanceSql);
 		List<?> alarmInstanceList = this.findCallSql(alarmInstanceSql);
 		List<?> applicationScenariosList = this.findCallSql(applicationScenariosSql);
 		
@@ -991,6 +1052,16 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			}
 			if(instanceDropdownData.toString().endsWith(",")){
 				instanceDropdownData.deleteCharAt(instanceDropdownData.length() - 1);
+			}
+		}
+		
+		if(displayInstanceList.size()>0){
+			displayInstanceDropdownData.append("\"\",");
+			for(int i=0;i<displayInstanceList.size();i++){
+				displayInstanceDropdownData.append("'"+displayInstanceList.get(i)+"',");
+			}
+			if(instanceDropdownData.toString().endsWith(",")){
+				displayInstanceDropdownData.deleteCharAt(displayInstanceDropdownData.length() - 1);
 			}
 		}
 		
@@ -1013,6 +1084,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			applicationScenariosDropdownData.deleteCharAt(applicationScenariosDropdownData.length() - 1);
 		}
 		instanceDropdownData.append("]");
+		displayInstanceDropdownData.append("]");
 		alarmInstanceDropdownData.append("]");
 		applicationScenariosDropdownData.append("]");
 		
@@ -1020,28 +1092,26 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		List<?> list = this.findCallSql(sql);
 		result_json.append("{\"success\":true,\"totalCount\":"+list.size()+","
 				+ "\"instanceDropdownData\":"+instanceDropdownData.toString()+","
+				+ "\"displayInstanceDropdownData\":"+displayInstanceDropdownData.toString()+","
 				+ "\"alarmInstanceDropdownData\":"+alarmInstanceDropdownData.toString()+","
 				+ "\"applicationScenariosDropdownData\":"+applicationScenariosDropdownData.toString()+","
 				+ "\"columns\":"+columns+",\"totalRoot\":[");
 		for(int i=0;i<list.size();i++){
 			Object[] obj = (Object[]) list.get(i);
-			
 			result_json.append("{\"id\":\""+obj[0]+"\",");
 			result_json.append("\"orgName\":\""+obj[1]+"\",");
 			result_json.append("\"wellName\":\""+obj[2]+"\",");
 			result_json.append("\"applicationScenariosName\":\""+obj[3]+"\",");
 			result_json.append("\"instanceName\":\""+obj[4]+"\",");
-			result_json.append("\"alarmInstanceName\":\""+obj[5]+"\",");
-			result_json.append("\"signInId\":\""+obj[6]+"\",");
-			result_json.append("\"slave\":\""+obj[7]+"\",");
-			result_json.append("\"videoUrl\":\""+obj[8]+"\",");
-			result_json.append("\"status\":\""+obj[10]+"\",");
-			result_json.append("\"statusName\":\""+obj[11]+"\",");
-			result_json.append("\"sortNum\":\""+obj[9]+"\"},");
+			result_json.append("\"displayInstanceName\":\""+obj[5]+"\",");
+			result_json.append("\"alarmInstanceName\":\""+obj[6]+"\",");
+			result_json.append("\"signInId\":\""+obj[7]+"\",");
+			result_json.append("\"slave\":\""+obj[8]+"\",");
+			result_json.append("\"videoUrl\":\""+obj[9]+"\",");
+			result_json.append("\"status\":\""+obj[11]+"\",");
+			result_json.append("\"statusName\":\""+obj[12]+"\",");
+			result_json.append("\"sortNum\":\""+obj[10]+"\"},");
 		}
-//		for(int i=1;i<=recordCount-list.size();i++){
-//			result_json.append("{\"jlbh\":\"-99999\",\"id\":\"-99999\"},");
-//		}
 		if(result_json.toString().endsWith(",")){
 			result_json.deleteCharAt(result_json.length() - 1);
 		}
@@ -1066,7 +1136,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		if (StringManagerUtils.isNotNull(wellInformationName)) {
 			WellInformation_Str = " and t.wellname like '%" + wellInformationName+ "%'";
 		}
-		String sql = "select id,orgName,wellName,applicationScenariosName,instanceName,alarmInstanceName,signInId,slave,"
+		String sql = "select id,orgName,wellName,applicationScenariosName,instanceName,instanceName,alarmInstanceName,signInId,slave,"
 				+ " videoUrl,sortNum,status,statusName"
 				+ " from "+tableName+" t where 1=1"
 				+ WellInformation_Str;
@@ -1080,19 +1150,19 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		result_json.append("[");
 		for(int i=0;i<list.size();i++){
 			Object[] obj = (Object[]) list.get(i);
-			
 			result_json.append("{\"id\":\""+obj[0]+"\",");
 			result_json.append("\"orgName\":\""+obj[1]+"\",");
 			result_json.append("\"wellName\":\""+obj[2]+"\",");
 			result_json.append("\"applicationScenariosName\":\""+obj[3]+"\",");
 			result_json.append("\"instanceName\":\""+obj[4]+"\",");
-			result_json.append("\"alarmInstanceName\":\""+obj[5]+"\",");
-			result_json.append("\"signInId\":\""+obj[6]+"\",");
-			result_json.append("\"slave\":\""+obj[7]+"\",");
-			result_json.append("\"videoUrl\":\""+obj[8]+"\",");
-			result_json.append("\"status\":\""+obj[10]+"\",");
-			result_json.append("\"statusName\":\""+obj[11]+"\",");
-			result_json.append("\"sortNum\":\""+obj[9]+"\"},");
+			result_json.append("\"displayInstanceName\":\""+obj[5]+"\",");
+			result_json.append("\"alarmInstanceName\":\""+obj[6]+"\",");
+			result_json.append("\"signInId\":\""+obj[7]+"\",");
+			result_json.append("\"slave\":\""+obj[8]+"\",");
+			result_json.append("\"videoUrl\":\""+obj[9]+"\",");
+			result_json.append("\"status\":\""+obj[11]+"\",");
+			result_json.append("\"statusName\":\""+obj[12]+"\",");
+			result_json.append("\"sortNum\":\""+obj[10]+"\"},");
 		}
 		for(int i=1;i<=recordCount-list.size();i++){
 			result_json.append("{\"jlbh\":\"-99999\",\"id\":\"-99999\"},");
@@ -1106,9 +1176,10 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public String getPipeDeviceInfoList(Map map,Page pager,int recordCount) {
+	public String getPCPDeviceInfoList(Map map,Page pager,int recordCount) {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer instanceDropdownData = new StringBuffer();
+		StringBuffer displayInstanceDropdownData = new StringBuffer();
 		StringBuffer alarmInstanceDropdownData = new StringBuffer();
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
 		String ddicName="pcpDeviceManager";
@@ -1128,7 +1199,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		}
 		
 		String columns=service.showTableHeadersColumns(ddicName);
-		String sql = "select id,orgName,wellName,applicationScenariosName,instanceName,alarmInstanceName,signInId,slave,"
+		String sql = "select id,orgName,wellName,applicationScenariosName,instanceName,displayInstanceName,alarmInstanceName,signInId,slave,"
 				+ " videoUrl,sortNum,status,statusName"
 				+ " from "+tableName+" t where 1=1"
 				+ WellInformation_Str;
@@ -1137,14 +1208,17 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		sql+= " and t.devicetype="+deviceType;
 		sql+= " order by t.sortnum,t.wellname ";
 		String instanceSql="select t.name from tbl_protocolinstance t where t.devicetype="+protocolType+" order by t.sort";
+		String displayInstanceSql="select t.name from tbl_protocoldisplayinstance t where t.devicetype="+protocolType+" order by t.sort";
 		String alarmInstanceSql="select t.name from tbl_protocolalarminstance t where t.devicetype="+protocolType+" order by t.sort";
 		String applicationScenariosSql="select c.itemname from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' order by c.itemvalue";
 		
 		instanceDropdownData.append("[");
+		displayInstanceDropdownData.append("[");
 		alarmInstanceDropdownData.append("[");
 		applicationScenariosDropdownData.append("[");
 
 		List<?> instanceList = this.findCallSql(instanceSql);
+		List<?> displayInstanceList = this.findCallSql(displayInstanceSql);
 		List<?> alarmInstanceList = this.findCallSql(alarmInstanceSql);
 		List<?> applicationScenariosList = this.findCallSql(applicationScenariosSql);
 		
@@ -1155,6 +1229,15 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			}
 			if(instanceDropdownData.toString().endsWith(",")){
 				instanceDropdownData.deleteCharAt(instanceDropdownData.length() - 1);
+			}
+		}
+		if(displayInstanceList.size()>0){
+			displayInstanceDropdownData.append("\"\",");
+			for(int i=0;i<displayInstanceList.size();i++){
+				displayInstanceDropdownData.append("'"+displayInstanceList.get(i)+"',");
+			}
+			if(displayInstanceDropdownData.toString().endsWith(",")){
+				displayInstanceDropdownData.deleteCharAt(displayInstanceDropdownData.length() - 1);
 			}
 		}
 		if(alarmInstanceList.size()>0){
@@ -1175,6 +1258,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		}
 	
 		instanceDropdownData.append("]");
+		displayInstanceDropdownData.append("]");
 		alarmInstanceDropdownData.append("]");
 		applicationScenariosDropdownData.append("]");
 		
@@ -1184,6 +1268,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		
 		result_json.append("{\"success\":true,\"totalCount\":"+list.size()+","
 				+ "\"instanceDropdownData\":"+instanceDropdownData.toString()+","
+				+ "\"displayInstanceDropdownData\":"+displayInstanceDropdownData.toString()+","
 				+ "\"alarmInstanceDropdownData\":"+alarmInstanceDropdownData.toString()+","
 				+ "\"applicationScenariosDropdownData\":"+applicationScenariosDropdownData.toString()+","
 				+ "\"columns\":"+columns+",\"totalRoot\":[");
@@ -1195,13 +1280,14 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			result_json.append("\"wellName\":\""+obj[2]+"\",");
 			result_json.append("\"applicationScenariosName\":\""+obj[3]+"\",");
 			result_json.append("\"instanceName\":\""+obj[4]+"\",");
-			result_json.append("\"alarmInstanceName\":\""+obj[5]+"\",");
-			result_json.append("\"signInId\":\""+obj[6]+"\",");
-			result_json.append("\"slave\":\""+obj[7]+"\",");
-			result_json.append("\"videoUrl\":\""+obj[8]+"\",");
-			result_json.append("\"status\":\""+obj[10]+"\",");
-			result_json.append("\"statusName\":\""+obj[11]+"\",");
-			result_json.append("\"sortNum\":\""+obj[9]+"\"},");
+			result_json.append("\"displayInstanceName\":\""+obj[5]+"\",");
+			result_json.append("\"alarmInstanceName\":\""+obj[6]+"\",");
+			result_json.append("\"signInId\":\""+obj[7]+"\",");
+			result_json.append("\"slave\":\""+obj[8]+"\",");
+			result_json.append("\"videoUrl\":\""+obj[9]+"\",");
+			result_json.append("\"status\":\""+obj[11]+"\",");
+			result_json.append("\"statusName\":\""+obj[12]+"\",");
+			result_json.append("\"sortNum\":\""+obj[10]+"\"},");
 		}
 //		for(int i=1;i<=recordCount-list.size();i++){
 //			result_json.append("{\"jlbh\":\"-99999\",\"id\":\"-99999\"},");
@@ -1999,6 +2085,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	public String getBatchAddDeviceTableInfo(String deviceTypeStr,int recordCount) {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer instanceDropdownData = new StringBuffer();
+		StringBuffer displayInstanceDropdownData = new StringBuffer();
 		StringBuffer alarmInstanceDropdownData = new StringBuffer();
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
 		String ddicName="rpcDeviceManager";
@@ -2010,14 +2097,17 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		}
 		
 		String instanceSql="select t.name from tbl_protocolinstance t where t.devicetype="+protocolType+" order by t.sort";
+		String displayInstanceSql="select t.name from tbl_protocoldisplayinstance t where t.devicetype="+protocolType+" order by t.sort";
 		String alarmInstanceSql="select t.name from tbl_protocolalarminstance t where t.devicetype="+protocolType+" order by t.sort";
 		String applicationScenariosSql="select c.itemname from tbl_code c where c.itemcode='APPLICATIONSCENARIOS' order by c.itemvalue";
 		String columns=service.showTableHeadersColumns(ddicName);
 		instanceDropdownData.append("[");
+		displayInstanceDropdownData.append("[");
 		alarmInstanceDropdownData.append("[");
 		applicationScenariosDropdownData.append("[");
 
 		List<?> instanceList = this.findCallSql(instanceSql);
+		List<?> displayInstanceList = this.findCallSql(displayInstanceSql);
 		List<?> alarmInstanceList = this.findCallSql(alarmInstanceSql);
 		List<?> applicationScenariosList = this.findCallSql(applicationScenariosSql);
 		
@@ -2031,6 +2121,15 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			}
 		}
 		
+		if(displayInstanceList.size()>0){
+			displayInstanceDropdownData.append("\"\",");
+			for(int i=0;i<displayInstanceList.size();i++){
+				displayInstanceDropdownData.append("'"+displayInstanceList.get(i)+"',");
+			}
+			if(displayInstanceDropdownData.toString().endsWith(",")){
+				displayInstanceDropdownData.deleteCharAt(displayInstanceDropdownData.length() - 1);
+			}
+		}
 		
 		if(alarmInstanceList.size()>0){
 			alarmInstanceDropdownData.append("\"\",");
@@ -2050,12 +2149,14 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			applicationScenariosDropdownData.deleteCharAt(applicationScenariosDropdownData.length() - 1);
 		}
 		instanceDropdownData.append("]");
+		displayInstanceDropdownData.append("]");
 		alarmInstanceDropdownData.append("]");
 		applicationScenariosDropdownData.append("]");
 		
 		String json = "";
 		result_json.append("{\"success\":true,\"totalCount\":"+recordCount+","
 				+ "\"instanceDropdownData\":"+instanceDropdownData.toString()+","
+				+ "\"displayInstanceDropdownData\":"+displayInstanceDropdownData.toString()+","
 				+ "\"alarmInstanceDropdownData\":"+alarmInstanceDropdownData.toString()+","
 				+ "\"applicationScenariosDropdownData\":"+applicationScenariosDropdownData.toString()+","
 				+ "\"columns\":"+columns+",\"totalRoot\":[");

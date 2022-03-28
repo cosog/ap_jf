@@ -193,6 +193,19 @@ public class WellInformationManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/getDisplayInstanceCombList")
+	public String getDisplayInstanceCombList() throws IOException {
+		deviceType= ParamUtils.getParameter(request, "deviceType");
+		String json=wellInformationManagerService.getDisplayInstanceCombList(deviceType);
+		response.setContentType("application/json;charset=utf-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	@RequestMapping("/getAlarmInstanceCombList")
 	public String getAlarmInstanceCombList() throws IOException {
 		deviceType= ParamUtils.getParameter(request, "deviceType");
@@ -280,7 +293,7 @@ public class WellInformationManagerController extends BaseController {
 		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
 			json = this.wellInformationManagerService.getRPCDeviceInfoList(map, pager,recordCount);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
-			json = this.wellInformationManagerService.getPipeDeviceInfoList(map, pager,recordCount);
+			json = this.wellInformationManagerService.getPCPDeviceInfoList(map, pager,recordCount);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=300){
 			json = this.wellInformationManagerService.getSMSDeviceInfoList(map, pager,recordCount);
 		}

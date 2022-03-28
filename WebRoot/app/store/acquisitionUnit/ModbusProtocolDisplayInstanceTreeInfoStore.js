@@ -56,7 +56,21 @@ Ext.define('AP.store.acquisitionUnit.ModbusProtocolDisplayInstanceTreeInfoStore'
                         	
                         },select( v, record, index, eOpts ){
                         	Ext.getCmp("ModbusProtocolDisplayInstanceTreeSelectRow_Id").setValue(index);
-                        	
+                        	if(record.data.classes==0){//选中设备类型deviceType
+                        		if(isNotVal(record.data.children) && record.data.children.length>0){
+                        			CreateProtocolDisplayInstanceAcqItemsInfoTable(record.data.children[0].id,record.data.children[0].text,record.data.children[0].classes);
+                        			CreateProtocolDisplayInstanceCalItemsInfoTable(record.data.children[0].id,record.data.children[0].text,record.data.children[0].classes,record.data.deviceType);
+                        		}else{
+                        			CreateProtocolDisplayInstanceAcqItemsInfoTable(-1,'',1);
+                        			CreateProtocolDisplayInstanceCalItemsInfoTable(-1,'',1,record.data.deviceType);
+                        		}
+                        	}else if(record.data.classes==2){//选中显示单元
+                        		CreateProtocolDisplayInstanceAcqItemsInfoTable(record.parentNode.data.id,record.parentNode.data.text,record.parentNode.data.classes);
+                        		CreateProtocolDisplayInstanceCalItemsInfoTable(record.parentNode.data.id,record.parentNode.data.text,record.parentNode.data.classes,record.parentNode.data.deviceType);
+                        	}else{
+                        		CreateProtocolDisplayInstanceAcqItemsInfoTable(record.data.id,record.data.text,record.data.classes);
+                        		CreateProtocolDisplayInstanceCalItemsInfoTable(record.data.id,record.data.text,record.data.classes,record.data.deviceType);
+                        	}
                         	
                         	CreateProtocolDisplayInstancePropertiesInfoTable(record.data);
                         },beforecellcontextmenu: function (pl, td, cellIndex, record, tr, rowIndex, e, eOpts) {//右键事件

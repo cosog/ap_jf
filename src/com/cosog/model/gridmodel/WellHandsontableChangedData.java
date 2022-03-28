@@ -41,6 +41,8 @@ public class WellHandsontableChangedData {
 
 	    private String instanceName="";
 	    
+	    private String displayInstanceName="";
+	    
 	    private String alarmInstanceName="";
 
 	    private String signInId="";
@@ -159,6 +161,14 @@ public class WellHandsontableChangedData {
 
 		public void setStatusName(String statusName) {
 			this.statusName = statusName;
+		}
+
+		public String getDisplayInstanceName() {
+			return displayInstanceName;
+		}
+
+		public void setDisplayInstanceName(String displayInstanceName) {
+			this.displayInstanceName = displayInstanceName;
 		}
 	    
 	}

@@ -374,7 +374,7 @@
                     "Quantity": 250,
                     "Ratio": 0.01,
                     "RWType": "r",
-                    "Unit": "0.01m",
+                    "Unit": "m",
                     "ResolutionMode": 2,
                     "AcqMode": "passive"
                 },
@@ -386,7 +386,7 @@
                     "Quantity": 250,
                     "Ratio": 0.01,
                     "RWType": "r",
-                    "Unit": "0.01kN",
+                    "Unit": "kN",
                     "ResolutionMode": 2,
                     "AcqMode": "passive"
                 },
@@ -398,7 +398,7 @@
                     "Quantity": 250,
                     "Ratio": 0.01,
                     "RWType": "r",
-                    "Unit": "0.01A",
+                    "Unit": "A",
                     "ResolutionMode": 2,
                     "AcqMode": "passive"
                 },
@@ -410,7 +410,7 @@
                     "Quantity": 250,
                     "Ratio": 0.01,
                     "RWType": "r",
-                    "Unit": "0.01kW",
+                    "Unit": "kW",
                     "ResolutionMode": 2,
                     "AcqMode": "passive"
                 },

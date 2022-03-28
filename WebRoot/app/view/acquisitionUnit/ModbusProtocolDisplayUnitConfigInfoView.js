@@ -177,9 +177,6 @@ var ProtocolDisplayUnitAcqItemsConfigHandsontableHelper = {
 	            if(value!=null){
 	            	td.style.backgroundColor = '#'+value;
 	            }
-	            
-	            
-	            
 	        }
 	        
 	        protocolDisplayUnitAcqItemsConfigHandsontableHelper.createTable = function (data) {
@@ -275,7 +272,7 @@ function CreateProtocolDisplayUnitCalItemsConfigInfoTable(deviceType,classes,uni
 			}
 			if(protocolDisplayUnitCalItemsConfigHandsontableHelper==null || protocolDisplayUnitCalItemsConfigHandsontableHelper.hot==undefined){
 				protocolDisplayUnitCalItemsConfigHandsontableHelper = ProtocolDisplayUnitCalItemsConfigHandsontableHelper.createNew("ModbusProtocolDisplayUnitCalItemsConfigTableInfoDiv_id");
-				var colHeaders="['','序号','名称','单位','显示级别','显示顺序','实时曲线','实时曲线颜色','历史曲线','历史曲线曲线']";
+				var colHeaders="['','序号','名称','单位','显示级别','显示顺序','实时曲线','实时曲线颜色','历史曲线','历史曲线曲线','']";
 				var columns="[" 
 						+"{data:'checked',type:'checkbox'}," 
 						+"{data:'id'}," 
@@ -286,7 +283,8 @@ function CreateProtocolDisplayUnitCalItemsConfigInfoTable(deviceType,classes,uni
 						+"{data:'isRealtimeCurve',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitCalItemsConfigHandsontableHelper);}}," 
 						+"{data:'realtimeCurveColor'},"
 						+"{data:'isHistoryCurve',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitCalItemsConfigHandsontableHelper);}},"
-						+"{data:'historyCurveColor'}"
+						+"{data:'historyCurveColor'},"
+						+"{data:'code'}"
 						+"]";
 				protocolDisplayUnitCalItemsConfigHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
 				protocolDisplayUnitCalItemsConfigHandsontableHelper.columns=Ext.JSON.decode(columns);
@@ -326,9 +324,6 @@ var ProtocolDisplayUnitCalItemsConfigHandsontableHelper = {
 	            if(value!=null){
 	            	td.style.backgroundColor = '#'+value;
 	            }
-	            
-	            
-	            
 	        }
 	        
 	        protocolDisplayUnitCalItemsConfigHandsontableHelper.createTable = function (data) {
@@ -338,7 +333,7 @@ var ProtocolDisplayUnitCalItemsConfigHandsontableHelper = {
 	        		licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
 	        		data: data,
 	        		hiddenColumns: {
-	                    columns: [13],
+	                    columns: [10],
 	                    indicators: false
 	                },
 	                colWidths: [25,50,140,80,60,60,60,70,60,70],
@@ -699,10 +694,13 @@ var grantDisplayCalItemsPermission = function () {
             	var isHistoryCurve=calItemsData[index][8];
             	var historyCurveColor=calItemsData[index][9];
             	
-                addjson.push(itemName);
+            	var itemCode = calItemsData[index][10];
+            	
+                addjson.push(itemCode);
                 addItemSort.push(itemSort);
                 var matrix_value = '0,0,0';
                 matrixData += itemName + ":"
+                + itemCode+ ":"
                 + itemSort+ ":"
                 + itemShowLevel+ ":" 
                 + isRealtimeCurve+ ":" 
