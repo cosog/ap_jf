@@ -658,7 +658,6 @@ public class DriverAPIController extends BaseController{
 					+ " order by t2.id";
 			String itemsSql="select t.wellname,t3.protocol, "
 					+ " listagg(t6.itemname, ',') within group(order by t6.groupid,t6.id ) key,"
-					+ " listagg(decode(t6.sort,null,9999,t6.sort), ',') within group(order by t6.groupid,t6.id ) sort, "
 					+ " listagg(decode(t6.bitindex,null,9999,t6.bitindex), ',') within group(order by t6.groupid,t6.id ) bitindex  "
 					+ " from "+deviceTableName+" t,tbl_protocolinstance t2,tbl_acq_unit_conf t3,tbl_acq_group2unit_conf t4,tbl_acq_group_conf t5,tbl_acq_item2group_conf t6 "
 					+ " where t.instancecode=t2.code and t2.unitid=t3.id and t3.id=t4.unitid and t4.groupid=t5.id and t5.id=t6.groupid "
@@ -681,8 +680,7 @@ public class DriverAPIController extends BaseController{
 				//配置的采控项
 				Object[] itemsObj=(Object[]) itemsList.get(0);
 				String[] itemsArr=(itemsObj[2]+"").split(",");
-				String[] itemsSortArr=(itemsObj[3]+"").split(",");
-				String[] itemsBitIndexArr=(itemsObj[4]+"").split(",");
+				String[] itemsBitIndexArr=(itemsObj[3]+"").split(",");
 				Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
 				if(equipmentDriveMap.size()==0){
 					EquipmentDriverServerTask.loadProtocolConfig();
@@ -757,18 +755,17 @@ public class DriverAPIController extends BaseController{
 								String bitIndex="";
 								String unit=protocol.getItems().get(j).getUnit();
 								int alarmLevel=0;
-								int sort=9999;
 								if(StringManagerUtils.existOrNot(itemsArr, title, false)){
 									updateRealtimeData+=",t."+columnName+"='"+rawValue+"'";
 									insertHistColumns+=","+columnName;
 									insertHistValue+=",'"+rawValue+"'";
 									if(protocol.getItems().get(j).getResolutionMode()==1||protocol.getItems().get(j).getResolutionMode()==2){//如果是枚举量或数据量
-										for(int k=0;k<itemsArr.length;k++){
-											if(title.equalsIgnoreCase(itemsArr[k])){
-												sort=StringManagerUtils.stringToInteger(itemsSortArr[k]);
-												break;
-											}
-										}
+//										for(int k=0;k<itemsArr.length;k++){
+//											if(title.equalsIgnoreCase(itemsArr[k])){
+//												sort=StringManagerUtils.stringToInteger(itemsSortArr[k]);
+//												break;
+//											}
+//										}
 										if(protocol.getItems().get(j).getMeaning()!=null&&protocol.getItems().get(j).getMeaning().size()>0){
 											for(int l=0;l<protocol.getItems().get(j).getMeaning().size();l++){
 												if(StringManagerUtils.isNotNull(value)&&StringManagerUtils.stringToFloat(value)==(protocol.getItems().get(j).getMeaning().get(l).getValue())){
@@ -777,7 +774,7 @@ public class DriverAPIController extends BaseController{
 												}
 											}
 										}
-										ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit,sort);
+										ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit);
 										protocolItemResolutionDataList.add(protocolItemResolutionData);
 									}else if(protocol.getItems().get(j).getResolutionMode()==0){//如果是开关量
 										boolean isMatch=false;
@@ -794,13 +791,11 @@ public class DriverAPIController extends BaseController{
 											}
 											for(int l=0;l<protocol.getItems().get(j).getMeaning().size();l++){
 												title=protocol.getItems().get(j).getMeaning().get(l).getMeaning();
-												sort=9999;
 												isMatch=false;
 												for(int n=0;n<itemsArr.length;n++){
 													if(itemsArr[n].equalsIgnoreCase(protocol.getItems().get(j).getTitle()) 
 															&&StringManagerUtils.stringToInteger(itemsBitIndexArr[n])==protocol.getItems().get(j).getMeaning().get(l).getValue()
 															){
-														sort=StringManagerUtils.stringToInteger(itemsSortArr[n]);
 														isMatch=true;
 														break;
 													}
@@ -820,7 +815,7 @@ public class DriverAPIController extends BaseController{
 																value="";
 																rawValue="";
 															}
-															ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit,sort);
+															ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit);
 															protocolItemResolutionDataList.add(protocolItemResolutionData);
 															match=true;
 															break;
@@ -830,39 +825,29 @@ public class DriverAPIController extends BaseController{
 														value="";
 														rawValue="";
 														bitIndex=protocol.getItems().get(j).getMeaning().get(l).getValue()+"";
-														ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit,sort);
+														ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit);
 														protocolItemResolutionDataList.add(protocolItemResolutionData);
 													}
 												}
-//												else{
-//													for(int k=0;k<itemsArr.length;k++){
-//														if(title.equalsIgnoreCase(itemsArr[k])){
-//															sort=StringManagerUtils.stringToInteger(itemsSortArr[k]);
-//															break;
-//														}
-//													}
-//													ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit,sort);
-//													protocolItemResolutionDataList.add(protocolItemResolutionData);
-//												}
 											}
 										}else{
-											for(int k=0;k<itemsArr.length;k++){
-												if(title.equalsIgnoreCase(itemsArr[k])){
-													sort=StringManagerUtils.stringToInteger(itemsSortArr[k]);
-													break;
-												}
-											}
-											ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit,sort);
+//											for(int k=0;k<itemsArr.length;k++){
+//												if(title.equalsIgnoreCase(itemsArr[k])){
+//													sort=StringManagerUtils.stringToInteger(itemsSortArr[k]);
+//													break;
+//												}
+//											}
+											ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit);
 											protocolItemResolutionDataList.add(protocolItemResolutionData);
 										}
 									}else{
-										for(int k=0;k<itemsArr.length;k++){
-											if(title.equalsIgnoreCase(itemsArr[k])){
-												sort=StringManagerUtils.stringToInteger(itemsSortArr[k]);
-												break;
-											}
-										}
-										ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit,sort);
+//										for(int k=0;k<itemsArr.length;k++){
+//											if(title.equalsIgnoreCase(itemsArr[k])){
+//												sort=StringManagerUtils.stringToInteger(itemsSortArr[k]);
+//												break;
+//											}
+//										}
+										ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawTitle,title,value,rawValue,addr,columnName,columnDataType,resolutionMode,bitIndex,unit);
 										protocolItemResolutionDataList.add(protocolItemResolutionData);
 									}
 								}
@@ -874,8 +859,6 @@ public class DriverAPIController extends BaseController{
 					updateRealtimeData+=" where t.wellId= "+wellId;
 					insertHistSql="insert into "+historyTable+"("+insertHistColumns+")values("+insertHistValue+")";
 					
-					//排序
-					Collections.sort(protocolItemResolutionDataList);
 					//报警判断
 					for(int i=0;i<protocolItemResolutionDataList.size();i++){
 						int alarmLevel=0;
@@ -891,7 +874,6 @@ public class DriverAPIController extends BaseController{
 						acquisitionItemInfo.setBitIndex(protocolItemResolutionDataList.get(i).getBitIndex());
 						acquisitionItemInfo.setAlarmLevel(alarmLevel);
 						acquisitionItemInfo.setUnit(protocolItemResolutionDataList.get(i).getUnit());
-						acquisitionItemInfo.setSort(protocolItemResolutionDataList.get(i).getSort());
 						for(int l=0;l<alarmItemsList.size();l++){
 							Object[] alarmItemObj=(Object[]) alarmItemsList.get(l);
 							if((acquisitionItemInfo.getAddr()+"").equals(alarmItemObj[2]+"")){
@@ -1005,17 +987,22 @@ public class DriverAPIController extends BaseController{
 						}
 						columns+= "]";
 						
-						String userItemsSql="select "
-								+ " listagg(t6.itemname, ',') within group(order by t6.groupid,t6.id ) key"
-								+ " from "+deviceTableName+" t,tbl_protocolinstance t2,tbl_acq_unit_conf t3,tbl_acq_group2unit_conf t4,tbl_acq_group_conf t5,tbl_acq_item2group_conf t6 "
-								+ " where t.instancecode=t2.code and t2.unitid=t3.id and t3.id=t4.unitid and t4.groupid=t5.id and t5.id=t6.groupid "
+						String displayItemsSql="select listagg(t4.itemname, ',') within group(order by t4.unitid,t4.id ) key,"
+								+ "listagg(decode(t4.sort,null,9999,t4.sort), ',') within group(order by t4.unitid,t4.id ) sort, "
+								+ "listagg(decode(t4.bitindex,null,9999,t4.bitindex), ',') within group(order by t4.unitid,t4.id ) bitindex  "
+								+ " from "+deviceTableName+" t,tbl_protocoldisplayinstance t2,tbl_display_unit_conf t3, tbl_display_items2unit_conf t4 "
+								+ " where t.displayinstancecode=t2.code and t2.displayunitid=t3.id and t3.id=t4.unitid and t4.type=0 "
 								+ " and t.signinid='"+acqGroup.getID()+"' and to_number(t.slave)="+acqGroup.getSlave()
-								+ " and decode(t6.showlevel,null,9999,t6.showlevel)>=( select r.showlevel from tbl_role r,tbl_user u where u.user_type=r.role_id and u.user_id='"+websocketClientUser+"' )"
+								+ " and decode(t4.showlevel,null,9999,t4.showlevel)>=( select r.showlevel from tbl_role r,tbl_user u where u.user_type=r.role_id and u.user_id='"+websocketClientUser+"' ) "
 								+ " group by t.wellname,t3.protocol";
 						
-						List<?> userItemsList = commonDataService.findCallSql(userItemsSql);
+						List<?> userItemsList = commonDataService.findCallSql(displayItemsSql);
 						if(userItemsList.size()>0&&userItemsList.get(0)!=null){
-							String[] userItems=userItemsList.get(0).toString().split(",");
+							Object[] displayItemsObj=(Object[]) itemsList.get(0);
+							
+							String[] displayItemsArr=displayItemsObj[0].toString().split(",");
+							String[] displayItemsSortArr=displayItemsObj[1].toString().split(",");
+							String[] displayItemsBitIndexArr=displayItemsObj[2].toString().split(",");
 							
 							
 							webSocketSendData.append("{ \"success\":true,\"functionCode\":\""+functionCode+"\",\"wellName\":\""+wellName+"\",\"acqTime\":\""+acqTime+"\",\"columns\":"+columns+",");
@@ -1027,12 +1014,21 @@ public class DriverAPIController extends BaseController{
 							//筛选
 							List<AcquisitionItemInfo> userAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
 							for(int j=0;j<acquisitionItemInfoList.size();j++){
-								if(StringManagerUtils.existOrNot(userItems, acquisitionItemInfoList.get(j).getRawTitle(), false)){
-									userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
+								for(int k=0;k<displayItemsArr.length;k++){
+									if(displayItemsArr[k].equalsIgnoreCase(acquisitionItemInfoList.get(j).getRawTitle())){
+										acquisitionItemInfoList.get(j).setSort(StringManagerUtils.stringToInteger(displayItemsSortArr[k]));
+										userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
+										break;
+									}
 								}
+//								if(StringManagerUtils.existOrNot(displayItemsArr, acquisitionItemInfoList.get(j).getRawTitle(), false)){
+//									userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
+//								}
 							}
 							//插入排序间隔的空项
 							List<AcquisitionItemInfo> finalAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
+							//排序
+							Collections.sort(finalAcquisitionItemInfoList);
 							for(int j=0;j<userAcquisitionItemInfoList.size();j++){
 								if(j>0&&userAcquisitionItemInfoList.get(j).getSort()<9999
 										&&userAcquisitionItemInfoList.get(j).getSort()-userAcquisitionItemInfoList.get(j-1).getSort()>1
