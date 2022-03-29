@@ -443,7 +443,6 @@ var grantAcquisitionItemsPermission = function () {
     var addUrl = context + '/acquisitionUnitManagerController/grantAcquisitionItemsPermission'
     // 添加条件
     var addjson = [];
-    var addItemSort=[];
     var matrixData = "";
     var matrixDataArr = "";
     Ext.MessageBox.msgButtons['ok'].text = "<img   style=\"border:0;position:absolute;right:50px;top:1px;\"  src=\'" + context + "/images/zh_CN/accept.png'/>&nbsp;&nbsp;&nbsp;确定";
@@ -472,7 +471,6 @@ var grantAcquisitionItemsPermission = function () {
             	var bitIndex=driverConfigItemsData[index][7];
                 
                 addjson.push(itemName);
-                addItemSort.push(itemSort);
                 var matrix_value = "";
                 matrix_value = '0,0,0,';
                 if (matrix_value != "" || matrix_value != null) {
@@ -494,14 +492,12 @@ var grantAcquisitionItemsPermission = function () {
         if (addjson.length > 0) {
             matrixData = matrixData.substring(0, matrixData.length - 1);
             var addparams = "" + addjson.join(",");
-            var addSortParams = "" + addItemSort.join(",");
             var matrixCodes_ = "" + matrixData;
             Ext.Ajax.request({
                 url: addUrl,
                 method: "POST",
                 params: {
                     params: addparams,
-                    sorts: addSortParams,
                     protocol :protocol,
                     groupCode: groupCode,
                     matrixCodes: matrixCodes_

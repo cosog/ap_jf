@@ -255,26 +255,14 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		result_json.append("\"totalRoot\":[");
 		
 		List<String> itemsList=new ArrayList<String>();
-		List<String> itemsSortList=new ArrayList<String>();
 		List<String> itemsBitIndexList=new ArrayList<String>();
-		List<String> itemsShowLevelList=new ArrayList<String>();
-		List<String> realtimeCurveList=new ArrayList<String>();
-		List<String> realtimeCurveColorList=new ArrayList<String>();
-		List<String> historyCurveList=new ArrayList<String>();
-		List<String> historyCurveColorList=new ArrayList<String>();
 		if("3".equalsIgnoreCase(classes)){
-			String sql="select t.itemname,t.sort,t.bitindex,t.showlevel,t.realtimeCurve,t.realtimeCurveColor,historyCurve,historyCurveColor from TBL_ACQ_ITEM2GROUP_CONF t,tbl_acq_group_conf t2 where t.groupid=t2.id and t2.group_code='"+code+"' order by t.id";
+			String sql="select t.itemname,t.bitindex from TBL_ACQ_ITEM2GROUP_CONF t,tbl_acq_group_conf t2 where t.groupid=t2.id and t2.group_code='"+code+"' order by t.id";
 			List<?> list=this.findCallSql(sql);
 			for(int i=0;i<list.size();i++){
 				Object[] obj=(Object[])list.get(i);
 				itemsList.add(obj[0]+"");
-				itemsSortList.add(obj[1]+"");
-				itemsBitIndexList.add(obj[2]+"");
-				itemsShowLevelList.add(obj[3]+"");
-				realtimeCurveList.add(obj[4]+"");
-				realtimeCurveColorList.add(obj[5]+"");
-				historyCurveList.add(obj[6]+"");
-				historyCurveColorList.add(obj[7]+"");
+				itemsBitIndexList.add(obj[1]+"");
 			}
 		}
 		for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
@@ -295,12 +283,6 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 					}
 					if(sign){
 						boolean checked=false;
-						String sort="";
-						String showLevel="";
-						String isRealtimeCurve="";
-						String realtimeCurveColor="";
-						String isHistoryCurve="";
-						String historyCurveColor="";
 						String resolutionMode="数据量";
 						if(protocolConfig.getItems().get(j).getResolutionMode()==0){
 							resolutionMode="开关量";
@@ -321,23 +303,11 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 							Collections.sort(protocolConfig.getItems().get(j).getMeaning());//排序
 							for(int k=0;k<protocolConfig.getItems().get(j).getMeaning().size();k++){
 								checked=false;
-								sort="";
-								showLevel="";
-								isRealtimeCurve="";
-								realtimeCurveColor="";
-								isHistoryCurve="";
-								historyCurveColor="";
 								for(int m=0;m<itemsList.size();m++){
 									if(itemsList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())
 											&&itemsBitIndexList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getMeaning().get(k).getValue()+"")
 										){
 										checked=true;
-										sort=itemsSortList.get(m);
-										showLevel=itemsShowLevelList.get(m);
-										isRealtimeCurve=realtimeCurveList.get(m);
-										realtimeCurveColor=realtimeCurveColorList.get(m);
-										isHistoryCurve=historyCurveList.get(m);
-										historyCurveColor=historyCurveColorList.get(m);
 										break;
 									}
 								}
@@ -355,31 +325,19 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 										+ "\"RWType\":\""+RWType+"\","
 										+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
 										+ "\"resolutionMode\":\""+resolutionMode+"\","
-										+ "\"acqMode\":\""+("active".equalsIgnoreCase(protocolConfig.getItems().get(j).getAcqMode())?"主动上传":"被动响应")+"\","
-										+ "\"showLevel\":\""+showLevel+"\","
-										+ "\"sort\":\""+sort+"\","
-										+ "\"isRealtimeCurve\":\""+isRealtimeCurve+"\","
-										+ "\"realtimeCurveColor\":\""+realtimeCurveColor+"\","
-										+ "\"isHistoryCurve\":\""+isHistoryCurve+"\","
-										+ "\"historyCurveColor\":\""+historyCurveColor+"\""
+										+ "\"acqMode\":\""+("active".equalsIgnoreCase(protocolConfig.getItems().get(j).getAcqMode())?"主动上传":"被动响应")+"\""
 										+ "},");
 								index++;
 							}
 						}else{
 							checked=StringManagerUtils.existOrNot(itemsList, protocolConfig.getItems().get(j).getTitle(),false);
-							if(checked){
-								for(int k=0;k<itemsList.size();k++){
-									if(itemsList.get(k).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())){
-										sort=itemsSortList.get(k);
-										showLevel=itemsShowLevelList.get(k);
-										isRealtimeCurve=realtimeCurveList.get(k);
-										realtimeCurveColor=realtimeCurveColorList.get(k);
-										isHistoryCurve=historyCurveList.get(k);
-										historyCurveColor=historyCurveColorList.get(k);
-										break;
-									}
-								}
-							}
+//							if(checked){
+//								for(int k=0;k<itemsList.size();k++){
+//									if(itemsList.get(k).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())){
+//										break;
+//									}
+//								}
+//							}
 							result_json.append("{\"checked\":"+checked+","
 									+ "\"id\":"+(index)+","
 									+ "\"title\":\""+protocolConfig.getItems().get(j).getTitle()+"\","
@@ -392,13 +350,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 									+ "\"RWType\":\""+RWType+"\","
 									+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
 									+ "\"resolutionMode\":\""+resolutionMode+"\","
-									+ "\"acqMode\":\""+("active".equalsIgnoreCase(protocolConfig.getItems().get(j).getAcqMode())?"主动上传":"被动响应")+"\","
-									+ "\"showLevel\":\""+showLevel+"\","
-									+ "\"sort\":\""+sort+"\","
-									+ "\"isRealtimeCurve\":\""+isRealtimeCurve+"\","
-									+ "\"realtimeCurveColor\":\""+realtimeCurveColor+"\","
-									+ "\"isHistoryCurve\":\""+isHistoryCurve+"\","
-									+ "\"historyCurveColor\":\""+historyCurveColor+"\""
+									+ "\"acqMode\":\""+("active".equalsIgnoreCase(protocolConfig.getItems().get(j).getAcqMode())?"主动上传":"被动响应")+"\""
 									+ "},");
 							index++;
 						}
