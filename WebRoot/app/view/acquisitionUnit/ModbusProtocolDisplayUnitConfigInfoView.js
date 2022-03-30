@@ -1,5 +1,6 @@
 var protocolDisplayUnitAcqItemsConfigHandsontableHelper=null;
 var protocolDisplayUnitCalItemsConfigHandsontableHelper=null;
+var protocolDisplayUnitCtrlItemsConfigHandsontableHelper=null;
 var protocolDisplayUnitPropertiesHandsontableHelper=null;
 Ext.define('AP.view.acquisitionUnit.ModbusProtocolDisplayUnitConfigInfoView', {
     extend: 'Ext.panel.Panel',
@@ -70,36 +71,55 @@ Ext.define('AP.view.acquisitionUnit.ModbusProtocolDisplayUnitConfigInfoView', {
                 	layout: "border",
                 	items: [{
                 		region: 'center',
-                		title:'采集项配置',
-                		id:"ModbusProtocolDisplayUnitAcqItemsConfigTableInfoPanel_Id",
-                        layout: 'fit',
-                        html:'<div class="ModbusProtocolDisplayUnitAcqItemsConfigTableInfoContainer" style="width:100%;height:100%;"><div class="con" id="ModbusProtocolDisplayUnitAcqItemsConfigTableInfoDiv_id"></div></div>',
-                        listeners: {
-                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                            	if(protocolDisplayUnitAcqItemsConfigHandsontableHelper!=null && protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot!=undefined){
-                            		protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot.refreshDimensions();
-                            	}
+                		layout: "border",
+                		items: [{
+                    		region: 'center',
+                    		title:'采集项配置',
+                    		id:"ModbusProtocolDisplayUnitAcqItemsConfigTableInfoPanel_Id",
+                            layout: 'fit',
+                            html:'<div class="ModbusProtocolDisplayUnitAcqItemsConfigTableInfoContainer" style="width:100%;height:100%;"><div class="con" id="ModbusProtocolDisplayUnitAcqItemsConfigTableInfoDiv_id"></div></div>',
+                            listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if(protocolDisplayUnitAcqItemsConfigHandsontableHelper!=null && protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot!=undefined){
+                                		protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot.refreshDimensions();
+                                	}
+                                }
                             }
-                        }
+                    	},{
+                    		region: 'south',
+                        	height:'50%',
+                        	title:'计算项配置',
+                        	collapsible: true,
+                            split: true,
+                        	layout: 'fit',
+                        	id:"ModbusProtocolDisplayUnitCalItemsConfigTableInfoPanel_Id",
+                            layout: 'fit',
+                            html:'<div class="ModbusProtocolDisplayUnitCalItemsConfigTableInfoContainer" style="width:100%;height:100%;"><div class="con" id="ModbusProtocolDisplayUnitCalItemsConfigTableInfoDiv_id"></div></div>',
+                            listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if(protocolDisplayUnitCalItemsConfigHandsontableHelper!=null && protocolDisplayUnitCalItemsConfigHandsontableHelper.hot!=undefined){
+                                		protocolDisplayUnitCalItemsConfigHandsontableHelper.hot.refreshDimensions();
+                                	}
+                                }
+                            }
+                    	}]
                 	},{
-                		region: 'south',
-                    	height:'50%',
-                    	title:'计算项配置',
-                    	collapsible: true,
-                        split: true,
-                    	layout: 'fit',
-                    	id:"ModbusProtocolDisplayUnitCalItemsConfigTableInfoPanel_Id",
+                		region: 'east',
+                		width:'40%',
+                		title:'控制项配置',
+                		id:"ModbusProtocolDisplayUnitCtrlItemsConfigTableInfoPanel_Id",
                         layout: 'fit',
-                        html:'<div class="ModbusProtocolDisplayUnitCalItemsConfigTableInfoContainer" style="width:100%;height:100%;"><div class="con" id="ModbusProtocolDisplayUnitCalItemsConfigTableInfoDiv_id"></div></div>',
+                        collapsible: true,
+                        split: true,
+                        html:'<div class="ModbusProtocolDisplayUnitCtrlItemsConfigTableInfoContainer" style="width:100%;height:100%;"><div class="con" id="ModbusProtocolDisplayUnitCtrlItemsConfigTableInfoDiv_id"></div></div>',
                         listeners: {
                             resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                            	if(protocolDisplayUnitCalItemsConfigHandsontableHelper!=null && protocolDisplayUnitCalItemsConfigHandsontableHelper.hot!=undefined){
-                            		protocolDisplayUnitCalItemsConfigHandsontableHelper.hot.refreshDimensions();
+                            	if(protocolDisplayUnitCtrlItemsConfigHandsontableHelper!=null && protocolDisplayUnitCtrlItemsConfigHandsontableHelper.hot!=undefined){
+                            		protocolDisplayUnitCtrlItemsConfigHandsontableHelper.hot.refreshDimensions();
                             	}
                             }
                         }
-                	}]
-                    
+                	}] 
                 }]
             }]
     	});
@@ -120,7 +140,7 @@ function CreateProtocolDisplayUnitAcqItemsConfigInfoTable(protocolName,classes,c
 			}
 			if(protocolDisplayUnitAcqItemsConfigHandsontableHelper==null || protocolDisplayUnitAcqItemsConfigHandsontableHelper.hot==undefined){
 				protocolDisplayUnitAcqItemsConfigHandsontableHelper = ProtocolDisplayUnitAcqItemsConfigHandsontableHelper.createNew("ModbusProtocolDisplayUnitAcqItemsConfigTableInfoDiv_id");
-				var colHeaders="['','序号','名称','单位','显示级别','显示顺序','实时曲线','实时曲线颜色','历史曲线','历史曲线曲线']";
+				var colHeaders="['','序号','名称','单位','显示级别','显示顺序','实时曲线','实时曲线颜色','历史曲线','历史曲线颜色']";
 				var columns="[" 
 						+"{data:'checked',type:'checkbox'}," 
 						+"{data:'id'}," 
@@ -189,7 +209,7 @@ var ProtocolDisplayUnitAcqItemsConfigHandsontableHelper = {
 	                    columns: [10,11,12],
 	                    indicators: false
 	                },
-	                colWidths: [25,50,140,80,60,60,60,70,60,70],
+	                colWidths: [25,50,140,80,60,60,60,85,60,85],
 	                columns:protocolDisplayUnitAcqItemsConfigHandsontableHelper.columns,
 	                stretchH: 'all',//延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
 	                autoWrapRow: true,
@@ -272,7 +292,7 @@ function CreateProtocolDisplayUnitCalItemsConfigInfoTable(deviceType,classes,uni
 			}
 			if(protocolDisplayUnitCalItemsConfigHandsontableHelper==null || protocolDisplayUnitCalItemsConfigHandsontableHelper.hot==undefined){
 				protocolDisplayUnitCalItemsConfigHandsontableHelper = ProtocolDisplayUnitCalItemsConfigHandsontableHelper.createNew("ModbusProtocolDisplayUnitCalItemsConfigTableInfoDiv_id");
-				var colHeaders="['','序号','名称','单位','显示级别','显示顺序','实时曲线','实时曲线颜色','历史曲线','历史曲线曲线','']";
+				var colHeaders="['','序号','名称','单位','显示级别','显示顺序','实时曲线','实时曲线颜色','历史曲线','历史曲线颜色','']";
 				var columns="[" 
 						+"{data:'checked',type:'checkbox'}," 
 						+"{data:'id'}," 
@@ -336,7 +356,7 @@ var ProtocolDisplayUnitCalItemsConfigHandsontableHelper = {
 	                    columns: [10],
 	                    indicators: false
 	                },
-	                colWidths: [25,50,140,80,60,60,60,70,60,70],
+	                colWidths: [25,50,140,80,60,60,60,85,60,85],
 	                columns:protocolDisplayUnitCalItemsConfigHandsontableHelper.columns,
 	                stretchH: 'all',//延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
 	                autoWrapRow: true,
@@ -403,6 +423,124 @@ var ProtocolDisplayUnitCalItemsConfigHandsontableHelper = {
 	        	protocolDisplayUnitCalItemsConfigHandsontableHelper.AllData = [];
 	        }
 	        return protocolDisplayUnitCalItemsConfigHandsontableHelper;
+	    }
+};
+
+function CreateProtocolDisplayUnitCtrlItemsConfigInfoTable(protocolName,classes,code,unitId,acqUnitId,unitName){
+	Ext.Ajax.request({
+		method:'POST',
+		url:context + '/acquisitionUnitManagerController/getProtocolDisplayUnitCtrlItemsConfigData',
+		success:function(response) {
+			var result =  Ext.JSON.decode(response.responseText);
+			if(classes==2){
+				Ext.getCmp("ModbusProtocolDisplayUnitCtrlItemsConfigTableInfoPanel_Id").setTitle(unitName+'/控制项配置');
+			}else{
+				Ext.getCmp("ModbusProtocolDisplayUnitCtrlItemsConfigTableInfoPanel_Id").setTitle('控制项配置');
+			}
+			if(protocolDisplayUnitCtrlItemsConfigHandsontableHelper==null || protocolDisplayUnitCtrlItemsConfigHandsontableHelper.hot==undefined){
+				protocolDisplayUnitCtrlItemsConfigHandsontableHelper = ProtocolDisplayUnitCtrlItemsConfigHandsontableHelper.createNew("ModbusProtocolDisplayUnitCtrlItemsConfigTableInfoDiv_id");
+				var colHeaders="['','序号','名称','单位','显示级别','显示顺序']";
+				var columns="[" 
+						+"{data:'checked',type:'checkbox'}," 
+						+"{data:'id'}," 
+						+"{data:'title'},"
+						+"{data:'unit'},"
+						+"{data:'showLevel',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitCtrlItemsConfigHandsontableHelper);}}," 
+						+"{data:'sort',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,protocolDisplayUnitCtrlItemsConfigHandsontableHelper);}}," 
+						+"{data:'resolutionMode',type:'dropdown',strict:true,allowInvalid:false,source:['开关量', '枚举量','数据量']}," 
+						+"{data:'addr',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num(val, callback,this.row, this.col,protocolDisplayUnitCtrlItemsConfigHandsontableHelper);}},"
+						+"{data:'bitIndex'}"
+						+"]";
+				
+				protocolDisplayUnitCtrlItemsConfigHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
+				protocolDisplayUnitCtrlItemsConfigHandsontableHelper.columns=Ext.JSON.decode(columns);
+				protocolDisplayUnitCtrlItemsConfigHandsontableHelper.createTable(result.totalRoot);
+			}else{
+				protocolDisplayUnitCtrlItemsConfigHandsontableHelper.hot.loadData(result.totalRoot);
+			}
+		},
+		failure:function(){
+			Ext.MessageBox.alert("错误","与后台联系的时候出了问题");
+		},
+		params: {
+			protocolName:protocolName,
+			classes:classes,
+			code:code,
+			unitId:unitId,
+			acqUnitId:acqUnitId
+        }
+	});
+};
+
+var ProtocolDisplayUnitCtrlItemsConfigHandsontableHelper = {
+		createNew: function (divid) {
+	        var protocolDisplayUnitCtrlItemsConfigHandsontableHelper = {};
+	        protocolDisplayUnitCtrlItemsConfigHandsontableHelper.hot1 = '';
+	        protocolDisplayUnitCtrlItemsConfigHandsontableHelper.divid = divid;
+	        protocolDisplayUnitCtrlItemsConfigHandsontableHelper.validresult=true;//数据校验
+	        protocolDisplayUnitCtrlItemsConfigHandsontableHelper.colHeaders=[];
+	        protocolDisplayUnitCtrlItemsConfigHandsontableHelper.columns=[];
+	        protocolDisplayUnitCtrlItemsConfigHandsontableHelper.AllData=[];
+	        
+	        protocolDisplayUnitCtrlItemsConfigHandsontableHelper.addColBg = function (instance, td, row, col, prop, value, cellProperties) {
+	             Handsontable.renderers.TextRenderer.apply(this, arguments);
+	             td.style.backgroundColor = 'rgb(242, 242, 242)';    
+	        }
+	        
+	        protocolDisplayUnitCtrlItemsConfigHandsontableHelper.createTable = function (data) {
+	        	$('#'+protocolDisplayUnitCtrlItemsConfigHandsontableHelper.divid).empty();
+	        	var hotElement = document.querySelector('#'+protocolDisplayUnitCtrlItemsConfigHandsontableHelper.divid);
+	        	protocolDisplayUnitCtrlItemsConfigHandsontableHelper.hot = new Handsontable(hotElement, {
+	        		licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
+	        		data: data,
+	        		hiddenColumns: {
+	                    columns: [6,7,8],
+	                    indicators: false
+	                },
+	                colWidths: [25,50,140,80,60,60],
+	                columns:protocolDisplayUnitCtrlItemsConfigHandsontableHelper.columns,
+	                stretchH: 'all',//延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
+	                autoWrapRow: true,
+	                rowHeaders: false,//显示行头
+	                colHeaders:protocolDisplayUnitCtrlItemsConfigHandsontableHelper.colHeaders,//显示列头
+	                columnSorting: true,//允许排序
+	                sortIndicator: true,
+	                manualColumnResize:true,//当值为true时，允许拖动，当为false时禁止拖动
+	                manualRowResize:true,//当值为true时，允许拖动，当为false时禁止拖动
+	                filters: true,
+	                renderAllRows: true,
+	                search: true,
+	                cells: function (row, col, prop) {
+	                	var cellProperties = {};
+	                    var visualRowIndex = this.instance.toVisualRow(row);
+	                    var visualColIndex = this.instance.toVisualColumn(col);
+	                    var ScadaDriverModbusConfigSelectRow= Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").getValue();
+	                	if(ScadaDriverModbusConfigSelectRow!=''){
+	                		var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(ScadaDriverModbusConfigSelectRow);
+	                		if(selectedItem.data.classes!=2){
+	                			cellProperties.readOnly = true;
+	                		}else{
+	                			if (visualColIndex >=1 && visualColIndex<=3) {
+	    							cellProperties.readOnly = true;
+	    		                }
+	                		}
+	                	}
+	                    return cellProperties;
+	                },
+	                afterBeginEditing:function(row,column){
+	                	
+	                },
+	                afterSelectionEnd : function (row,column,row2,column2, preventScrolling,selectionLayerLevel) {
+	                	
+	                }
+	        	});
+	        }
+	        //保存数据
+	        protocolDisplayUnitCtrlItemsConfigHandsontableHelper.saveData = function () {}
+	        protocolDisplayUnitCtrlItemsConfigHandsontableHelper.clearContainer = function () {
+	        	protocolDisplayUnitCtrlItemsConfigHandsontableHelper.AllData = [];
+	        }
+	        return protocolDisplayUnitCtrlItemsConfigHandsontableHelper;
 	    }
 };
 
@@ -542,6 +680,7 @@ function SaveModbusProtocolDisplayUnitConfigTreeData(){
 			saveDisplayUnitConfigData(displayUnitSaveData,selectedItem.data.protocol,selectedItem.parentNode.data.deviceType);
 			grantDisplayAcqItemsPermission();
 			grantDisplayCalItemsPermission();
+			grantDisplayCtrlItemsPermission();
 		}
 	}
 };
@@ -739,6 +878,88 @@ var grantDisplayCalItemsPermission = function () {
                 Ext.Msg.alert("warn", "【<font color=red>" + cosog.string.execption + " </font>】：" + cosog.string.contactadmin + "！");
             }
         });
+    }
+    return false;
+}
+
+var grantDisplayCtrlItemsPermission = function () {
+	var DisplayUnitConfigTreeSelectRow= Ext.getCmp("ModbusProtocolDisplayUnitConfigSelectRow_Id").getValue();
+	if (protocolDisplayUnitCtrlItemsConfigHandsontableHelper == null ||DisplayUnitConfigTreeSelectRow=='') {
+        return false;
+    }
+	var selectedItem=Ext.getCmp("ModbusProtocolDisplayUnitConfigTreeGridPanel_Id").getStore().getAt(DisplayUnitConfigTreeSelectRow);
+    var ctrlItemsData = protocolDisplayUnitCtrlItemsConfigHandsontableHelper.hot.getData();
+    var addUrl = context + '/acquisitionUnitManagerController/grantCtrlItemsToDisplayUnitPermission'
+    // 添加条件
+    var addjson = [];
+    var addItemSort=[];
+    var matrixData = "";
+    var matrixDataArr = "";
+    Ext.MessageBox.msgButtons['ok'].text = "<img   style=\"border:0;position:absolute;right:50px;top:1px;\"  src=\'" + context + "/images/zh_CN/accept.png'/>&nbsp;&nbsp;&nbsp;确定";
+    
+    var unitCode = selectedItem.data.code;
+    var unitId = selectedItem.data.id;
+    var protocol=selectedItem.data.protocol;
+    if (!isNotVal(unitCode)) {
+        return false
+    }
+    if (ctrlItemsData.length > 0) {
+        Ext.Array.each(ctrlItemsData, function (name, index, countriesItSelf) {
+            if ((ctrlItemsData[index][0]+'')==='true') {
+            	var itemName = ctrlItemsData[index][2];
+            	
+            	var itemShowLevel = ctrlItemsData[index][4];
+            	var itemSort = ctrlItemsData[index][5];
+            	
+            	var resolutionMode = ctrlItemsData[index][6];
+            	var itemAddr = ctrlItemsData[index][7];
+            	var bitIndex=ctrlItemsData[index][8];
+                
+                addjson.push(itemName);
+                addItemSort.push(itemSort);
+                var matrix_value = '0,0,0';
+                matrixData += itemName + ":"
+                + itemSort+ ":"
+                + itemShowLevel+ ":" 
+                
+                + resolutionMode+ ":"
+                + itemAddr + ":" 
+                + bitIndex +":"
+                
+                + matrix_value+ "|";
+            }
+        });
+        if (addjson.length > 0) {
+            matrixData = matrixData.substring(0, matrixData.length - 1);
+            var addparams = "" + addjson.join(",");
+            var addSortParams = "" + addItemSort.join(",");
+            var matrixCodes_ = "" + matrixData;
+            Ext.Ajax.request({
+                url: addUrl,
+                method: "POST",
+                params: {
+                    params: addparams,
+                    sorts: addSortParams,
+                    protocol :protocol,
+                    unitCode: unitCode,
+                    unitId:unitId,
+                    itemType:2,
+                    matrixCodes: matrixCodes_
+                },
+                success: function (response) {
+                    var result = Ext.JSON.decode(response.responseText);
+                    if (result.msg == true) {
+                        Ext.Msg.alert(cosog.string.ts, "<font color=blue>保存成功</font>");
+                    }
+                    if (result.msg == false) {
+                        Ext.Msg.alert('info', "<font color=red>SORRY！" + '采集项安排失败' + "。</font>");
+                    }
+                },
+                failure: function () {
+                    Ext.Msg.alert("warn", "【<font color=red>" + cosog.string.execption + " </font>】：" + cosog.string.contactadmin + "！");
+                }
+            });
+        }
     }
     return false;
 }

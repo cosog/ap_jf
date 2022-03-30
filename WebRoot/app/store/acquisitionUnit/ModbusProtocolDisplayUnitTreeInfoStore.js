@@ -59,15 +59,19 @@ Ext.define('AP.store.acquisitionUnit.ModbusProtocolDisplayUnitTreeInfoStore', {
                         	if(record.data.classes==0){
                         		if(isNotVal(record.data.children) && record.data.children.length>0){
                         			CreateProtocolDisplayUnitAcqItemsConfigInfoTable(record.data.children[0].text,record.data.children[0].classes,record.data.children[0].code);
+                        			CreateProtocolDisplayUnitCtrlItemsConfigInfoTable(record.data.children[0].text,record.data.children[0].classes,record.data.children[0].code);
                         		}else{
                         			CreateProtocolDisplayUnitAcqItemsConfigInfoTable('',1,'');
+                        			CreateProtocolDisplayUnitCtrlItemsConfigInfoTable('',1,'');
                             	}
                         		CreateProtocolDisplayUnitCalItemsConfigInfoTable(record.data.deviceType,record.data.children[0].classes);
                         	}else if(record.data.classes==1){
                         		CreateProtocolDisplayUnitAcqItemsConfigInfoTable(record.data.text,record.data.classes,record.data.code);
+                        		CreateProtocolDisplayUnitCtrlItemsConfigInfoTable(record.data.text,record.data.classes,record.data.code);
                         		CreateProtocolDisplayUnitCalItemsConfigInfoTable(record.parentNode.data.deviceType,record.data.classes);
                         	}else if(record.data.classes==2){
                         		CreateProtocolDisplayUnitAcqItemsConfigInfoTable(record.data.protocol,record.data.classes,record.data.code,record.data.id,record.data.acqUnitId,record.data.text);
+                        		CreateProtocolDisplayUnitCtrlItemsConfigInfoTable(record.data.protocol,record.data.classes,record.data.code,record.data.id,record.data.acqUnitId,record.data.text);
                         		CreateProtocolDisplayUnitCalItemsConfigInfoTable(record.parentNode.parentNode.data.deviceType,record.data.classes,record.data.id,record.data.text);
                         	}
                         	CreateProtocolDisplayUnitConfigPropertiesInfoTable(record.data);

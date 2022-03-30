@@ -55,6 +55,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cosog.model.AlarmShowStyle;
+import com.cosog.model.DisplayUnit;
 import com.cosog.model.KeyParameter;
 import com.cosog.model.Org;
 import com.cosog.model.User;
@@ -140,9 +141,9 @@ public class BaseDao extends HibernateDaoSupport {
 	}
 
 	@Transactional
-	public <T> void addObject(T clazz) {
+	public <T> Serializable addObject(T clazz) {
 
-		this.save(clazz);
+		return this.save(clazz);
 	}
 
 
@@ -885,8 +886,8 @@ public class BaseDao extends HibernateDaoSupport {
 	 * @param object
 	 */
 	@Transactional
-	public void save(Object object) {
-		getSessionFactory().getCurrentSession().save(object);
+	public Serializable save(Object object) {
+		return getSessionFactory().getCurrentSession().save(object);
 	}
 
 	public <T> void saveOrUpdateObject(T clazz) {

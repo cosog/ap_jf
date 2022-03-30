@@ -1,6 +1,7 @@
 package com.cosog.service.acqUnit;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -955,67 +956,99 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				Collections.sort(protocolConfig.getItems());
 				int index=1;
 				for(int j=0;j<protocolConfig.getItems().size();j++){
-					boolean sign=false;
-					if(!"2".equalsIgnoreCase(classes)){
-						sign=true;
-					}else{
-						if(StringManagerUtils.existOrNot(acqItemsList, protocolConfig.getItems().get(j).getTitle(), false)){
+					if(!"w".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+						boolean sign=false;
+						if(!"2".equalsIgnoreCase(classes)){
 							sign=true;
+						}else{
+							if(StringManagerUtils.existOrNot(acqItemsList, protocolConfig.getItems().get(j).getTitle(), false)){
+								sign=true;
+							}
 						}
-					}
-					if(sign){
-						boolean checked=false;
-						String sort="";
-						String showLevel="";
-						String isRealtimeCurve="";
-						String realtimeCurveColor="";
-						String isHistoryCurve="";
-						String historyCurveColor="";
-						String resolutionMode="数据量";
-						if(protocolConfig.getItems().get(j).getResolutionMode()==0){
-							resolutionMode="开关量";
-						}else if(protocolConfig.getItems().get(j).getResolutionMode()==1){
-							resolutionMode="枚举量";
-						}
-						String RWType="只读";
-						if("r".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
-							RWType="只读";
-						}else if("w".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
-							RWType="只写";
-						}else if("rw".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
-							RWType="读写";
-						}
-						if(protocolConfig.getItems().get(j).getResolutionMode()==0
-								&&protocolConfig.getItems().get(j).getMeaning()!=null
-								&&protocolConfig.getItems().get(j).getMeaning().size()>0){
-							Collections.sort(protocolConfig.getItems().get(j).getMeaning());//排序
-							for(int k=0;k<protocolConfig.getItems().get(j).getMeaning().size();k++){
-								checked=false;
-								sort="";
-								showLevel="";
-								isRealtimeCurve="";
-								realtimeCurveColor="";
-								isHistoryCurve="";
-								historyCurveColor="";
-								for(int m=0;m<itemsList.size();m++){
-									if(itemsList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())
-											&&itemsBitIndexList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getMeaning().get(k).getValue()+"")
-										){
-										checked=true;
-										sort=itemsSortList.get(m);
-										showLevel=itemsShowLevelList.get(m);
-										isRealtimeCurve=realtimeCurveList.get(m);
-										realtimeCurveColor=realtimeCurveColorList.get(m);
-										isHistoryCurve=historyCurveList.get(m);
-										historyCurveColor=historyCurveColorList.get(m);
-										break;
+						if(sign){
+							boolean checked=false;
+							String sort="";
+							String showLevel="";
+							String isRealtimeCurve="";
+							String realtimeCurveColor="";
+							String isHistoryCurve="";
+							String historyCurveColor="";
+							String resolutionMode="数据量";
+							if(protocolConfig.getItems().get(j).getResolutionMode()==0){
+								resolutionMode="开关量";
+							}else if(protocolConfig.getItems().get(j).getResolutionMode()==1){
+								resolutionMode="枚举量";
+							}
+							String RWType="只读";
+							if("r".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+								RWType="只读";
+							}else if("w".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+								RWType="只写";
+							}else if("rw".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+								RWType="读写";
+							}
+							if(protocolConfig.getItems().get(j).getResolutionMode()==0
+									&&protocolConfig.getItems().get(j).getMeaning()!=null
+									&&protocolConfig.getItems().get(j).getMeaning().size()>0){
+								Collections.sort(protocolConfig.getItems().get(j).getMeaning());//排序
+								for(int k=0;k<protocolConfig.getItems().get(j).getMeaning().size();k++){
+									checked=false;
+									sort="";
+									showLevel="";
+									isRealtimeCurve="";
+									realtimeCurveColor="";
+									isHistoryCurve="";
+									historyCurveColor="";
+									for(int m=0;m<itemsList.size();m++){
+										if(itemsList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())
+												&&itemsBitIndexList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getMeaning().get(k).getValue()+"")
+											){
+											checked=true;
+											sort=itemsSortList.get(m);
+											showLevel=itemsShowLevelList.get(m);
+											isRealtimeCurve=realtimeCurveList.get(m);
+											realtimeCurveColor=realtimeCurveColorList.get(m);
+											isHistoryCurve=historyCurveList.get(m);
+											historyCurveColor=historyCurveColorList.get(m);
+											break;
+										}
+									}
+									
+									result_json.append("{"
+											+ "\"checked\":"+checked+","
+											+ "\"id\":"+(index)+","
+											+ "\"title\":\""+protocolConfig.getItems().get(j).getMeaning().get(k).getMeaning()+"\","
+											+ "\"addr\":"+protocolConfig.getItems().get(j).getAddr()+","
+											+ "\"RWType\":\""+RWType+"\","
+											+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
+											+ "\"resolutionMode\":\""+resolutionMode+"\","
+											+ "\"showLevel\":\""+showLevel+"\","
+											+ "\"sort\":\""+sort+"\","
+											+ "\"isRealtimeCurve\":\""+isRealtimeCurve+"\","
+											+ "\"realtimeCurveColor\":\""+realtimeCurveColor+"\","
+											+ "\"isHistoryCurve\":\""+isHistoryCurve+"\","
+											+ "\"historyCurveColor\":\""+historyCurveColor+"\""
+											+ "},");
+									index++;
+								}
+							}else{
+								checked=StringManagerUtils.existOrNot(itemsList, protocolConfig.getItems().get(j).getTitle(),false);
+								if(checked){
+									for(int k=0;k<itemsList.size();k++){
+										if(itemsList.get(k).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())){
+											sort=itemsSortList.get(k);
+											showLevel=itemsShowLevelList.get(k);
+											isRealtimeCurve=realtimeCurveList.get(k);
+											realtimeCurveColor=realtimeCurveColorList.get(k);
+											isHistoryCurve=historyCurveList.get(k);
+											historyCurveColor=historyCurveColorList.get(k);
+											break;
+										}
 									}
 								}
-								
-								result_json.append("{"
-										+ "\"checked\":"+checked+","
+								result_json.append("{\"checked\":"+checked+","
 										+ "\"id\":"+(index)+","
-										+ "\"title\":\""+protocolConfig.getItems().get(j).getMeaning().get(k).getMeaning()+"\","
+										+ "\"title\":\""+protocolConfig.getItems().get(j).getTitle()+"\","
 										+ "\"addr\":"+protocolConfig.getItems().get(j).getAddr()+","
 										+ "\"RWType\":\""+RWType+"\","
 										+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
@@ -1029,36 +1062,159 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 										+ "},");
 								index++;
 							}
+						}
+					}
+				}
+				break;
+			}
+		}
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		return result_json.toString().replaceAll("null", "");
+	}
+	
+	public String getProtocolDisplayUnitCtrlItemsConfigData(String protocolName,String classes,String code,String unitId,String acqUnitId){
+		StringBuffer result_json = new StringBuffer();
+		Gson gson = new Gson();
+		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		if(equipmentDriveMap.size()==0){
+			EquipmentDriverServerTask.loadProtocolConfig();
+			equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		}
+		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"地址\",\"dataIndex\":\"addr\",width:80 ,children:[] },"
+				+ "{ \"header\":\"单位\",\"dataIndex\":\"unit\",width:80 ,children:[] },"
+				+ "{ \"header\":\"显示级别\",\"dataIndex\":\"showLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"显示顺序\",\"dataIndex\":\"sort\",width:80 ,children:[] }"
+				+ "]";
+		
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		
+		List<String> acqItemsList=new ArrayList<String>();
+		List<String> acqItemsBitIndexList=new ArrayList<String>();
+		
+		List<String> itemsList=new ArrayList<String>();
+		List<String> itemsSortList=new ArrayList<String>();
+		List<String> itemsBitIndexList=new ArrayList<String>();
+		List<String> itemsShowLevelList=new ArrayList<String>();
+		if("2".equalsIgnoreCase(classes)){
+			String acqUnitIiemsSql="select distinct t.itemname,t.bitindex "
+					+ "from TBL_ACQ_ITEM2GROUP_CONF t,tbl_acq_group_conf t2,tbl_acq_group2unit_conf t3,tbl_acq_unit_conf t4 "
+					+ "where t.groupid=t2.id  and t2.id=t3.groupid and t3.unitid=t4.id and t4.id="+acqUnitId+" and t2.type=1";
+			String sql="select t.itemname,t.bitindex,t.sort,t.showlevel "
+					+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2 "
+					+ " where t.unitid=t2.id and t2.id= "+unitId+" and t.type=2"
+					+ " order by t.sort";
+			List<?> acqItemList=this.findCallSql(acqUnitIiemsSql);
+			List<?> list=this.findCallSql(sql);
+			for(int i=0;i<acqItemList.size();i++){
+				Object[] obj=(Object[])acqItemList.get(i);
+				acqItemsList.add(obj[0]+"");
+				acqItemsBitIndexList.add(obj[1]+"");
+			}
+			for(int i=0;i<list.size();i++){
+				Object[] obj=(Object[])list.get(i);
+				itemsList.add(obj[0]+"");
+				itemsBitIndexList.add(obj[1]+"");
+				itemsSortList.add(obj[2]+"");
+				itemsShowLevelList.add(obj[3]+"");
+			}
+		}
+		for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
+			ModbusProtocolConfig.Protocol protocolConfig=modbusProtocolConfig.getProtocol().get(i);
+			if(protocolName.equalsIgnoreCase(protocolConfig.getName())){
+//				Collections.sort(protocolConfig.getItems());
+				int index=1;
+				for(int j=0;j<protocolConfig.getItems().size();j++){
+					if(!"r".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+						boolean sign=false;
+						if(!"2".equalsIgnoreCase(classes)){
+							sign=true;
 						}else{
-							checked=StringManagerUtils.existOrNot(itemsList, protocolConfig.getItems().get(j).getTitle(),false);
-							if(checked){
-								for(int k=0;k<itemsList.size();k++){
-									if(itemsList.get(k).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())){
-										sort=itemsSortList.get(k);
-										showLevel=itemsShowLevelList.get(k);
-										isRealtimeCurve=realtimeCurveList.get(k);
-										realtimeCurveColor=realtimeCurveColorList.get(k);
-										isHistoryCurve=historyCurveList.get(k);
-										historyCurveColor=historyCurveColorList.get(k);
-										break;
+							if(StringManagerUtils.existOrNot(acqItemsList, protocolConfig.getItems().get(j).getTitle(), false)){
+								sign=true;
+							}
+						}
+						if(sign){
+							boolean checked=false;
+							String sort="";
+							String showLevel="";
+							String resolutionMode="数据量";
+							if(protocolConfig.getItems().get(j).getResolutionMode()==0){
+								resolutionMode="开关量";
+							}else if(protocolConfig.getItems().get(j).getResolutionMode()==1){
+								resolutionMode="枚举量";
+							}
+							String RWType="只读";
+							if("r".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+								RWType="只读";
+							}else if("w".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+								RWType="只写";
+							}else if("rw".equalsIgnoreCase(protocolConfig.getItems().get(j).getRWType())){
+								RWType="读写";
+							}
+							if(protocolConfig.getItems().get(j).getResolutionMode()==0
+									&&protocolConfig.getItems().get(j).getMeaning()!=null
+									&&protocolConfig.getItems().get(j).getMeaning().size()>0){
+								Collections.sort(protocolConfig.getItems().get(j).getMeaning());//排序
+								for(int k=0;k<protocolConfig.getItems().get(j).getMeaning().size();k++){
+									checked=false;
+									sort="";
+									showLevel="";
+									for(int m=0;m<itemsList.size();m++){
+										if(itemsList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())
+												&&itemsBitIndexList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getMeaning().get(k).getValue()+"")
+											){
+											checked=true;
+											sort=itemsSortList.get(m);
+											showLevel=itemsShowLevelList.get(m);
+											break;
+										}
+									}
+									
+									result_json.append("{"
+											+ "\"checked\":"+checked+","
+											+ "\"id\":"+(index)+","
+											+ "\"title\":\""+protocolConfig.getItems().get(j).getMeaning().get(k).getMeaning()+"\","
+											+ "\"addr\":"+protocolConfig.getItems().get(j).getAddr()+","
+											+ "\"RWType\":\""+RWType+"\","
+											+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
+											+ "\"resolutionMode\":\""+resolutionMode+"\","
+											+ "\"showLevel\":\""+showLevel+"\","
+											+ "\"sort\":\""+sort+"\""
+											+ "},");
+									index++;
+								}
+							}else{
+								checked=StringManagerUtils.existOrNot(itemsList, protocolConfig.getItems().get(j).getTitle(),false);
+								if(checked){
+									for(int k=0;k<itemsList.size();k++){
+										if(itemsList.get(k).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())){
+											sort=itemsSortList.get(k);
+											showLevel=itemsShowLevelList.get(k);
+											break;
+										}
 									}
 								}
+								result_json.append("{\"checked\":"+checked+","
+										+ "\"id\":"+(index)+","
+										+ "\"title\":\""+protocolConfig.getItems().get(j).getTitle()+"\","
+										+ "\"addr\":"+protocolConfig.getItems().get(j).getAddr()+","
+										+ "\"RWType\":\""+RWType+"\","
+										+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
+										+ "\"resolutionMode\":\""+resolutionMode+"\","
+										+ "\"showLevel\":\""+showLevel+"\","
+										+ "\"sort\":\""+sort+"\""
+										+ "},");
+								index++;
 							}
-							result_json.append("{\"checked\":"+checked+","
-									+ "\"id\":"+(index)+","
-									+ "\"title\":\""+protocolConfig.getItems().get(j).getTitle()+"\","
-									+ "\"addr\":"+protocolConfig.getItems().get(j).getAddr()+","
-									+ "\"RWType\":\""+RWType+"\","
-									+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
-									+ "\"resolutionMode\":\""+resolutionMode+"\","
-									+ "\"showLevel\":\""+showLevel+"\","
-									+ "\"sort\":\""+sort+"\","
-									+ "\"isRealtimeCurve\":\""+isRealtimeCurve+"\","
-									+ "\"realtimeCurveColor\":\""+realtimeCurveColor+"\","
-									+ "\"isHistoryCurve\":\""+isHistoryCurve+"\","
-									+ "\"historyCurveColor\":\""+historyCurveColor+"\""
-									+ "},");
-							index++;
 						}
 					}
 				}
@@ -1386,6 +1542,116 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 										+ "\"realtimeCurveColor\":\""+realtimeCurveColor+"\","
 										+ "\"isHistoryCurve\":\""+isHistoryCurve+"\","
 										+ "\"historyCurveColor\":\""+historyCurveColor+"\""
+										+ "},");
+								index++;
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+		
+		
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		return result_json.toString().replaceAll("null", "");
+	}
+	
+	public String getProtocolDisplayInstanceCtrlItemsConfigData(String id,String classes){
+		StringBuffer result_json = new StringBuffer();
+		Gson gson = new Gson();
+		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		if(equipmentDriveMap.size()==0){
+			EquipmentDriverServerTask.loadProtocolConfig();
+			equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		}
+		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"单位\",\"dataIndex\":\"unit\",width:80 ,children:[] },"
+				+ "{ \"header\":\"显示级别\",\"dataIndex\":\"showLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"显示顺序\",\"dataIndex\":\"sort\",width:80 ,children:[] }"
+				+ "]";
+		
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		
+		List<String> itemsList=new ArrayList<String>();
+		List<String> itemsSortList=new ArrayList<String>();
+		List<String> itemsBitIndexList=new ArrayList<String>();
+		List<String> itemsShowLevelList=new ArrayList<String>();
+		
+		String protocolSql="select t.protocol from tbl_display_unit_conf t,tbl_protocoldisplayinstance t2 where t.id=t2.displayunitid and t2.id="+id+"";
+		String sql="select t.itemname,t.bitindex,t.sort,t.showlevel"
+				+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2,tbl_protocoldisplayinstance t3 "
+				+ " where t.unitid=t2.id and t2.id=t3.displayunitid and t.type=2 and t3.id= "+id
+				+ " order by t.id";
+		List<?> protocolList=this.findCallSql(protocolSql);
+		if(protocolList.size()>0){
+			String protocolName=protocolList.get(0)+"";
+			List<?> list=this.findCallSql(sql);
+			for(int i=0;i<list.size();i++){
+				Object[] obj=(Object[])list.get(i);
+				itemsList.add(obj[0]+"");
+				itemsBitIndexList.add(obj[1]+"");
+				itemsSortList.add(obj[2]+"");
+				itemsShowLevelList.add(obj[3]+"");
+			}
+			
+			for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
+				ModbusProtocolConfig.Protocol protocolConfig=modbusProtocolConfig.getProtocol().get(i);
+				if(protocolName.equalsIgnoreCase(protocolConfig.getName())){
+//					Collections.sort(protocolConfig.getItems());
+					int index=1;
+					for(int j=0;j<protocolConfig.getItems().size();j++){
+						if(StringManagerUtils.existOrNot(itemsList, protocolConfig.getItems().get(j).getTitle(), false)){
+							String sort="";
+							String showLevel="";
+							if(protocolConfig.getItems().get(j).getResolutionMode()==0
+									&&protocolConfig.getItems().get(j).getMeaning()!=null
+									&&protocolConfig.getItems().get(j).getMeaning().size()>0){
+								Collections.sort(protocolConfig.getItems().get(j).getMeaning());//排序
+								for(int k=0;k<protocolConfig.getItems().get(j).getMeaning().size();k++){
+									sort="";
+									showLevel="";
+									for(int m=0;m<itemsList.size();m++){
+										if(itemsList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())
+												&&itemsBitIndexList.get(m).equalsIgnoreCase(protocolConfig.getItems().get(j).getMeaning().get(k).getValue()+"")
+											){
+											sort=itemsSortList.get(m);
+											showLevel=itemsShowLevelList.get(m);
+											break;
+										}
+									}
+									
+									result_json.append("{"
+											+ "\"id\":"+(index)+","
+											+ "\"title\":\""+protocolConfig.getItems().get(j).getMeaning().get(k).getMeaning()+"\","
+											+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
+											+ "\"showLevel\":\""+showLevel+"\","
+											+ "\"sort\":\""+sort+"\""
+											+ "},");
+									index++;
+								}
+							}else{
+								for(int k=0;k<itemsList.size();k++){
+									if(itemsList.get(k).equalsIgnoreCase(protocolConfig.getItems().get(j).getTitle())){
+										sort=itemsSortList.get(k);
+										showLevel=itemsShowLevelList.get(k);
+										break;
+									}
+								}
+								result_json.append("{"
+										+ "\"id\":"+(index)+","
+										+ "\"title\":\""+protocolConfig.getItems().get(j).getTitle()+"\","
+										+ "\"unit\":\""+protocolConfig.getItems().get(j).getUnit()+"\","
+										+ "\"showLevel\":\""+showLevel+"\","
+										+ "\"sort\":\""+sort+"\""
 										+ "},");
 								index++;
 							}
@@ -2981,8 +3247,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		getBaseDao().updateObject(doAlarmUnitAdd);
 	}
 	
-	public void doDisplayUnitAdd(T displayUnit) throws Exception {
-		getBaseDao().addObject(displayUnit);
+	public Serializable doDisplayUnitAdd(T displayUnit) throws Exception {
+		return getBaseDao().addObject(displayUnit);
 	}
 	
 	public void doDisplayUnitBulkDelete(final String ids,String deviceType) throws Exception {
