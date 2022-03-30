@@ -57,7 +57,9 @@ import com.cosog.service.acqUnit.AcquisitionUnitManagerService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.right.RoleManagerService;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.utils.AcquisitionItemColumnsMap;
 import com.cosog.utils.BackModuleRecursion;
+import com.cosog.utils.Config;
 import com.cosog.utils.Constants;
 import com.cosog.utils.DataSourceConfig;
 import com.cosog.utils.DataSourceConfigSaveData;
@@ -618,6 +620,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 		String result = "";
 		PrintWriter out = response.getWriter();
 		DisplayUnitItem displayUnitItem = null;
+		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
 		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
 		if(equipmentDriveMap.size()==0){
 			EquipmentDriverServerTask.loadProtocolConfig();
@@ -643,6 +646,17 @@ public class AcquisitionUnitManagerController extends BaseController {
 			
 			if (paramsArr.length > 0 && StringManagerUtils.isNotNull(unitId) && protocol!=null) {
 				this.displayUnitItemManagerService.deleteCurrentDisplayUnitOwnItems(unitId,itemType);
+				int protocolType=protocol.getDeviceType();
+				String columnsKey="rpcDeviceAcquisitionItemColumns";
+				if(protocolType==1){
+					columnsKey="pcpDeviceAcquisitionItemColumns";
+				}
+				Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
+				if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
+					EquipmentDriverServerTask.loadAcquisitionItemColumns(protocolType);
+				}
+				Map<String,String> loadedAcquisitionItemColumnsMap=acquisitionItemColumnsMap.get(columnsKey);
+				
 				if (matrixCodes != "" || matrixCodes != null) {
 					String module_matrix[] = matrixCodes.split("\\|");
 					List<String> itemsList=new ArrayList<String>();
@@ -675,6 +689,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 						displayUnitItem = new DisplayUnitItem();
 						displayUnitItem.setUnitId(StringManagerUtils.stringToInteger(unitId));
 						displayUnitItem.setItemName(itemName);
+						displayUnitItem.setItemCode(dataSaveMode==0?("addr"+itemAddr):(loadedAcquisitionItemColumnsMap.get(itemName)));
 						displayUnitItem.setType(StringManagerUtils.stringToInteger(itemType));
 						displayUnitItem.setSort(StringManagerUtils.isNumber(module_[1])?StringManagerUtils.stringTransferInteger(module_[1]):null);
 						displayUnitItem.setBitIndex(bitIndex>=0?bitIndex:null);
@@ -684,6 +699,102 @@ public class AcquisitionUnitManagerController extends BaseController {
 						displayUnitItem.setHistoryCurve((StringManagerUtils.isNumber(module_[5]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[5]):null);
 						displayUnitItem.setHistoryCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[6])?module_[6]:"");
 						displayUnitItem.setMatrix(module_[10]);
+						this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
+					}
+				}
+			}
+			result = "{success:true,msg:true}";
+			response.setCharacterEncoding(Constants.ENCODING_UTF8);
+			out.print(result);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result = "{success:false,msg:false}";
+			out.print(result);
+		}
+		return null;
+	}
+	
+	/**
+	 * @return NUll
+	 * @throws IOException
+	 * 显示单元安排采集项
+	 */
+	@RequestMapping("/grantCtrlItemsToDisplayUnitPermission")
+	public String grantCtrlItemsToDisplayUnitPermission() throws IOException {
+		String result = "";
+		PrintWriter out = response.getWriter();
+		DisplayUnitItem displayUnitItem = null;
+		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
+		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		if(equipmentDriveMap.size()==0){
+			EquipmentDriverServerTask.loadProtocolConfig();
+			equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		}
+		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		try {
+			String params = ParamUtils.getParameter(request, "params");
+			String matrixCodes = ParamUtils.getParameter(request, "matrixCodes");
+			String unitId = ParamUtils.getParameter(request, "unitId");
+			String protocolName = ParamUtils.getParameter(request, "protocol");
+			String itemType = ParamUtils.getParameter(request, "itemType");
+			log.debug("grantAcquisitionItemsPermission params==" + params);
+			String paramsArr[] = StringManagerUtils.split(params, ",");
+			
+			ModbusProtocolConfig.Protocol protocol=null;
+			for(int j=0;j<modbusProtocolConfig.getProtocol().size();j++){
+				if(protocolName.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(j).getName())){
+					protocol=modbusProtocolConfig.getProtocol().get(j);
+					break;
+				}
+			}
+			
+			if (paramsArr.length > 0 && StringManagerUtils.isNotNull(unitId) && protocol!=null) {
+				this.displayUnitItemManagerService.deleteCurrentDisplayUnitOwnItems(unitId,itemType);
+				int protocolType=protocol.getDeviceType();
+				String columnsKey="rpcDeviceAcquisitionItemColumns";
+				if(protocolType==1){
+					columnsKey="pcpDeviceAcquisitionItemColumns";
+				}
+				Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
+				if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
+					EquipmentDriverServerTask.loadAcquisitionItemColumns(protocolType);
+				}
+				Map<String,String> loadedAcquisitionItemColumnsMap=acquisitionItemColumnsMap.get(columnsKey);
+				if (matrixCodes != "" || matrixCodes != null) {
+					String module_matrix[] = matrixCodes.split("\\|");
+					List<String> itemsList=new ArrayList<String>();
+					for (int i = 0; i < module_matrix.length; i++) {
+						String module_[] = module_matrix[i].split("\\:");
+						String itemName=module_[0];
+						int itemAddr=StringManagerUtils.stringTransferInteger(module_[4]);
+						String resolutionMode=module_[3];
+						String bitIndexStr=module_[5];
+						int bitIndex=-99;
+						if("开关量".equalsIgnoreCase(resolutionMode)){//如果是开关量
+							for(int j=0;j<protocol.getItems().size();j++){
+								if(itemAddr==protocol.getItems().get(j).getAddr()){
+									for(int k=0;protocol.getItems().get(j).getMeaning()!=null&&k<protocol.getItems().get(j).getMeaning().size();k++){
+										if(itemName.equalsIgnoreCase(protocol.getItems().get(j).getMeaning().get(k).getMeaning())
+												&&(StringManagerUtils.isNotNull(bitIndexStr)&&StringManagerUtils.stringToInteger(bitIndexStr)==protocol.getItems().get(j).getMeaning().get(k).getValue())  ){
+											itemName=protocol.getItems().get(j).getTitle();
+											bitIndex=protocol.getItems().get(j).getMeaning().get(k).getValue();
+											break;
+										}
+									}
+									break;
+								}
+							}
+						}
+						
+						displayUnitItem = new DisplayUnitItem();
+						displayUnitItem.setUnitId(StringManagerUtils.stringToInteger(unitId));
+						displayUnitItem.setItemName(itemName);
+						displayUnitItem.setItemCode(dataSaveMode==0?("addr"+itemAddr):(loadedAcquisitionItemColumnsMap.get(itemName)));
+						displayUnitItem.setType(StringManagerUtils.stringToInteger(itemType));
+						displayUnitItem.setSort(StringManagerUtils.isNumber(module_[1])?StringManagerUtils.stringTransferInteger(module_[1]):null);
+						displayUnitItem.setBitIndex(bitIndex>=0?bitIndex:null);
+						displayUnitItem.setMatrix(module_[6]);
 						this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
 					}
 				}
@@ -911,6 +1022,24 @@ public class AcquisitionUnitManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/getProtocolDisplayUnitCtrlItemsConfigData")
+	public String getProtocolDisplayUnitCtrlItemsConfigData() throws Exception {
+		String protocolName = ParamUtils.getParameter(request, "protocolName");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String code = ParamUtils.getParameter(request, "code");
+		String unitId = ParamUtils.getParameter(request, "unitId");
+		String acqUnitId = ParamUtils.getParameter(request, "acqUnitId");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getProtocolDisplayUnitCtrlItemsConfigData(protocolName,classes,code,unitId,acqUnitId);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	@RequestMapping("/getProtocolDisplayUnitCalItemsConfigData")
 	public String getProtocolDisplayUnitCalItemsConfigData() throws Exception {
 		String deviceType = ParamUtils.getParameter(request, "deviceType");
@@ -948,6 +1077,21 @@ public class AcquisitionUnitManagerController extends BaseController {
 		String classes = ParamUtils.getParameter(request, "classes");
 		String json = "";
 		json = acquisitionUnitItemManagerService.getProtocolDisplayInstanceAcqItemsConfigData(id,classes);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/getProtocolDisplayInstanceCtrlItemsConfigData")
+	public String getProtocolDisplayInstanceCtrlItemsConfigData() throws Exception {
+		String id = ParamUtils.getParameter(request, "id");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getProtocolDisplayInstanceCtrlItemsConfigData(id,classes);
 		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();

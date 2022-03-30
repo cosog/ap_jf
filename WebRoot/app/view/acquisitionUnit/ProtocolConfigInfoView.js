@@ -164,6 +164,12 @@ Ext.define('AP.view.acquisitionUnit.ProtocolConfigInfoView', {
     					}
     					protocolDisplayInstanceCalItemsHandsontableHelper=null;
     				}
+    				if(protocolDisplayInstanceCtrlItemsHandsontableHelper!=null){
+    					if(protocolDisplayInstanceCtrlItemsHandsontableHelper.hot!=undefined){
+    						protocolDisplayInstanceCtrlItemsHandsontableHelper.hot.destroy();
+    					}
+    					protocolDisplayInstanceCtrlItemsHandsontableHelper=null;
+    				}
     				
     				//报警实例HandsontableHelper资源
     				if(protocolAlarmInstanceConfigNumItemsHandsontableHelper!=null){
@@ -209,6 +215,13 @@ Ext.define('AP.view.acquisitionUnit.ProtocolConfigInfoView', {
     						protocolDisplayUnitPropertiesHandsontableHelper.hot.destroy();
     					}
     					protocolDisplayUnitPropertiesHandsontableHelper=null;
+    				}
+
+    				if(protocolDisplayUnitCtrlItemsConfigHandsontableHelper!=null){
+    					if(protocolDisplayUnitCtrlItemsConfigHandsontableHelper.hot!=undefined){
+    						protocolDisplayUnitCtrlItemsConfigHandsontableHelper.hot.destroy();
+    					}
+    					protocolDisplayUnitCtrlItemsConfigHandsontableHelper=null;
     				}
     			},
     			afterrender: function ( panel, eOpts) {}

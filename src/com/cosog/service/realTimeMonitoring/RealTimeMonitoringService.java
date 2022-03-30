@@ -965,7 +965,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				+ " listagg(t4.itemname, ',') within group(order by t4.unitid,t4.sort,t4.id,t4.bitindex ) key,"
 				+ " listagg(decode(t4.sort,null,9999,t4.sort), ',') within group(order by t4.unitid,t4.sort,t4.id,t4.bitindex ) sort "
 				+ " from "+deviceTableName+" t,tbl_protocoldisplayinstance t2,tbl_display_unit_conf t3,tbl_display_items2unit_conf t4 "
-				+ " where t.displayinstancecode=t2.code and t2.displayunitid=t3.id and t3.id=t4.unitid and t4.type=0 "
+				+ " where t.displayinstancecode=t2.code and t2.displayunitid=t3.id and t3.id=t4.unitid and t4.type=2 "
 				+ " and t.id="+deviceId
 				+ " and decode(t4.showlevel,null,9999,t4.showlevel)>=( select r.showlevel from tbl_role r,tbl_user u where u.user_type=r.role_id and u.user_no="+userId+" )"
 				+ " group by t.wellname,t3.protocol";
