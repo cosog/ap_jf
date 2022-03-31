@@ -254,13 +254,15 @@ public class AcquisitionUnitManagerController extends BaseController {
 //			this.acquisitionGroupManagerService.doAcquisitionGroupAdd(acquisitionGroup);
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
-			out.print(result);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			result = "{success:false,msg:false}";
-			out.print(result);
+			
 		}
+		out.print(result);
+		out.flush();
+		out.close();
 		return null;
 	}
 	
@@ -297,33 +299,34 @@ public class AcquisitionUnitManagerController extends BaseController {
 			}
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
-			out.print(result);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			result = "{success:false,msg:false}";
-			out.print(result);
 		}
+		out.print(result);
+		out.flush();
+		out.close();
 		return null;
 	}
 	
 	@RequestMapping("/doAcquisitionGroupEdit")
-	public String doAcquisitionGroupEdit(@ModelAttribute AcquisitionGroup acquisitionGroup) {
+	public String doAcquisitionGroupEdit(@ModelAttribute AcquisitionGroup acquisitionGroup) throws IOException {
 		String result ="{success:true,msg:false}";
+		PrintWriter out = response.getWriter();
 		try {
 			this.acquisitionUnitManagerService.doAcquisitionGroupEdit(acquisitionGroup);
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
 			response.setHeader("Cache-Control", "no-cache");
-			PrintWriter pw = response.getWriter();
 			result= "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
-			response.getWriter().print(result);
-			pw.flush();
-			pw.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		out.print(result);
+		out.flush();
+		out.close();
 		return null;
 	}
 	
@@ -350,13 +353,14 @@ public class AcquisitionUnitManagerController extends BaseController {
 			this.acquisitionUnitManagerService.doAcquisitionUnitAdd(acquisitionUnit);
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
-			out.print(result);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			result = "{success:false,msg:false}";
-			out.print(result);
 		}
+		out.print(result);
+		out.flush();
+		out.close();
 		return null;
 	}
 	
@@ -1762,13 +1766,14 @@ public class AcquisitionUnitManagerController extends BaseController {
 			this.alarmUnitManagerService.doAlarmUnitAdd(alarmUnit);
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
-			out.print(result);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			result = "{success:false,msg:false}";
-			out.print(result);
 		}
+		out.print(result);
+		out.flush();
+		out.close();
 		return null;
 	}
 	
@@ -1780,13 +1785,14 @@ public class AcquisitionUnitManagerController extends BaseController {
 			this.displayUnitManagerService.doDisplayUnitAdd(displayUnit);
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
-			out.print(result);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			result = "{success:false,msg:false}";
-			out.print(result);
 		}
+		out.print(result);
+		out.flush();
+		out.close();
 		return null;
 	}
 	
