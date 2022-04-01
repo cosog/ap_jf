@@ -30,14 +30,14 @@ import com.cosog.service.base.BaseService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.data.DataitemsInfoService;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTast;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.DataSourceConfig;
 import com.cosog.utils.EquipmentDriveMap;
-import com.cosog.utils.MemoryData;
+import com.cosog.utils.MemoryDataMap;
 import com.cosog.utils.Page;
 import com.cosog.utils.StringManagerUtils;
 import com.cosog.utils.TcpServerConfigMap;
-import com.cosog.utils.MemoryData.CalItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -1232,9 +1232,19 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	public String getProtocolDisplayUnitCalItemsConfigData(String deviceType,String classes,String unitId){
 		StringBuffer result_json = new StringBuffer();
 		Gson gson = new Gson();
-		List<CalItem> calItemList=MemoryData.calItemList;
+		String key="rpcCalItemList";
 		if("1".equalsIgnoreCase(deviceType)){
-			calItemList=MemoryData.pcpCalItemList;
+			key="pcpCalItemList";
+		}
+		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
+		ArrayList<MemoryDataManagerTast.CalItem> calItemList= (ArrayList<MemoryDataManagerTast.CalItem>)memoryDataMap.get(key);
+		if(calItemList==null){
+			if("0".equalsIgnoreCase(deviceType)){
+				MemoryDataManagerTast.loadRPCCalculateItem();
+			}else{
+				MemoryDataManagerTast.loadPCPCalculateItem();
+			}
+			calItemList= (ArrayList<MemoryDataManagerTast.CalItem>)memoryDataMap.get(key);
 		}
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
@@ -1674,9 +1684,19 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	public String getProtocolDisplayInstanceCalItemsConfigData(String id,String classes,String deviceType){
 		StringBuffer result_json = new StringBuffer();
 		Gson gson = new Gson();
-		List<CalItem> calItemList=MemoryData.calItemList;
+		String key="rpcCalItemList";
 		if("1".equalsIgnoreCase(deviceType)){
-			calItemList=MemoryData.pcpCalItemList;
+			key="pcpCalItemList";
+		}
+		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
+		ArrayList<MemoryDataManagerTast.CalItem> calItemList= (ArrayList<MemoryDataManagerTast.CalItem>)memoryDataMap.get(key);
+		if(calItemList==null){
+			if("0".equalsIgnoreCase(deviceType)){
+				MemoryDataManagerTast.loadRPCCalculateItem();
+			}else{
+				MemoryDataManagerTast.loadPCPCalculateItem();
+			}
+			calItemList= (ArrayList<MemoryDataManagerTast.CalItem>)memoryDataMap.get(key);
 		}
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
