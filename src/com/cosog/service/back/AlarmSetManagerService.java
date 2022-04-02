@@ -12,6 +12,7 @@ import com.cosog.model.AlarmShowStyle;
 import com.cosog.service.base.BaseService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.Config;
 import com.cosog.utils.ConfigFile;
 import com.cosog.utils.DataModelMap;
@@ -111,7 +112,7 @@ public class AlarmSetManagerService<T> extends BaseService<T> {
 		String json="[]";
 		if(alarmShowStyle==null){
 			try {
-				EquipmentDriverServerTask.initAlarmStyle();
+				MemoryDataManagerTask.initAlarmStyle();
 				alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 			} catch (IOException|SQLException e) {
 				json="[]";

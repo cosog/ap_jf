@@ -35,7 +35,12 @@ import org.springframework.web.socket.TextMessage;
 import com.cosog.controller.base.BaseController;
 import com.cosog.model.AlarmShowStyle;
 import com.cosog.model.CommStatus;
+import com.cosog.model.calculate.AcqInstanceOwnItem;
+import com.cosog.model.calculate.AlarmInstanceOwnItem;
 import com.cosog.model.calculate.CommResponseData;
+import com.cosog.model.calculate.DisplayInstanceOwnItem;
+import com.cosog.model.calculate.PCPDeviceInfo;
+import com.cosog.model.calculate.RPCDeviceInfo;
 import com.cosog.model.calculate.TimeEffResponseData;
 import com.cosog.model.calculate.TimeEffTotalResponseData;
 import com.cosog.model.calculate.WellAcquisitionData;
@@ -47,6 +52,7 @@ import com.cosog.model.drive.ModbusProtocolConfig;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.datainterface.CalculateDataService;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.AcquisitionItemColumnsMap;
 import com.cosog.utils.AlarmInfoMap;
 import com.cosog.utils.Config;
@@ -54,6 +60,7 @@ import com.cosog.utils.Config2;
 import com.cosog.utils.Constants;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.EquipmentDriveMap;
+import com.cosog.utils.MemoryDataMap;
 import com.cosog.utils.OracleJdbcUtis;
 import com.cosog.utils.ParamUtils;
 import com.cosog.utils.ProtocolItemResolutionData;
@@ -544,34 +551,31 @@ public class DriverAPIController extends BaseController{
 		AcqGroup acqGroup=gson.fromJson(data, type);
 		String json = "{success:true,flag:true}";
 		if(acqGroup!=null){
-			String sql="select t.wellname,t.devicetype ,t3.protocol"
-					+ " from tbl_rpcdevice t,tbl_protocolinstance t2,tbl_acq_unit_conf t3  "
-					+ " where t.instancecode=t2.code and t2.unitid=t3.id"
-					+ " and t.signinid='"+acqGroup.getID()+"' and to_number(t.slave)="+acqGroup.getSlave();
-			List list = this.commonDataService.findCallSql(sql);
-			if(list.size()>0){
-				Object[] obj=(Object[]) list.get(0);
-				String wellName=obj[0]+"";
-				String deviceType=obj[1]+"";
-				String protocolName=obj[2]+"";
-				if("A11-Modbus".equalsIgnoreCase(protocolName)){
+			Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
+			Map<Integer,RPCDeviceInfo> rpcDeviceInfoMap= (HashMap<Integer,RPCDeviceInfo>)memoryDataMap.get("RPCDeviceInfo");
+			RPCDeviceInfo rpcDeviceInfo=null;
+			PCPDeviceInfo pcpDeviceInfo=null;
+			for(Integer key:rpcDeviceInfoMap.keySet()){
+				if(acqGroup.getID().equalsIgnoreCase(rpcDeviceInfoMap.get(key).getSignInId()) && acqGroup.getSlave()==StringManagerUtils.stringToInteger(rpcDeviceInfoMap.get(key).getSlave())){
+					rpcDeviceInfo=rpcDeviceInfoMap.get(key);
+					break;
 				}
-				else{
-					this.DataProcessing(acqGroup, wellName,deviceType,protocolName);
+			}
+			if(rpcDeviceInfo==null){
+				Map<Integer,PCPDeviceInfo> pcpDeviceInfoMap= (HashMap<Integer,PCPDeviceInfo>)memoryDataMap.get("PCPDeviceInfo");
+				for(Integer key:pcpDeviceInfoMap.keySet()){
+					if(acqGroup.getID().equalsIgnoreCase(pcpDeviceInfoMap.get(key).getSignInId()) && acqGroup.getSlave()==StringManagerUtils.stringToInteger(pcpDeviceInfoMap.get(key).getSlave())){
+						pcpDeviceInfo=pcpDeviceInfoMap.get(key);
+						break;
+					}
 				}
-			}else{////如果抽油机表中未找到对应设备，查找螺杆泵表
-				sql="select t.wellname,t.devicetype ,t3.protocol"
-						+ " from tbl_pcpdevice t,tbl_protocolinstance t2,tbl_acq_unit_conf t3  "
-						+ " where t.instancecode=t2.code and t2.unitid=t3.id"
-						+ " and t.signinid='"+acqGroup.getID()+"' and to_number(t.slave)="+acqGroup.getSlave();
-				list = this.commonDataService.findCallSql(sql);
-				if(list.size()>0){
-					Object[] obj=(Object[]) list.get(0);
-					String wellName=obj[0]+"";
-					String deviceType=obj[1]+"";
-					String protocolName=obj[2]+"";
-					this.DataProcessing(acqGroup, wellName,deviceType,protocolName);
-				}
+			}
+			
+			if(rpcDeviceInfo!=null){
+				this.DataProcessing(rpcDeviceInfo,acqGroup);
+			}
+			if(pcpDeviceInfo!=null){
+				this.PCPDataProcessing(pcpDeviceInfo,acqGroup);
 			}
 		}else{
 			json = "{success:true,flag:false}";
@@ -586,11 +590,10 @@ public class DriverAPIController extends BaseController{
 	};
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public String DataProcessing(AcqGroup acqGroup,String wellName,String deviceType,String protocolName) throws Exception{
+	public String DataProcessing(RPCDeviceInfo rpcDeviceInfo,AcqGroup acqGroup) throws Exception{
 		Gson gson=new Gson();
 		java.lang.reflect.Type type=null;
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
-//		String commUrl=Config.getInstance().configFile.getAgileCalculate().getCommunication()[0];
 		List<String> websocketClientUserList=new ArrayList<>();
 		for (WebSocketByJavax item : WebSocketByJavax.clients.values()) { 
             String[] clientInfo=item.userId.split("_");
@@ -601,14 +604,14 @@ public class DriverAPIController extends BaseController{
 		
 		StringBuffer webSocketSendData = new StringBuffer();
 		StringBuffer info_json = new StringBuffer();
-		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
+		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
 		boolean save=false;
 		boolean alarm=false;
 		boolean sendMessage=false;
-		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
+		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) memoryDataMap.get("AlarmShowStyle");
 		if(alarmShowStyle==null){
-			EquipmentDriverServerTask.initAlarmStyle();
-			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
+			MemoryDataManagerTask.initAlarmStyle();
+			alarmShowStyle=(AlarmShowStyle) memoryDataMap.get("AlarmShowStyle");
 		}
 		String deviceTableName="tbl_rpcdevice";
 		String realtimeTable="tbl_rpcacqdata_latest";
@@ -617,22 +620,10 @@ public class DriverAPIController extends BaseController{
 		String functionCode="rpcDeviceRealTimeMonitoringData";
 		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		int DeviceType=0;
-		if(StringManagerUtils.stringToInteger(deviceType)>=100 && StringManagerUtils.stringToInteger(deviceType)<200){
+		if(rpcDeviceInfo.getDeviceType()>=100 && rpcDeviceInfo.getDeviceType()<200){
 			DeviceType=0;
-			deviceTableName="tbl_rpcdevice";
-			realtimeTable="tbl_rpcacqdata_latest";
-			historyTable="tbl_rpcacqdata_hist";
-			rawDataTable="tbl_rpcacqrawdata";
-			functionCode="rpcDeviceRealTimeMonitoringData";
-			columnsKey="rpcDeviceAcquisitionItemColumns";
-		}else if(StringManagerUtils.stringToInteger(deviceType)>=200 && StringManagerUtils.stringToInteger(deviceType)<300){
+		}else if(rpcDeviceInfo.getDeviceType()>=200 && rpcDeviceInfo.getDeviceType()<300){
 			DeviceType=1;
-			deviceTableName="tbl_pcpdevice";
-			realtimeTable="tbl_pcpacqdata_latest";
-			historyTable="tbl_pcpacqdata_hist";
-			rawDataTable="tbl_pcpacqrawdata";
-			functionCode="pcpDeviceRealTimeMonitoringData";
-			columnsKey="pcpDeviceAcquisitionItemColumns";
 		}
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
@@ -640,32 +631,37 @@ public class DriverAPIController extends BaseController{
 		}
 		Map<String,String> loadedAcquisitionItemColumnsMap=acquisitionItemColumnsMap.get(columnsKey);
 		if(acqGroup!=null){
-			boolean ifAddDay=false;
-			String sql="select t.wellname ,to_char(t2.acqTime,'yyyy-mm-dd hh24:mi:ss'),"
-					+ " t2.commstatus,t2.commtime,t2.commtimeefficiency,t2.commrange,"
-					+ " t6.save_cycle,"
-					+ " t.id"
-					+ " from "+deviceTableName+" t,"+realtimeTable+"  t2,tbl_protocolinstance t3,tbl_acq_unit_conf t4,tbl_acq_group2unit_conf t5,tbl_acq_group_conf t6    "
-					+ " where t.id=t2.wellid and t.instancecode=t3.code and t3.unitid=t4.id and t4.id=t5.unitid and t5.groupid=t6.id"
-					+ " and t.signinid='"+acqGroup.getID()+"' and to_number(t.slave)="+acqGroup.getSlave()
-					+ " order by t6.id";
-			String alarmItemsSql="select t2.itemname,t2.itemcode,t2.itemaddr,t2.type,t2.bitindex,t2.value, "
-					+ " t2.upperlimit,t2.lowerlimit,t2.hystersis,t2.delay,decode(t2.alarmsign,0,0,t2.alarmlevel) as alarmlevel,"
-					+ " t2.issendmessage,t2.issendmail "
-					+ " from "+deviceTableName+" t, tbl_alarm_item2unit_conf t2,tbl_alarm_unit_conf t3,tbl_protocolalarminstance t4 "
-					+ " where t.alarminstancecode=t4.code and t4.alarmunitid=t3.id and t3.id=t2.unitid "
-					+ " and t.signinid='"+acqGroup.getID()+"' and to_number(t.slave)="+acqGroup.getSlave()
-					+ " order by t2.id";
-			String itemsSql="select t.wellname,t3.protocol, "
-					+ " listagg(t6.itemname, ',') within group(order by t6.groupid,t6.id ) key,"
-					+ " listagg(decode(t6.bitindex,null,9999,t6.bitindex), ',') within group(order by t6.groupid,t6.id ) bitindex  "
-					+ " from "+deviceTableName+" t,tbl_protocolinstance t2,tbl_acq_unit_conf t3,tbl_acq_group2unit_conf t4,tbl_acq_group_conf t5,tbl_acq_item2group_conf t6 "
-					+ " where t.instancecode=t2.code and t2.unitid=t3.id and t3.id=t4.unitid and t4.groupid=t5.id and t5.id=t6.groupid "
-					+ " and t.signinid='"+acqGroup.getID()+"' and to_number(t.slave)="+acqGroup.getSlave()
-					+ " group by t.wellname,t3.protocol";
+			String protocolName="";
+			Map<String,ArrayList<AcqInstanceOwnItem>> acqInstanceOwnItemMap= (HashMap<String,ArrayList<AcqInstanceOwnItem>>)memoryDataMap.get("AcqInstanceOwnItem");
+			List<AcqInstanceOwnItem> acqInstanceOwnItemList=acqInstanceOwnItemMap.get(rpcDeviceInfo.getInstanceCode());
+			if(acqInstanceOwnItemList!=null&&acqInstanceOwnItemList.size()>0){
+				protocolName=acqInstanceOwnItemList.get(0).getProtocol();
+			}
 			
-			List list = commonDataService.findCallSql(sql);
-			List<?> itemsList = commonDataService.findCallSql(itemsSql);
+			Map<String,ArrayList<DisplayInstanceOwnItem>> displayInstanceOwnItemMap= (HashMap<String,ArrayList<DisplayInstanceOwnItem>>)memoryDataMap.get("DisplayInstanceOwnItem");
+			List<DisplayInstanceOwnItem> displayInstanceOwnItemList=displayInstanceOwnItemMap.get(rpcDeviceInfo.getDisplayInstanceCode());
+			
+			Map<String,ArrayList<AlarmInstanceOwnItem>> alarmInstanceOwnItemMap= (HashMap<String,ArrayList<AlarmInstanceOwnItem>>)memoryDataMap.get("AlarmInstanceOwnItem");
+			List<AlarmInstanceOwnItem> alarmInstanceOwnItemList=alarmInstanceOwnItemMap.get(rpcDeviceInfo.getAlarmInstanceCode());
+			
+			Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
+			if(equipmentDriveMap.size()==0){
+				EquipmentDriverServerTask.loadProtocolConfig();
+				equipmentDriveMap = EquipmentDriveMap.getMapObject();
+			}
+			ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+			
+			ModbusProtocolConfig.Protocol protocol=null;
+			for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
+				if(protocolName.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(i).getName())){
+					protocol=modbusProtocolConfig.getProtocol().get(i);
+					break;
+				}
+			}
+			if(protocol!=null){
+				
+			}
+			
 			if(list.size()>0 && itemsList.size()>0){
 				Object[] obj=(Object[]) list.get(0);
 				String lastSaveTime=obj[1]+"";
@@ -681,20 +677,7 @@ public class DriverAPIController extends BaseController{
 				Object[] itemsObj=(Object[]) itemsList.get(0);
 				String[] itemsArr=(itemsObj[2]+"").split(",");
 				String[] itemsBitIndexArr=(itemsObj[3]+"").split(",");
-				Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-				if(equipmentDriveMap.size()==0){
-					EquipmentDriverServerTask.loadProtocolConfig();
-					equipmentDriveMap = EquipmentDriveMap.getMapObject();
-				}
-				ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
 				
-				ModbusProtocolConfig.Protocol protocol=null;
-				for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
-					if(protocolName.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(i).getName())){
-						protocol=modbusProtocolConfig.getProtocol().get(i);
-						break;
-					}
-				}
 				if(protocol!=null){
 					List<?> alarmItemsList = commonDataService.findCallSql(alarmItemsSql);
 					//通信计算

@@ -27,6 +27,7 @@ import com.cosog.model.drive.ModbusDriverSaveData;
 import com.cosog.service.back.AlarmSetManagerService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.Constants;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.EquipmentDriveMap;
@@ -97,7 +98,7 @@ public class AlarmSetManagerController extends BaseController {
 		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
 		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		if(alarmShowStyle==null){
-			EquipmentDriverServerTask.initAlarmStyle();
+			MemoryDataManagerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
 		
@@ -110,7 +111,7 @@ public class AlarmSetManagerController extends BaseController {
 				
 			}
 			alarmSetManagerService.setAlarmLevelColor(alarmShowStyleSaveData);
-			EquipmentDriverServerTask.initAlarmStyle();
+			MemoryDataManagerTask.initAlarmStyle();
 			json="{success:true,msg:true}";
 		} catch (Exception e) {
 			json = "{success:true,msg:false}";
@@ -139,7 +140,7 @@ public class AlarmSetManagerController extends BaseController {
 				
 			}
 			alarmSetManagerService.setAlarmColor(alarmShowStyleSaveData);
-			EquipmentDriverServerTask.initAlarmStyle();
+			MemoryDataManagerTask.initAlarmStyle();
 			json="{success:true,msg:true}";
 		} catch (Exception e) {
 			json = "{success:true,msg:false}";
