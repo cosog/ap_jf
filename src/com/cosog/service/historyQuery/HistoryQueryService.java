@@ -19,6 +19,7 @@ import com.cosog.service.base.BaseService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.data.DataitemsInfoService;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.AcquisitionItemColumnsMap;
 import com.cosog.utils.Config;
 import com.cosog.utils.DataModelMap;
@@ -41,7 +42,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
 		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		if(alarmShowStyle==null){
-			EquipmentDriverServerTask.initAlarmStyle();
+			MemoryDataManagerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
 		String tableName="tbl_rpcacqdata_latest";
@@ -104,7 +105,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
 		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		if(alarmShowStyle==null){
-			EquipmentDriverServerTask.initAlarmStyle();
+			MemoryDataManagerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
 		String tableName="tbl_rpcacqdata_latest";
@@ -157,7 +158,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
 		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		if(alarmShowStyle==null){
-			EquipmentDriverServerTask.initAlarmStyle();
+			MemoryDataManagerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
 		String deviceTableName="tbl_rpcdevice";
@@ -231,7 +232,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
 		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		if(alarmShowStyle==null){
-			EquipmentDriverServerTask.initAlarmStyle();
+			MemoryDataManagerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
 		String deviceTableName="tbl_rpcdevice";
@@ -294,7 +295,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
 		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		if(alarmShowStyle==null){
-			EquipmentDriverServerTask.initAlarmStyle();
+			MemoryDataManagerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
 		
@@ -608,7 +609,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
 		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		if(alarmShowStyle==null){
-			EquipmentDriverServerTask.initAlarmStyle();
+			MemoryDataManagerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
 		String hisTableName="tbl_rpcacqdata_hist";

@@ -1,5 +1,6 @@
 package com.cosog.model.calculate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RPCCalculateRequestData {
@@ -32,6 +33,39 @@ public class RPCCalculateRequestData {
 
     private ManualIntervention ManualIntervention;
 
+    public void init(){
+    	this.setFluidPVT(new FluidPVT());
+    	this.setReservoir(new Reservoir());
+    	
+    	this.setTubingString(new TubingString());
+    	this.getTubingString().setEveryTubing(new ArrayList<EveryTubing>());
+    	
+    	this.setCasingString(new CasingString());
+    	this.getCasingString().setEveryCasing(new ArrayList<EveryCasing>());
+    	
+    	this.setRodString(new RodString());
+    	this.getRodString().setEveryRod(new ArrayList<EveryRod>());
+    	
+    	this.setPump(new Pump());
+    	this.setProduction(new Production());
+    	
+    	this.setPumpingUnit(new PumpingUnit());
+    	this.getPumpingUnit().setBalance(new Balance());
+    	this.getPumpingUnit().getBalance().setEveryBalance(new ArrayList<EveryBalance>());
+    	
+    	
+    	
+    	this.setFESDiagram(new FESDiagram());
+    	this.getFESDiagram().setS(new ArrayList<Float>());
+    	this.getFESDiagram().setF(new ArrayList<Float>());
+    	this.getFESDiagram().setWatt(new ArrayList<Float>());
+    	this.getFESDiagram().setI(new ArrayList<Float>());
+    	
+    	this.setManualIntervention(new ManualIntervention());
+    }
+    
+    
+    
     public void setWellName(String WellName){
         this.WellName = WellName;
     }

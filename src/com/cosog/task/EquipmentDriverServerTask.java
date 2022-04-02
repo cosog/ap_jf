@@ -342,9 +342,10 @@ public class EquipmentDriverServerTask {
 						pstmt.executeUpdate();
 						result++;
 					}
-					
 				}
 			}
+			
+			MemoryDataManagerTask.loadProtocolMappingColumn();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -1847,79 +1848,6 @@ public class EquipmentDriverServerTask {
 		json_buff.append("}");
 		StringManagerUtils.printLog("服务始化："+json_buff.toString());
 		StringManagerUtils.sendPostMethod(initUrl,json_buff.toString(),"utf-8");
-	}
-	
-	public static void initAlarmStyle() throws IOException, SQLException{
-		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
-		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
-		if(alarmShowStyle==null){
-			alarmShowStyle=new AlarmShowStyle();
-		}
-		String sql="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
-				+ " (select * from tbl_code t where t.itemcode='BJYS' ) v1,"
-				+ " (select * from tbl_code t where t.itemcode='BJQJYS' ) v2,"
-				+ " (select * from tbl_code t where t.itemcode='BJYSTMD' ) v3 "
-				+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
-				+ " order by v1.itemvalue ";
-		String sql2="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
-				+ " (select * from tbl_code t where t.itemcode='TXBJYS' ) v1,"
-				+ " (select * from tbl_code t where t.itemcode='TXBJQJYS' ) v2,"
-				+ " (select * from tbl_code t where t.itemcode='TXBJYSTMD' ) v3 "
-				+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
-				+ " order by v1.itemvalue ";
-		Connection conn = null;   
-		PreparedStatement pstmt = null;  
-		Statement stmt = null;  
-		ResultSet rs = null;
-		conn=OracleJdbcUtis.getConnection();
-		if(conn==null){
-			return ;
-		}
-		pstmt = conn.prepareStatement(sql); 
-		rs=pstmt.executeQuery();
-		while(rs.next()){
-			if(rs.getInt(1)==0){
-				alarmShowStyle.getData().getNormal().setValue(rs.getInt(1));
-				alarmShowStyle.getData().getNormal().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getData().getNormal().setColor(rs.getString(3));
-				alarmShowStyle.getData().getNormal().setOpacity(rs.getString(4));
-			}else if(rs.getInt(1)==100){
-				alarmShowStyle.getData().getFirstLevel().setValue(rs.getInt(1));
-				alarmShowStyle.getData().getFirstLevel().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getData().getFirstLevel().setColor(rs.getString(3));
-				alarmShowStyle.getData().getFirstLevel().setOpacity(rs.getString(4));
-			}else if(rs.getInt(1)==200){
-				alarmShowStyle.getData().getSecondLevel().setValue(rs.getInt(1));
-				alarmShowStyle.getData().getSecondLevel().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getData().getSecondLevel().setColor(rs.getString(3));
-				alarmShowStyle.getData().getSecondLevel().setOpacity(rs.getString(4));
-			}else if(rs.getInt(1)==300){
-				alarmShowStyle.getData().getThirdLevel().setValue(rs.getInt(1));
-				alarmShowStyle.getData().getThirdLevel().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getData().getThirdLevel().setColor(rs.getString(3));
-				alarmShowStyle.getData().getThirdLevel().setOpacity(rs.getString(4));
-			}	
-		}
-		pstmt = conn.prepareStatement(sql2); 
-		rs=pstmt.executeQuery();
-		while(rs.next()){
-			if(rs.getInt(1)==0){
-				alarmShowStyle.getComm().getOffline().setValue(rs.getInt(1));
-				alarmShowStyle.getComm().getOffline().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getComm().getOffline().setColor(rs.getString(3));
-				alarmShowStyle.getComm().getOffline().setOpacity(rs.getString(4));
-			}else if(rs.getInt(1)==1){
-				alarmShowStyle.getComm().getOnline().setValue(rs.getInt(1));
-				alarmShowStyle.getComm().getOnline().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getComm().getOnline().setColor(rs.getString(3));
-				alarmShowStyle.getComm().getOnline().setOpacity(rs.getString(4));
-			}
-		}
-		
-		if(!dataModelMap.containsKey("AlarmShowStyle")){
-			dataModelMap.put("AlarmShowStyle", alarmShowStyle);
-		}
-		OracleJdbcUtis.closeDBConnection(conn, stmt, pstmt, rs);
 	}
 	
 	public static void LoadDeviceCommStatus() throws IOException, SQLException{

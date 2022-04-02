@@ -30,7 +30,7 @@ import com.cosog.service.base.BaseService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.data.DataitemsInfoService;
 import com.cosog.task.EquipmentDriverServerTask;
-import com.cosog.task.MemoryDataManagerTast;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.DataSourceConfig;
 import com.cosog.utils.EquipmentDriveMap;
@@ -1237,14 +1237,14 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			key="pcpCalItemList";
 		}
 		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
-		ArrayList<MemoryDataManagerTast.CalItem> calItemList= (ArrayList<MemoryDataManagerTast.CalItem>)memoryDataMap.get(key);
+		ArrayList<MemoryDataManagerTask.CalItem> calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
 		if(calItemList==null){
 			if("0".equalsIgnoreCase(deviceType)){
-				MemoryDataManagerTast.loadRPCCalculateItem();
+				MemoryDataManagerTask.loadRPCCalculateItem();
 			}else{
-				MemoryDataManagerTast.loadPCPCalculateItem();
+				MemoryDataManagerTask.loadPCPCalculateItem();
 			}
-			calItemList= (ArrayList<MemoryDataManagerTast.CalItem>)memoryDataMap.get(key);
+			calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
 		}
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
@@ -1689,14 +1689,14 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			key="pcpCalItemList";
 		}
 		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
-		ArrayList<MemoryDataManagerTast.CalItem> calItemList= (ArrayList<MemoryDataManagerTast.CalItem>)memoryDataMap.get(key);
+		ArrayList<MemoryDataManagerTask.CalItem> calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
 		if(calItemList==null){
 			if("0".equalsIgnoreCase(deviceType)){
-				MemoryDataManagerTast.loadRPCCalculateItem();
+				MemoryDataManagerTask.loadRPCCalculateItem();
 			}else{
-				MemoryDataManagerTast.loadPCPCalculateItem();
+				MemoryDataManagerTask.loadPCPCalculateItem();
 			}
-			calItemList= (ArrayList<MemoryDataManagerTast.CalItem>)memoryDataMap.get(key);
+			calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
 		}
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"

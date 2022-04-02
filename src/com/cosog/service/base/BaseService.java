@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import com.cosog.dao.BaseDao;
 import com.cosog.model.AlarmShowStyle;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.GenericsUtils;
 import com.cosog.utils.Page;
@@ -802,7 +803,7 @@ public class BaseService<T> {
 		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
 		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		if(alarmShowStyle==null){
-			EquipmentDriverServerTask.initAlarmStyle();
+			MemoryDataManagerTask.initAlarmStyle();
 			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
 		String[] str = splitPageSql(sql);

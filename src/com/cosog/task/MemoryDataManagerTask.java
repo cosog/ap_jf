@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.cosog.model.AlarmShowStyle;
+import com.cosog.model.DataMapping;
 import com.cosog.model.WorkType;
 import com.cosog.model.calculate.AcqInstanceOwnItem;
 import com.cosog.model.calculate.AlarmInstanceOwnItem;
@@ -23,6 +26,7 @@ import com.cosog.model.calculate.PCPDeviceInfo;
 import com.cosog.model.calculate.PCPProductionData;
 import com.cosog.model.calculate.RPCDeviceInfo;
 import com.cosog.model.calculate.RPCProductionData;
+import com.cosog.utils.DataModelMap;
 import com.cosog.utils.EquipmentDriveMap;
 import com.cosog.utils.MemoryDataMap;
 import com.cosog.utils.OracleJdbcUtis;
@@ -31,11 +35,11 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 @Component("LoadingMemoryData")  
-public class MemoryDataManagerTast {
+public class MemoryDataManagerTask {
 
-	private static MemoryDataManagerTast instance=new MemoryDataManagerTast();
+	private static MemoryDataManagerTask instance=new MemoryDataManagerTask();
 	
-	public static MemoryDataManagerTast getInstance(){
+	public static MemoryDataManagerTask getInstance(){
 		return instance;
 	}
 	
@@ -44,8 +48,46 @@ public class MemoryDataManagerTast {
 		loadAcqInstanceOwnItemByGroupId("");
 		loadAlarmInstanceOwnItemByGroupId("");
 		loadDisplayInstanceOwnItemByGroupId("");
+		
 		loadRPCDeviceInfo(null);
 		loadPCPDeviceInfo(null);
+	}
+	
+	public static void loadProtocolMappingColumn(){
+		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		Map<String,DataMapping> rpcDeviceInfoMap= (HashMap<String,DataMapping>)memoryDataMap.get("ProtocolMappingColumn");
+		if(rpcDeviceInfoMap!=null){
+			memoryDataMap.remove("ProtocolMappingColumn");
+		}
+		rpcDeviceInfoMap=new HashMap<String,DataMapping>();
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		try {
+			String sql="select t.id,t.name,t.mappingcolumn,t.calcolumn,t.protocoltype,t.mappingmode,t.repetitiontimes from TBL_DATAMAPPING t order by t.protocoltype,t.id";
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				DataMapping dataMapping=new DataMapping();
+				dataMapping.setId(rs.getInt(1));
+				dataMapping.setName(rs.getString(2));
+				dataMapping.setMappingColumn(rs.getString(3));
+				dataMapping.setCalColumn(rs.getString(4));
+				dataMapping.setProtocolType(rs.getInt(5));
+				dataMapping.setMappingMode(rs.getInt(6));
+				dataMapping.setRepetitionTimes(rs.getInt(7));
+				rpcDeviceInfoMap.put(dataMapping.getProtocolType()+"_"+dataMapping.getMappingColumn(), dataMapping);
+			}
+			memoryDataMap.put("ProtocolMappingColumn", rpcDeviceInfoMap);
+		}catch (SQLException e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
 	}
 	
 	public static void loadRPCDeviceInfo(List<String> wellIdList){
@@ -248,9 +290,6 @@ public class MemoryDataManagerTast {
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
-		int result=0;
-		Gson gson = new Gson();
-		java.lang.reflect.Type type=null;
 		Map<String,ArrayList<AcqInstanceOwnItem>> acqInstanceOwnItemMap= (HashMap<String,ArrayList<AcqInstanceOwnItem>>)memoryDataMap.get("AcqInstanceOwnItem");
 		if(acqInstanceOwnItemMap==null){
 			acqInstanceOwnItemMap=new HashMap<String,ArrayList<AcqInstanceOwnItem>>();
@@ -280,7 +319,6 @@ public class MemoryDataManagerTast {
 				acqInstanceOwnItem.setBitIndex(rs.getInt(7));
 				acqInstanceOwnItem.setGroupId(rs.getInt(8));
 				acqInstanceOwnItem.setUnitId(rs.getInt(9));
-				
 				
 				ArrayList<AcqInstanceOwnItem> acqInstanceOwnItemList=acqInstanceOwnItemMap.get(acqInstanceOwnItem.getInstanceCode());
 				if(acqInstanceOwnItemList==null){
@@ -543,6 +581,79 @@ public class MemoryDataManagerTast {
 		} finally{
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
+	}
+	
+	public static void initAlarmStyle() throws IOException, SQLException{
+		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
+		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) memoryDataMap.get("AlarmShowStyle");
+		if(alarmShowStyle==null){
+			alarmShowStyle=new AlarmShowStyle();
+		}
+		String sql="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
+				+ " (select * from tbl_code t where t.itemcode='BJYS' ) v1,"
+				+ " (select * from tbl_code t where t.itemcode='BJQJYS' ) v2,"
+				+ " (select * from tbl_code t where t.itemcode='BJYSTMD' ) v3 "
+				+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
+				+ " order by v1.itemvalue ";
+		String sql2="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
+				+ " (select * from tbl_code t where t.itemcode='TXBJYS' ) v1,"
+				+ " (select * from tbl_code t where t.itemcode='TXBJQJYS' ) v2,"
+				+ " (select * from tbl_code t where t.itemcode='TXBJYSTMD' ) v3 "
+				+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
+				+ " order by v1.itemvalue ";
+		Connection conn = null;   
+		PreparedStatement pstmt = null;  
+		Statement stmt = null;  
+		ResultSet rs = null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+			return ;
+		}
+		pstmt = conn.prepareStatement(sql); 
+		rs=pstmt.executeQuery();
+		while(rs.next()){
+			if(rs.getInt(1)==0){
+				alarmShowStyle.getData().getNormal().setValue(rs.getInt(1));
+				alarmShowStyle.getData().getNormal().setBackgroundColor(rs.getString(2));
+				alarmShowStyle.getData().getNormal().setColor(rs.getString(3));
+				alarmShowStyle.getData().getNormal().setOpacity(rs.getString(4));
+			}else if(rs.getInt(1)==100){
+				alarmShowStyle.getData().getFirstLevel().setValue(rs.getInt(1));
+				alarmShowStyle.getData().getFirstLevel().setBackgroundColor(rs.getString(2));
+				alarmShowStyle.getData().getFirstLevel().setColor(rs.getString(3));
+				alarmShowStyle.getData().getFirstLevel().setOpacity(rs.getString(4));
+			}else if(rs.getInt(1)==200){
+				alarmShowStyle.getData().getSecondLevel().setValue(rs.getInt(1));
+				alarmShowStyle.getData().getSecondLevel().setBackgroundColor(rs.getString(2));
+				alarmShowStyle.getData().getSecondLevel().setColor(rs.getString(3));
+				alarmShowStyle.getData().getSecondLevel().setOpacity(rs.getString(4));
+			}else if(rs.getInt(1)==300){
+				alarmShowStyle.getData().getThirdLevel().setValue(rs.getInt(1));
+				alarmShowStyle.getData().getThirdLevel().setBackgroundColor(rs.getString(2));
+				alarmShowStyle.getData().getThirdLevel().setColor(rs.getString(3));
+				alarmShowStyle.getData().getThirdLevel().setOpacity(rs.getString(4));
+			}	
+		}
+		pstmt = conn.prepareStatement(sql2); 
+		rs=pstmt.executeQuery();
+		while(rs.next()){
+			if(rs.getInt(1)==0){
+				alarmShowStyle.getComm().getOffline().setValue(rs.getInt(1));
+				alarmShowStyle.getComm().getOffline().setBackgroundColor(rs.getString(2));
+				alarmShowStyle.getComm().getOffline().setColor(rs.getString(3));
+				alarmShowStyle.getComm().getOffline().setOpacity(rs.getString(4));
+			}else if(rs.getInt(1)==1){
+				alarmShowStyle.getComm().getOnline().setValue(rs.getInt(1));
+				alarmShowStyle.getComm().getOnline().setBackgroundColor(rs.getString(2));
+				alarmShowStyle.getComm().getOnline().setColor(rs.getString(3));
+				alarmShowStyle.getComm().getOnline().setOpacity(rs.getString(4));
+			}
+		}
+		
+		if(!memoryDataMap.containsKey("AlarmShowStyle")){
+			memoryDataMap.put("AlarmShowStyle", alarmShowStyle);
+		}
+		OracleJdbcUtis.closeDBConnection(conn, stmt, pstmt, rs);
 	}
 	
 	public static class CalItem{

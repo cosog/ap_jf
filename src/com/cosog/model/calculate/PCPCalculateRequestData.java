@@ -3,8 +3,17 @@ package com.cosog.model.calculate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cosog.model.calculate.RPCCalculateRequestData.CasingString;
+import com.cosog.model.calculate.RPCCalculateRequestData.EveryCasing;
 import com.cosog.model.calculate.RPCCalculateRequestData.EveryRod;
 import com.cosog.model.calculate.RPCCalculateRequestData.EveryTubing;
+import com.cosog.model.calculate.RPCCalculateRequestData.FluidPVT;
+import com.cosog.model.calculate.RPCCalculateRequestData.ManualIntervention;
+import com.cosog.model.calculate.RPCCalculateRequestData.Production;
+import com.cosog.model.calculate.RPCCalculateRequestData.Pump;
+import com.cosog.model.calculate.RPCCalculateRequestData.Reservoir;
+import com.cosog.model.calculate.RPCCalculateRequestData.RodString;
+import com.cosog.model.calculate.RPCCalculateRequestData.TubingString;
 public class PCPCalculateRequestData {
 	
 	private String AKString;                                              //秘钥
@@ -52,6 +61,24 @@ public class PCPCalculateRequestData {
 		ManualIntervention = manualIntervention;
 	}
 
+	public void init(){
+		this.setFluidPVT(new FluidPVT());
+    	this.setReservoir(new Reservoir());
+    	
+    	this.setTubingString(new TubingString());
+    	this.getTubingString().setEveryTubing(new ArrayList<EveryTubing>());
+    	
+    	this.setCasingString(new CasingString());
+    	this.getCasingString().setEveryCasing(new ArrayList<EveryCasing>());
+    	
+    	this.setRodString(new RodString());
+    	this.getRodString().setEveryRod(new ArrayList<EveryRod>());
+    	
+    	this.setPump(new Pump());
+    	this.setProduction(new Production());
+    	
+    	this.setManualIntervention(new ManualIntervention());
+	}
 
 	public String getAKString() {
 		return AKString;
