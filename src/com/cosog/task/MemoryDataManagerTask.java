@@ -24,6 +24,7 @@ import com.cosog.model.calculate.AlarmInstanceOwnItem;
 import com.cosog.model.calculate.DisplayInstanceOwnItem;
 import com.cosog.model.calculate.PCPDeviceInfo;
 import com.cosog.model.calculate.PCPProductionData;
+import com.cosog.model.calculate.RPCCalculateRequestData;
 import com.cosog.model.calculate.RPCDeviceInfo;
 import com.cosog.model.calculate.RPCProductionData;
 import com.cosog.utils.DataModelMap;
@@ -58,11 +59,11 @@ public class MemoryDataManagerTask {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		Map<String,DataMapping> rpcDeviceInfoMap= (HashMap<String,DataMapping>)memoryDataMap.get("ProtocolMappingColumn");
-		if(rpcDeviceInfoMap!=null){
+		Map<String,DataMapping> protocolMappingColumnMap= (HashMap<String,DataMapping>)memoryDataMap.get("ProtocolMappingColumn");
+		if(protocolMappingColumnMap!=null){
 			memoryDataMap.remove("ProtocolMappingColumn");
 		}
-		rpcDeviceInfoMap=new HashMap<String,DataMapping>();
+		protocolMappingColumnMap=new HashMap<String,DataMapping>();
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
@@ -80,9 +81,9 @@ public class MemoryDataManagerTask {
 				dataMapping.setProtocolType(rs.getInt(5));
 				dataMapping.setMappingMode(rs.getInt(6));
 				dataMapping.setRepetitionTimes(rs.getInt(7));
-				rpcDeviceInfoMap.put(dataMapping.getProtocolType()+"_"+dataMapping.getMappingColumn(), dataMapping);
+				protocolMappingColumnMap.put(dataMapping.getProtocolType()+"_"+dataMapping.getMappingColumn(), dataMapping);
 			}
-			memoryDataMap.put("ProtocolMappingColumn", rpcDeviceInfoMap);
+			memoryDataMap.put("ProtocolMappingColumn", protocolMappingColumnMap);
 		}catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -158,7 +159,7 @@ public class MemoryDataManagerTask {
 					rocDeviceInfo.setProduction(rpcProductionData.getProduction());
 					rocDeviceInfo.setManualIntervention(rpcProductionData.getManualIntervention());
 					if(pumpingModelId>0){
-						rocDeviceInfo.setPumpingUnit(new RPCDeviceInfo.PumpingUnit());
+						rocDeviceInfo.setPumpingUnit(new RPCCalculateRequestData.PumpingUnit());
 						rocDeviceInfo.getPumpingUnit().setManufacturer(rs.getString(24));
 						rocDeviceInfo.getPumpingUnit().setModel(rs.getString(25));
 						rocDeviceInfo.getPumpingUnit().setStroke(stroke);
@@ -168,8 +169,8 @@ public class MemoryDataManagerTask {
 						rocDeviceInfo.getPumpingUnit().setSingleCrankWeight(rs.getFloat(29));
 						rocDeviceInfo.getPumpingUnit().setSingleCrankPinWeight(rs.getFloat(30));
 						rocDeviceInfo.getPumpingUnit().setStructuralUnbalance(rs.getFloat(31));
-						type = new TypeToken<RPCDeviceInfo.Balance>() {}.getType();
-						RPCDeviceInfo.Balance balance=gson.fromJson(balanceInfo, type);
+						type = new TypeToken<RPCCalculateRequestData.Balance>() {}.getType();
+						RPCCalculateRequestData.Balance balance=gson.fromJson(balanceInfo, type);
 						if(balance!=null){
 							rocDeviceInfo.getPumpingUnit().setBalance(balance);
 						}
