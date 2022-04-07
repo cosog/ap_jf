@@ -580,7 +580,7 @@ public class DriverAPIController extends BaseController{
 				this.RPCDataProcessing(rpcDeviceInfo,acqGroup);
 			}
 			if(pcpDeviceInfo!=null){
-				this.PCPDataProcessing(pcpDeviceInfo,acqGroup);
+//				this.PCPDataProcessing(pcpDeviceInfo,acqGroup);
 			}
 		}else{
 			json = "{success:true,flag:false}";
@@ -712,6 +712,7 @@ public class DriverAPIController extends BaseController{
 				String insertHistValue=rpcDeviceInfo.getId()+",to_date('"+acqTime+"','yyyy-mm-dd hh24:mi:ss'),1";
 				String insertHistSql="";
 				
+				List<AcquisitionItemInfo> acquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
 				List<ProtocolItemResolutionData> protocolItemResolutionDataList=new ArrayList<ProtocolItemResolutionData>();
 				for(int i=0;acqGroup.getAddr()!=null &&i<acqGroup.getAddr().size();i++){
 					for(int j=0;j<protocol.getItems().size();j++){
@@ -719,7 +720,7 @@ public class DriverAPIController extends BaseController{
 							String value="";
 							String columnName=dataSaveMode==0?("addr"+protocol.getItems().get(j).getAddr()):(loadedAcquisitionItemColumnsMap.get(protocol.getItems().get(j).getTitle()));
 							
-							
+							DataMapping dataMappingColumn=protocolMappingColumnMap.get("0_"+columnName);
 							
 							if(acqGroup.getValue()!=null&&acqGroup.getValue().size()>i&&acqGroup.getValue().get(i)!=null){
 								value=StringManagerUtils.objectListToString(acqGroup.getValue().get(i), protocol.getItems().get(j).getIFDataType());
@@ -735,12 +736,12 @@ public class DriverAPIController extends BaseController{
 							int alarmLevel=0;
 							int sort=9999;
 							
-							
-							
 							if(existOrNot(acqInstanceOwnItemList, title, false)){
 								updateRealtimeData+=",t."+columnName+"='"+rawValue+"'";
 								insertHistColumns+=","+columnName;
 								insertHistValue+=",'"+rawValue+"'";
+								
+								
 								if(protocol.getItems().get(j).getResolutionMode()==1||protocol.getItems().get(j).getResolutionMode()==2){//如果是枚举量或数据量
 									if(protocol.getItems().get(j).getMeaning()!=null&&protocol.getItems().get(j).getMeaning().size()>0){
 										for(int l=0;l<protocol.getItems().get(j).getMeaning().size();l++){
@@ -816,15 +817,27 @@ public class DriverAPIController extends BaseController{
 									protocolItemResolutionDataList.add(protocolItemResolutionData);
 								}
 								
-								DataMapping dataMappingColumn=protocolMappingColumnMap.get("0_"+columnName);
+								
 								if("TubingPressure".equalsIgnoreCase(dataMappingColumn.getCalColumn())){//油压
 									rpcCalculateRequestData.getProduction().setTubingPressure(StringManagerUtils.stringToFloat(rawValue));
+									updateRealtimeData+=",t.TubingPressure="+rawValue+"";
+									insertHistColumns+=",TubingPressure";
+									insertHistValue+=","+rawValue+"";
 								}else if("CasingPressure".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
 									rpcCalculateRequestData.getProduction().setCasingPressure(StringManagerUtils.stringToFloat(rawValue));
+									updateRealtimeData+=",t.CasingPressure="+rawValue+"";
+									insertHistColumns+=",CasingPressure";
+									insertHistValue+=","+rawValue+"";
 								}else if("ProducingfluidLevel".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
 									rpcCalculateRequestData.getProduction().setProducingfluidLevel(StringManagerUtils.stringToFloat(rawValue));
+									updateRealtimeData+=",t.ProducingfluidLevel="+rawValue+"";
+									insertHistColumns+=",ProducingfluidLevel";
+									insertHistValue+=","+rawValue+"";
 								}else if("volumeWaterCut".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
 									rpcCalculateRequestData.getProduction().setWaterCut(StringManagerUtils.stringToFloat(rawValue));
+									updateRealtimeData+=",t.volumeWaterCut="+rawValue+"";
+									insertHistColumns+=",volumeWaterCut";
+									insertHistValue+=","+rawValue+"";
 								}else if("acqtime".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
 									rpcCalculateRequestData.getFESDiagram().setAcqTime(rawValue);
 								}else if("stroke".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
@@ -861,7 +874,6 @@ public class DriverAPIController extends BaseController{
 									}
 								}
 							}
-							
 							break;
 						}
 					}
@@ -874,9 +886,86 @@ public class DriverAPIController extends BaseController{
 					type = new TypeToken<RPCCalculateResponseData>() {}.getType();
 					rpcCalculateResponseData=gson.fromJson(responseData, type);
 				}
+				
+				updateRealtimeData+=" where t.wellId= "+rpcDeviceInfo.getId();
+				insertHistSql="insert into "+historyTable+"("+insertHistColumns+")values("+insertHistValue+")";
+				
+				//排序
+				Collections.sort(protocolItemResolutionDataList);
+				//报警判断
+				for(int i=0;i<protocolItemResolutionDataList.size();i++){
+					int alarmLevel=0;
+					AcquisitionItemInfo acquisitionItemInfo=new AcquisitionItemInfo();
+					acquisitionItemInfo.setAddr(StringManagerUtils.stringToInteger(protocolItemResolutionDataList.get(i).getAddr()));
+					acquisitionItemInfo.setColumn(protocolItemResolutionDataList.get(i).getColumn());
+					acquisitionItemInfo.setTitle(protocolItemResolutionDataList.get(i).getColumnName());
+					acquisitionItemInfo.setRawTitle(protocolItemResolutionDataList.get(i).getRawColumnName());
+					acquisitionItemInfo.setValue(protocolItemResolutionDataList.get(i).getValue());
+					acquisitionItemInfo.setRawValue(protocolItemResolutionDataList.get(i).getRawValue());
+					acquisitionItemInfo.setDataType(protocolItemResolutionDataList.get(i).getColumnDataType());
+					acquisitionItemInfo.setResolutionMode(protocolItemResolutionDataList.get(i).getResolutionMode());
+					acquisitionItemInfo.setBitIndex(protocolItemResolutionDataList.get(i).getBitIndex());
+					acquisitionItemInfo.setAlarmLevel(alarmLevel);
+					acquisitionItemInfo.setUnit(protocolItemResolutionDataList.get(i).getUnit());
+					acquisitionItemInfo.setSort(protocolItemResolutionDataList.get(i).getSort());
+					for(int l=0;l<alarmInstanceOwnItemList.size();l++){
+						if((acquisitionItemInfo.getAddr()+"").equals(alarmInstanceOwnItemList.get(l).getItemAddr()+"")){
+							int alarmType=alarmInstanceOwnItemList.get(l).getType();
+							if(alarmType==2 && StringManagerUtils.isNotNull(acquisitionItemInfo.getRawValue())){//数据量报警
+								float hystersis=alarmInstanceOwnItemList.get(l).getHystersis();
+								if(StringManagerUtils.isNotNull(alarmInstanceOwnItemList.get(l).getUpperLimit()+"") && StringManagerUtils.stringToFloat(acquisitionItemInfo.getRawValue())>alarmInstanceOwnItemList.get(l).getUpperLimit()+hystersis){
+									alarmLevel=alarmInstanceOwnItemList.get(l).getAlarmSign()>0?alarmInstanceOwnItemList.get(l).getAlarmLevel():0;
+									acquisitionItemInfo.setAlarmLevel(alarmLevel);
+									acquisitionItemInfo.setHystersis(hystersis);
+									acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItemList.get(l).getUpperLimit());
+									acquisitionItemInfo.setAlarmInfo("高报");
+									acquisitionItemInfo.setAlarmType(1);
+									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItemList.get(l).getDelay());
+									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItemList.get(l).getIsSendMessage());
+									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItemList.get(l).getIsSendMail());
+								}else if((StringManagerUtils.isNotNull(alarmInstanceOwnItemList.get(l).getLowerLimit()+"") && StringManagerUtils.stringToFloat(acquisitionItemInfo.getRawValue())<alarmInstanceOwnItemList.get(l).getLowerLimit()-hystersis)){
+									alarmLevel=alarmInstanceOwnItemList.get(l).getAlarmSign()>0?alarmInstanceOwnItemList.get(l).getAlarmLevel():0;
+									acquisitionItemInfo.setAlarmLevel(alarmLevel);
+									acquisitionItemInfo.setHystersis(hystersis);
+									acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItemList.get(l).getLowerLimit());
+									acquisitionItemInfo.setAlarmInfo("低报");
+									acquisitionItemInfo.setAlarmType(1);
+									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItemList.get(l).getDelay());
+									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItemList.get(l).getIsSendMessage());
+									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItemList.get(l).getIsSendMail());
+								}
+								break;
+							}else if(alarmType==0  && StringManagerUtils.isNotNull(acquisitionItemInfo.getRawValue()) ){//开关量报警
+								if(StringManagerUtils.isNotNull(acquisitionItemInfo.getBitIndex())){
+									if(acquisitionItemInfo.getBitIndex().equals(alarmInstanceOwnItemList.get(l).getBitIndex()+"") && StringManagerUtils.stringToInteger(acquisitionItemInfo.getRawValue())==StringManagerUtils.stringToInteger(alarmInstanceOwnItemList.get(l).getValue()+"")){
+										alarmLevel=alarmInstanceOwnItemList.get(l).getAlarmSign()>0?alarmInstanceOwnItemList.get(l).getAlarmLevel():0;
+										acquisitionItemInfo.setAlarmLevel(alarmLevel);
+										acquisitionItemInfo.setAlarmInfo(acquisitionItemInfo.getValue());
+										acquisitionItemInfo.setAlarmType(3);
+										acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItemList.get(l).getDelay());
+										acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItemList.get(l).getIsSendMessage());
+										acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItemList.get(l).getIsSendMail());
+									}
+								}
+							}else if(alarmType==1  && StringManagerUtils.isNotNull(acquisitionItemInfo.getRawValue()) ){//枚举量报警
+								if(StringManagerUtils.stringToInteger(acquisitionItemInfo.getRawValue())==StringManagerUtils.stringToInteger(alarmInstanceOwnItemList.get(l).getValue()+"")){
+									alarmLevel=alarmInstanceOwnItemList.get(l).getAlarmSign()>0?alarmInstanceOwnItemList.get(l).getAlarmLevel():0;
+									acquisitionItemInfo.setAlarmLevel(alarmLevel);
+									acquisitionItemInfo.setAlarmInfo(acquisitionItemInfo.getValue());
+									acquisitionItemInfo.setAlarmType(2);
+									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItemList.get(l).getDelay());
+									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItemList.get(l).getIsSendMessage());
+									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItemList.get(l).getIsSendMail());
+								}
+							}
+						}
+					}
+					if(acquisitionItemInfo.getAlarmLevel()>0){
+						alarm=true;
+					}
+					acquisitionItemInfoList.add(acquisitionItemInfo);
+				}
 			}
-			
-			
 		}
 		return null;
 	}
