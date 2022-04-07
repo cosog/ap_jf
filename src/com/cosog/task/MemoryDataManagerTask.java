@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,8 @@ import com.cosog.utils.StringManagerUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import redis.clients.jedis.Jedis;
+
 @Component("LoadingMemoryData")  
 public class MemoryDataManagerTask {
 
@@ -44,8 +47,22 @@ public class MemoryDataManagerTask {
 		return instance;
 	}
 	
-//	@Scheduled(fixedRate = 1000*60*60*24*365*100)
+	@Scheduled(fixedRate = 1000*60*60*24*365*100)
 	public void loadMemoryData() throws SQLException, ParseException,InterruptedException, IOException{
+		
+		try {
+            Jedis jedis = new Jedis();
+            Date time1 = new Date();
+            jedis.set("goodsName","aa");
+            Date time2 = new Date();
+            System.out.println("消耗时间："+(time2.getTime()-time1.getTime()));
+            System.out.println("存入redis完毕");
+            System.out.println(jedis.get("goodsName"));
+        } catch (Exception e) {
+        	e.printStackTrace();
+            System.out.println("登录无法更新该用户缓存");
+        }
+		
 		loadAcqInstanceOwnItemByGroupId("");
 		loadAlarmInstanceOwnItemByGroupId("");
 		loadDisplayInstanceOwnItemByGroupId("");
