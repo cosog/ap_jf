@@ -1,6 +1,7 @@
 package com.cosog.task;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,8 +23,11 @@ import com.cosog.model.AlarmShowStyle;
 import com.cosog.model.DataMapping;
 import com.cosog.model.WorkType;
 import com.cosog.model.calculate.AcqInstanceOwnItem;
+import com.cosog.model.calculate.AcqInstanceOwnItem.AcqItem;
 import com.cosog.model.calculate.AlarmInstanceOwnItem;
+import com.cosog.model.calculate.AlarmInstanceOwnItem.AlarmItem;
 import com.cosog.model.calculate.DisplayInstanceOwnItem;
+import com.cosog.model.calculate.DisplayInstanceOwnItem.DisplayItem;
 import com.cosog.model.calculate.PCPDeviceInfo;
 import com.cosog.model.calculate.PCPProductionData;
 import com.cosog.model.calculate.RPCCalculateRequestData;
@@ -32,6 +37,7 @@ import com.cosog.utils.DataModelMap;
 import com.cosog.utils.EquipmentDriveMap;
 import com.cosog.utils.MemoryDataMap;
 import com.cosog.utils.OracleJdbcUtis;
+import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -49,43 +55,66 @@ public class MemoryDataManagerTask {
 	
 	@Scheduled(fixedRate = 1000*60*60*24*365*100)
 	public void loadMemoryData() throws SQLException, ParseException,InterruptedException, IOException{
+		Jedis jedis = new Jedis();
+        jedis.flushDB();
+//		try {
+//            
+//            DataMapping dataMapping=new DataMapping();
+//			dataMapping.setId(1);
+//			dataMapping.setName("aa");
+//			dataMapping.setMappingColumn("bb");
+//			dataMapping.setCalColumn("cc");
+//			dataMapping.setProtocolType(0);
+//			dataMapping.setMappingMode(0);
+//			dataMapping.setRepetitionTimes(1);
+//			
+////			byte[] personByte = SerializeObjectUnils.serialize(dataMapping);
+////            jedis.set("goodsName".getBytes(),personByte);
+////            System.out.println("存入redis完毕");
+////            
+////            byte[] byt = jedis.get("goodsName".getBytes());
+////            Object obj = SerializeObjectUnils.unserizlize(byt);
+////            
+////            if (obj instanceof DataMapping) {
+////                System.out.println(((DataMapping) obj).getId());
+////                System.out.println(((DataMapping) obj).getName());
+////                System.out.println(((DataMapping) obj).getMappingColumn());
+////            }
+//            
+//            
+//            jedis.hset("ProtocolMappingColumn".getBytes(), "cc".getBytes(), SerializeObjectUnils.serialize(dataMapping));//哈希(Hash)
+//            byte[]byt=  jedis.hget("ProtocolMappingColumn".getBytes(), "cc".getBytes());
+//            Object obj = SerializeObjectUnils.unserizlize(byt);
+//            if (obj instanceof DataMapping) {
+//                System.out.println(((DataMapping) obj).getId());
+//                System.out.println(((DataMapping) obj).getName());
+//                System.out.println(((DataMapping) obj).getMappingColumn());
+//            }
+//        } catch (Exception e) {
+//        	e.printStackTrace();
+//            System.out.println("登录无法更新该用户缓存");
+//        }
 		
-		try {
-            Jedis jedis = new Jedis();
-            Date time1 = new Date();
-            jedis.set("goodsName","aa");
-            Date time2 = new Date();
-            System.out.println("消耗时间："+(time2.getTime()-time1.getTime()));
-            System.out.println("存入redis完毕");
-            System.out.println(jedis.get("goodsName"));
-        } catch (Exception e) {
-        	e.printStackTrace();
-            System.out.println("登录无法更新该用户缓存");
-        }
-		
-		loadAcqInstanceOwnItemByGroupId("");
+//		loadAcqInstanceOwnItemByGroupId("");
 		loadAlarmInstanceOwnItemByGroupId("");
-		loadDisplayInstanceOwnItemByGroupId("");
-		
-		loadRPCDeviceInfo(null);
-		loadPCPDeviceInfo(null);
+//		loadDisplayInstanceOwnItemByGroupId("");
+//		
+//		loadRPCDeviceInfo(null);
+//		loadPCPDeviceInfo(null);
+		jedis.disconnect();
+		jedis.close();
 	}
 	
 	public static void loadProtocolMappingColumn(){
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		Map<String,DataMapping> protocolMappingColumnMap= (HashMap<String,DataMapping>)memoryDataMap.get("ProtocolMappingColumn");
-		if(protocolMappingColumnMap!=null){
-			memoryDataMap.remove("ProtocolMappingColumn");
-		}
-		protocolMappingColumnMap=new HashMap<String,DataMapping>();
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
         }
 		try {
+			Jedis jedis = new Jedis();
 			String sql="select t.id,t.name,t.mappingcolumn,t.calcolumn,t.protocoltype,t.mappingmode,t.repetitiontimes from TBL_DATAMAPPING t order by t.protocoltype,t.id";
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
@@ -98,9 +127,27 @@ public class MemoryDataManagerTask {
 				dataMapping.setProtocolType(rs.getInt(5));
 				dataMapping.setMappingMode(rs.getInt(6));
 				dataMapping.setRepetitionTimes(rs.getInt(7));
-				protocolMappingColumnMap.put(dataMapping.getProtocolType()+"_"+dataMapping.getMappingColumn(), dataMapping);
+				String key=dataMapping.getProtocolType()+"_"+dataMapping.getMappingColumn();
+				jedis.hset("ProtocolMappingColumn".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(dataMapping));//哈希(Hash)
 			}
-			memoryDataMap.put("ProtocolMappingColumn", protocolMappingColumnMap);
+			jedis.disconnect();
+			jedis.close();
+//			Set<String> aa=jedis.hkeys("ProtocolMappingColumn");
+//			Set<byte[]> bb=jedis.hkeys("ProtocolMappingColumn".getBytes());
+//			System.out.println("ProtocolMappingColumn中所有的key:"+aa);
+//			System.out.println("ProtocolMappingColumn中所有的key:"+bb);
+//			byte[] testKey=null;
+//			for (byte[] str : bb) {
+//				testKey=str;
+//				break;
+//			}
+//			
+//			System.out.println("ProtocolMappingColumn中所有的值:"+jedis.hvals("ProtocolMappingColumn".getBytes()));
+//			System.out.println("ProtocolMappingColumn中所有的值:"+jedis.hvals("ProtocolMappingColumn"));
+//			
+//			
+//			System.out.println("判断某个key是否存在:"+jedis.hexists("ProtocolMappingColumn".getBytes(), testKey));
+//			System.out.println("判断某个key的值:"+jedis.hget("ProtocolMappingColumn".getBytes(), testKey));
 		}catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -116,15 +163,16 @@ public class MemoryDataManagerTask {
 		int result=0;
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
-		Map<Integer,RPCDeviceInfo> rpcDeviceInfoMap= (HashMap<Integer,RPCDeviceInfo>)memoryDataMap.get("RPCDeviceInfo");
-		if(rpcDeviceInfoMap==null){
-			rpcDeviceInfoMap=new HashMap<Integer,RPCDeviceInfo>();
-		}
+//		Map<Integer,RPCDeviceInfo> rpcDeviceInfoMap= (HashMap<Integer,RPCDeviceInfo>)memoryDataMap.get("RPCDeviceInfo");
+//		if(rpcDeviceInfoMap==null){
+//			rpcDeviceInfoMap=new HashMap<Integer,RPCDeviceInfo>();
+//		}
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
         }
 		try { 
+			Jedis jedis = new Jedis();
 			String wellId=StringUtils.join(wellIdList, ",");
 			String sql="select t.id,t.orgid,t.orgName,t.wellname,t.devicetype,t.devicetypename,t.applicationscenarios,t.applicationScenariosName,t.signinid,t.slave,t.videourl,"
 					+ "t.instancecode,t.instancename,t.alarminstancecode,t.alarminstancename,t.displayinstancecode,t.displayinstancename,"
@@ -140,26 +188,26 @@ public class MemoryDataManagerTask {
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
-				RPCDeviceInfo rocDeviceInfo=new RPCDeviceInfo();
-				rocDeviceInfo.setId(rs.getInt(1));
-				rocDeviceInfo.setOrgId(rs.getInt(2));
-				rocDeviceInfo.setOrgName(rs.getString(3));
-				rocDeviceInfo.setWellName(rs.getString(4));
-				rocDeviceInfo.setDeviceType(rs.getInt(5));
-				rocDeviceInfo.setDeviceTypeName(rs.getString(6));
-				rocDeviceInfo.setApplicationScenarios(rs.getInt(7));
-				rocDeviceInfo.setApplicationScenariosName(rs.getString(8));
-				rocDeviceInfo.setSignInId(rs.getString(9));
-				rocDeviceInfo.setSlave(rs.getString(10));
-				rocDeviceInfo.setVideoUrl(rs.getString(11));
-				rocDeviceInfo.setInstanceCode(rs.getString(12));
-				rocDeviceInfo.setInstanceName(rs.getString(13));
-				rocDeviceInfo.setAlarmInstanceCode(rs.getString(14));
-				rocDeviceInfo.setAlarmInstanceName(rs.getString(15));
-				rocDeviceInfo.setDisplayInstanceCode(rs.getString(16));
-				rocDeviceInfo.setDisplayInstanceName(rs.getString(17));
-				rocDeviceInfo.setStatus(rs.getInt(18));
-				rocDeviceInfo.setStatusName(rs.getString(19));
+				RPCDeviceInfo rpcDeviceInfo=new RPCDeviceInfo();
+				rpcDeviceInfo.setId(rs.getInt(1));
+				rpcDeviceInfo.setOrgId(rs.getInt(2));
+				rpcDeviceInfo.setOrgName(rs.getString(3));
+				rpcDeviceInfo.setWellName(rs.getString(4));
+				rpcDeviceInfo.setDeviceType(rs.getInt(5));
+				rpcDeviceInfo.setDeviceTypeName(rs.getString(6));
+				rpcDeviceInfo.setApplicationScenarios(rs.getInt(7));
+				rpcDeviceInfo.setApplicationScenariosName(rs.getString(8));
+				rpcDeviceInfo.setSignInId(rs.getString(9));
+				rpcDeviceInfo.setSlave(rs.getString(10));
+				rpcDeviceInfo.setVideoUrl(rs.getString(11));
+				rpcDeviceInfo.setInstanceCode(rs.getString(12));
+				rpcDeviceInfo.setInstanceName(rs.getString(13));
+				rpcDeviceInfo.setAlarmInstanceCode(rs.getString(14));
+				rpcDeviceInfo.setAlarmInstanceName(rs.getString(15));
+				rpcDeviceInfo.setDisplayInstanceCode(rs.getString(16));
+				rpcDeviceInfo.setDisplayInstanceName(rs.getString(17));
+				rpcDeviceInfo.setStatus(rs.getInt(18));
+				rpcDeviceInfo.setStatusName(rs.getString(19));
 				String productionData=rs.getString(20);
 				String balanceInfo=rs.getString(21);
 				float stroke=rs.getFloat(22);
@@ -167,49 +215,51 @@ public class MemoryDataManagerTask {
 				if(StringManagerUtils.isNotNull(productionData)){
 					type = new TypeToken<RPCDeviceInfo>() {}.getType();
 					RPCDeviceInfo rpcProductionData=gson.fromJson(productionData, type);
-					rocDeviceInfo.setFluidPVT(rpcProductionData.getFluidPVT());
-					rocDeviceInfo.setReservoir(rpcProductionData.getReservoir());
-					rocDeviceInfo.setTubingString(rpcProductionData.getTubingString());
-					rocDeviceInfo.setCasingString(rpcProductionData.getCasingString());
-					rocDeviceInfo.setRodString(rpcProductionData.getRodString());
-					rocDeviceInfo.setPump(rpcProductionData.getPump());
-					rocDeviceInfo.setProduction(rpcProductionData.getProduction());
-					rocDeviceInfo.setManualIntervention(rpcProductionData.getManualIntervention());
+					rpcDeviceInfo.setFluidPVT(rpcProductionData.getFluidPVT());
+					rpcDeviceInfo.setReservoir(rpcProductionData.getReservoir());
+					rpcDeviceInfo.setTubingString(rpcProductionData.getTubingString());
+					rpcDeviceInfo.setCasingString(rpcProductionData.getCasingString());
+					rpcDeviceInfo.setRodString(rpcProductionData.getRodString());
+					rpcDeviceInfo.setPump(rpcProductionData.getPump());
+					rpcDeviceInfo.setProduction(rpcProductionData.getProduction());
+					rpcDeviceInfo.setManualIntervention(rpcProductionData.getManualIntervention());
 					if(pumpingModelId>0){
-						rocDeviceInfo.setPumpingUnit(new RPCCalculateRequestData.PumpingUnit());
-						rocDeviceInfo.getPumpingUnit().setManufacturer(rs.getString(24));
-						rocDeviceInfo.getPumpingUnit().setModel(rs.getString(25));
-						rocDeviceInfo.getPumpingUnit().setStroke(stroke);
-						rocDeviceInfo.getPumpingUnit().setCrankRotationDirection(rs.getString(26));
-						rocDeviceInfo.getPumpingUnit().setOffsetAngleOfCrank(rs.getFloat(27));
-						rocDeviceInfo.getPumpingUnit().setCrankGravityRadius(rs.getFloat(28));
-						rocDeviceInfo.getPumpingUnit().setSingleCrankWeight(rs.getFloat(29));
-						rocDeviceInfo.getPumpingUnit().setSingleCrankPinWeight(rs.getFloat(30));
-						rocDeviceInfo.getPumpingUnit().setStructuralUnbalance(rs.getFloat(31));
+						rpcDeviceInfo.setPumpingUnit(new RPCCalculateRequestData.PumpingUnit());
+						rpcDeviceInfo.getPumpingUnit().setManufacturer(rs.getString(24));
+						rpcDeviceInfo.getPumpingUnit().setModel(rs.getString(25));
+						rpcDeviceInfo.getPumpingUnit().setStroke(stroke);
+						rpcDeviceInfo.getPumpingUnit().setCrankRotationDirection(rs.getString(26));
+						rpcDeviceInfo.getPumpingUnit().setOffsetAngleOfCrank(rs.getFloat(27));
+						rpcDeviceInfo.getPumpingUnit().setCrankGravityRadius(rs.getFloat(28));
+						rpcDeviceInfo.getPumpingUnit().setSingleCrankWeight(rs.getFloat(29));
+						rpcDeviceInfo.getPumpingUnit().setSingleCrankPinWeight(rs.getFloat(30));
+						rpcDeviceInfo.getPumpingUnit().setStructuralUnbalance(rs.getFloat(31));
 						type = new TypeToken<RPCCalculateRequestData.Balance>() {}.getType();
 						RPCCalculateRequestData.Balance balance=gson.fromJson(balanceInfo, type);
 						if(balance!=null){
-							rocDeviceInfo.getPumpingUnit().setBalance(balance);
+							rpcDeviceInfo.getPumpingUnit().setBalance(balance);
 						}
 					}else{
-						rocDeviceInfo.setPumpingUnit(null);
+						rpcDeviceInfo.setPumpingUnit(null);
 					}
 				}else{
-					rocDeviceInfo.setFluidPVT(null);
-					rocDeviceInfo.setReservoir(null);
-					rocDeviceInfo.setRodString(null);
-					rocDeviceInfo.setTubingString(null);
-					rocDeviceInfo.setCasingString(null);
-					rocDeviceInfo.setPump(null);
-					rocDeviceInfo.setProduction(null);
-					rocDeviceInfo.setPumpingUnit(null);
-					rocDeviceInfo.setManualIntervention(null);
+					rpcDeviceInfo.setFluidPVT(null);
+					rpcDeviceInfo.setReservoir(null);
+					rpcDeviceInfo.setRodString(null);
+					rpcDeviceInfo.setTubingString(null);
+					rpcDeviceInfo.setCasingString(null);
+					rpcDeviceInfo.setPump(null);
+					rpcDeviceInfo.setProduction(null);
+					rpcDeviceInfo.setPumpingUnit(null);
+					rpcDeviceInfo.setManualIntervention(null);
 				}
-				rocDeviceInfo.setSortNum(32);
-				System.out.println(gson.toJson(rocDeviceInfo));
-				rpcDeviceInfoMap.put(rocDeviceInfo.getId(), rocDeviceInfo);
+				rpcDeviceInfo.setSortNum(32);
+				System.out.println(gson.toJson(rpcDeviceInfo));
+				String key=rpcDeviceInfo.getId()+"";
+				jedis.hset("RPCDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(rpcDeviceInfo));//哈希(Hash)
 			}
-			memoryDataMap.put("RPCDeviceInfo", rpcDeviceInfoMap);
+			jedis.disconnect();
+			jedis.close();
 		}catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -225,15 +275,12 @@ public class MemoryDataManagerTask {
 		int result=0;
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
-		Map<Integer,PCPDeviceInfo> pcpDeviceInfoMap= (HashMap<Integer,PCPDeviceInfo>)memoryDataMap.get("PCPDeviceInfo");
-		if(pcpDeviceInfoMap==null){
-			pcpDeviceInfoMap=new HashMap<Integer,PCPDeviceInfo>();
-		}
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
         }
 		try { 
+			Jedis jedis = new Jedis();
 			String wellId=StringUtils.join(wellIdList, ",");
 			String sql="select t.id,t.orgid,t.orgName,t.wellname,t.devicetype,t.devicetypename,t.applicationscenarios,t.applicationScenariosName,t.signinid,t.slave,t.videourl,"
 					+ "t.instancecode,t.instancename,t.alarminstancecode,t.alarminstancename,t.displayinstancecode,t.displayinstancename,"
@@ -247,55 +294,57 @@ public class MemoryDataManagerTask {
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
-				PCPDeviceInfo rocDeviceInfo=new PCPDeviceInfo();
-				rocDeviceInfo.setId(rs.getInt(1));
-				rocDeviceInfo.setOrgId(rs.getInt(2));
-				rocDeviceInfo.setOrgName(rs.getString(3));
-				rocDeviceInfo.setWellName(rs.getString(4));
-				rocDeviceInfo.setDeviceType(rs.getInt(5));
-				rocDeviceInfo.setDeviceTypeName(rs.getString(6));
-				rocDeviceInfo.setApplicationScenarios(rs.getInt(7));
-				rocDeviceInfo.setApplicationScenariosName(rs.getString(8));
-				rocDeviceInfo.setSignInId(rs.getString(9));
-				rocDeviceInfo.setSlave(rs.getString(10));
-				rocDeviceInfo.setVideoUrl(rs.getString(11));
-				rocDeviceInfo.setInstanceCode(rs.getString(12));
-				rocDeviceInfo.setInstanceName(rs.getString(13));
-				rocDeviceInfo.setAlarmInstanceCode(rs.getString(14));
-				rocDeviceInfo.setAlarmInstanceName(rs.getString(15));
-				rocDeviceInfo.setDisplayInstanceCode(rs.getString(16));
-				rocDeviceInfo.setDisplayInstanceName(rs.getString(17));
-				rocDeviceInfo.setStatus(rs.getInt(18));
-				rocDeviceInfo.setStatusName(rs.getString(19));
+				PCPDeviceInfo pcpDeviceInfo=new PCPDeviceInfo();
+				pcpDeviceInfo.setId(rs.getInt(1));
+				pcpDeviceInfo.setOrgId(rs.getInt(2));
+				pcpDeviceInfo.setOrgName(rs.getString(3));
+				pcpDeviceInfo.setWellName(rs.getString(4));
+				pcpDeviceInfo.setDeviceType(rs.getInt(5));
+				pcpDeviceInfo.setDeviceTypeName(rs.getString(6));
+				pcpDeviceInfo.setApplicationScenarios(rs.getInt(7));
+				pcpDeviceInfo.setApplicationScenariosName(rs.getString(8));
+				pcpDeviceInfo.setSignInId(rs.getString(9));
+				pcpDeviceInfo.setSlave(rs.getString(10));
+				pcpDeviceInfo.setVideoUrl(rs.getString(11));
+				pcpDeviceInfo.setInstanceCode(rs.getString(12));
+				pcpDeviceInfo.setInstanceName(rs.getString(13));
+				pcpDeviceInfo.setAlarmInstanceCode(rs.getString(14));
+				pcpDeviceInfo.setAlarmInstanceName(rs.getString(15));
+				pcpDeviceInfo.setDisplayInstanceCode(rs.getString(16));
+				pcpDeviceInfo.setDisplayInstanceName(rs.getString(17));
+				pcpDeviceInfo.setStatus(rs.getInt(18));
+				pcpDeviceInfo.setStatusName(rs.getString(19));
 				String productionData=rs.getString(20);
 				if(StringManagerUtils.isNotNull(productionData)){
 					type = new TypeToken<PCPDeviceInfo>() {}.getType();
 					PCPDeviceInfo pcpProductionData=gson.fromJson(productionData, type);
 					if(pcpProductionData!=null){
-						rocDeviceInfo.setFluidPVT(pcpProductionData.getFluidPVT());
-						rocDeviceInfo.setReservoir(pcpProductionData.getReservoir());
-						rocDeviceInfo.setTubingString(pcpProductionData.getTubingString());
-						rocDeviceInfo.setCasingString(pcpProductionData.getCasingString());
-						rocDeviceInfo.setRodString(pcpProductionData.getRodString());
-						rocDeviceInfo.setPump(pcpProductionData.getPump());
-						rocDeviceInfo.setProduction(pcpProductionData.getProduction());
-						rocDeviceInfo.setManualIntervention(pcpProductionData.getManualIntervention());
+						pcpDeviceInfo.setFluidPVT(pcpProductionData.getFluidPVT());
+						pcpDeviceInfo.setReservoir(pcpProductionData.getReservoir());
+						pcpDeviceInfo.setTubingString(pcpProductionData.getTubingString());
+						pcpDeviceInfo.setCasingString(pcpProductionData.getCasingString());
+						pcpDeviceInfo.setRodString(pcpProductionData.getRodString());
+						pcpDeviceInfo.setPump(pcpProductionData.getPump());
+						pcpDeviceInfo.setProduction(pcpProductionData.getProduction());
+						pcpDeviceInfo.setManualIntervention(pcpProductionData.getManualIntervention());
 					}
 				}else{
-					rocDeviceInfo.setFluidPVT(null);
-					rocDeviceInfo.setReservoir(null);
-					rocDeviceInfo.setRodString(null);
-					rocDeviceInfo.setTubingString(null);
-					rocDeviceInfo.setCasingString(null);
-					rocDeviceInfo.setPump(null);
-					rocDeviceInfo.setProduction(null);
-					rocDeviceInfo.setManualIntervention(null);
+					pcpDeviceInfo.setFluidPVT(null);
+					pcpDeviceInfo.setReservoir(null);
+					pcpDeviceInfo.setRodString(null);
+					pcpDeviceInfo.setTubingString(null);
+					pcpDeviceInfo.setCasingString(null);
+					pcpDeviceInfo.setPump(null);
+					pcpDeviceInfo.setProduction(null);
+					pcpDeviceInfo.setManualIntervention(null);
 				}
-				rocDeviceInfo.setSortNum(21);
-				System.out.println(gson.toJson(rocDeviceInfo));
-				pcpDeviceInfoMap.put(rocDeviceInfo.getId(), rocDeviceInfo);
+				pcpDeviceInfo.setSortNum(21);
+				System.out.println(gson.toJson(pcpDeviceInfo));
+				String key=pcpDeviceInfo.getId()+"";
+				jedis.hset("PCPDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(pcpDeviceInfo));//哈希(Hash)
 			}
-			memoryDataMap.put("PCPDeviceInfo", pcpDeviceInfoMap);
+			jedis.disconnect();
+			jedis.close();
 		}catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -304,22 +353,20 @@ public class MemoryDataManagerTask {
 	}
 	
 	public static void loadAcqInstanceOwnItemByGroupId(String groupId){
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
-		Map<String,ArrayList<AcqInstanceOwnItem>> acqInstanceOwnItemMap= (HashMap<String,ArrayList<AcqInstanceOwnItem>>)memoryDataMap.get("AcqInstanceOwnItem");
-		if(acqInstanceOwnItemMap==null){
-			acqInstanceOwnItemMap=new HashMap<String,ArrayList<AcqInstanceOwnItem>>();
-		}
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
         }
 		try {
-			String sql="select t5.code as instanceCode,t5.deviceType,t4.protocol,t.id as itemid,t.itemname,t.itemcode,t.bitindex,t.groupid,t3.unitid "
+			Jedis jedis = new Jedis();
+			String sql="select t5.code as instanceCode,t5.deviceType,t4.protocol,t3.unitid ,"
+					+ "t2.acq_cycle,t2.save_cycle,"
+					+ "t.id as itemid,t.itemname,t.itemcode,t.bitindex,t.groupid"
 					+ " from tbl_acq_item2group_conf t,tbl_acq_group_conf t2,tbl_acq_group2unit_conf t3,tbl_acq_unit_conf t4,tbl_protocolinstance t5 "
-					+ " where t.groupid=t2.id and t2.id=t3.groupid and t3.unitid=t4.id and t4.id=t5.unitid";
+					+ " where t.groupid=t2.id and t2.id=t3.groupid and t3.unitid=t4.id and t4.id=t5.unitid and t2.type=0";
 			if(StringManagerUtils.isNotNull(groupId)){
 				sql+=" and t.groupid="+groupId;
 			}
@@ -327,37 +374,59 @@ public class MemoryDataManagerTask {
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
-				AcqInstanceOwnItem acqInstanceOwnItem=new AcqInstanceOwnItem();
+				AcqInstanceOwnItem acqInstanceOwnItem=null;
+				if(jedis.hexists("AcqInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
+					byte[]byt=  jedis.hget("AcqInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
+					Object obj = SerializeObjectUnils.unserizlize(byt);
+					if (obj instanceof AcqInstanceOwnItem) {
+						acqInstanceOwnItem=(AcqInstanceOwnItem) obj;
+			         }
+				}else{
+					acqInstanceOwnItem=new AcqInstanceOwnItem();
+				}
+				
 				acqInstanceOwnItem.setInstanceCode(rs.getString(1));
 				acqInstanceOwnItem.setDeviceType(rs.getInt(2));
 				acqInstanceOwnItem.setProtocol(rs.getString(3));
-				acqInstanceOwnItem.setItemId(rs.getInt(4));
-				acqInstanceOwnItem.setItemName(rs.getString(5));
-				acqInstanceOwnItem.setItemCode(rs.getString(6));
-				acqInstanceOwnItem.setBitIndex(rs.getInt(7));
-				acqInstanceOwnItem.setGroupId(rs.getInt(8));
-				acqInstanceOwnItem.setUnitId(rs.getInt(9));
+				acqInstanceOwnItem.setUnitId(rs.getInt(4));
+				acqInstanceOwnItem.setAcqCycle(rs.getInt(5));
+				acqInstanceOwnItem.setSaveCycle(rs.getInt(6));
 				
-				ArrayList<AcqInstanceOwnItem> acqInstanceOwnItemList=acqInstanceOwnItemMap.get(acqInstanceOwnItem.getInstanceCode());
-				if(acqInstanceOwnItemList==null){
-					acqInstanceOwnItemList=new ArrayList<AcqInstanceOwnItem>();
+				if(acqInstanceOwnItem.getItemList()==null){
+					acqInstanceOwnItem.setItemList(new ArrayList<AcqItem>());
 				}
+				AcqItem acqItem=new AcqItem();
+				acqItem.setItemId(rs.getInt(7));
+				acqItem.setItemName(rs.getString(8));
+				acqItem.setItemCode(rs.getString(9));
+				acqItem.setBitIndex(rs.getInt(10));
+				acqItem.setGroupId(rs.getInt(11));
+				
 				int index=-1;
-				for(int i=0;i<acqInstanceOwnItemList.size();i++){
-					if(acqInstanceOwnItem.getItemId()==acqInstanceOwnItemList.get(i).getItemId()){
+				for(int i=0;i<acqInstanceOwnItem.getItemList().size();i++){
+					if(acqItem.getItemId()==acqInstanceOwnItem.getItemList().get(i).getItemId()){
 						index=i;
 						break;
 					}
 				}
 				if(index>=0){
-					acqInstanceOwnItemList.set(index, acqInstanceOwnItem);
+					acqInstanceOwnItem.getItemList().set(index, acqItem);
 				}else{
-					acqInstanceOwnItemList.add(acqInstanceOwnItem);
+					acqInstanceOwnItem.getItemList().add(acqItem);
 				}
 				
-				acqInstanceOwnItemMap.put(acqInstanceOwnItem.getInstanceCode(), acqInstanceOwnItemList);
+				String key=acqInstanceOwnItem.getInstanceCode();
+				jedis.hset("AcqInstanceOwnItem".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(acqInstanceOwnItem));//哈希(Hash)
 			}
-			memoryDataMap.put("AcqInstanceOwnItem", acqInstanceOwnItemMap);
+			
+//			byte[]byt=  jedis.hget("AcqInstanceOwnItem".getBytes(), "instance5".getBytes());
+//			Object obj = SerializeObjectUnils.unserizlize(byt);
+//			if (obj instanceof AcqInstanceOwnItem) {
+//				AcqInstanceOwnItem acqInstanceOwnItem=(AcqInstanceOwnItem) obj;
+//				System.out.println(new Gson().toJson(acqInstanceOwnItem));
+//	        }
+			jedis.disconnect();
+			jedis.close();
 		}catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -366,23 +435,19 @@ public class MemoryDataManagerTask {
 	}
 	
 	public static void loadDisplayInstanceOwnItemByGroupId(String unitId){
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
 		int result=0;
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
-		Map<String,ArrayList<DisplayInstanceOwnItem>> displayInstanceOwnItemMap= (HashMap<String,ArrayList<DisplayInstanceOwnItem>>)memoryDataMap.get("DisplayInstanceOwnItem");
-		if(displayInstanceOwnItemMap==null){
-			displayInstanceOwnItemMap=new HashMap<String,ArrayList<DisplayInstanceOwnItem>>();
-		}
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
         }
 		try {
-			String sql="select t3.code as instanceCode,t3.deviceType,t2.protocol,t.id as itemid,t.itemname,t.itemcode,t.bitindex,t.unitid,"
+			Jedis jedis = new Jedis();
+			String sql="select t3.code as instanceCode,t3.deviceType,t2.protocol,t.unitid,t.id as itemid,t.itemname,t.itemcode,t.bitindex,"
 					+ "t.showlevel,t.sort,t.realtimecurve,t.realtimecurvecolor,t.historycurve,t.historycurvecolor,t.type "
 					+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2,tbl_protocoldisplayinstance t3 "
 					+ " where t.unitid=t2.id and t2.id=t3.displayunitid";
@@ -393,42 +458,62 @@ public class MemoryDataManagerTask {
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
-				DisplayInstanceOwnItem displayInstanceOwnItem=new DisplayInstanceOwnItem();
+				DisplayInstanceOwnItem displayInstanceOwnItem=null;
+				if(jedis.hexists("DisplayInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
+					byte[]byt=  jedis.hget("DisplayInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
+					Object obj = SerializeObjectUnils.unserizlize(byt);
+					if (obj instanceof DisplayInstanceOwnItem) {
+						displayInstanceOwnItem=(DisplayInstanceOwnItem) obj;
+			         }
+				}else{
+					displayInstanceOwnItem=new DisplayInstanceOwnItem();
+				}
+				
 				displayInstanceOwnItem.setInstanceCode(rs.getString(1));
 				displayInstanceOwnItem.setDeviceType(rs.getInt(2));
 				displayInstanceOwnItem.setProtocol(rs.getString(3));
-				displayInstanceOwnItem.setItemId(rs.getInt(4));
-				displayInstanceOwnItem.setItemName(rs.getString(5));
-				displayInstanceOwnItem.setItemCode(rs.getString(6));
-				displayInstanceOwnItem.setBitIndex(rs.getInt(7));
-				displayInstanceOwnItem.setUnitId(rs.getInt(8));
-				displayInstanceOwnItem.setShowLevel(rs.getInt(9));
-				displayInstanceOwnItem.setSort(rs.getInt(10));
-				displayInstanceOwnItem.setRealtimeCurve(rs.getInt(11));
-				displayInstanceOwnItem.setRealtimeCurveColor(rs.getString(12));
-				displayInstanceOwnItem.setHistoryCurve(rs.getInt(13));
-				displayInstanceOwnItem.setHistoryCurveColor(rs.getString(14));
+				displayInstanceOwnItem.setUnitId(rs.getInt(4));
 				
-				ArrayList<DisplayInstanceOwnItem> displayInstanceOwnItemList=displayInstanceOwnItemMap.get(displayInstanceOwnItem.getInstanceCode());
-				if(displayInstanceOwnItemList==null){
-					displayInstanceOwnItemList=new ArrayList<DisplayInstanceOwnItem>();
+				if(displayInstanceOwnItem.getItemList()==null){
+					displayInstanceOwnItem.setItemList(new ArrayList<DisplayItem>());
 				}
+				DisplayItem displayItem=new DisplayItem();
+				displayItem.setUnitId(rs.getInt(4));
+				displayItem.setItemId(rs.getInt(5));
+				displayItem.setItemName(rs.getString(6));
+				displayItem.setItemCode(rs.getString(7));
+				displayItem.setBitIndex(rs.getInt(8));
+				displayItem.setShowLevel(rs.getInt(9));
+				displayItem.setSort(rs.getInt(10));
+				displayItem.setRealtimeCurve(rs.getInt(11));
+				displayItem.setRealtimeCurveColor(rs.getString(12));
+				displayItem.setHistoryCurve(rs.getInt(13));
+				displayItem.setHistoryCurveColor(rs.getString(14));
+				
 				int index=-1;
-				for(int i=0;i<displayInstanceOwnItemList.size();i++){
-					if(displayInstanceOwnItem.getItemId()==displayInstanceOwnItemList.get(i).getItemId()){
+				for(int i=0;i<displayInstanceOwnItem.getItemList().size();i++){
+					if(displayItem.getItemId()==displayInstanceOwnItem.getItemList().get(i).getItemId()){
 						index=i;
 						break;
 					}
 				}
 				if(index>=0){
-					displayInstanceOwnItemList.set(index, displayInstanceOwnItem);
+					displayInstanceOwnItem.getItemList().set(index, displayItem);
 				}else{
-					displayInstanceOwnItemList.add(displayInstanceOwnItem);
+					displayInstanceOwnItem.getItemList().add(displayItem);
 				}
 				
-				displayInstanceOwnItemMap.put(displayInstanceOwnItem.getInstanceCode(), displayInstanceOwnItemList);
+				String key=displayInstanceOwnItem.getInstanceCode();
+				jedis.hset("DisplayInstanceOwnItem".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(displayInstanceOwnItem));//哈希(Hash)
 			}
-			memoryDataMap.put("DisplayInstanceOwnItem", displayInstanceOwnItemMap);
+//			byte[]byt=  jedis.hget("DisplayInstanceOwnItem".getBytes(), "displayinstance1".getBytes());
+//			Object obj = SerializeObjectUnils.unserizlize(byt);
+//			if (obj instanceof DisplayInstanceOwnItem) {
+//				DisplayInstanceOwnItem displayInstanceOwnItem=(DisplayInstanceOwnItem) obj;
+//				System.out.println(new Gson().toJson(displayInstanceOwnItem));
+//	        }
+			jedis.disconnect();
+			jedis.close();
 		}catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -437,23 +522,20 @@ public class MemoryDataManagerTask {
 	}
 	
 	public static void loadAlarmInstanceOwnItemByGroupId(String unitId){
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
 		int result=0;
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
-		Map<String,ArrayList<AlarmInstanceOwnItem>> alarmInstanceOwnItemMap= (HashMap<String,ArrayList<AlarmInstanceOwnItem>>)memoryDataMap.get("AlarmInstanceOwnItem");
-		if(alarmInstanceOwnItemMap==null){
-			alarmInstanceOwnItemMap=new HashMap<String,ArrayList<AlarmInstanceOwnItem>>();
-		}
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
         }
 		try {
-			String sql="select t3.code as instanceCode,t3.deviceType,t.unitid,t2.protocol,t.id as itemId,t.itemname,t.itemcode,t.itemaddr,t.bitindex,"
+			Jedis jedis = new Jedis();
+			String sql="select t3.code as instanceCode,t3.deviceType,t.unitid,t2.protocol,"
+					+ " t.id as itemId,t.itemname,t.itemcode,t.itemaddr,t.bitindex,"
 					+ "t.value,t.upperlimit,t.lowerlimit,t.hystersis,t.delay,t.alarmlevel,t.alarmsign,t.type,t.issendmessage,t.issendmail "
 					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3 "
 					+ " where t.unitid=t2.id and t2.id=t3.alarmunitid";
@@ -464,51 +546,72 @@ public class MemoryDataManagerTask {
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
-				AlarmInstanceOwnItem alarmInstanceOwnItem=new AlarmInstanceOwnItem();
+				AlarmInstanceOwnItem alarmInstanceOwnItem=null;
+				if(jedis.hexists("AlarmInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
+					byte[]byt=  jedis.hget("AlarmInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
+					Object obj = SerializeObjectUnils.unserizlize(byt);
+					if (obj instanceof AlarmInstanceOwnItem) {
+						alarmInstanceOwnItem=(AlarmInstanceOwnItem) obj;
+			         }
+				}else{
+					alarmInstanceOwnItem=new AlarmInstanceOwnItem();
+				}
+				
 				alarmInstanceOwnItem.setInstanceCode(rs.getString(1));
 				alarmInstanceOwnItem.setDeviceType(rs.getInt(2));
 				alarmInstanceOwnItem.setUnitId(rs.getInt(3));
 				alarmInstanceOwnItem.setProtocol(rs.getString(4));
-				alarmInstanceOwnItem.setItemId(rs.getInt(5));
-				alarmInstanceOwnItem.setItemName(rs.getString(6));
-				alarmInstanceOwnItem.setItemCode(rs.getString(7));
-				alarmInstanceOwnItem.setItemAddr(rs.getInt(8));
-				alarmInstanceOwnItem.setBitIndex(rs.getInt(9));
 				
-				alarmInstanceOwnItem.setValue(rs.getFloat(10));
-				alarmInstanceOwnItem.setUpperLimit(rs.getFloat(11));
-				alarmInstanceOwnItem.setLowerLimit(rs.getFloat(12));
-				alarmInstanceOwnItem.setHystersis(rs.getFloat(13));
-				alarmInstanceOwnItem.setDelay(rs.getInt(14));
-				
-				alarmInstanceOwnItem.setAlarmLevel(rs.getInt(15));
-				alarmInstanceOwnItem.setAlarmSign(rs.getInt(16));
-				
-				alarmInstanceOwnItem.setType(rs.getInt(17));
-
-				alarmInstanceOwnItem.setIsSendMessage(rs.getInt(18));
-				alarmInstanceOwnItem.setIsSendMail(rs.getInt(19));
-				
-				ArrayList<AlarmInstanceOwnItem> alarmInstanceOwnItemList=alarmInstanceOwnItemMap.get(alarmInstanceOwnItem.getInstanceCode());
-				if(alarmInstanceOwnItemList==null){
-					alarmInstanceOwnItemList=new ArrayList<AlarmInstanceOwnItem>();
+				if(alarmInstanceOwnItem.getItemList()==null){
+					alarmInstanceOwnItem.setItemList(new ArrayList<AlarmItem>());
 				}
+				AlarmItem alarmItem=new AlarmItem();
+				alarmItem.setUnitId(rs.getInt(3));
+				alarmItem.setItemId(rs.getInt(5));
+				alarmItem.setItemName(rs.getString(6));
+				alarmItem.setItemCode(rs.getString(7));
+				alarmItem.setItemAddr(rs.getInt(8));
+				alarmItem.setBitIndex(rs.getInt(9));
+				
+				alarmItem.setValue(rs.getFloat(10));
+				alarmItem.setUpperLimit(rs.getFloat(11));
+				alarmItem.setLowerLimit(rs.getFloat(12));
+				alarmItem.setHystersis(rs.getFloat(13));
+				alarmItem.setDelay(rs.getInt(14));
+				
+				alarmItem.setAlarmLevel(rs.getInt(15));
+				alarmItem.setAlarmSign(rs.getInt(16));
+				
+				alarmItem.setType(rs.getInt(17));
+
+				alarmItem.setIsSendMessage(rs.getInt(18));
+				alarmItem.setIsSendMail(rs.getInt(19));
+				
 				int index=-1;
-				for(int i=0;i<alarmInstanceOwnItemList.size();i++){
-					if(alarmInstanceOwnItem.getItemId()==alarmInstanceOwnItemList.get(i).getItemId()){
+				for(int i=0;i<alarmInstanceOwnItem.getItemList().size();i++){
+					if(alarmItem.getItemId()==alarmInstanceOwnItem.getItemList().get(i).getItemId()){
 						index=i;
 						break;
 					}
 				}
 				if(index>=0){
-					alarmInstanceOwnItemList.set(index, alarmInstanceOwnItem);
+					alarmInstanceOwnItem.getItemList().set(index, alarmItem);
 				}else{
-					alarmInstanceOwnItemList.add(alarmInstanceOwnItem);
+					alarmInstanceOwnItem.getItemList().add(alarmItem);
 				}
 				
-				alarmInstanceOwnItemMap.put(alarmInstanceOwnItem.getInstanceCode(), alarmInstanceOwnItemList);
+				String key=alarmInstanceOwnItem.getInstanceCode();
+				jedis.hset("AlarmInstanceOwnItem".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(alarmInstanceOwnItem));//哈希(Hash)
+				
 			}
-			memoryDataMap.put("AlarmInstanceOwnItem", alarmInstanceOwnItemMap);
+//			byte[]byt=  jedis.hget("AlarmInstanceOwnItem".getBytes(), "alarminstance3".getBytes());
+//			Object obj = SerializeObjectUnils.unserizlize(byt);
+//			if (obj instanceof AlarmInstanceOwnItem) {
+//				AlarmInstanceOwnItem alarmInstanceOwnItem=(AlarmInstanceOwnItem) obj;
+//				System.out.println(new Gson().toJson(alarmInstanceOwnItem));
+//	        }
+			jedis.disconnect();
+			jedis.close();
 		}catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -517,68 +620,58 @@ public class MemoryDataManagerTask {
 	}
 	
 	public static void loadRPCCalculateItem(){
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
-		ArrayList<CalItem> rpcCalItemList= (ArrayList<CalItem>)memoryDataMap.get("rpcCalItemList");
-		if(rpcCalItemList==null){
-			rpcCalItemList=new ArrayList<CalItem>();
-		}
-		rpcCalItemList.add(new CalItem("工况","ResultCode",""));
-		rpcCalItemList.add(new CalItem("最大载荷","FMax","kN"));
-		rpcCalItemList.add(new CalItem("最小载荷","FMin","kN"));
-		rpcCalItemList.add(new CalItem("充满系数","FullnessCoefficient",""));
+		Jedis jedis = new Jedis();
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("工况","ResultCode","")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("最大载荷","FMax","kN")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("最小载荷","FMin","kN")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("充满系数","FullnessCoefficient","")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("理论排量","TheoreticalProduction","m^3/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产液量","LiquidVolumetricProduction","m^3/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产油量","OilVolumetricProduction","m^3/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产水量","WaterVolumetricProduction","m^3/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("柱塞有效冲程计算产量","AvailablePlungerStrokeVolumetricProduction","m^3/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("泵间隙漏失量","PumpClearanceLeakVolumetricProduction","m^3/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("游动凡尔漏失量","TVLeakVolumetricProduction","m^3/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("固定凡尔漏失量","SVLeakVolumetricProduction","m^3/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("气影响","GasInfluenceVolumetricProduction","m^3/d")));
 		
-		rpcCalItemList.add(new CalItem("理论排量","TheoreticalProduction","m^3/d"));
-		
-		rpcCalItemList.add(new CalItem("产液量","LiquidVolumetricProduction","m^3/d"));
-		rpcCalItemList.add(new CalItem("产油量","OilVolumetricProduction","m^3/d"));
-		rpcCalItemList.add(new CalItem("产水量","WaterVolumetricProduction","m^3/d"));
-		rpcCalItemList.add(new CalItem("柱塞有效冲程计算产量","AvailablePlungerStrokeVolumetricProduction","m^3/d"));
-		rpcCalItemList.add(new CalItem("泵间隙漏失量","PumpClearanceLeakVolumetricProduction","m^3/d"));
-		rpcCalItemList.add(new CalItem("游动凡尔漏失量","TVLeakVolumetricProduction","m^3/d"));
-		rpcCalItemList.add(new CalItem("固定凡尔漏失量","SVLeakVolumetricProduction","m^3/d"));
-		rpcCalItemList.add(new CalItem("气影响","GasInfluenceVolumetricProduction","m^3/d"));
-		
-		rpcCalItemList.add(new CalItem("产液量","LiquidWeightProduction","t/d"));
-		rpcCalItemList.add(new CalItem("产油量","OilWeightProduction","t/d"));
-		rpcCalItemList.add(new CalItem("产水量","WaterWeightProduction","t/d"));
-		rpcCalItemList.add(new CalItem("柱塞有效冲程计算产量","AvailablePlungerStrokeWeightProduction","t/d"));
-		rpcCalItemList.add(new CalItem("泵间隙漏失量","PumpClearanceLeakWeightProduction","t/d"));
-		rpcCalItemList.add(new CalItem("游动凡尔漏失量","TVLeakWeightProduction","t/d"));
-		rpcCalItemList.add(new CalItem("固定凡尔漏失量","SVLeakWeightProduction","t/d"));
-		rpcCalItemList.add(new CalItem("气影响","GasInfluenceWeightProduction","t/d"));
-		memoryDataMap.put("rpcCalItemList", rpcCalItemList);
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产液量","LiquidWeightProduction","t/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产油量","OilWeightProduction","t/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产水量","WaterWeightProduction","t/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("柱塞有效冲程计算产量","AvailablePlungerStrokeWeightProduction","t/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("泵间隙漏失量","PumpClearanceLeakWeightProduction","t/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("游动凡尔漏失量","TVLeakWeightProduction","t/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("固定凡尔漏失量","SVLeakWeightProduction","t/d")));
+		jedis.sadd("rpcCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("气影响","GasInfluenceWeightProduction","t/d")));
+		jedis.disconnect();
+		jedis.close();
 	}
 	
 	public static void loadPCPCalculateItem(){
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
-		ArrayList<CalItem> pcpCalItemList= (ArrayList<CalItem>)memoryDataMap.get("pcpCalItemList");
-		if(pcpCalItemList==null){
-			pcpCalItemList=new ArrayList<CalItem>();
-		}
-		pcpCalItemList.add(new CalItem("理论排量","TheoreticalProduction","m^3/d"));
-		pcpCalItemList.add(new CalItem("产液量","LiquidVolumetricProduction","m^3/d"));
-		pcpCalItemList.add(new CalItem("产油量","OilVolumetricProduction","m^3/d"));
-		pcpCalItemList.add(new CalItem("产水量","WaterVolumetricProduction","m^3/d"));
-		pcpCalItemList.add(new CalItem("产液量","LiquidWeightProduction","t/d"));
-		pcpCalItemList.add(new CalItem("产油量","OilWeightProduction","t/d"));
-		pcpCalItemList.add(new CalItem("产水量","WaterWeightProduction","t/d"));
-		memoryDataMap.put("pcpCalItemList", pcpCalItemList);
+		Jedis jedis = new Jedis();
+		
+		jedis.sadd("pcpCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("理论排量","TheoreticalProduction","m^3/d")));
+		jedis.sadd("pcpCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产液量","LiquidVolumetricProduction","m^3/d")));
+		jedis.sadd("pcpCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产油量","OilVolumetricProduction","m^3/d")));
+		jedis.sadd("pcpCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产水量","WaterVolumetricProduction","m^3/d")));
+		
+		jedis.sadd("pcpCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产液量","LiquidWeightProduction","t/d")));
+		jedis.sadd("pcpCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产油量","OilWeightProduction","t/d")));
+		jedis.sadd("pcpCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产水量","WaterWeightProduction","t/d")));
+		jedis.disconnect();
+		jedis.close();
 	}
 	
 	public static void loadRPCWorkType(){
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		Map<Integer,WorkType> rpcWorkTypeMap= (HashMap<Integer,WorkType>)memoryDataMap.get("RPCWorkType");
-		if(rpcWorkTypeMap==null){
-			rpcWorkTypeMap=new HashMap<Integer,WorkType>();
-		}
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
         }
 		try {
+			Jedis jedis = new Jedis();
 			String sql="select t.id,t.resultcode,t.resultname,t.resultdescription,t.optimizationsuggestion,t.remark "
 					+ " from TBL_RPC_WORKTYPE t order by t.resultcode";
 			pstmt = conn.prepareStatement(sql);
@@ -591,9 +684,11 @@ public class MemoryDataManagerTask {
 				workType.setResultDescription(rs.getString(4));
 				workType.setOptimizationSuggestion(rs.getString(5));
 				workType.setRemark(rs.getString(6));
-				rpcWorkTypeMap.put(workType.getResultCode(), workType);
+				String key=workType.getResultCode()+"";
+				jedis.hset("RPCWorkType".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(workType));//哈希(Hash)
 			}
-			memoryDataMap.put("RPCWorkType", rpcWorkTypeMap);
+			jedis.disconnect();
+			jedis.close();
 		}catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -601,80 +696,84 @@ public class MemoryDataManagerTask {
 		}
 	}
 	
-	public static void initAlarmStyle() throws IOException, SQLException{
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
-		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) memoryDataMap.get("AlarmShowStyle");
-		if(alarmShowStyle==null){
-			alarmShowStyle=new AlarmShowStyle();
-		}
-		String sql="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
-				+ " (select * from tbl_code t where t.itemcode='BJYS' ) v1,"
-				+ " (select * from tbl_code t where t.itemcode='BJQJYS' ) v2,"
-				+ " (select * from tbl_code t where t.itemcode='BJYSTMD' ) v3 "
-				+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
-				+ " order by v1.itemvalue ";
-		String sql2="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
-				+ " (select * from tbl_code t where t.itemcode='TXBJYS' ) v1,"
-				+ " (select * from tbl_code t where t.itemcode='TXBJQJYS' ) v2,"
-				+ " (select * from tbl_code t where t.itemcode='TXBJYSTMD' ) v3 "
-				+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
-				+ " order by v1.itemvalue ";
+	@SuppressWarnings("resource")
+	public static void initAlarmStyle(){
 		Connection conn = null;   
 		PreparedStatement pstmt = null;  
 		Statement stmt = null;  
 		ResultSet rs = null;
-		conn=OracleJdbcUtis.getConnection();
-		if(conn==null){
-			return ;
-		}
-		pstmt = conn.prepareStatement(sql); 
-		rs=pstmt.executeQuery();
-		while(rs.next()){
-			if(rs.getInt(1)==0){
-				alarmShowStyle.getData().getNormal().setValue(rs.getInt(1));
-				alarmShowStyle.getData().getNormal().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getData().getNormal().setColor(rs.getString(3));
-				alarmShowStyle.getData().getNormal().setOpacity(rs.getString(4));
-			}else if(rs.getInt(1)==100){
-				alarmShowStyle.getData().getFirstLevel().setValue(rs.getInt(1));
-				alarmShowStyle.getData().getFirstLevel().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getData().getFirstLevel().setColor(rs.getString(3));
-				alarmShowStyle.getData().getFirstLevel().setOpacity(rs.getString(4));
-			}else if(rs.getInt(1)==200){
-				alarmShowStyle.getData().getSecondLevel().setValue(rs.getInt(1));
-				alarmShowStyle.getData().getSecondLevel().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getData().getSecondLevel().setColor(rs.getString(3));
-				alarmShowStyle.getData().getSecondLevel().setOpacity(rs.getString(4));
-			}else if(rs.getInt(1)==300){
-				alarmShowStyle.getData().getThirdLevel().setValue(rs.getInt(1));
-				alarmShowStyle.getData().getThirdLevel().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getData().getThirdLevel().setColor(rs.getString(3));
-				alarmShowStyle.getData().getThirdLevel().setOpacity(rs.getString(4));
-			}	
-		}
-		pstmt = conn.prepareStatement(sql2); 
-		rs=pstmt.executeQuery();
-		while(rs.next()){
-			if(rs.getInt(1)==0){
-				alarmShowStyle.getComm().getOffline().setValue(rs.getInt(1));
-				alarmShowStyle.getComm().getOffline().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getComm().getOffline().setColor(rs.getString(3));
-				alarmShowStyle.getComm().getOffline().setOpacity(rs.getString(4));
-			}else if(rs.getInt(1)==1){
-				alarmShowStyle.getComm().getOnline().setValue(rs.getInt(1));
-				alarmShowStyle.getComm().getOnline().setBackgroundColor(rs.getString(2));
-				alarmShowStyle.getComm().getOnline().setColor(rs.getString(3));
-				alarmShowStyle.getComm().getOnline().setOpacity(rs.getString(4));
+		try {
+			Jedis jedis = new Jedis();
+			AlarmShowStyle alarmShowStyle=new AlarmShowStyle();
+			String sql="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
+					+ " (select * from tbl_code t where t.itemcode='BJYS' ) v1,"
+					+ " (select * from tbl_code t where t.itemcode='BJQJYS' ) v2,"
+					+ " (select * from tbl_code t where t.itemcode='BJYSTMD' ) v3 "
+					+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
+					+ " order by v1.itemvalue ";
+			String sql2="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
+					+ " (select * from tbl_code t where t.itemcode='TXBJYS' ) v1,"
+					+ " (select * from tbl_code t where t.itemcode='TXBJQJYS' ) v2,"
+					+ " (select * from tbl_code t where t.itemcode='TXBJYSTMD' ) v3 "
+					+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
+					+ " order by v1.itemvalue ";
+			
+			conn=OracleJdbcUtis.getConnection();
+			if(conn==null){
+				return ;
 			}
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				if(rs.getInt(1)==0){
+					alarmShowStyle.getData().getNormal().setValue(rs.getInt(1));
+					alarmShowStyle.getData().getNormal().setBackgroundColor(rs.getString(2));
+					alarmShowStyle.getData().getNormal().setColor(rs.getString(3));
+					alarmShowStyle.getData().getNormal().setOpacity(rs.getString(4));
+				}else if(rs.getInt(1)==100){
+					alarmShowStyle.getData().getFirstLevel().setValue(rs.getInt(1));
+					alarmShowStyle.getData().getFirstLevel().setBackgroundColor(rs.getString(2));
+					alarmShowStyle.getData().getFirstLevel().setColor(rs.getString(3));
+					alarmShowStyle.getData().getFirstLevel().setOpacity(rs.getString(4));
+				}else if(rs.getInt(1)==200){
+					alarmShowStyle.getData().getSecondLevel().setValue(rs.getInt(1));
+					alarmShowStyle.getData().getSecondLevel().setBackgroundColor(rs.getString(2));
+					alarmShowStyle.getData().getSecondLevel().setColor(rs.getString(3));
+					alarmShowStyle.getData().getSecondLevel().setOpacity(rs.getString(4));
+				}else if(rs.getInt(1)==300){
+					alarmShowStyle.getData().getThirdLevel().setValue(rs.getInt(1));
+					alarmShowStyle.getData().getThirdLevel().setBackgroundColor(rs.getString(2));
+					alarmShowStyle.getData().getThirdLevel().setColor(rs.getString(3));
+					alarmShowStyle.getData().getThirdLevel().setOpacity(rs.getString(4));
+				}	
+			}
+			pstmt = conn.prepareStatement(sql2); 
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				if(rs.getInt(1)==0){
+					alarmShowStyle.getComm().getOffline().setValue(rs.getInt(1));
+					alarmShowStyle.getComm().getOffline().setBackgroundColor(rs.getString(2));
+					alarmShowStyle.getComm().getOffline().setColor(rs.getString(3));
+					alarmShowStyle.getComm().getOffline().setOpacity(rs.getString(4));
+				}else if(rs.getInt(1)==1){
+					alarmShowStyle.getComm().getOnline().setValue(rs.getInt(1));
+					alarmShowStyle.getComm().getOnline().setBackgroundColor(rs.getString(2));
+					alarmShowStyle.getComm().getOnline().setColor(rs.getString(3));
+					alarmShowStyle.getComm().getOnline().setOpacity(rs.getString(4));
+				}
+			}
+			jedis.set("AlarmShowStyle".getBytes(), SerializeObjectUnils.serialize(alarmShowStyle));
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
-		
-		if(!memoryDataMap.containsKey("AlarmShowStyle")){
-			memoryDataMap.put("AlarmShowStyle", alarmShowStyle);
-		}
-		OracleJdbcUtis.closeDBConnection(conn, stmt, pstmt, rs);
 	}
 	
-	public static class CalItem{
+	public static class CalItem implements Serializable {
+		private static final long serialVersionUID = 1L;
 		public String name;
 		public String code;
 		public String unit;
@@ -708,6 +807,5 @@ public class MemoryDataManagerTask {
 		public void setCode(String code) {
 			this.code = code;
 		}
-		
 	}
 }

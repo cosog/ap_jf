@@ -1,16 +1,57 @@
 package com.cosog.model.calculate;
 
-public class AcqInstanceOwnItem {
+import java.io.Serializable;
+import java.util.List;
 
+public class AcqInstanceOwnItem  implements Serializable {
+	private static final long serialVersionUID = 1L;
 	public String instanceCode;
 	public int deviceType;
 	public String protocol;
-	public int itemId;
-	public String itemName;
-	public String itemCode;
-	public int bitIndex;
-	public int groupId;
 	public int unitId;
+	private int acqCycle;
+	private int saveCycle;
+	public List<AcqItem> itemList;
+	
+	public static class AcqItem implements Serializable {
+		private static final long serialVersionUID = 1L;
+		public int groupId;
+		public int itemId;
+		public String itemName;
+		public String itemCode;
+		public int bitIndex;
+		public int getGroupId() {
+			return groupId;
+		}
+		public void setGroupId(int groupId) {
+			this.groupId = groupId;
+		}
+		public int getItemId() {
+			return itemId;
+		}
+		public void setItemId(int itemId) {
+			this.itemId = itemId;
+		}
+		public String getItemName() {
+			return itemName;
+		}
+		public void setItemName(String itemName) {
+			this.itemName = itemName;
+		}
+		public String getItemCode() {
+			return itemCode;
+		}
+		public void setItemCode(String itemCode) {
+			this.itemCode = itemCode;
+		}
+		public int getBitIndex() {
+			return bitIndex;
+		}
+		public void setBitIndex(int bitIndex) {
+			this.bitIndex = bitIndex;
+		}
+	}
+	
 	public String getInstanceCode() {
 		return instanceCode;
 	}
@@ -29,40 +70,28 @@ public class AcqInstanceOwnItem {
 	public void setProtocol(String protocol) {
 		this.protocol = protocol;
 	}
-	public int getItemId() {
-		return itemId;
-	}
-	public void setItemId(int itemId) {
-		this.itemId = itemId;
-	}
-	public String getItemName() {
-		return itemName;
-	}
-	public void setItemName(String itemName) {
-		this.itemName = itemName;
-	}
-	public String getItemCode() {
-		return itemCode;
-	}
-	public void setItemCode(String itemCode) {
-		this.itemCode = itemCode;
-	}
-	public int getBitIndex() {
-		return bitIndex;
-	}
-	public void setBitIndex(int bitIndex) {
-		this.bitIndex = bitIndex;
-	}
-	public int getGroupId() {
-		return groupId;
-	}
-	public void setGroupId(int groupId) {
-		this.groupId = groupId;
-	}
 	public int getUnitId() {
 		return unitId;
 	}
 	public void setUnitId(int unitId) {
 		this.unitId = unitId;
+	}
+	public List<AcqItem> getItemList() {
+		return itemList;
+	}
+	public void setItemList(List<AcqItem> itemList) {
+		this.itemList = itemList;
+	}
+	public int getAcqCycle() {
+		return acqCycle;
+	}
+	public void setAcqCycle(int acqCycle) {
+		this.acqCycle = acqCycle;
+	}
+	public int getSaveCycle() {
+		return saveCycle;
+	}
+	public void setSaveCycle(int saveCycle) {
+		this.saveCycle = saveCycle;
 	}
 }

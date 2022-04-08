@@ -1,5 +1,6 @@
 package com.cosog.model.calculate;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,8 @@ import com.cosog.model.calculate.RPCCalculateRequestData.Pump;
 import com.cosog.model.calculate.RPCCalculateRequestData.Reservoir;
 import com.cosog.model.calculate.RPCCalculateRequestData.RodString;
 import com.cosog.model.calculate.RPCCalculateRequestData.TubingString;
-public class PCPCalculateRequestData {
+public class PCPCalculateRequestData  implements Serializable {
+	private static final long serialVersionUID = 1L;
 	
 	private String AKString;                                              //秘钥
 	private String WellName;                                              //井名
@@ -240,8 +242,8 @@ public class PCPCalculateRequestData {
 		RPM = rPM;
 	}
 	
-	public static class FluidPVT
-	{
+	public static class FluidPVT implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float CrudeOilDensity;
 
 	    private float WaterDensity;
@@ -276,8 +278,8 @@ public class PCPCalculateRequestData {
 	    }
 	}
 	
-	public static class Reservoir
-	{
+	public static class Reservoir implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float Depth;
 
 	    private float Temperature;
@@ -296,8 +298,8 @@ public class PCPCalculateRequestData {
 	    }
 	}
 	
-	public static class WellboreTrajectory
-	{
+	public static class WellboreTrajectory implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private List<Float> MeasuringDepth;
 
 	    private List<Float> DeviationAngle;
@@ -324,8 +326,8 @@ public class PCPCalculateRequestData {
 	    }
 	}
 	
-	public static class EveryRod
-	{
+	public static class EveryRod implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private int Type;
 
 	    private String Grade;
@@ -376,8 +378,8 @@ public class PCPCalculateRequestData {
 	    }
 	}
 	
-	public static class RodString
-	{
+	public static class RodString implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private List<EveryRod> EveryRod;
 
 	    public void setEveryRod(List<EveryRod> EveryRod){
@@ -388,8 +390,8 @@ public class PCPCalculateRequestData {
 	    }
 	}
 	
-	public static class EveryTubing
-	{
+	public static class EveryTubing implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private String Grade;
 
 	    private float length;
@@ -440,8 +442,8 @@ public class PCPCalculateRequestData {
 	    }
 	}
 	
-	public static class TubingString
-	{
+	public static class TubingString implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private List<EveryTubing> EveryTubing;
 
 	    public void setEveryTubing(List<EveryTubing> EveryTubing){
@@ -452,8 +454,8 @@ public class PCPCalculateRequestData {
 	    }
 	}
 
-	public static class Pump
-	{ 
+	public static class Pump implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float BarrelLength;//泵筒长
 	    
 	    private int BarrelSeries;//螺杆泵泵级数
@@ -488,8 +490,8 @@ public class PCPCalculateRequestData {
 		}
 	}
 	
-	public static class EveryEquipment
-	{
+	public static class EveryEquipment implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private int EquipmentType; //设备类型 1-尾管，2-滤管，3-锚定器，4-油气分离器
 
 	    private int Grade;//级别  1-H，2-J，3-K，4-N，5-L，6-C，7-T，8-P，9-Q
@@ -557,8 +559,8 @@ public class PCPCalculateRequestData {
 	}
 
 	
-	public static class TailTubingString
-	{
+	public static class TailTubingString implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private ArrayList<EveryEquipment> EveryEquipment;
 
 	    public void setEveryEquipment(ArrayList<EveryEquipment> EveryEquipment){
@@ -570,8 +572,8 @@ public class PCPCalculateRequestData {
 	}
 
 	
-	public static class EveryCasing
-	{
+	public static class EveryCasing implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float OutsideDiameter;//套管外径
 
 	    private float InsideDiameter;//套管内径
@@ -615,8 +617,8 @@ public class PCPCalculateRequestData {
 	}
 
 	
-	public static class CasingString
-	{
+	public static class CasingString implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private ArrayList<EveryCasing> EveryCasing;
 
 	    public void setEveryCasing(ArrayList<EveryCasing> EveryCasing){
@@ -628,8 +630,8 @@ public class PCPCalculateRequestData {
 	}
 
 	
-	public static class Production
-	{
+	public static class Production implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float WaterCut;//体积含水率
 
 	    private float ProductionGasOilRatio;//生产气油比
@@ -697,8 +699,8 @@ public class PCPCalculateRequestData {
 	}
 
 	
-	public static class ManualIntervention
-	{
+	public static class ManualIntervention implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private int Code;
 
 	    private float NetGrossRatio;
@@ -718,12 +720,10 @@ public class PCPCalculateRequestData {
 		public void setNetGrossRatio(float netGrossRatio) {
 			NetGrossRatio = netGrossRatio;
 		}
-
-	   
 	}
 	
-	public static class SystemEfficiency
-	{
+	public static class SystemEfficiency implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float MotorInputWatt;
 
 	    public void setMotorInputWatt(float MotorInputWatt){

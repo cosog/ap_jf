@@ -1,8 +1,11 @@
 package com.cosog.model.calculate;
 
+import java.io.Serializable;
+
 import com.cosog.model.calculate.PCPCalculateRequestData.*;
 
-public class PCPDeviceInfo {
+public class PCPDeviceInfo implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private Integer id;
 	private Integer orgId;
 	private String orgName;

@@ -1,6 +1,9 @@
 package com.cosog.model;
 
-public class DataMapping{
+import java.io.Serializable;
+
+public class DataMapping  implements Serializable{
+	private static final long serialVersionUID = 1L;
 	public Integer id;
 	public String name;
 	public String mappingColumn;
