@@ -1,22 +1,105 @@
 package com.cosog.model.calculate;
 
-public class DisplayInstanceOwnItem {
+import java.io.Serializable;
+import java.util.List;
+
+public class DisplayInstanceOwnItem implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	public String instanceCode;
 	public int deviceType;
 	public String protocol;
-	public int itemId;
-	public String itemName;
-	public String itemCode;
-	public int bitIndex;
 	public int unitId;
-	public int showLevel;
-	public int sort;
-	public int realtimeCurve;
-	public String realtimeCurveColor;
-	public int historyCurve;
-	public String historyCurveColor;
-	public int type;
+	public List<DisplayItem> itemList;
+	
+	public static class DisplayItem implements Serializable {
+		private static final long serialVersionUID = 1L;
+		public int itemId;
+		public String itemName;
+		public String itemCode;
+		public int bitIndex;
+		public int unitId;
+		public int showLevel;
+		public int sort;
+		public int realtimeCurve;
+		public String realtimeCurveColor;
+		public int historyCurve;
+		public String historyCurveColor;
+		public int type;
+		public int getItemId() {
+			return itemId;
+		}
+		public void setItemId(int itemId) {
+			this.itemId = itemId;
+		}
+		public String getItemName() {
+			return itemName;
+		}
+		public void setItemName(String itemName) {
+			this.itemName = itemName;
+		}
+		public String getItemCode() {
+			return itemCode;
+		}
+		public void setItemCode(String itemCode) {
+			this.itemCode = itemCode;
+		}
+		public int getBitIndex() {
+			return bitIndex;
+		}
+		public void setBitIndex(int bitIndex) {
+			this.bitIndex = bitIndex;
+		}
+		public int getUnitId() {
+			return unitId;
+		}
+		public void setUnitId(int unitId) {
+			this.unitId = unitId;
+		}
+		public int getShowLevel() {
+			return showLevel;
+		}
+		public void setShowLevel(int showLevel) {
+			this.showLevel = showLevel;
+		}
+		public int getSort() {
+			return sort;
+		}
+		public void setSort(int sort) {
+			this.sort = sort;
+		}
+		public int getRealtimeCurve() {
+			return realtimeCurve;
+		}
+		public void setRealtimeCurve(int realtimeCurve) {
+			this.realtimeCurve = realtimeCurve;
+		}
+		public String getRealtimeCurveColor() {
+			return realtimeCurveColor;
+		}
+		public void setRealtimeCurveColor(String realtimeCurveColor) {
+			this.realtimeCurveColor = realtimeCurveColor;
+		}
+		public int getHistoryCurve() {
+			return historyCurve;
+		}
+		public void setHistoryCurve(int historyCurve) {
+			this.historyCurve = historyCurve;
+		}
+		public String getHistoryCurveColor() {
+			return historyCurveColor;
+		}
+		public void setHistoryCurveColor(String historyCurveColor) {
+			this.historyCurveColor = historyCurveColor;
+		}
+		public int getType() {
+			return type;
+		}
+		public void setType(int type) {
+			this.type = type;
+		}
+		
+	}
 	
 	public String getInstanceCode() {
 		return instanceCode;
@@ -36,29 +119,11 @@ public class DisplayInstanceOwnItem {
 	public void setProtocol(String protocol) {
 		this.protocol = protocol;
 	}
-	public int getItemId() {
-		return itemId;
+	public List<DisplayItem> getItemList() {
+		return itemList;
 	}
-	public void setItemId(int itemId) {
-		this.itemId = itemId;
-	}
-	public String getItemName() {
-		return itemName;
-	}
-	public void setItemName(String itemName) {
-		this.itemName = itemName;
-	}
-	public String getItemCode() {
-		return itemCode;
-	}
-	public void setItemCode(String itemCode) {
-		this.itemCode = itemCode;
-	}
-	public int getBitIndex() {
-		return bitIndex;
-	}
-	public void setBitIndex(int bitIndex) {
-		this.bitIndex = bitIndex;
+	public void setItemList(List<DisplayItem> itemList) {
+		this.itemList = itemList;
 	}
 	public int getUnitId() {
 		return unitId;
@@ -66,46 +131,5 @@ public class DisplayInstanceOwnItem {
 	public void setUnitId(int unitId) {
 		this.unitId = unitId;
 	}
-	public int getShowLevel() {
-		return showLevel;
-	}
-	public void setShowLevel(int showLevel) {
-		this.showLevel = showLevel;
-	}
-	public int getSort() {
-		return sort;
-	}
-	public void setSort(int sort) {
-		this.sort = sort;
-	}
-	public int getRealtimeCurve() {
-		return realtimeCurve;
-	}
-	public void setRealtimeCurve(int realtimeCurve) {
-		this.realtimeCurve = realtimeCurve;
-	}
-	public String getRealtimeCurveColor() {
-		return realtimeCurveColor;
-	}
-	public void setRealtimeCurveColor(String realtimeCurveColor) {
-		this.realtimeCurveColor = realtimeCurveColor;
-	}
-	public int getHistoryCurve() {
-		return historyCurve;
-	}
-	public void setHistoryCurve(int historyCurve) {
-		this.historyCurve = historyCurve;
-	}
-	public String getHistoryCurveColor() {
-		return historyCurveColor;
-	}
-	public void setHistoryCurveColor(String historyCurveColor) {
-		this.historyCurveColor = historyCurveColor;
-	}
-	public int getType() {
-		return type;
-	}
-	public void setType(int type) {
-		this.type = type;
-	}
+	
 }

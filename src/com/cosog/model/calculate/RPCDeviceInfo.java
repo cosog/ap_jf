@@ -1,11 +1,13 @@
 package com.cosog.model.calculate;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.cosog.model.calculate.RPCCalculateResponseData;
 import com.cosog.model.calculate.RPCCalculateRequestData.*;
 
-public class RPCDeviceInfo {
+public class RPCDeviceInfo implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private Integer id;
 	private Integer orgId;
 	private String orgName;

@@ -1,9 +1,11 @@
 package com.cosog.model.calculate;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RPCCalculateRequestData {
+public class RPCCalculateRequestData implements Serializable {
+	private static final long serialVersionUID = 1L;
 	
 	private String WellName;
 
@@ -151,8 +153,9 @@ public class RPCCalculateRequestData {
         return this.ManualIntervention;
     }
 
-	public static class FluidPVT
-	{
+	public static class FluidPVT  implements Serializable {
+		private static final long serialVersionUID = 1L;
+		
 	    private float CrudeOilDensity;
 
 	    private float WaterDensity;
@@ -187,8 +190,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class Reservoir
-	{
+	public static class Reservoir implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float Depth;
 
 	    private float Temperature;
@@ -207,8 +210,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class WellboreTrajectory
-	{
+	public static class WellboreTrajectory implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private List<Float> MeasuringDepth;
 
 	    private List<Float> DeviationAngle;
@@ -235,8 +238,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class EveryRod
-	{
+	public static class EveryRod implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private int Type;
 
 	    private String Grade;
@@ -287,8 +290,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class RodString
-	{
+	public static class RodString implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private List<EveryRod> EveryRod;
 
 	    public void setEveryRod(List<EveryRod> EveryRod){
@@ -299,8 +302,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class EveryTubing
-	{
+	public static class EveryTubing implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private String Grade;
 
 	    private float length;
@@ -351,8 +354,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class TubingString
-	{
+	public static class TubingString implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private List<EveryTubing> EveryTubing;
 
 	    public void setEveryTubing(List<EveryTubing> EveryTubing){
@@ -363,8 +366,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class Pump
-	{
+	public static class Pump implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private String PumpType;
 
 	    private String BarrelType;
@@ -431,8 +434,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class EveryCasing
-	{
+	public static class EveryCasing implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private String Grade;
 
 	    private float OutsideDiameter;
@@ -483,8 +486,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class CasingString
-	{
+	public static class CasingString implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private List<EveryCasing> EveryCasing;
 
 	    public void setEveryCasing(List<EveryCasing> EveryCasing){
@@ -495,8 +498,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class EveryBalance
-	{
+	public static class EveryBalance implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float Weight;
 
 	    public void setWeight(float Weight){
@@ -507,8 +510,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class Balance
-	{
+	public static class Balance implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private List<EveryBalance> EveryBalance;
 
 	    public void setEveryBalance(List<EveryBalance> EveryBalance){
@@ -519,8 +522,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class Motor
-	{
+	public static class Motor implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private String Manufacturer;
 
 	    private String Model;
@@ -555,8 +558,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class PumpingUnit
-	{
+	public static class PumpingUnit implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private String Manufacturer;
 
 	    private String Model;
@@ -647,8 +650,8 @@ public class RPCCalculateRequestData {
 		}
 	}
 
-	public static class Production
-	{
+	public static class Production implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float WaterCut;
 
 	    private float ProductionGasOilRatio;
@@ -715,8 +718,8 @@ public class RPCCalculateRequestData {
 		}
 	}
 	
-	public static class FESDiagram
-	{
+	public static class FESDiagram implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private int Src;
 		
 		private String AcqTime;
@@ -783,8 +786,8 @@ public class RPCCalculateRequestData {
 		}
 	}
 	
-	public static class FeatureDB
-	{
+	public static class FeatureDB implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float ClosedGraphNumber;
 
 	    private float BandCoefficient;
@@ -1035,8 +1038,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 	
-	public static class SystemEfficiency
-	{
+	public static class SystemEfficiency implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private float MotorEfficiency;
 
 	    private float BeltEfficiency;
@@ -1079,8 +1082,8 @@ public class RPCCalculateRequestData {
 	    }
 	}
 
-	public static class ManualIntervention
-	{
+	public static class ManualIntervention implements Serializable {
+		private static final long serialVersionUID = 1L;
 	    private int Code;
 
 	    private float NetGrossRatio;
