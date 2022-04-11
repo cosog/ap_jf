@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import com.cosog.model.calculate.AlarmInstanceOwnItem;
 import com.cosog.model.calculate.AlarmInstanceOwnItem.AlarmItem;
 import com.cosog.model.calculate.DisplayInstanceOwnItem;
 import com.cosog.model.calculate.DisplayInstanceOwnItem.DisplayItem;
+import com.cosog.model.drive.ModbusProtocolConfig;
 import com.cosog.model.calculate.PCPDeviceInfo;
 import com.cosog.model.calculate.PCPProductionData;
 import com.cosog.model.calculate.RPCCalculateRequestData;
@@ -95,14 +97,43 @@ public class MemoryDataManagerTask {
 //            System.out.println("登录无法更新该用户缓存");
 //        }
 		
-//		loadAcqInstanceOwnItemByGroupId("");
+		loadAcqInstanceOwnItemByGroupId("");
 		loadAlarmInstanceOwnItemByGroupId("");
-//		loadDisplayInstanceOwnItemByGroupId("");
+		loadDisplayInstanceOwnItemByGroupId("");
 //		
-//		loadRPCDeviceInfo(null);
-//		loadPCPDeviceInfo(null);
+		loadRPCDeviceInfo(null);
+		loadPCPDeviceInfo(null);
 		jedis.disconnect();
 		jedis.close();
+	}
+	
+	@SuppressWarnings("static-access")
+	public static void loadProtocolConfig(){
+		StringManagerUtils.printLog("驱动加载开始");
+		StringManagerUtils stringManagerUtils=new StringManagerUtils();
+		Gson gson = new Gson();
+		String path="";
+		String protocolConfigData="";
+		java.lang.reflect.Type type=null;
+		//添加Modbus协议配置
+		path=stringManagerUtils.getFilePath("ModbusProtocolConfig.json","protocolConfig/");
+		protocolConfigData=stringManagerUtils.readFile(path,"utf-8");
+		type = new TypeToken<ModbusProtocolConfig>() {}.getType();
+		ModbusProtocolConfig modbusProtocolConfig=gson.fromJson(protocolConfigData, type);
+		if(modbusProtocolConfig==null){
+			modbusProtocolConfig=new ModbusProtocolConfig();
+			modbusProtocolConfig.setProtocol(new ArrayList<ModbusProtocolConfig.Protocol>());
+		}else if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()==null){
+			modbusProtocolConfig.setProtocol(new ArrayList<ModbusProtocolConfig.Protocol>());
+		}else if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()!=null&&modbusProtocolConfig.getProtocol().size()>0){
+			Collections.sort(modbusProtocolConfig.getProtocol());
+		}
+		
+		Jedis jedis = new Jedis();
+		jedis.set("modbusProtocolConfig".getBytes(), SerializeObjectUnils.serialize(modbusProtocolConfig));
+		jedis.disconnect();
+		jedis.close();
+		StringManagerUtils.printLog("驱动加载结束");
 	}
 	
 	public static void loadProtocolMappingColumn(){
@@ -163,10 +194,6 @@ public class MemoryDataManagerTask {
 		int result=0;
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
-//		Map<Integer,RPCDeviceInfo> rpcDeviceInfoMap= (HashMap<Integer,RPCDeviceInfo>)memoryDataMap.get("RPCDeviceInfo");
-//		if(rpcDeviceInfoMap==null){
-//			rpcDeviceInfoMap=new HashMap<Integer,RPCDeviceInfo>();
-//		}
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
@@ -770,6 +797,17 @@ public class MemoryDataManagerTask {
 		} finally{
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
+	}
+	
+	public static ModbusProtocolConfig getModbusProtocolConfig(){
+		Jedis jedis = new Jedis();
+		if(!jedis.exists("modbusProtocolConfig".getBytes())){
+			MemoryDataManagerTask.loadProtocolConfig();
+		}
+		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig)SerializeObjectUnils.unserizlize(jedis.get("modbusProtocolConfig".getBytes()));
+		jedis.disconnect();
+		jedis.close();
+		return modbusProtocolConfig;
 	}
 	
 	public static class CalItem implements Serializable {

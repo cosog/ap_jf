@@ -57,6 +57,7 @@ import com.cosog.service.acqUnit.AcquisitionUnitManagerService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.right.RoleManagerService;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.AcquisitionItemColumnsMap;
 import com.cosog.utils.BackModuleRecursion;
 import com.cosog.utils.Config;
@@ -67,10 +68,13 @@ import com.cosog.utils.EquipmentDriveMap;
 import com.cosog.utils.Page;
 import com.cosog.utils.PagingConstants;
 import com.cosog.utils.ParamUtils;
+import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
 import com.cosog.utils.TcpServerConfigMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import redis.clients.jedis.Jedis;
 
 /** <p>描述：角色维护管理Action</p>
  * 
@@ -221,12 +225,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 			String deviceType = ParamUtils.getParameter(request, "modbusProtocol.deviceType");
 			String sort = ParamUtils.getParameter(request, "modbusProtocol.sort");
 			
-			Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			if(equipmentDriveMap.size()==0){
-				EquipmentDriverServerTask.loadProtocolConfig();
-				equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			}
-			ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			boolean isAdd=true;
 			if(modbusProtocolConfig!=null){
 				for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
@@ -486,12 +485,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 		String result = "";
 		PrintWriter out = response.getWriter();
 		AcquisitionGroupItem acquisitionGroupItem = null;
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
-		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 		try {
 			String params = ParamUtils.getParameter(request, "params");
 			String matrixCodes = ParamUtils.getParameter(request, "matrixCodes");
@@ -557,6 +551,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 					}
 				}
 				EquipmentDriverServerTask.initInstanceConfigByAcqGroupId(groupId+"","update");
+				EquipmentDriverServerTask.initPumpDriverAcquisitionInfoConfigByAcqGroupId(groupId+"","update");
 			}
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
@@ -625,12 +620,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 		PrintWriter out = response.getWriter();
 		DisplayUnitItem displayUnitItem = null;
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
-		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 		try {
 			String params = ParamUtils.getParameter(request, "params");
 			String matrixCodes = ParamUtils.getParameter(request, "matrixCodes");
@@ -730,12 +720,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 		PrintWriter out = response.getWriter();
 		DisplayUnitItem displayUnitItem = null;
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
-		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 		try {
 			String params = ParamUtils.getParameter(request, "params");
 			String matrixCodes = ParamUtils.getParameter(request, "matrixCodes");
@@ -1357,12 +1342,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 			modbusDriverSaveData.dataFiltering();
 			String path=stringManagerUtils.getFilePath(fileName,"protocolConfig/");
 			
-			Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			if(equipmentDriveMap.size()==0){
-				EquipmentDriverServerTask.loadProtocolConfig();
-				equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			}
-			ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			if(modbusProtocolConfig==null){
 				modbusProtocolConfig=new ModbusProtocolConfig();
 				modbusProtocolConfig.setProtocol(new ArrayList<ModbusProtocolConfig.Protocol>());
@@ -1549,7 +1529,10 @@ public class AcquisitionUnitManagerController extends BaseController {
 				}
 			}
 			StringManagerUtils.writeFile(path,StringManagerUtils.jsonStringFormat(gson.toJson(modbusProtocolConfig)));
-			equipmentDriveMap.put("modbusProtocolConfig", modbusProtocolConfig);
+			Jedis jedis = new Jedis();
+			jedis.set("modbusProtocolConfig".getBytes(), SerializeObjectUnils.serialize(modbusProtocolConfig));
+			jedis.disconnect();
+			jedis.close();
 			if(StringManagerUtils.isNotNull(modbusDriverSaveData.getProtocolName())){
 				EquipmentDriverServerTask.initProtocolConfig(modbusDriverSaveData.getProtocolName(),"update");
 				EquipmentDriverServerTask.initInstanceConfigByProtocolName(modbusDriverSaveData.getProtocolName(),"update");

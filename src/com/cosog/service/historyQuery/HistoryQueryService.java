@@ -26,9 +26,12 @@ import com.cosog.utils.DataModelMap;
 import com.cosog.utils.EquipmentDriveMap;
 import com.cosog.utils.Page;
 import com.cosog.utils.ProtocolItemResolutionData;
+import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import redis.clients.jedis.Jedis;
 
 @Service("historyQueryService")
 public class HistoryQueryService<T> extends BaseService<T>  {
@@ -324,12 +327,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		ModbusProtocolConfig.Protocol protocol=null;
 		if(protocolList.size()>0){
 			String protocolName=protocolList.get(0).toString();
-			Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			if(equipmentDriveMap.size()==0){
-				EquipmentDriverServerTask.loadProtocolConfig();
-				equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			}
-			ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
 				if(modbusProtocolConfig.getProtocol().get(i).getDeviceType()==StringManagerUtils.stringToInteger(deviceType) 
 						&& protocolName.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(i).getName())){
@@ -511,12 +509,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		ModbusProtocolConfig.Protocol protocol=null;
 		if(protocolList.size()>0){
 			String protocolName=protocolList.get(0).toString();
-			Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			if(equipmentDriveMap.size()==0){
-				EquipmentDriverServerTask.loadProtocolConfig();
-				equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			}
-			ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
 				if(modbusProtocolConfig.getProtocol().get(i).getDeviceType()==StringManagerUtils.stringToInteger(deviceType) 
 						&& protocolName.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(i).getName())){
@@ -659,12 +652,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		for(int i=0;i<itemsList.size();i++){
 			Object[] itemsObj=(Object[]) itemsList.get(i);
 			String protocolName=itemsObj[1]+"";
-			Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			if(equipmentDriveMap.size()==0){
-				EquipmentDriverServerTask.loadProtocolConfig();
-				equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			}
-			ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			
 			ModbusProtocolConfig.Protocol protocol=null;
 			for(int j=0;j<modbusProtocolConfig.getProtocol().size();j++){
@@ -972,12 +960,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		List<String> curveColorList=new ArrayList<String>();
 		if(protocolList.size()>0){
 			protocolName=protocolList.get(0)+"";
-			Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			if(equipmentDriveMap.size()==0){
-				EquipmentDriverServerTask.loadProtocolConfig();
-				equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			}
-			ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()!=null){
 				for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
 					if(protocolName.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(i).getName())){
@@ -1104,12 +1087,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		List<String> curveColorList=new ArrayList<String>();
 		if(protocolList.size()>0){
 			protocolName=protocolList.get(0)+"";
-			Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			if(equipmentDriveMap.size()==0){
-				EquipmentDriverServerTask.loadProtocolConfig();
-				equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			}
-			ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()!=null){
 				for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
 					if(protocolName.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(i).getName())){

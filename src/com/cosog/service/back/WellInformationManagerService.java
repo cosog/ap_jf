@@ -33,13 +33,17 @@ import com.cosog.service.base.BaseService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.data.DataitemsInfoService;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.EquipmentDriveMap;
 import com.cosog.utils.LicenseMap;
 import com.cosog.utils.Page;
+import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
 import com.cosog.utils.LicenseMap.License;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import redis.clients.jedis.Jedis;
 
 @Service("wellInformationManagerService")
 public class WellInformationManagerService<T> extends BaseService<T> {
@@ -869,11 +873,6 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		String ddicName="rpcDeviceManager";
 		String tableName="viw_rpcdevice";
 		int protocolType=0;
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
 		String wellInformationName = (String) map.get("wellInformationName");
 		int deviceType=StringManagerUtils.stringToInteger((String) map.get("deviceType"));
 		String orgId = (String) map.get("orgId");
@@ -1009,11 +1008,6 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		String ddicName="rpcDeviceManager";
 		String tableName="viw_rpcdevice";
 		int protocolType=0;
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
 		String wellInformationName = (String) map.get("wellInformationName");
 		int deviceType=StringManagerUtils.stringToInteger((String) map.get("deviceType"));
 		String orgId = (String) map.get("orgId");
@@ -1124,11 +1118,6 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	public String getRPCDeviceInfoExportData(Map map,Page pager,int recordCount) {
 		StringBuffer result_json = new StringBuffer();
 		String tableName="viw_rpcdevice";
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
 		String wellInformationName = (String) map.get("wellInformationName");
 		int deviceType=StringManagerUtils.stringToInteger((String) map.get("deviceType"));
 		String orgId = (String) map.get("orgId");
@@ -1185,11 +1174,6 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		String ddicName="pcpDeviceManager";
 		String tableName="viw_pcpdevice";
 		int protocolType=1;
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
 		String wellInformationName = (String) map.get("wellInformationName");
 		int deviceType=StringManagerUtils.stringToInteger((String) map.get("deviceType"));
 		String orgId = (String) map.get("orgId");
@@ -1359,10 +1343,6 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		String ddicName="SMSDeviceManager";
 		String tableName="viw_smsdevice";
 		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
 		String wellInformationName = (String) map.get("wellInformationName");
 		String orgId = (String) map.get("orgId");
 		String WellInformation_Str = "";

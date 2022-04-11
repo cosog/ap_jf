@@ -37,9 +37,12 @@ import com.cosog.utils.DataModelMap;
 import com.cosog.utils.EquipmentDriveMap;
 import com.cosog.utils.JDBCUtil;
 import com.cosog.utils.OracleJdbcUtis;
+import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import redis.clients.jedis.Jedis;
 
 @Component("EquipmentDriverServerTask")  
 public class EquipmentDriverServerTask {
@@ -101,7 +104,7 @@ public class EquipmentDriverServerTask {
 		
 		
 
-		loadProtocolConfig();
+//		loadProtocolConfig();
 		initServerConfig();
 		initProtocolConfig("","");
 		initInstanceConfig(null,"");
@@ -200,32 +203,32 @@ public class EquipmentDriverServerTask {
 		}
 	}
 	
-	@SuppressWarnings("static-access")
-	public static void loadProtocolConfig(){
-		StringManagerUtils.printLog("驱动加载开始");
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		StringManagerUtils stringManagerUtils=new StringManagerUtils();
-		Gson gson = new Gson();
-		String path="";
-		String protocolConfigData="";
-		java.lang.reflect.Type type=null;
-		//添加Modbus协议配置
-		path=stringManagerUtils.getFilePath("ModbusProtocolConfig.json","protocolConfig/");
-		protocolConfigData=stringManagerUtils.readFile(path,"utf-8");
-		type = new TypeToken<ModbusProtocolConfig>() {}.getType();
-		ModbusProtocolConfig modbusProtocolConfig=gson.fromJson(protocolConfigData, type);
-		if(modbusProtocolConfig==null){
-			modbusProtocolConfig=new ModbusProtocolConfig();
-			modbusProtocolConfig.setProtocol(new ArrayList<ModbusProtocolConfig.Protocol>());
-		}else if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()==null){
-			modbusProtocolConfig.setProtocol(new ArrayList<ModbusProtocolConfig.Protocol>());
-		}else if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()!=null&&modbusProtocolConfig.getProtocol().size()>0){
-			Collections.sort(modbusProtocolConfig.getProtocol());
-		}
-		equipmentDriveMap.put("modbusProtocolConfig", modbusProtocolConfig);
-		
-		StringManagerUtils.printLog("驱动加载结束");
-	}
+//	@SuppressWarnings("static-access")
+//	public static void loadProtocolConfig(){
+//		StringManagerUtils.printLog("驱动加载开始");
+//		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
+//		StringManagerUtils stringManagerUtils=new StringManagerUtils();
+//		Gson gson = new Gson();
+//		String path="";
+//		String protocolConfigData="";
+//		java.lang.reflect.Type type=null;
+//		//添加Modbus协议配置
+//		path=stringManagerUtils.getFilePath("ModbusProtocolConfig.json","protocolConfig/");
+//		protocolConfigData=stringManagerUtils.readFile(path,"utf-8");
+//		type = new TypeToken<ModbusProtocolConfig>() {}.getType();
+//		ModbusProtocolConfig modbusProtocolConfig=gson.fromJson(protocolConfigData, type);
+//		if(modbusProtocolConfig==null){
+//			modbusProtocolConfig=new ModbusProtocolConfig();
+//			modbusProtocolConfig.setProtocol(new ArrayList<ModbusProtocolConfig.Protocol>());
+//		}else if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()==null){
+//			modbusProtocolConfig.setProtocol(new ArrayList<ModbusProtocolConfig.Protocol>());
+//		}else if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()!=null&&modbusProtocolConfig.getProtocol().size()>0){
+//			Collections.sort(modbusProtocolConfig.getProtocol());
+//		}
+//		equipmentDriveMap.put("modbusProtocolConfig", modbusProtocolConfig);
+//		
+//		StringManagerUtils.printLog("驱动加载结束");
+//	}
 	
 	@SuppressWarnings({ "static-access", "resource" })
 	public static int syncDataMappingTable(){
@@ -368,12 +371,7 @@ public class EquipmentDriverServerTask {
 	}
 	
 	public static int loadAcquisitionItemAddrColumns(){
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
-		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 		
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		Map<String,String> rpcDeviceAcquisitionItemColumns=new LinkedHashMap<String,String>();
@@ -400,12 +398,7 @@ public class EquipmentDriverServerTask {
 	}
 	
 	public static int loadAcquisitionItemNameColumns(){
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
-		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 		
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		Map<String,String> rpcDeviceAcquisitionItemColumns=new LinkedHashMap<String,String>();
@@ -471,12 +464,7 @@ public class EquipmentDriverServerTask {
 	}
 	
 	public static int loadAcquisitionItemAddrColumns(int deviceType){
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
-		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 		
 		Collections.sort(modbusProtocolConfig.getProtocol());
 		
@@ -501,12 +489,7 @@ public class EquipmentDriverServerTask {
 	}
 	
 	public static int loadAcquisitionItemNameColumns(int deviceType){
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
-		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 		
 		Collections.sort(modbusProtocolConfig.getProtocol());
 		
@@ -635,12 +618,7 @@ public class EquipmentDriverServerTask {
 		}
 		Map<String,String> loadedAcquisitionItemColumnsMap=acquisitionItemColumnsMap.get(columnsKey);
 		
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
-		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+		ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 		
 		Collections.sort(modbusProtocolConfig.getProtocol());
 		List<String> acquisitionItemColumns=new ArrayList<String>();
@@ -758,13 +736,8 @@ public class EquipmentDriverServerTask {
 		}
 		String initUrl=Config.getInstance().configFile.getDriverConfig().getProtocol();
 		Gson gson = new Gson();
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
+		ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 		InitProtocol initProtocol=null;
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-			equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		}
-		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
 		if(modbusProtocolConfig!=null){
 			if("delete".equalsIgnoreCase(method)){
 				initProtocol=new InitProtocol();
@@ -986,12 +959,7 @@ public class EquipmentDriverServerTask {
 			sql+= "group by t.name,t.acqprotocoltype,t.ctrlprotocoltype,t.signinprefix,t.signinsuffix,t.heartbeatprefix,t.heartbeatsuffix,"
 					+ "t2.protocol,t2.unit_code,t4.group_code,t4.acq_cycle,t4.type";
 			Map<String,InitInstance> InstanceListMap=new HashMap<String,InitInstance>();
-			Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			if(equipmentDriveMap.size()==0){
-				EquipmentDriverServerTask.loadProtocolConfig();
-				equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			}
-			ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			Connection conn = null;   
 			PreparedStatement pstmt = null;   
 			ResultSet rs = null;
@@ -1721,6 +1689,47 @@ public class EquipmentDriverServerTask {
 			}
 			if(wellList.size()>0){
 				initPCPDriverAcquisitionInfoConfig(wellList,method);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
+		return 0;
+	}
+	
+	@SuppressWarnings("resource")
+	public static int initPumpDriverAcquisitionInfoConfigByAcqGroupId(String groupId,String method){
+		List<String> wellList=new ArrayList<String>();
+		Connection conn = null;   
+		PreparedStatement pstmt = null;   
+		ResultSet rs = null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return -1;
+        }
+		try {
+			String sql="select t.id from tbl_rpcdevice t,tbl_protocolinstance t2,tbl_acq_unit_conf t3 ,tbl_acq_group2unit_conf t4,tbl_acq_group_conf t5 "
+					+ " where t.instancecode=t2.code and t2.unitid=t3.id and t3.id=t4.unitid and t4.groupid=t5.id and t5.id="+groupId;
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				wellList.add(rs.getString(1));
+			}
+			if(wellList.size()>0){
+				initRPCDriverAcquisitionInfoConfigById(wellList,method);
+			}
+			
+			wellList=new ArrayList<String>();
+			sql="select t.id from tbl_pcpdevice t,tbl_protocolinstance t2,tbl_acq_unit_conf t3 ,tbl_acq_group2unit_conf t4,tbl_acq_group_conf t5 "
+					+ " where t.instancecode=t2.code and t2.unitid=t3.id and t3.id=t4.unitid and t4.groupid=t5.id and t5.id="+groupId;
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				wellList.add(rs.getString(1));
+			}
+			if(wellList.size()>0){
+				initPCPDriverAcquisitionInfoConfigById(wellList,method);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -111,12 +111,8 @@ public class AlarmSetManagerService<T> extends BaseService<T> {
 		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		String json="[]";
 		if(alarmShowStyle==null){
-			try {
-				MemoryDataManagerTask.initAlarmStyle();
-				alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
-			} catch (IOException|SQLException e) {
-				json="[]";
-			}
+			MemoryDataManagerTask.initAlarmStyle();
+			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
 		}
 		json=new Gson().toJson(alarmShowStyle);
 		return json;

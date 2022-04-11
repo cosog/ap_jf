@@ -32,6 +32,7 @@ import com.cosog.service.base.CommonDataService;
 import com.cosog.service.data.DataitemsInfoService;
 import com.cosog.service.realTimeMonitoring.RealTimeMonitoringService;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.AcquisitionItemColumnsMap;
 import com.cosog.utils.Config;
 import com.cosog.utils.Constants;
@@ -39,6 +40,7 @@ import com.cosog.utils.EquipmentDriveMap;
 import com.cosog.utils.Page;
 import com.cosog.utils.PagingConstants;
 import com.cosog.utils.ParamUtils;
+import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
 import com.cosog.utils.UnixPwdCrypt;
 import com.google.gson.Gson;
@@ -46,6 +48,7 @@ import com.google.gson.reflect.TypeToken;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import redis.clients.jedis.Jedis;
 
 @Controller
 @RequestMapping("/realTimeMonitoringController")
@@ -372,12 +375,8 @@ public class RealTimeMonitoringController extends BaseController {
 			User user = (User) session.getAttribute("userLogin");
 			String url=Config.getInstance().configFile.getDriverConfig().getWriteAddr();
 			String readUrl=Config.getInstance().configFile.getDriverConfig().getReadAddr();
-			Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			if(equipmentDriveMap.size()==0){
-				EquipmentDriverServerTask.loadProtocolConfig();
-				equipmentDriveMap = EquipmentDriveMap.getMapObject();
-			}
-			ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig) equipmentDriveMap.get("modbusProtocolConfig");
+			
+			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			
 			ModbusProtocolConfig.Protocol protocol=null;
 			for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
