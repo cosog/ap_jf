@@ -34,6 +34,7 @@ import oracle.jdbc.OracleConnection;
 import oracle.jdbc.internal.OracleClob;
 import oracle.sql.BLOB;
 import oracle.sql.CLOB;
+import redis.clients.jedis.Jedis;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -79,11 +80,13 @@ import com.cosog.model.gridmodel.WellHandsontableChangedData;
 import com.cosog.model.gridmodel.WellProHandsontableChangedData;
 import com.cosog.model.gridmodel.WellringGridPanelData;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.EquipmentDriveMap;
 import com.cosog.utils.LicenseMap;
 import com.cosog.utils.OracleJdbcUtis;
 import com.cosog.utils.Page;
+import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
 import com.cosog.utils.LicenseMap.License;
 /**
@@ -929,10 +932,7 @@ public class BaseDao extends HibernateDaoSupport {
 		List<String> deleteWellList=new ArrayList<String>();
 		List<String> disableWellIdList=new ArrayList<String>();
 		List<WellHandsontableChangedData.Updatelist> collisionList=new ArrayList<WellHandsontableChangedData.Updatelist>();
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-		}
+		
 		License license=LicenseMap.getMapObject().get(LicenseMap.SN);
 		try {
 			cs = conn.prepareCall("{call prd_update_rpcdevice(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
@@ -1083,10 +1083,7 @@ public class BaseDao extends HibernateDaoSupport {
 		List<String> deleteWellList=new ArrayList<String>();
 		List<String> disableWellIdList=new ArrayList<String>();
 		List<WellHandsontableChangedData.Updatelist> collisionList=new ArrayList<WellHandsontableChangedData.Updatelist>();
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-		}
+		
 //		License license=LicenseMap.getMapObject().get(LicenseMap.SN);
 		try {
 			cs = conn.prepareCall("{call prd_save_rpcdevice(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
@@ -1227,10 +1224,7 @@ public class BaseDao extends HibernateDaoSupport {
 		List<String> deleteWellList=new ArrayList<String>();
 		List<String> disableWellIdList=new ArrayList<String>();
 		List<WellHandsontableChangedData.Updatelist> collisionList=new ArrayList<WellHandsontableChangedData.Updatelist>();
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-		}
+		
 		License license=LicenseMap.getMapObject().get(LicenseMap.SN);
 		try {
 			cs = conn.prepareCall("{call prd_update_pcpdevice(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
@@ -1381,10 +1375,6 @@ public class BaseDao extends HibernateDaoSupport {
 		List<String> deleteWellList=new ArrayList<String>();
 		List<String> disableWellIdList=new ArrayList<String>();
 		List<WellHandsontableChangedData.Updatelist> collisionList=new ArrayList<WellHandsontableChangedData.Updatelist>();
-		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-		if(equipmentDriveMap.size()==0){
-			EquipmentDriverServerTask.loadProtocolConfig();
-		}
 //		License license=LicenseMap.getMapObject().get(LicenseMap.SN);
 		try {
 			cs = conn.prepareCall("{call prd_save_pcpdevice(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
