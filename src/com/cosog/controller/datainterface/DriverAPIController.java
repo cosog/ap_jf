@@ -48,6 +48,7 @@ import com.cosog.model.calculate.RPCCalculateResponseData;
 import com.cosog.model.calculate.RPCDeviceInfo;
 import com.cosog.model.calculate.TimeEffResponseData;
 import com.cosog.model.calculate.TimeEffTotalResponseData;
+import com.cosog.model.calculate.UserInfo;
 import com.cosog.model.calculate.WellAcquisitionData;
 import com.cosog.model.drive.AcqGroup;
 import com.cosog.model.drive.AcqOnline;
@@ -645,6 +646,22 @@ public class DriverAPIController extends BaseController{
 			MemoryDataManagerTask.loadRPCCalculateItem();
 		}
 		
+		if(!jedis.exists("UserInfo".getBytes())){
+			MemoryDataManagerTask.loadUserInfo();
+		}
+		
+		if(!jedis.exists("AcqInstanceOwnItem".getBytes())){
+			MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId("");
+		}
+		
+		if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
+			MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+		}
+		
+		if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
+			MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+		}
+		
 		String deviceTableName="tbl_rpcdevice";
 		String realtimeTable="tbl_rpcacqdata_latest";
 		String historyTable="tbl_rpcacqdata_hist";
@@ -692,7 +709,7 @@ public class DriverAPIController extends BaseController{
 			}
 			
 			if(protocol!=null){
-				String lastSaveTime="";
+				String lastSaveTime=rpcDeviceInfo.getAcqTime();
 				int save_cycle=acqInstanceOwnItem.getSaveCycle();
 				String acqTime=StringManagerUtils.getCurrentTime("yyyy-MM-dd HH:mm:ss");
 				long timeDiff=StringManagerUtils.getTimeDifference(lastSaveTime, acqTime, "yyyy-MM-dd HH:mm:ss");
@@ -897,6 +914,8 @@ public class DriverAPIController extends BaseController{
 					String responseData=StringManagerUtils.sendPostMethod(url, gson.toJson(rpcCalculateRequestData),"utf-8");
 					type = new TypeToken<RPCCalculateResponseData>() {}.getType();
 					rpcCalculateResponseData=gson.fromJson(responseData, type);
+					
+					
 				}
 				
 				updateRealtimeData+=" where t.wellId= "+rpcDeviceInfo.getId();
@@ -994,7 +1013,10 @@ public class DriverAPIController extends BaseController{
 				
 				if(save || alarm){//如果满足保存周期或者有报警，保存数据
 					String saveRawDataSql="insert into "+rawDataTable+"(wellid,acqtime,rawdata)values("+rpcDeviceInfo.getId()+",to_date('"+acqTime+"','yyyy-mm-dd hh24:mi:ss'),'"+acqGroup.getRawData()+"' )";
-					
+					rpcDeviceInfo.setAcqTime(acqTime);
+					rpcDeviceInfo.setAcquisitionItemInfoList(acquisitionItemInfoList);
+					//更新内存数据
+					jedis.hset("RPCDeviceInfo".getBytes(), (rpcDeviceInfo.getId()+"").getBytes(), SerializeObjectUnils.serialize(rpcDeviceInfo));
 					commonDataService.getBaseDao().updateOrDeleteBySql(updateRealtimeData);
 					commonDataService.getBaseDao().updateOrDeleteBySql(insertHistSql);
 					commonDataService.getBaseDao().updateOrDeleteBySql(saveRawDataSql);
@@ -1007,121 +1029,120 @@ public class DriverAPIController extends BaseController{
 				
 				
 				//处理websocket推送
-				for (String websocketClientUser : websocketClientUserList) {
-					int items=3;
-					
-					String columns = "[";
-					for(int i=1;i<=items;i++){
-						columns+= "{ \"header\":\"名称\",\"dataIndex\":\"name"+i+"\",children:[] },"
-								+ "{ \"header\":\"变量\",\"dataIndex\":\"value"+i+"\",children:[] }";
-						if(i<items){
-							columns+=",";
-						}
-					}
-					columns+= "]";
-					
-					String userItemsSql="select "
-							+ " listagg(t6.itemname, ',') within group(order by t6.groupid,t6.id ) key"
-							+ " from "+deviceTableName+" t,tbl_protocolinstance t2,tbl_acq_unit_conf t3,tbl_acq_group2unit_conf t4,tbl_acq_group_conf t5,tbl_acq_item2group_conf t6 "
-							+ " where t.instancecode=t2.code and t2.unitid=t3.id and t3.id=t4.unitid and t4.groupid=t5.id and t5.id=t6.groupid "
-							+ " and t.signinid='"+acqGroup.getID()+"' and to_number(t.slave)="+acqGroup.getSlave()
-							+ " and decode(t6.showlevel,null,9999,t6.showlevel)>=( select r.showlevel from tbl_role r,tbl_user u where u.user_type=r.role_id and u.user_id='"+websocketClientUser+"' )"
-							+ " group by t.wellname,t3.protocol";
-					
-					List<?> userItemsList = commonDataService.findCallSql(userItemsSql);
-					if(userItemsList.size()>0&&userItemsList.get(0)!=null){
-						String[] userItems=userItemsList.get(0).toString().split(",");
-						
-						
-						webSocketSendData.append("{ \"success\":true,\"functionCode\":\""+functionCode+"\",\"wellName\":\""+rpcDeviceInfo.getWellName()+"\",\"acqTime\":\""+acqTime+"\",\"columns\":"+columns+",");
-						webSocketSendData.append("\"totalRoot\":[");
-						info_json.append("[");
-						webSocketSendData.append("{\"name1\":\""+rpcDeviceInfo.getWellName()+":"+acqTime+" 在线\"},");
-						//排序
-						Collections.sort(acquisitionItemInfoList);
-						//筛选
-						List<AcquisitionItemInfo> userAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
-						for(int j=0;j<acquisitionItemInfoList.size();j++){
-							if(StringManagerUtils.existOrNot(userItems, acquisitionItemInfoList.get(j).getRawTitle(), false)){
-								userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
+				if(displayInstanceOwnItem!=null){
+					for (String websocketClientUser : websocketClientUserList) {
+						if(jedis.hexists("UserInfo".getBytes(), websocketClientUser.getBytes())){
+							UserInfo userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), websocketClientUser.getBytes()));
+							
+							int items=3;
+							String columns = "[";
+							for(int i=1;i<=items;i++){
+								columns+= "{ \"header\":\"名称\",\"dataIndex\":\"name"+i+"\",children:[] },"
+										+ "{ \"header\":\"变量\",\"dataIndex\":\"value"+i+"\",children:[] }";
+								if(i<items){
+									columns+=",";
+								}
 							}
-						}
-						//插入排序间隔的空项
-						List<AcquisitionItemInfo> finalAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
-						for(int j=0;j<userAcquisitionItemInfoList.size();j++){
-							if(j>0&&userAcquisitionItemInfoList.get(j).getSort()<9999
-									&&userAcquisitionItemInfoList.get(j).getSort()-userAcquisitionItemInfoList.get(j-1).getSort()>1
-								){
-									int def=userAcquisitionItemInfoList.get(j).getSort()-userAcquisitionItemInfoList.get(j-1).getSort();
-									for(int k=1;k<def;k++){
-										AcquisitionItemInfo acquisitionItemInfo=new AcquisitionItemInfo();
-										finalAcquisitionItemInfoList.add(acquisitionItemInfo);
+							columns+= "]";
+							
+							webSocketSendData.append("{ \"success\":true,\"functionCode\":\""+functionCode+"\",\"wellName\":\""+rpcDeviceInfo.getWellName()+"\",\"acqTime\":\""+acqTime+"\",\"columns\":"+columns+",");
+							webSocketSendData.append("\"totalRoot\":[");
+							info_json.append("[");
+							webSocketSendData.append("{\"name1\":\""+rpcDeviceInfo.getWellName()+":"+acqTime+" 在线\"},");
+							//排序
+							Collections.sort(acquisitionItemInfoList);
+							//筛选
+							List<AcquisitionItemInfo> userAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
+							for(int j=0;j<acquisitionItemInfoList.size();j++){
+								for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
+									if(existDisplayItem(displayInstanceOwnItem.getItemList(), acquisitionItemInfoList.get(j).getRawTitle(), false)){
+										if(displayInstanceOwnItem.getItemList().get(k).getShowLevel()==0||displayInstanceOwnItem.getItemList().get(k).getShowLevel()>userInfo.getRoleShowLevel()){
+											userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
+										}
+										break;
 									}
 								}
-								finalAcquisitionItemInfoList.add(userAcquisitionItemInfoList.get(j));
-						}
-						
-						int row=1;
-						if(finalAcquisitionItemInfoList.size()%items==0){
-							row=finalAcquisitionItemInfoList.size()/items+1;
-						}else{
-							row=finalAcquisitionItemInfoList.size()/items+2;
-						}
-						
-						for(int j=1;j<row;j++){
-							webSocketSendData.append("{");
-							for(int k=0;k<items;k++){
-								int index=items*(j-1)+k;
-								String columnName="";
-								String value="";
-								String rawValue="";
-								String column="";
-								String columnDataType="";
-								String resolutionMode="";
-								String unit="";
-								int alarmLevel=0;
-								if(index<finalAcquisitionItemInfoList.size() 
-										&& StringManagerUtils.isNotNull(finalAcquisitionItemInfoList.get(index).getTitle())
-//										&&StringManagerUtils.existOrNot(userItems, finalAcquisitionItemInfoList.get(index).getRawTitle(),false)
-										){
-									columnName=finalAcquisitionItemInfoList.get(index).getTitle();
-									value=finalAcquisitionItemInfoList.get(index).getValue();
-									rawValue=finalAcquisitionItemInfoList.get(index).getRawValue();
-									column=finalAcquisitionItemInfoList.get(index).getColumn();
-									columnDataType=finalAcquisitionItemInfoList.get(index).getDataType();
-									resolutionMode=finalAcquisitionItemInfoList.get(index).getResolutionMode()+"";
-									alarmLevel=finalAcquisitionItemInfoList.get(index).getAlarmLevel();
-									unit=finalAcquisitionItemInfoList.get(index).getUnit();
+							}
+							//插入排序间隔的空项
+							List<AcquisitionItemInfo> finalAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
+							for(int j=0;j<userAcquisitionItemInfoList.size();j++){
+								if(j>0&&userAcquisitionItemInfoList.get(j).getSort()<9999
+										&&userAcquisitionItemInfoList.get(j).getSort()-userAcquisitionItemInfoList.get(j-1).getSort()>1
+									){
+										int def=userAcquisitionItemInfoList.get(j).getSort()-userAcquisitionItemInfoList.get(j-1).getSort();
+										for(int k=1;k<def;k++){
+											AcquisitionItemInfo acquisitionItemInfo=new AcquisitionItemInfo();
+											finalAcquisitionItemInfoList.add(acquisitionItemInfo);
+										}
+									}
+									finalAcquisitionItemInfoList.add(userAcquisitionItemInfoList.get(j));
+							}
+							
+							int row=1;
+							if(finalAcquisitionItemInfoList.size()%items==0){
+								row=finalAcquisitionItemInfoList.size()/items+1;
+							}else{
+								row=finalAcquisitionItemInfoList.size()/items+2;
+							}
+							
+							for(int j=1;j<row;j++){
+								webSocketSendData.append("{");
+								for(int k=0;k<items;k++){
+									int index=items*(j-1)+k;
+									String columnName="";
+									String value="";
+									String rawValue="";
+									String column="";
+									String columnDataType="";
+									String resolutionMode="";
+									String unit="";
+									int alarmLevel=0;
+									if(index<finalAcquisitionItemInfoList.size() 
+											&& StringManagerUtils.isNotNull(finalAcquisitionItemInfoList.get(index).getTitle())
+//											&&StringManagerUtils.existOrNot(userItems, finalAcquisitionItemInfoList.get(index).getRawTitle(),false)
+											){
+										columnName=finalAcquisitionItemInfoList.get(index).getTitle();
+										value=finalAcquisitionItemInfoList.get(index).getValue();
+										rawValue=finalAcquisitionItemInfoList.get(index).getRawValue();
+										column=finalAcquisitionItemInfoList.get(index).getColumn();
+										columnDataType=finalAcquisitionItemInfoList.get(index).getDataType();
+										resolutionMode=finalAcquisitionItemInfoList.get(index).getResolutionMode()+"";
+										alarmLevel=finalAcquisitionItemInfoList.get(index).getAlarmLevel();
+										unit=finalAcquisitionItemInfoList.get(index).getUnit();
+									}
+									
+									if(StringManagerUtils.isNotNull(columnName)&&StringManagerUtils.isNotNull(unit)){
+										webSocketSendData.append("\"name"+(k+1)+"\":\""+(columnName+"("+unit+")")+"\",");
+									}else{
+										webSocketSendData.append("\"name"+(k+1)+"\":\""+columnName+"\",");
+									}
+									webSocketSendData.append("\"value"+(k+1)+"\":\""+value+"\",");
+									info_json.append("{\"row\":"+j+",\"col\":"+k+",\"columnName\":\""+columnName+"\",\"column\":\""+column+"\",\"value\":\""+value+"\",\"rawValue\":\""+rawValue+"\",\"columnDataType\":\""+columnDataType+"\",\"resolutionMode\":\""+resolutionMode+"\",\"alarmLevel\":"+alarmLevel+"},");
 								}
-								
-								if(StringManagerUtils.isNotNull(columnName)&&StringManagerUtils.isNotNull(unit)){
-									webSocketSendData.append("\"name"+(k+1)+"\":\""+(columnName+"("+unit+")")+"\",");
-								}else{
-									webSocketSendData.append("\"name"+(k+1)+"\":\""+columnName+"\",");
+								if(webSocketSendData.toString().endsWith(",")){
+									webSocketSendData.deleteCharAt(webSocketSendData.length() - 1);
 								}
-								webSocketSendData.append("\"value"+(k+1)+"\":\""+value+"\",");
-								info_json.append("{\"row\":"+j+",\"col\":"+k+",\"columnName\":\""+columnName+"\",\"column\":\""+column+"\",\"value\":\""+value+"\",\"rawValue\":\""+rawValue+"\",\"columnDataType\":\""+columnDataType+"\",\"resolutionMode\":\""+resolutionMode+"\",\"alarmLevel\":"+alarmLevel+"},");
+								webSocketSendData.append("},");
 							}
 							if(webSocketSendData.toString().endsWith(",")){
 								webSocketSendData.deleteCharAt(webSocketSendData.length() - 1);
 							}
-							webSocketSendData.append("},");
+							
+							if(info_json.toString().endsWith(",")){
+								info_json.deleteCharAt(info_json.length() - 1);
+							}
+							info_json.append("]");
+							
+							webSocketSendData.append("]");
+							webSocketSendData.append(",\"CellInfo\":"+info_json);
+							webSocketSendData.append(",\"AlarmShowStyle\":"+new Gson().toJson(alarmShowStyle)+"}");
+							infoHandler().sendMessageToUser(websocketClientUser, webSocketSendData.toString());
 						}
-						if(webSocketSendData.toString().endsWith(",")){
-							webSocketSendData.deleteCharAt(webSocketSendData.length() - 1);
-						}
-						
-						if(info_json.toString().endsWith(",")){
-							info_json.deleteCharAt(info_json.length() - 1);
-						}
-						info_json.append("]");
-						
-						webSocketSendData.append("]");
-						webSocketSendData.append(",\"CellInfo\":"+info_json);
-						webSocketSendData.append(",\"AlarmShowStyle\":"+new Gson().toJson(alarmShowStyle)+"}");
-						infoHandler().sendMessageToUser(websocketClientUser, webSocketSendData.toString());
 					}
 				}
+				
+				jedis.disconnect();
+				jedis.close();
 			}
 		}
 		return null;
@@ -1135,6 +1156,23 @@ public class DriverAPIController extends BaseController{
                 match = acqInstanceOwnItemList.get(i).getItemName().equals(key);
             } else {
                 match = acqInstanceOwnItemList.get(i).getItemName().equalsIgnoreCase(key);
+            }
+            if (match) {
+                flag = true;
+                break;
+            }
+        }
+		return flag;
+	}
+	
+	public static boolean existDisplayItem(List<DisplayInstanceOwnItem.DisplayItem> displayItemList, String key, boolean caseSensitive ){
+		boolean flag = false;
+		for (int i = 0; i < displayItemList.size(); i++) {
+            boolean match = false;
+            if (caseSensitive) {
+                match = displayItemList.get(i).getItemName().equals(key);
+            } else {
+                match = displayItemList.get(i).getItemName().equalsIgnoreCase(key);
             }
             if (match) {
                 flag = true;
