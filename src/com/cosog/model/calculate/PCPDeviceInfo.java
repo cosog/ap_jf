@@ -1,8 +1,10 @@
 package com.cosog.model.calculate;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.cosog.model.calculate.PCPCalculateRequestData.*;
+import com.cosog.model.drive.AcquisitionItemInfo;
 
 public class PCPDeviceInfo implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -36,7 +38,8 @@ public class PCPDeviceInfo implements Serializable {
 	private CasingString CasingString;                                    //套管参数
 	private Production Production;                      //生产数据
 	private ManualIntervention ManualIntervention;                        //人工干预
-	
+	private String acqTime;
+	private List<AcquisitionItemInfo> acquisitionItemInfoList;
 	public Integer getId() {
 		return id;
 	}
@@ -334,5 +337,25 @@ public class PCPDeviceInfo implements Serializable {
 
 	public void setStatusName(String statusName) {
 		this.statusName = statusName;
+	}
+
+
+	public String getAcqTime() {
+		return acqTime;
+	}
+
+
+	public void setAcqTime(String acqTime) {
+		this.acqTime = acqTime;
+	}
+
+
+	public List<AcquisitionItemInfo> getAcquisitionItemInfoList() {
+		return acquisitionItemInfoList;
+	}
+
+
+	public void setAcquisitionItemInfoList(List<AcquisitionItemInfo> acquisitionItemInfoList) {
+		this.acquisitionItemInfoList = acquisitionItemInfoList;
 	}
 }

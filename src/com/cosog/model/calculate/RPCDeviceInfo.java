@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.cosog.model.calculate.RPCCalculateResponseData;
+import com.cosog.model.drive.AcquisitionItemInfo;
 import com.cosog.model.calculate.RPCCalculateRequestData.*;
 
 public class RPCDeviceInfo implements Serializable {
@@ -47,7 +48,9 @@ public class RPCDeviceInfo implements Serializable {
 
     private ManualIntervention ManualIntervention;
 
+	private String acqTime;
 	
+	private List<AcquisitionItemInfo> acquisitionItemInfoList;
 
 	public Integer getId() {
 		return id;
@@ -279,6 +282,22 @@ public class RPCDeviceInfo implements Serializable {
 
 	public void setStatusName(String statusName) {
 		this.statusName = statusName;
+	}
+
+	public String getAcqTime() {
+		return acqTime;
+	}
+
+	public void setAcqTime(String acqTime) {
+		this.acqTime = acqTime;
+	}
+
+	public List<AcquisitionItemInfo> getAcquisitionItemInfoList() {
+		return acquisitionItemInfoList;
+	}
+
+	public void setAcquisitionItemInfoList(List<AcquisitionItemInfo> acquisitionItemInfoList) {
+		this.acquisitionItemInfoList = acquisitionItemInfoList;
 	}
 
 }

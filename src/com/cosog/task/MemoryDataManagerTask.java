@@ -29,12 +29,14 @@ import com.cosog.model.calculate.AlarmInstanceOwnItem;
 import com.cosog.model.calculate.AlarmInstanceOwnItem.AlarmItem;
 import com.cosog.model.calculate.DisplayInstanceOwnItem;
 import com.cosog.model.calculate.DisplayInstanceOwnItem.DisplayItem;
+import com.cosog.model.drive.AcquisitionItemInfo;
 import com.cosog.model.drive.ModbusProtocolConfig;
 import com.cosog.model.calculate.PCPDeviceInfo;
 import com.cosog.model.calculate.PCPProductionData;
 import com.cosog.model.calculate.RPCCalculateRequestData;
 import com.cosog.model.calculate.RPCDeviceInfo;
 import com.cosog.model.calculate.RPCProductionData;
+import com.cosog.model.calculate.UserInfo;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.EquipmentDriveMap;
 import com.cosog.utils.MemoryDataMap;
@@ -98,8 +100,8 @@ public class MemoryDataManagerTask {
 //        }
 		
 		loadAcqInstanceOwnItemByGroupId("");
-		loadAlarmInstanceOwnItemByGroupId("");
-		loadDisplayInstanceOwnItemByGroupId("");
+		loadAlarmInstanceOwnItemByUnitId("");
+		loadDisplayInstanceOwnItemByUnitId("");
 //		
 		loadRPCDeviceInfo(null);
 		loadPCPDeviceInfo(null);
@@ -187,11 +189,9 @@ public class MemoryDataManagerTask {
 	}
 	
 	public static void loadRPCDeviceInfo(List<String> wellIdList){
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		int result=0;
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
 		conn=OracleJdbcUtis.getConnection();
@@ -281,6 +281,8 @@ public class MemoryDataManagerTask {
 					rpcDeviceInfo.setManualIntervention(null);
 				}
 				rpcDeviceInfo.setSortNum(32);
+				rpcDeviceInfo.setAcqTime("");
+				rpcDeviceInfo.setAcquisitionItemInfoList(new ArrayList<AcquisitionItemInfo>());
 				System.out.println(gson.toJson(rpcDeviceInfo));
 				String key=rpcDeviceInfo.getId()+"";
 				jedis.hset("RPCDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(rpcDeviceInfo));//哈希(Hash)
@@ -461,7 +463,7 @@ public class MemoryDataManagerTask {
 		}
 	}
 	
-	public static void loadDisplayInstanceOwnItemByGroupId(String unitId){
+	public static void loadDisplayInstanceOwnItemByUnitId(String unitId){
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
@@ -548,7 +550,7 @@ public class MemoryDataManagerTask {
 		}
 	}
 	
-	public static void loadAlarmInstanceOwnItemByGroupId(String unitId){
+	public static void loadAlarmInstanceOwnItemByUnitId(String unitId){
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
@@ -687,6 +689,59 @@ public class MemoryDataManagerTask {
 		jedis.sadd("pcpCalItemList".getBytes(), SerializeObjectUnils.serialize(new CalItem("产水量","WaterWeightProduction","t/d")));
 		jedis.disconnect();
 		jedis.close();
+	}
+	
+	public static void loadUserInfo(){
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		try {
+			Jedis jedis = new Jedis();
+			String sql="select t.user_no,t.user_id,t.user_name,t.user_pwd,t.user_orgid,"
+					+ " t.user_in_email,t.user_phone,"
+					+ " t.user_quicklogin,t.user_enable,t.user_receivesms,t.user_receivemail,"
+					+ " t.user_type,t2.role_name,t2.role_level,t2.role_flag,t2.showlevel "
+					+ " from tbl_user t,tbl_role t2 "
+					+ " where t.user_type=t2.role_id"
+					+ " order by t.user_no";
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				UserInfo userInfo=new UserInfo();
+				userInfo.setUserNo(rs.getInt(1));
+				userInfo.setUserId(rs.getString(2));
+				userInfo.setUserName(rs.getString(3));
+				userInfo.setUserPwd(rs.getString(4));
+				userInfo.setUserOrgid(rs.getInt(5));
+				
+				userInfo.setUserInEmail(rs.getString(6));
+				userInfo.setUserPhone(rs.getString(7));
+				
+				userInfo.setUserQuickLogin(rs.getInt(8));
+				userInfo.setUserEnable(rs.getInt(9));
+				userInfo.setReceiveSMS(rs.getInt(10));
+				userInfo.setReceiveMail(rs.getInt(11));
+				
+				userInfo.setUserType(rs.getInt(12));
+				userInfo.setRoleName(rs.getString(13));
+				userInfo.setRoleLevel(rs.getInt(14));
+				userInfo.setRoleFlag(rs.getInt(15));
+				userInfo.setRoleShowLevel(rs.getInt(16));
+				
+				String key=userInfo.getUserId();
+				jedis.hset("UserInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(userInfo));//哈希(Hash)
+			}
+			jedis.disconnect();
+			jedis.close();
+		}catch (SQLException e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
 	}
 	
 	public static void loadRPCWorkType(){
