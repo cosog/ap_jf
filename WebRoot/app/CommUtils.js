@@ -2406,3 +2406,620 @@ function getDateAndTime(dateStr,h,m,s){
 	}
 	return dateStr+' '+hStr+":"+mStr+':'+sStr;
 };
+
+
+/* 
+ * 在泵功图中提取光杆功图
+ */
+showFSDiagramFromPumpcard = function(result, divid) {
+	var pumpFSDiagramData=result.pumpFSDiagramData.split("#")[0];
+    var gt=pumpFSDiagramData.split(","); // 功图数据：功图点数，位移1，载荷1，位移2，载荷2...
+    var gtcount=(gt.length)/2; // 功图点数
+	var data = "["; // 功图data
+	var upStrokeData = "["; // 上冲程数据
+	var downStrokeData = "["; // 下冲程数据
+	var minIndex=0,maxIndex=0;
+	if(gt.length>0){
+		for (var i=0; i <= gt.length; i+=2) {
+			if(i<gt.length){
+				data += "[" + changeTwoDecimal(gt[i]) + ","+changeTwoDecimal(gt[i+1])+"],";
+			}else{
+				data += "[" + changeTwoDecimal(gt[0]) + ","+changeTwoDecimal(gt[1])+"]";//将图形的第一个点拼到最后面，使图形闭合
+			}
+		}
+		
+		var minPos=100,maxPos=0;
+		for (var i=0; i < gtcount; i++) {
+			if(parseFloat(gt[i*2])<parseFloat(minPos)){
+				minPos=changeTwoDecimal(gt[i*2]);
+				minIndex=i;
+			}
+			if(parseFloat(gt[i*2])>parseFloat(maxPos)){
+				maxPos=changeTwoDecimal(gt[i*2]);
+				maxIndex=i;
+			}
+		}
+		if(minIndex<=maxIndex){//如果最小值索引小于最大值索引
+			for(var i=minIndex;i<=maxIndex;i++){
+				upStrokeData += "[" + changeTwoDecimal(gt[i*2]) + ","+changeTwoDecimal(gt[i*2+1])+"]";
+				if(i<maxIndex){
+					upStrokeData+=",";
+				}
+			}
+			var upStrokeCount=maxIndex-minIndex+1;//上冲程点数
+			var downStrokeCount=gtcount-upStrokeCount;
+			for(var i=0;i<downStrokeCount+2;i++){
+				var index=i+maxIndex;
+				if(index>(gtcount-1)){
+					index=index-gtcount;
+				}
+				downStrokeData += "[" + changeTwoDecimal(gt[index*2]) + ","+changeTwoDecimal(gt[index*2+1])+"]";
+				if(i<downStrokeCount+1){
+					downStrokeData+=",";
+				}
+			}
+		}else{//如果最小值索引大于最大值索引
+			for(var i=maxIndex;i<=minIndex;i++){
+				downStrokeData += "[" + changeTwoDecimal(gt[i*2]) + ","+changeTwoDecimal(gt[i*2+1])+"]";
+				if(i<minIndex){
+					downStrokeData+=",";
+				}
+			}
+			var downStrokeCount=minIndex-maxIndex+1;//下冲程点数
+			var upStrokeCount=gtcount-downStrokeCount;
+			for(var i=0;i<upStrokeCount+2;i++){
+				var index=i+minIndex;
+				if(index>(gtcount-1)){
+					index=index-gtcount;
+				}
+				upStrokeData += "[" + changeTwoDecimal(gt[index*2]) + ","+(gt[index*2+1])+"]";
+				if(i<upStrokeCount+1){
+					upStrokeData+=",";
+				}
+			}
+		}
+	}
+	data+="]";
+	upStrokeData+="]";
+	downStrokeData+="]";
+	
+	
+	var pointdata = Ext.JSON.decode(data);
+	var upStrokePointdata = Ext.JSON.decode(upStrokeData);
+	var downStrokePointdata = Ext.JSON.decode(downStrokeData);
+	initSurfaceCardChart(pointdata,result, divid);
+	return false;
+}
+
+function initSurfaceCardChart(pointdata, gtdata, divid) {
+	var wellName=gtdata.wellName;         // 井名
+	var acqTime=gtdata.acqTime;     // 采集时间
+	var upperLoadLine=gtdata.upperLoadLine;   // 理论上载荷
+	var lowerLoadLine=gtdata.lowerLoadLine;   // 理论下载荷
+	var pointCount=gtdata.pointCount;//曲线点数
+	var fmax=gtdata.fmax;     // 最大载荷
+	var fmin=gtdata.fmin;     // 最小载荷
+	var stroke=gtdata.stroke;       // 冲程
+	var spm=gtdata.spm;       // 冲次
+	var liquidProduction=gtdata.liquidProduction;     // 日产液量
+	var resultName=gtdata.resultName;     // 工况类型
+	var xtext='<span style="text-align:center;">'+cosog.string.position+'<br />';
+	var productionUnitStr='t/d';
+    if(productionUnit!=0){
+    	productionUnitStr='m^3/d';
+    }
+    xtext+='点数:'+pointCount+"";
+    xtext+=' 最大载荷:'+fmax+'kN';
+    xtext+=' 最小载荷:'+fmin+'kN';
+    xtext+=' 冲程:'+stroke+'m';
+    xtext+=' 冲次:'+spm+'/min';
+    xtext+=' 产液:'+liquidProduction+productionUnitStr;
+    xtext+=' 工况:'+resultName;
+    var upperlimit=parseFloat(fmax)+10;
+    if(parseFloat(upperLoadLine)>=parseFloat(fmax)){
+    	upperlimit=parseFloat(upperLoadLine)+10;
+    }
+    if(isNaN(upperlimit)){
+    	upperlimit=null;
+    }
+	mychart = new Highcharts.Chart({
+				chart: {
+		            renderTo : divid,
+		            zoomType: 'xy',
+		            borderWidth : 0,
+		            reflow: true
+		        },                                                                                   
+		        title: {
+		        	text: cosog.string.FSDiagram  // 光杆功图                        
+		        },                                                                                   
+		        subtitle: {
+		        	text: wellName+' ['+acqTime+']'                                                      
+		        },
+		        credits: {
+		            enabled: false
+		        },
+		        xAxis: {                                                                           
+		            title: {                                                                         
+		                text: xtext,    // 坐标+显示文字
+//		                align:'low',
+		                useHTML: false,
+		                margin:5,
+//                        offset: 10,
+                        style: {
+//                            color: '#000',
+//                            fontWeight: 'normal',
+                        	fontSize: '12px',
+                            padding: '5px'
+                        }
+		            },                                                                               
+		            startOnTick: false,      //是否强制轴线在标线处开始
+		            endOnTick: false,        //是否强制轴线在标线处结束                                                        
+		            showLastLabel: true,
+		            allowDecimals: false,    // 刻度值是否为小数
+//		            min:0,
+		            minorTickInterval: ''    // 最小刻度间隔
+		        },                                                                                   
+		        yAxis: {                                                                             
+		            title: {                                                                         
+		                text: cosog.string.load   // 载荷（kN） 
+                    },
+		            allowDecimals: false,    // 刻度值是否为小数
+		            minorTickInterval: '',   // 不显示次刻度线
+		            min: 0                  // 最小值
+		        },
+		        exporting:{
+                    enabled:true,    
+                    filename:wellName+'-'+acqTime+'-光杆功图',    
+                    url:context + '/exportHighcharsPicController/export'
+               },
+		        legend: {                                                                            
+		            layout: 'vertical',                                                              
+		            align: 'left',                                                                   
+		            verticalAlign: 'top',                                                            
+		            x: 100,                                                                          
+		            y: 70,                                                                           
+		            floating: true,                                                                  
+		            backgroundColor: '#FFFFFF',                                                      
+		            borderWidth: 1  ,
+		            enabled: false
+		        },                                                                                   
+		        plotOptions: {                                                                       
+		            scatter: {                                                                       
+		                marker: {                                                                    
+		                    radius: 0,                                                               
+		                    states: {                                                                
+		                        hover: {                                                             
+		                            enabled: true,                                                   
+		                            lineColor: '#646464'                                    
+		                        }                                                                    
+		                    }                                                                        
+		                },                                                                           
+		                states: {                                                                    
+		                    hover: {                                                                 
+		                        marker: {                                                            
+		                            enabled: false                                                   
+		                        }                                                                    
+		                    }                                                                        
+		                },                                                                           
+		                tooltip: {                                                                   
+		                    headerFormat: '',                                
+		                    pointFormat: '{point.x},{point.y}'                                
+		                }                                                                            
+		            }                                                                                
+		        }, 
+		        series: [{
+		    		type: 'line',
+		    		color: '#d12',
+		    		dashStyle: 'Dash', //Dash,Dot,Solid,shortdash,默认Solid
+		    		lineWidth:2,
+		    		name: '理论上载荷线',
+		    		data: [[0, parseFloat(upperLoadLine)], [parseFloat(stroke), parseFloat(upperLoadLine)]],
+		    		marker: {
+		    			enabled: false
+		    		},
+		    		states: {
+		    			hover: {
+		    				lineWidth: 0
+		    			}
+		    		},
+		    		enableMouseTracking: true
+		    	},{
+		    		type: 'line',
+		    		color: '#d12',
+		    		dashStyle: 'Dash', //Dash,Dot,Solid,shortdash,默认Solid
+		    		lineWidth:2,
+		    		name: '理论下载荷线',
+		    		data: [[0, parseFloat(lowerLoadLine)], [parseFloat(stroke), parseFloat(lowerLoadLine)]],
+		    		marker: {
+		    			enabled: false
+		    		},
+		    		states: {
+		    			hover: {
+		    				lineWidth: 0
+		    			}
+		    		},
+		    		enableMouseTracking: true
+		    	},{                                                                           
+		            name: '',   
+		            type: 'scatter',     // 散点图   
+		            color: '#00ff00',   
+		            lineWidth:3,
+		            data:  pointdata                                                                                  
+		        }]
+	});
+}
+
+showRodPress = function(result, divid) {
+	var wellName=result.wellName;                        // 井名
+	var acqTime=result.acqTime;                    // 时间
+	var rodStressRatio1=changeTwoDecimal(parseFloat(result.rodStressRatio1)*100);              // 一级应力百分比
+	var rodStressRatio2=changeTwoDecimal(parseFloat(result.rodStressRatio2)*100);              // 二级应力百分比
+	var rodStressRatio3=changeTwoDecimal(parseFloat(result.rodStressRatio3)*100);              // 三级应力百分比
+	var rodStressRatio4=changeTwoDecimal(parseFloat(result.rodStressRatio4)*100);              // 四级应力百分比
+	var yjg=cosog.string.rod1;   // 一级杆
+	var ejg=cosog.string.rod2;   // 二级杆
+	var sjg=cosog.string.rod3;   // 三级杆
+	var sijg=cosog.string.rod4;   // 四级杆
+	var xdata = "[";
+	var ydata = "[";
+	if(rodStressRatio1>0){
+		xdata +="'" + yjg + "'" ;
+		ydata +=rodStressRatio1 ;
+		if(rodStressRatio2>0){
+			xdata +=",'" + ejg + "'" ;
+			ydata +="," + rodStressRatio2 ;
+			if(rodStressRatio3>0){
+				xdata +=",'" + sjg + "'" ;
+				ydata +="," + rodStressRatio3 ;
+				if(rodStressRatio4>0){
+					xdata +=",'" + sijg + "'" ;
+					ydata +="," + rodStressRatio4 ;
+				}
+			}
+		}
+	}
+	xdata+="]";
+	ydata+="]";
+	var xdata2 = Ext.JSON.decode(xdata);
+	var ydata2 = Ext.JSON.decode(ydata);
+	initRodPressChart(xdata2, ydata2, wellName, acqTime, divid);
+	return false;
+}
+
+function initRodPressChart(xdata, ydata, wellName, acqTime, divid) {
+	mychart = new Highcharts.Chart({
+				chart: {                                                                             
+		            type: 'column',                      // 柱状图
+		            renderTo : divid,                    // 图形放置的位置
+		            zoomType: 'xy',                    // 沿xy轴放大
+		            borderWidth : 0,
+		            options3d: {                         // 3D效果
+		                enabled: false,                   // 是否显示3D效果
+		                alpha: 0,                        // 内旋角度
+		                beta: 0,                         // 外旋角度
+		                depth: 100,                       // 图形的全深比
+		                frame: {
+		                	back: {                      // X与Y形成的背面面板
+		                		color: 'transparent',    // 面板颜色
+		                		size: 1                  // 面板厚度
+		                	},
+		                	bottom: {                    // X与Z形成的底部面板
+		                		color: '#fdfdfd',        // 面板颜色
+		                		size: 0                  // 面板厚度
+		                	},
+		                	side: {                      // Y与Z形成的侧面面板
+		                		color: '#fdfdfd',        // 面板颜色
+		                		size: 2                  // 面板厚度
+		                	}
+		                },
+		                viewDistance: 10                 // 图形前面看图的距离
+		            }
+		        },                                                                                   
+		        title: {                                                                             
+		            text: cosog.string.rodStress,              // 杆柱应力      
+		            style: {
+		            	fontSize: '13px'
+		            }
+		        },                                                                                   
+		        subtitle: {                                                                          
+		            text: wellName+' ['+acqTime+']'
+		        },
+		        colors: ['#00bc00','#006837', '#00FF00','#006837', '#00FF00','#006837'],
+		        credits: {
+		            enabled: false
+		        },
+		        xAxis: { 
+		        	categories: xdata,
+		            labels: {
+		                rotation: 0,
+		                align: 'center',
+		                style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+		            },
+		            gridLineWidth: 0          // 网格线宽度
+		        },                                                                                   
+		        yAxis: {    
+		        	min: 0,
+		        	max:100,
+		            title: {                                                                         
+		                text: cosog.string.rodStressRatio  // 应力百分比(%)                                                          
+		            },
+		            allowDecimals: false,    // 刻度值是否为小数
+		            minorTickInterval: ''    // 不显示次刻度线
+		        },
+		        exporting:{    
+                    enabled:true,    
+                    filename:'class-booking-chart',    
+                    url:context + '/exportHighcharsPicController/export'
+               },
+		        legend: {                                                                            
+		            enabled: false
+		        }, 
+		        plotOptions : {
+		        	column: {  
+		        		pointWidth: 40,                     // 柱子宽度
+		        		borderWidth: 2
+//		        		color: '#000000'
+			        } 
+				},
+		        series: [{
+		            name: cosog.string.rodStressRatio,  // 应力百分比(%)
+		            data: ydata,
+		            dataLabels: {
+		                enabled: true,
+		                rotation: 0,
+		                color: '#0066cc',
+		                align: 'center',
+		                x: 0,
+		                y: 0,
+//		                zIndex:0,
+		                style: {
+		                    fontSize: '13px',
+		                    fontFamily: 'SimSun'
+		                }
+		            }
+		        }] 
+	});
+	SetEveryOnePointColor(mychart);           //设置每一个数据点的颜色值
+}
+
+function SetEveryOnePointColor(chart) {      // 设置每一个数据点的颜色横向渐变
+	var colors = chart.options.colors;
+	var pointsList = chart.series[0].points;         //获得第一个序列的所有数据点
+    for (var i = 0; i < pointsList.length; i++) {    //遍历设置每一个数据点颜色
+        chart.series[0].points[i].update({
+            color: {
+                linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 },     //横向渐变效果 如果将x2和y2值交换将会变成纵向渐变效果
+                stops: [
+                            [0, Highcharts.Color(colors[i*2]).setOpacity(1).get('rgba')],
+                            [1, Highcharts.Color(colors[i*2+1]).setOpacity(1).get('rgba')]
+                        ]  
+            }
+        });
+    }
+}
+
+showPumpCard = function(result,divid) {
+	var color=new Array("#00ff00","#ff0000","#ff8000","#ff06c5","#0000ff"); // 线条颜色
+	var wellName=result.wellName;                        // 井名
+	var acqTime=result.acqTime;                    // 时间
+	var resultCode=result.resultCode;
+	var pumpFSDiagramData=result.pumpFSDiagramData.split("#");       // 图形数据
+	var series = "[";
+	if(pumpFSDiagramData.length>0&&resultCode!=1232){
+		series+="{";
+		for (var i =0; i < pumpFSDiagramData.length; i++){
+			var everyDiagramData = pumpFSDiagramData[i].split(",");
+			var data = "[";
+			for (var j=0; j <= everyDiagramData.length; j+=2) {
+				if(j<everyDiagramData.length){
+					data += "[" + everyDiagramData[j] + ","+everyDiagramData[j+1]+"],";
+				}else{
+					data += "[" + everyDiagramData[0] + ","+everyDiagramData[1]+"]";//将图形的第一个点拼到最后面，使图形闭合
+				}
+			}
+			data+="]";
+			if(i<(pumpFSDiagramData.length-1)){
+				series+="name: ''," + "color: '" + color[i] + " ' , " + "lineWidth:3," + "data:" + data + "},{";
+			}else{
+				series+="name: ''," + "color: '" + color[i] + " ' , " + "lineWidth:3," + "data:" + data + "}";
+			}
+		}
+	}
+	series+="]";
+	var pointdata = Ext.JSON.decode(series);
+	title = cosog.string.pumpFSDiagram;  // 泵功图
+	initMultiSurfaceCardChart(pointdata, title, wellName, acqTime, divid);
+	return false;
+}
+
+function initMultiSurfaceCardChart(series, title, wellName, acqTime, divid,upperLoadLine,lowerLoadLine) {
+	mychart = new Highcharts.Chart({
+				chart: {                                                                             
+		            type: 'scatter',
+		            renderTo : divid,
+		            borderWidth : 0,
+		            zoomType: 'xy'
+		        },                                                                                   
+		        title: {  
+		        	text: title
+		        },                                                                                   
+		        subtitle: {                                                                          
+		            text: wellName+' ['+acqTime+']'                                                      
+		        },
+		        credits: {
+		            enabled: false
+		        },
+		        xAxis: {                                                                             
+		            title: {                                                                         
+		                enabled: true,                                                               
+		                text: cosog.string.position,    // 位移（m）
+		                align:'middle',//"low"，"middle" 和 "high"，分别表示于最小值对齐、居中对齐、与最大值对齐
+		                style: {
+		                	fontSize: '12px',
+		                	padding: '5px'
+                      }
+		            },  
+		            startOnTick: false,      //是否强制轴线在标线处开始
+		            endOnTick: false,        //是否强制轴线在标线处结束                                                                  
+		            showLastLabel: true,
+		            minorTickInterval: ''    // 最小刻度间隔
+		            //min:0                                                            
+		        },                                                                                   
+		        yAxis: {                                                                             
+		            title: {                                                                         
+		                text: cosog.string.load                                    
+		            },
+		            allowDecimals: false, 
+		            minorTickInterval: '',
+//		            min:0,
+		            plotLines: [{
+	                    color: '#d12',
+	                    dashStyle: 'Dash', //Dash,Dot,Solid,默认Solid
+	                    label: {
+	                        text: upperLoadLine,
+	                        align: 'right',
+	                        x: -10
+	                    },
+	                    width: 3,
+	                    value: upperLoadLine,  //y轴显示位置
+	                    zIndex: 10
+	                },{
+	                    color: '#d12',
+	                    dashStyle: 'Dash',
+	                    label: {
+	                        text: lowerLoadLine,
+	                        align: 'right',
+	                        x: -10
+	                    },
+	                    width: 3,
+	                    value: lowerLoadLine,  //y轴显示位置
+	                    zIndex: 10
+	                }]
+		        },
+		        exporting:{    
+                    enabled:true,    
+                    filename:'class-booking-chart',    
+                    url:context + '/exportHighcharsPicController/export'
+               },
+		        legend: {                                                                            
+		            layout: 'vertical',                                                              
+		            align: 'left',                                                                   
+		            verticalAlign: 'top',                                                            
+		            x: 100,                                                                          
+		            y: 70,                                                                           
+		            floating: true,                                                                  
+		            backgroundColor: '#FFFFFF',                                                      
+		            borderWidth: 1  ,
+		            enabled: false
+		        },                                                                                   
+		        plotOptions: {                                                                       
+		            scatter: {                                                                       
+		                marker: {                                                                    
+		                    radius: 0,                                                               
+		                    states: {                                                                
+		                        hover: {                                                             
+		                            enabled: true,                                                   
+		                            lineColor: '#646464'                                    
+		                        }                                                                    
+		                    }                                                                        
+		                },                                                                           
+		                states: {                                                                    
+		                    hover: {                                                                 
+		                        marker: {                                                            
+		                            enabled: false                                                   
+		                        }                                                                    
+		                    }                                                                        
+		                },                                                                           
+		                tooltip: {                                                                   
+		                    headerFormat: '',                                
+		                    pointFormat: '{point.x}, {point.y}'                                
+		                }                                                                            
+		            }                                                                                
+		        }, 
+		        series: series 
+	});
+}
+
+showPumpEfficiency = function(bxzcData, divid) {
+	var wellName=bxzcData.wellName;           // 井名
+	var acqTime=bxzcData.acqTime;       // 时间
+	var pumpEff1=bxzcData.pumpEff1;   // 冲程损失系数
+	var pumpEff2=bxzcData.pumpEff2;       // 充满系数
+	var pumpEff3=bxzcData.pumpEff3;       // 漏失系数
+	var pumpEff4=bxzcData.pumpEff4;   // 液体收缩系数
+	var ydata="[" + pumpEff1 + "," + pumpEff2 + "," + pumpEff3 + "," + pumpEff4 + "]";
+	if(pumpEff1==0&&pumpEff2==0&&pumpEff3==0&&pumpEff4==0){
+		ydata="[]";
+	}
+	ydata = Ext.JSON.decode(ydata);
+	initPumpEfficiencyChart(ydata, wellName, acqTime, divid);
+	return false;
+}
+
+function initPumpEfficiencyChart(ydata, wellName, acqTime, divid, title, yname) {
+	$('#'+divid).highcharts({
+				chart: {                                                                             
+		            type: 'column',      
+		            borderWidth : 0,
+		            zoomType: 'xy'                   
+		        },                                                                                   
+		        title: {                                                                                      
+		            text: cosog.string.pumpEff             
+		        },
+		        subtitle: {                                                                                   
+		            text: wellName+' ['+acqTime+']'                                                      
+		        },
+		        colors: ['#66ffcc', '#009999', '#ffcc33', '#ff6633', '#00ffff', '#3366cc', '#ffccff', '#cc0000', '#6AF9C4'],
+		        credits: {            
+		            enabled: false
+		        },
+		        xAxis: { 
+		        	categories: [
+		        	                cosog.string.pumpEff1,
+		        	                cosog.string.pumpEff2,
+		        	                cosog.string.pumpEff3,
+		        	                cosog.string.pumpEff4
+		        	            ],
+		        	gridLineWidth: 0
+		        }, 
+		        tooltip: {
+		            enabled: false
+		        },
+		        yAxis: {    
+		        	min: 0,
+		            title: {                                                                         
+		                text: cosog.string.percent                                           
+		            },
+		            minorTickInterval: ''
+		        },
+		        exporting:{    
+                    enabled:true,    
+                    filename:'class-booking-chart',    
+                    url:context + '/exportHighcharsPicController/export'
+               },
+		        legend: {                                                                            
+		            enabled: false
+		        },  
+		        series: [{
+		            data: ydata,
+		            dataLabels: {
+		                enabled: true,
+		                rotation: 0,
+		                color: '#0066cc',
+		                align: 'center',
+		                x: 0,
+		                y: 0,
+		                style: {
+		                    fontSize: '13px',
+		                    fontFamily: 'SimSun'
+		                }
+		            }
+		        }]
+		        
+	}, function (chart) {
+        SetEveryOnePointColor(chart);
+    });
+}
