@@ -270,7 +270,222 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                                     }
                                 }
                             }]
-                		}],
+                		},{
+                        	title: '井筒分析',
+                        	margin: '0 0 0 0',
+                            padding: 0,
+                            autoScroll:true,
+                            scrollable: true,
+                            height:900,
+                            id: 'RPCRealTimeMonitoringFSDiagramAnalysisTabPanel_Id',
+                            layout: {
+                                type: 'vbox',
+                                pack: 'start',
+                                align: 'stretch'
+                            },
+                            items: [{
+                            		border: false,
+                            		margin: '0 0 0 0',
+//                            		flex: 1,
+                            		height:300,
+                            		layout: {
+                            	        type: 'hbox',
+                            	        pack: 'start',
+                            	        align: 'stretch'
+                            	    },
+                            	    items:[{
+                            	    	border: true,
+                            	    	layout: 'fit',
+                            	    	margin: '0 0 0 0',
+                                        flex: 1,
+                                        height:300,
+                                        align:'stretch',
+                                        html: '<div id=\"FSDiagramAnalysisSingleWellboreDetailsDiv1_id\" style="width:100%;height:100%;"></div>',
+                                        listeners: {
+                                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            	if($("#FSDiagramAnalysisSingleWellboreDetailsDiv1_id").highcharts()!=undefined){
+                                        			$("#FSDiagramAnalysisSingleWellboreDetailsDiv1_id").highcharts().setSize($("#FSDiagramAnalysisSingleWellboreDetailsDiv1_id").offsetWidth, $("#FSDiagramAnalysisSingleWellboreDetailsDiv1_id").offsetHeight,true);
+                                        		}
+                                            }
+                                        }
+                            	    },{
+                            	    	border: true,
+                            	    	layout: 'fit',
+                            	    	margin: '0 0 0 1',
+                                        flex: 1,
+                                        height:300,
+                                        align:'stretch',
+                                        html: '<div id=\"FSDiagramAnalysisSingleWellboreDetailsDiv2_id\" style="width:100%;height:100%;"></div>',
+                                        listeners: {
+                                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            	if($("#FSDiagramAnalysisSingleWellboreDetailsDiv2_id").highcharts()!=undefined){
+                                        			$("#FSDiagramAnalysisSingleWellboreDetailsDiv2_id").highcharts().setSize($("#FSDiagramAnalysisSingleWellboreDetailsDiv2_id").offsetWidth, $("#FSDiagramAnalysisSingleWellboreDetailsDiv2_id").offsetHeight,true);
+                                        		}
+                                            }
+                                        }
+                            	    }]
+                            	},{
+                            		border: false,
+//                            		flex: 1,
+                            		margin: '1 0 0 0',
+                            		layout: {
+                            	        type: 'hbox',
+                            	        pack: 'start',
+                            	        align: 'stretch'
+                            	    },
+                            	    items:[{
+                            	    	border: true,
+                            	    	layout: 'fit',
+                            	    	margin: '0 0 0 0',
+                                        flex: 1,
+                                        height:300,
+                                        align:'stretch',
+                                        html: '<div id=\"FSDiagramAnalysisSingleWellboreDetailsDiv3_id\" style="width:100%;height:100%;"></div>',
+                                        listeners: {
+                                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            	if($("#FSDiagramAnalysisSingleWellboreDetailsDiv3_id").highcharts()!=undefined){
+                                        			$("#FSDiagramAnalysisSingleWellboreDetailsDiv3_id").highcharts().setSize($("#FSDiagramAnalysisSingleWellboreDetailsDiv3_id").offsetWidth, $("#FSDiagramAnalysisSingleWellboreDetailsDiv3_id").offsetHeight,true);
+                                        		}
+                                            }
+                                        }
+                            	    },{
+                            	    	border: true,
+                            	    	layout: 'fit',
+                            	    	margin: '0 0 0 1',
+                                        flex: 1,
+                                        height:300,
+                                        align:'stretch',
+                                        html: '<div id=\"FSDiagramAnalysisSingleWellboreDetailsDiv4_id\" style="width:100%;height:100%;"></div>',
+                                        listeners: {
+                                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            	if($("#FSDiagramAnalysisSingleWellboreDetailsDiv4_id").highcharts()!=undefined){
+                                        			$("#FSDiagramAnalysisSingleWellboreDetailsDiv4_id").highcharts().setSize($("#FSDiagramAnalysisSingleWellboreDetailsDiv4_id").offsetWidth, $("#FSDiagramAnalysisSingleWellboreDetailsDiv4_id").offsetHeight,true);
+                                        		}
+                                            }
+                                        }
+                            	    }]
+                            	}]
+                        },{
+                        	title: '地面分析',
+                        	margin: '0 0 0 0',
+                            padding: 0,
+                            autoScroll:true,
+                            scrollable: true,
+                            id: 'RPCRealTimeMonitoringFSDiagramAnalysisSurfaceTabPanel_Id',
+                            layout: {
+                                type: 'vbox',
+                                pack: 'start',
+                                align: 'stretch'
+                            },
+                            items: [
+                            	{
+                            		border: false,
+                            		margin: '0 0 0 0',
+//                            		flex: 1,
+                            		layout: {
+                            	        type: 'hbox',
+                            	        pack: 'start',
+                            	        align: 'stretch'
+                            	    },
+                            	    items:[{
+                            	    	border: true,
+                            	    	layout: 'fit',
+                            	    	margin: '0 0 0 0',
+                                        flex: 1,
+                                        height:300,
+                                        align:'stretch',
+                                        html: '<div id=\"FSDiagramAnalysisSingleSurfaceDetailsDiv1_id\" style="width:100%;height:100%;"></div>',
+                                        listeners: {
+                                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            	if($("#FSDiagramAnalysisSingleSurfaceDetailsDiv1_id").highcharts()!=undefined){
+                                        			$("#FSDiagramAnalysisSingleSurfaceDetailsDiv1_id").highcharts().setSize($("#FSDiagramAnalysisSingleSurfaceDetailsDiv1_id").offsetWidth, $("#FSDiagramAnalysisSingleSurfaceDetailsDiv1_id").offsetHeight,true);
+                                        		}
+                                            }
+                                        }
+                            	    },{
+                            	    	border: true,
+                            	    	layout: 'fit',
+                            	    	margin: '0 0 0 1',
+                                        flex: 1,
+                                        height:300,
+                                        align:'stretch',
+                                        html: '<div id=\"FSDiagramAnalysisSingleSurfaceDetailsDiv2_id\" style="width:100%;height:100%;"></div>',
+                                        listeners: {
+                                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            	if($("#FSDiagramAnalysisSingleSurfaceDetailsDiv2_id").highcharts()!=undefined){
+                                        			$("#FSDiagramAnalysisSingleSurfaceDetailsDiv2_id").highcharts().setSize($("#FSDiagramAnalysisSingleSurfaceDetailsDiv2_id").offsetWidth, $("#FSDiagramAnalysisSingleSurfaceDetailsDiv2_id").offsetHeight,true);
+                                        		}
+                                            }
+                                        }
+                            	    }]
+                            	},{
+                            		border: false,
+//                            		flex: 1,
+                            		margin: '0 0 0 0',
+                            		layout: {
+                            	        type: 'hbox',
+                            	        pack: 'start',
+                            	        align: 'stretch'
+                            	    },
+                            	    items:[{
+                            	    	border: true,
+                            	    	layout: 'fit',
+                            	    	margin: '1 0 0 0',
+                                        flex: 1,
+                                        height:300,
+                                        align:'stretch',
+                                        html: '<div id=\"FSDiagramAnalysisSingleSurfaceDetailsDiv3_id\" style="width:100%;height:100%;"></div>',
+                                        listeners: {
+                                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            	if($("#FSDiagramAnalysisSingleSurfaceDetailsDiv3_id").highcharts()!=undefined){
+                                        			$("#FSDiagramAnalysisSingleSurfaceDetailsDiv3_id").highcharts().setSize($("#FSDiagramAnalysisSingleSurfaceDetailsDiv3_id").offsetWidth, $("#FSDiagramAnalysisSingleSurfaceDetailsDiv3_id").offsetHeight,true);
+                                        		}
+                                            }
+                                        }
+                            	    },{
+                            	    	border: true,
+                            	    	layout: 'fit',
+                            	    	margin: '1 0 0 1',
+                                        flex: 1,
+                                        height:300,
+                                        align:'stretch',
+                                        html: '<div id=\"FSDiagramAnalysisSingleSurfaceDetailsDiv4_id\" style="width:100%;height:100%;"></div>',
+                                        listeners: {
+                                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            	if($("#FSDiagramAnalysisSingleSurfaceDetailsDiv4_id").highcharts()!=undefined){
+                                        			$("#FSDiagramAnalysisSingleSurfaceDetailsDiv4_id").highcharts().setSize($("#FSDiagramAnalysisSingleSurfaceDetailsDiv4_id").offsetWidth, $("#FSDiagramAnalysisSingleSurfaceDetailsDiv4_id").offsetHeight,true);
+                                        		}
+                                            }
+                                        }
+                            	    }]
+                            	},{
+                            		border: false,
+//                            		flex: 1,
+                            		margin: '0 0 0 0',
+                            		layout: {
+                            	        type: 'hbox',
+                            	        pack: 'start',
+                            	        align: 'stretch'
+                            	    },
+                            	    items:[{
+                            	    	border: true,
+                            	    	layout: 'fit',
+                            	    	margin: '1 0 0 0',
+                                        flex: 1,
+                                        height:300,
+                                        align:'stretch',
+                                        html: '<div id=\"FSDiagramAnalysisSingleSurfaceDetailsDiv5_id\" style="width:100%;height:100%;"></div>',
+                                        listeners: {
+                                            resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            	if($("#FSDiagramAnalysisSingleSurfaceDetailsDiv5_id").highcharts()!=undefined){
+                                        			$("#FSDiagramAnalysisSingleSurfaceDetailsDiv5_id").highcharts().setSize($("#FSDiagramAnalysisSingleSurfaceDetailsDiv5_id").offsetWidth, $("#FSDiagramAnalysisSingleSurfaceDetailsDiv5_id").offsetHeight,true);
+                                        		}
+                                            }
+                                        }
+                            	    }]
+                            	}
+                            ]
+                        }],
                 		listeners: {
             				tabchange: function (tabPanel, newCard,oldCard, obj) {
             					var selectRow= Ext.getCmp("RPCRealTimeMonitoringInfoDeviceListSelectRow_Id").getValue();
@@ -284,6 +499,8 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             			var selectedItem=gridPanel.getStore().getAt(selectRow);
                             			CreateRPCDeviceRealTimeMonitoringDataTable(selectedItem.data.id,selectedItem.data.wellName,0)
                             		}
+            					}else{
+            						Ext.create('AP.store.diagnosis.SingleFESDiagramDetailsChartsStore');
             					}
             				}
                 		}

@@ -598,6 +598,33 @@ public class RealTimeMonitoringController extends BaseController {
 		return null;
 	}
 	
+	/**
+	 * 描述：查询功图分析详情数据
+	 */
+	@RequestMapping("/querySingleFESDiagramDetailsChartsData")
+	public String querySingleFESDiagramDetailsChartsData()throws Exception{
+		int id = Integer.parseInt(ParamUtils.getParameter(request, "id"));
+		String wellName = ParamUtils.getParameter(request, "wellName");
+		String startDate = ParamUtils.getParameter(request, "startDate");
+		String endDate = ParamUtils.getParameter(request, "endDate");
+		String type = ParamUtils.getParameter(request, "type");
+		String json = "";
+		if("1".equals(type)){
+			json = this.realTimeMonitoringService.querySingleDetailsWellBoreChartsData(id,wellName);
+		}else if("2".equals(type)){
+			json = this.realTimeMonitoringService.querySingleDetailsSurfaceData(id,wellName);
+		}
+		
+		//HttpServletResponse response = ServletActionContext.getResponse();
+		response.setContentType("application/json;charset=utf-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	public String getLimit() {
 		return limit;
 	}

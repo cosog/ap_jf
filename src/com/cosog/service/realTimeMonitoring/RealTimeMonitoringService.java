@@ -1,6 +1,8 @@
 package com.cosog.service.realTimeMonitoring;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.engine.jdbc.SerializableClobProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +38,8 @@ import com.cosog.utils.Page;
 import com.cosog.utils.ProtocolItemResolutionData;
 import com.cosog.utils.StringManagerUtils;
 import com.google.gson.Gson;
+
+import oracle.sql.CLOB;
 
 @Service("realTimeMonitoringService")
 public class RealTimeMonitoringService<T> extends BaseService<T> {
@@ -1349,5 +1354,307 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		}
 		dynSbf.append("]}");
 		return dynSbf.toString().replaceAll("null", "");
+	}
+	
+	public String querySingleDetailsWellBoreChartsData(int id,String wellName) throws SQLException, IOException{
+		byte[] bytes; 
+		ConfigFile configFile=Config.getInstance().configFile;
+		BufferedInputStream bis = null;
+        StringBuffer dataSbf = new StringBuffer();
+        StringBuffer pumpFSDiagramStrBuff = new StringBuffer();
+        String tableName="tbl_rpcacqdata_latest";
+        String prodCol=" liquidweightproduction";
+		if(configFile.getOthers().getProductionUnit()!=0){
+			prodCol=" liquidVolumetricProduction";
+		}
+        String sql="select well.wellName as wellName, to_char(t.acqTime,'yyyy-mm-dd hh24:mi:ss') as acqTime,"
+        		+ " t.pumpfsdiagram,"
+        		+ " t.upperloadline,t.lowerloadline, t.fmax,t.fmin,t.stroke,t.spm, "
+        		+ " t."+prodCol+","
+        		+ " status.resultname,status.resultcode, "
+        		+ " t.rodstring,"
+        		+ " t.pumpeff1*100 as pumpeff1, t.pumpeff2*100 as pumpeff2, t.pumpeff3*100 as pumpeff3, t.pumpeff4*100 as pumpeff4,"
+        		+ " t.position_curve,t.load_curve"
+        		+ " from "+tableName+" t"
+        		+ " left outer join tbl_rpcdevice well on t.wellid=well.id"
+        		+ " left outer join tbl_rpc_worktype status on t.resultcode=status.resultcode"
+        		+ " where 1=1 ";
+        sql+=" and t.id="+id;
+		List<?> list=this.findCallSql(sql);
+		String pointCount="";
+		if(list.size()>0){
+			Object[] obj=(Object[])list.get(0);
+			String positionCurveData="";
+			String loadCurveData="";
+			String pumpFSDiagram="";
+			SerializableClobProxy   proxy=null;
+			CLOB realClob=null;
+			if(obj[2]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[2]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				pumpFSDiagram=StringManagerUtils.CLOBtoString(realClob);
+			}
+			
+			if(obj[17]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[17]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				positionCurveData=StringManagerUtils.CLOBtoString(realClob);
+				if(StringManagerUtils.isNotNull(positionCurveData)){
+					pointCount=positionCurveData.split(",").length+"";
+				}
+			}
+			
+			if(obj[18]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[18]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				loadCurveData=StringManagerUtils.CLOBtoString(realClob);
+			}
+			
+			
+			
+			String rodStressRatio1="0",rodStressRatio2="0",rodStressRatio3="0",rodStressRatio4="0";
+			
+			if("1232".equals(obj[11]+"") || !StringManagerUtils.isNotNull(pumpFSDiagram)){//采集异常
+				String positionCurveDataArr[]=positionCurveData.split(",");
+				String loadCurveDataArr[]=loadCurveData.split(",");
+				for(int i=0;i<positionCurveDataArr.length&&i<loadCurveDataArr.length;i++){
+					pumpFSDiagramStrBuff.append(positionCurveDataArr[i]+",").append(loadCurveDataArr[i]+",");
+				}
+			}else{
+				String arrbgt[]=pumpFSDiagram.split(";");  // 以;为界放入数组
+		        for(int i=2;i<(arrbgt.length);i++){
+		        	String arrbgtdata[]=arrbgt[i].split(",");  // 以,为界放入数组
+		        	for(int j=0;j<arrbgtdata.length;j+=2){
+		        		pumpFSDiagramStrBuff.append(arrbgtdata[j] + ",");
+		        		pumpFSDiagramStrBuff.append(arrbgtdata[j+1] + ",");
+			        }
+		        	pumpFSDiagramStrBuff.deleteCharAt(pumpFSDiagramStrBuff.length() - 1);
+		        	pumpFSDiagramStrBuff.append("#");
+		        }
+		        if(obj[12]!=null){
+		        	String rodDataArr[]=obj[12].toString().split(";");
+			        for(int i=1;i<rodDataArr.length;i++){
+			        	if(i==1&&rodDataArr[i].split(",").length==6){
+			        		rodStressRatio1=rodDataArr[i].split(",")[5];
+			        	}else if(i==2&&rodDataArr[i].split(",").length==6){
+			        		rodStressRatio2=rodDataArr[i].split(",")[5];
+			        	}if(i==3&&rodDataArr[i].split(",").length==6){
+			        		rodStressRatio3=rodDataArr[i].split(",")[5];
+			        	}if(i==4&&rodDataArr[i].split(",").length==6){
+			        		rodStressRatio4=rodDataArr[i].split(",")[5];
+			        	}
+			        }
+		        }
+			}
+	        if(pumpFSDiagramStrBuff.toString().endsWith(",")){
+	        	pumpFSDiagramStrBuff=pumpFSDiagramStrBuff.deleteCharAt(pumpFSDiagramStrBuff.length() - 1);
+	        }
+	        String pumpFSDiagramData = pumpFSDiagramStrBuff.toString();
+	        
+	        dataSbf.append("{success:true,");
+	        dataSbf.append("wellName:\""+wellName+"\",");           // 井名
+	        dataSbf.append("acqTime:\""+obj[1]+"\",");         // 时间
+	        dataSbf.append("pointCount:\""+pointCount+"\","); 
+	        dataSbf.append("upperLoadLine:\""+obj[3]+"\",");         // 理论上载荷
+	        dataSbf.append("lowerLoadLine:\""+obj[4]+"\",");         // 理论下载荷
+	        dataSbf.append("fmax:\""+obj[5]+"\",");         // 最大载荷
+	        dataSbf.append("fmin:\""+obj[6]+"\",");         // 最小载荷
+	        dataSbf.append("stroke:\""+obj[7]+"\",");         // 冲程
+	        dataSbf.append("spm:\""+obj[8]+"\",");         // 冲次
+	        dataSbf.append("liquidProduction:\""+obj[9]+"\",");         // 日产液量
+	        dataSbf.append("resultName:\""+obj[10]+"\",");         // 工况类型
+	        dataSbf.append("resultCode:\""+obj[11]+"\",");         // 工况代码
+	        
+	        dataSbf.append("rodStressRatio1:"+rodStressRatio1+",");       // 一级应力百分比
+	        dataSbf.append("rodStressRatio2:"+rodStressRatio2+",");       // 二级应力百分比 
+	        dataSbf.append("rodStressRatio3:"+rodStressRatio3+",");           // 三级应力百分比
+	        dataSbf.append("rodStressRatio4:"+rodStressRatio4+",");           // 四级应力百分比
+	        
+	        dataSbf.append("pumpEff1:"+StringManagerUtils.stringToFloat(obj[13]==null?"":obj[13].toString(),1)+",");       // 冲程损失系数
+	        dataSbf.append("pumpEff2:"+StringManagerUtils.stringToFloat(obj[14]==null?"":obj[14].toString().toString(),1)+",");       // 充满系数
+	        dataSbf.append("pumpEff3:"+StringManagerUtils.stringToFloat(obj[15]==null?"":obj[15].toString().toString(),1)+",");           // 漏失系数
+	        dataSbf.append("pumpEff4:"+StringManagerUtils.stringToFloat(obj[16]==null?"":obj[16].toString().toString(),1)+",");           // 液体收缩系数
+	        dataSbf.append("pumpFSDiagramData:\""+pumpFSDiagramData+"\",");         // 泵功图数据
+	        dataSbf.append("positionCurveData:\""+positionCurveData+"\",");         
+	        dataSbf.append("loadCurveData:\""+loadCurveData+"\""); 
+	        dataSbf.append("}");
+		}else{
+			dataSbf.append("{success:true,");
+			dataSbf.append("wellName:\""+wellName+"\",");
+	        dataSbf.append("acqTime:\"\",");
+	        dataSbf.append("pointCount:\""+pointCount+"\","); 
+	        dataSbf.append("upperLoadLine:\"\",");  
+	        dataSbf.append("lowerLoadLine:\"\","); 
+	        dataSbf.append("fmax:\"\",");  
+	        dataSbf.append("fmin:\"\",");
+	        dataSbf.append("stroke:\"\",");  
+	        dataSbf.append("spm:\"\","); 
+	        dataSbf.append("liquidProduction:\"\",");  
+	        dataSbf.append("resultName:\"\",");
+	        dataSbf.append("resultCode:\"\",");  
+	        dataSbf.append("rodStressRatio1:\"\","); 
+	        dataSbf.append("rodStressRatio2:\"\",");  
+	        dataSbf.append("rodStressRatio3:\"\",");
+	        dataSbf.append("rodStressRatio4:\"\",");  
+	        dataSbf.append("pumpEff1:\"\","); 
+	        dataSbf.append("pumpEff2:\"\",");  
+	        dataSbf.append("pumpEff3:\"\",");
+	        dataSbf.append("pumpEff4:\"\",");  
+	        dataSbf.append("pumpFSDiagramData:\"\",");
+	        dataSbf.append("positionCurveData:\"\",");
+	        dataSbf.append("loadCurveData:\"\"");
+	        dataSbf.append("}");
+		}
+		return dataSbf.toString().replaceAll("null", "");
+	}
+
+	public String querySingleDetailsSurfaceData(int id,String wellName) throws SQLException, IOException{
+		byte[] bytes; 
+		ConfigFile configFile=Config.getInstance().configFile;
+		BufferedInputStream bis = null;
+        StringBuffer dataSbf = new StringBuffer();
+        StringBuffer pumpFSDiagramStrBuff = new StringBuffer();
+        String tableName="tbl_rpcacqdata_latest";
+        
+        String sql="select well.wellName, to_char(t.acqTime,'yyyy-mm-dd hh24:mi:ss') as acqTime,"
+        		+ " t.upstrokewattmax,t.downstrokewattmax,t.wattdegreebalance,t.upstrokeimax,t.downstrokeimax,t.idegreebalance,t.deltaRadius*100,"
+        		+ " t.position_curve,t.load_curve,t.power_curve,t.current_curve,"
+        		+ " t.crankangle,t.loadtorque,t.cranktorque,t.currentbalancetorque,t.currentnettorque,"
+        		+ " t.expectedbalancetorque,t.expectednettorque,"
+        		+ " t.polishrodV,t.polishrodA "
+        		+ " from "+tableName+" t"
+        		+ " left outer join tbl_rpcdevice well on t.wellid=well.id"
+        		+ " where 1=1 ";
+        sql+=" and t.id="+id;
+		List<?> list=this.findCallSql(sql);
+		if(list.size()>0){
+			Object[] obj=(Object[])list.get(0);
+			String positionCurveData="";
+			String loadCurveData="";
+			String wattCurveData="";
+			String iCurveData="";
+			String crankAngle="",loadRorque="",crankTorque="",currentBalanceTorque="",currentNetTorque="",expectedBalanceTorque="",expectedNetTorque="";
+			String polishrodV="",polishrodA="";
+			SerializableClobProxy   proxy=null;
+			CLOB realClob=null;
+			
+			if(obj[9]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[9]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				positionCurveData=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[10]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[10]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				loadCurveData=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[11]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[11]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				wattCurveData=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[12]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[12]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				iCurveData=StringManagerUtils.CLOBtoString(realClob);
+			}
+			
+			if(obj[13]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[13]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				crankAngle=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[14]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[14]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				loadRorque=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[15]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[15]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				crankTorque=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[16]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[16]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				currentBalanceTorque=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[17]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[17]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				currentNetTorque=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[18]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[18]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				expectedBalanceTorque=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[19]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[19]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				expectedNetTorque=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[20]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[20]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				polishrodV=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(obj[21]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[21]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				polishrodA=StringManagerUtils.CLOBtoString(realClob);
+			}
+			
+	        dataSbf.append("{success:true,");
+	        dataSbf.append("wellName:\""+wellName+"\",");           // 井名
+	        dataSbf.append("acqTime:\""+obj[1]+"\",");         // 时间
+	        dataSbf.append("upStrokeWattMax:\""+obj[2]+"\",");         
+	        dataSbf.append("downStrokeWattMax:\""+obj[3]+"\",");
+	        dataSbf.append("wattDegreeBalance:\""+obj[4]+"\",");
+	        dataSbf.append("upStrokeIMax:\""+obj[5]+"\",");
+	        dataSbf.append("downStrokeIMax:\""+obj[6]+"\",");
+	        dataSbf.append("iDegreeBalance:\""+obj[7]+"\",");
+	        dataSbf.append("deltaRadius:\""+obj[8]+"\",");
+	        dataSbf.append("positionCurveData:\""+positionCurveData+"\",");
+	        dataSbf.append("loadCurveData:\""+loadCurveData+"\",");
+	        dataSbf.append("powerCurveData:\""+wattCurveData+"\",");
+	        dataSbf.append("currentCurveData:\""+iCurveData+"\",");
+	        dataSbf.append("crankAngle:\""+crankAngle+"\","); 
+	        dataSbf.append("loadRorque:\""+loadRorque+"\","); 
+	        dataSbf.append("crankTorque:\""+crankTorque+"\","); 
+	        dataSbf.append("currentBalanceTorque:\""+currentBalanceTorque+"\","); 
+	        dataSbf.append("currentNetTorque:\""+currentNetTorque+"\","); 
+	        dataSbf.append("expectedBalanceTorque:\""+expectedBalanceTorque+"\","); 
+	        dataSbf.append("expectedNetTorque:\""+expectedNetTorque+"\","); 
+	        dataSbf.append("polishrodV:\""+polishrodV+"\","); 
+	        dataSbf.append("polishrodA:\""+polishrodA+"\""); 
+	        dataSbf.append("}");
+	        
+		}else{
+			dataSbf.append("{success:true,");
+	        dataSbf.append("wellName:\""+wellName+"\",");           // 井名
+	        dataSbf.append("acqTime:\"\",");         // 时间
+	        dataSbf.append("upStrokeWattMax:\"\",");         
+	        dataSbf.append("downStrokeWattMax:\"\",");
+	        dataSbf.append("wattDegreeBalance:\"\",");
+	        dataSbf.append("upStrokeIMax:\"\",");
+	        dataSbf.append("downStrokeIMax:\"\",");
+	        dataSbf.append("iDegreeBalance:\"\",");
+	        dataSbf.append("deltaRadius:\"\",");
+	        dataSbf.append("positionCurveData:\"\",");
+	        dataSbf.append("loadCurveData:\"\",");
+	        dataSbf.append("powerCurveData:\"\",");
+	        dataSbf.append("currentCurveData:\"\",");
+	        dataSbf.append("crankAngle:\"\","); 
+	        dataSbf.append("loadRorque:\"\","); 
+	        dataSbf.append("crankTorque:\"\","); 
+	        dataSbf.append("currentBalanceTorque:\"\","); 
+	        dataSbf.append("currentNetTorque:\"\","); 
+	        dataSbf.append("expectedBalanceTorque:\"\","); 
+	        dataSbf.append("expectedNetTorque:\"\","); 
+	        dataSbf.append("polishrodV:\"\","); 
+	        dataSbf.append("polishrodA:\"\""); 
+		}
+		return dataSbf.toString().replaceAll("null", "");
 	}
 }

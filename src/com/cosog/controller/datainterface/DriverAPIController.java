@@ -842,7 +842,6 @@ public class DriverAPIController extends BaseController{
 									protocolItemResolutionDataList.add(protocolItemResolutionData);
 								}
 								
-								
 								if("TubingPressure".equalsIgnoreCase(dataMappingColumn.getCalColumn())){//油压
 									rpcCalculateRequestData.getProduction().setTubingPressure(StringManagerUtils.stringToFloat(rawValue));
 									rpcDeviceInfo.getProduction().setTubingPressure(StringManagerUtils.stringToFloat(rawValue));
@@ -915,7 +914,9 @@ public class DriverAPIController extends BaseController{
 					type = new TypeToken<RPCCalculateResponseData>() {}.getType();
 					rpcCalculateResponseData=gson.fromJson(responseData, type);
 					
-					
+					if(rpcCalculateResponseData!=null){
+						
+					}
 				}
 				
 				updateRealtimeData+=" where t.wellId= "+rpcDeviceInfo.getId();
