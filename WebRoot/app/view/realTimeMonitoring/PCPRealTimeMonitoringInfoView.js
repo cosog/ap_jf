@@ -271,31 +271,9 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                                     	}
                                     }
                                 }
-                            }
-//                            ,{
-//                            	region: 'south',
-//                            	height: '40%',
-//                            	title: '实时曲线',
-//                            	layout: 'fit',
-//                            	border: true,
-//                            	split: true,
-//                                collapsible: true,
-//                                tbar:[{
-//                                    id: 'PCPRealTimeMonitoringSelectedCurve_Id',//选择的统计项的值
-//                                    xtype: 'textfield',
-//                                    value: '',
-//                                    hidden: true
-//                                }],
-//                                html: '<div id="pcpRealTimeMonitoringCurveDiv_Id" style="width:100%;height:100%;"></div>',
-//                                listeners: {
-//                                    resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-//                                        if ($("#pcpRealTimeMonitoringCurveDiv_Id").highcharts() != undefined) {
-//                                            $("#pcpRealTimeMonitoringCurveDiv_Id").highcharts().setSize($("#pcpRealTimeMonitoringCurveDiv_Id").offsetWidth, $("#pcpRealTimeMonitoringCurveDiv_Id").offsetHeight, true);
-//                                        }
-//                                    }
-//                                }
-//                            }
-                            ]
+                            }]
+                		},{
+                			
                 		}],
                 		listeners: {
             				tabchange: function (tabPanel, newCard,oldCard, obj) {

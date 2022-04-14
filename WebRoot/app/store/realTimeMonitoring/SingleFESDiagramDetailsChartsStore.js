@@ -53,8 +53,8 @@ Ext.define('AP.store.diagnosis.SingleFESDiagramDetailsChartsStore', {
             }
         },
         beforeload: function (store, options) {
-        	var id  = Ext.getCmp("PCPRealTimeMonitoringListGridPanel_Id").getSelectionModel().getSelection()[0].data.id;// 获取图形数据id
-        	var wellName  = Ext.getCmp("PCPRealTimeMonitoringListGridPanel_Id").getSelectionModel().getSelection()[0].data.wellName;
+        	var id  = Ext.getCmp("RPCRealTimeMonitoringListGridPanel_Id").getSelectionModel().getSelection()[0].data.id;// 获取图形数据id
+        	var wellName  = Ext.getCmp("RPCRealTimeMonitoringListGridPanel_Id").getSelectionModel().getSelection()[0].data.wellName;
             var type=1;
             var tabPanel = Ext.getCmp("RPCRealTimeMonitoringCurveAndTableTabPanel");
             var activeId = tabPanel.getActiveTab().id;
