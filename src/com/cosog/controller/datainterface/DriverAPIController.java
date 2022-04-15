@@ -630,7 +630,6 @@ public class DriverAPIController extends BaseController{
 		Jedis jedis = new Jedis();
 		StringBuffer webSocketSendData = new StringBuffer();
 		StringBuffer info_json = new StringBuffer();
-//		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
 		boolean save=false;
 		boolean alarm=false;
 		boolean sendMessage=false;
@@ -664,7 +663,6 @@ public class DriverAPIController extends BaseController{
 			MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
 		}
 		
-		String deviceTableName="tbl_rpcdevice";
 		String realtimeTable="tbl_rpcacqdata_latest";
 		String historyTable="tbl_rpcacqdata_hist";
 		String rawDataTable="tbl_rpcacqrawdata";
@@ -741,7 +739,6 @@ public class DriverAPIController extends BaseController{
 				
 				List<AcquisitionItemInfo> acquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
 				List<ProtocolItemResolutionData> protocolItemResolutionDataList=new ArrayList<ProtocolItemResolutionData>();
-				List<ProtocolItemResolutionData> calItemResolutionDataList=new ArrayList<ProtocolItemResolutionData>();
 				for(int i=0;acqGroup.getAddr()!=null &&i<acqGroup.getAddr().size();i++){
 					for(int j=0;j<protocol.getItems().size();j++){
 						if(acqGroup.getAddr().get(i)==protocol.getItems().get(j).getAddr()){
@@ -848,27 +845,15 @@ public class DriverAPIController extends BaseController{
 								if("TubingPressure".equalsIgnoreCase(dataMappingColumn.getCalColumn())){//油压
 									rpcCalculateRequestData.getProduction().setTubingPressure(StringManagerUtils.stringToFloat(rawValue));
 									rpcDeviceInfo.getProduction().setTubingPressure(StringManagerUtils.stringToFloat(rawValue));
-									updateRealtimeData+=",t.TubingPressure="+rawValue+"";
-									insertHistColumns+=",TubingPressure";
-									insertHistValue+=","+rawValue+"";
 								}else if("CasingPressure".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
 									rpcCalculateRequestData.getProduction().setCasingPressure(StringManagerUtils.stringToFloat(rawValue));
 									rpcDeviceInfo.getProduction().setCasingPressure(StringManagerUtils.stringToFloat(rawValue));
-									updateRealtimeData+=",t.CasingPressure="+rawValue+"";
-									insertHistColumns+=",CasingPressure";
-									insertHistValue+=","+rawValue+"";
 								}else if("ProducingfluidLevel".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
 									rpcCalculateRequestData.getProduction().setProducingfluidLevel(StringManagerUtils.stringToFloat(rawValue));
-									rpcDeviceInfo.getProduction().setProducingfluidLevel(StringManagerUtils.stringToFloat(rawValue));
-									updateRealtimeData+=",t.ProducingfluidLevel="+rawValue+"";
-									insertHistColumns+=",ProducingfluidLevel";
 									insertHistValue+=","+rawValue+"";
 								}else if("volumeWaterCut".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
 									rpcCalculateRequestData.getProduction().setWaterCut(StringManagerUtils.stringToFloat(rawValue));
 									rpcDeviceInfo.getProduction().setWaterCut(StringManagerUtils.stringToFloat(rawValue));
-									updateRealtimeData+=",t.volumeWaterCut="+rawValue+"";
-									insertHistColumns+=",volumeWaterCut";
-									insertHistValue+=","+rawValue+"";
 								}else if("FESDiagramAcqtime".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
 									rpcCalculateRequestData.getFESDiagram().setAcqTime(rawValue);
 								}else if("stroke".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
@@ -909,22 +894,29 @@ public class DriverAPIController extends BaseController{
 						}
 					}
 				}
-				
+				//进行功图计算
+				WorkType workType=null;
+				int rpcWorkTypeAlarmLevel=0;
 				if(StringManagerUtils.isNotNull(rpcCalculateRequestData.getFESDiagram().getAcqTime())
 						&& rpcCalculateRequestData.getFESDiagram().getS().size()>0
 						&& rpcCalculateRequestData.getFESDiagram().getF().size()>0){
 					String responseData=StringManagerUtils.sendPostMethod(url, gson.toJson(rpcCalculateRequestData),"utf-8");
 					type = new TypeToken<RPCCalculateResponseData>() {}.getType();
 					rpcCalculateResponseData=gson.fromJson(responseData, type);
-					
 					if(rpcCalculateResponseData!=null&&rpcCalculateResponseData.getCalculationStatus().getResultStatus()==1){
-						WorkType workType=(WorkType) SerializeObjectUnils.unserizlize(jedis.hget("AcqInstanceOwnItem".getBytes(), (rpcCalculateResponseData.getCalculationStatus().getResultCode()+"").getBytes()));
-						ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData("工况","工况",workType.getResultName(),workType.getResultName(),"","resultName","","","","",1);
-						calItemResolutionDataList.add(protocolItemResolutionData);
-					}else{
-						
+						workType=(WorkType) SerializeObjectUnils.unserizlize(jedis.hget("RPCWorkType".getBytes(), (rpcCalculateResponseData.getCalculationStatus().getResultCode()+"").getBytes()));
 					}
 				}
+				if(workType!=null){
+					for(int i=0;alarmInstanceOwnItem!=null&&i<alarmInstanceOwnItem.getItemList().size();i++){
+						if(alarmInstanceOwnItem.getItemList().get(i).getType()==4&&workType.getResultName().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(i).getItemName())){
+							rpcWorkTypeAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
+							break;
+						}
+					}
+				}
+				
+				List<ProtocolItemResolutionData> calItemResolutionDataList=getFESDiagramCalItemData(rpcCalculateRequestData,rpcCalculateResponseData);
 				
 				updateRealtimeData+=" where t.wellId= "+rpcDeviceInfo.getId();
 				insertHistSql="insert into "+historyTable+"("+insertHistColumns+")values("+insertHistValue+")";
@@ -1004,6 +996,40 @@ public class DriverAPIController extends BaseController{
 					}
 					acquisitionItemInfoList.add(acquisitionItemInfo);
 				}
+				//添加计算项
+				for(int i=0;i<calItemResolutionDataList.size();i++){
+					int alarmLevel=0;
+					AcquisitionItemInfo acquisitionItemInfo=new AcquisitionItemInfo();
+					acquisitionItemInfo.setAddr(StringManagerUtils.stringToInteger(calItemResolutionDataList.get(i).getAddr()));
+					acquisitionItemInfo.setColumn(calItemResolutionDataList.get(i).getColumn());
+					acquisitionItemInfo.setTitle(calItemResolutionDataList.get(i).getColumnName());
+					acquisitionItemInfo.setRawTitle(calItemResolutionDataList.get(i).getRawColumnName());
+					acquisitionItemInfo.setValue(calItemResolutionDataList.get(i).getValue());
+					acquisitionItemInfo.setRawValue(calItemResolutionDataList.get(i).getRawValue());
+					acquisitionItemInfo.setDataType(calItemResolutionDataList.get(i).getColumnDataType());
+					acquisitionItemInfo.setResolutionMode(calItemResolutionDataList.get(i).getResolutionMode());
+					acquisitionItemInfo.setBitIndex(calItemResolutionDataList.get(i).getBitIndex());
+					if("resultName".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn())){
+						alarmLevel=rpcWorkTypeAlarmLevel;
+						
+					}
+					acquisitionItemInfo.setAlarmLevel(alarmLevel);
+					acquisitionItemInfo.setUnit(calItemResolutionDataList.get(i).getUnit());
+					acquisitionItemInfo.setSort(calItemResolutionDataList.get(i).getSort());
+					acquisitionItemInfo.setAlarmInfo("工况报警:"+calItemResolutionDataList.get(i).getValue());
+					acquisitionItemInfo.setAlarmType(4);
+					acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(i).getDelay());
+					acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(i).getIsSendMessage());
+					acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(i).getIsSendMail());
+
+					if(acquisitionItemInfo.getAlarmLevel()>0){
+						alarm=true;
+					}
+					acquisitionItemInfoList.add(acquisitionItemInfo);
+				}
+				
+				
+				
 				//更新内存中设备通信状态
 				Map<String, Object> dataModelMap = DataModelMap.getMapObject();
 				List<CommStatus> commStatusList=(List<CommStatus>) dataModelMap.get("DeviceCommStatus");
@@ -1057,20 +1083,22 @@ public class DriverAPIController extends BaseController{
 							webSocketSendData.append("\"totalRoot\":[");
 							info_json.append("[");
 							webSocketSendData.append("{\"name1\":\""+rpcDeviceInfo.getWellName()+":"+acqTime+" 在线\"},");
-							//排序
-							Collections.sort(acquisitionItemInfoList);
+							
 							//筛选
 							List<AcquisitionItemInfo> userAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
 							for(int j=0;j<acquisitionItemInfoList.size();j++){
 								for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
 									if(existDisplayItem(displayInstanceOwnItem.getItemList(), acquisitionItemInfoList.get(j).getRawTitle(), false)){
 										if(displayInstanceOwnItem.getItemList().get(k).getShowLevel()==0||displayInstanceOwnItem.getItemList().get(k).getShowLevel()>userInfo.getRoleShowLevel()){
+											acquisitionItemInfoList.get(j).setSort(displayInstanceOwnItem.getItemList().get(k).getSort());
 											userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
 										}
 										break;
 									}
 								}
 							}
+							//排序
+							Collections.sort(userAcquisitionItemInfoList);
 							//插入排序间隔的空项
 							List<AcquisitionItemInfo> finalAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
 							for(int j=0;j<userAcquisitionItemInfoList.size();j++){
@@ -1148,7 +1176,6 @@ public class DriverAPIController extends BaseController{
 						}
 					}
 				}
-				
 				jedis.disconnect();
 				jedis.close();
 			}
@@ -1680,5 +1707,143 @@ public class DriverAPIController extends BaseController{
             }
         }
 		return flag;
+	}
+	
+	public static boolean existDisplayItemCode(List<DisplayInstanceOwnItem.DisplayItem> displayItemList, String key, boolean caseSensitive ){
+		boolean flag = false;
+		for (int i = 0; i < displayItemList.size(); i++) {
+            boolean match = false;
+            if (caseSensitive) {
+                match = displayItemList.get(i).getItemCode().equals(key);
+            } else {
+                match = displayItemList.get(i).getItemCode().equalsIgnoreCase(key);
+            }
+            if (match) {
+                flag = true;
+                break;
+            }
+        }
+		return flag;
+	}
+	
+	public static List<ProtocolItemResolutionData> getFESDiagramCalItemData(RPCCalculateRequestData calculateRequestData,RPCCalculateResponseData calculateResponseData){
+		List<ProtocolItemResolutionData> FESDiagramCalItemList=new ArrayList<ProtocolItemResolutionData>();
+		if(calculateResponseData!=null&&calculateResponseData.getCalculationStatus().getResultStatus()==1){
+			Jedis jedis = new Jedis();
+			//功图采集时间
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("功图采集时间","功图采集时间",calculateRequestData.getFESDiagram().getAcqTime(),calculateRequestData.getFESDiagram().getAcqTime(),"","FESDiagramAcqtime","","","","",1));
+			//工况
+			WorkType workType=(WorkType) SerializeObjectUnils.unserizlize(jedis.hget("RPCWorkType".getBytes(), (calculateResponseData.getCalculationStatus().getResultCode()+"").getBytes()));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("工况","工况",workType.getResultName(),workType.getResultName(),"","resultName","","","","",1));
+			//冲程、冲次
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲程","冲程",calculateRequestData.getFESDiagram().getStroke()+"",calculateRequestData.getFESDiagram().getStroke()+"","","Stroke","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲次","冲次",calculateRequestData.getFESDiagram().getSPM()+"",calculateRequestData.getFESDiagram().getSPM()+"","","spm","","","","1/min",1));
+			//最大最小载荷
+			String FMax="",FMin="";
+			if(calculateResponseData.getFESDiagram().getFMax()!=null&&calculateResponseData.getFESDiagram().getFMax().size()>0){
+				FMax=calculateResponseData.getFESDiagram().getFMax().get(0)+"";
+			}
+			if(calculateResponseData.getFESDiagram().getFMin()!=null&&calculateResponseData.getFESDiagram().getFMin().size()>0){
+				FMin=calculateResponseData.getFESDiagram().getFMin().get(0)+"";
+			}
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("最大载荷","最大载荷",FMax,FMax,"","FMax","","","","kN",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("最小载荷","最小载荷",FMin,FMin,"","FMin","","","","kN",1));
+			//平衡
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("上冲程最大电流","上冲程最大电流",calculateResponseData.getFESDiagram().getUpStrokeIMax()+"",calculateResponseData.getFESDiagram().getUpStrokeIMax()+"","","UPSTROKEIMAX","","","","A",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("下冲程最大电流","下冲程最大电流",calculateResponseData.getFESDiagram().getDownStrokeIMax()+"",calculateResponseData.getFESDiagram().getDownStrokeIMax()+"","","DOWNSTROKEIMAX","","","","A",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("上冲程最大功率","上冲程最大功率",calculateResponseData.getFESDiagram().getUpStrokeWattMax()+"",calculateResponseData.getFESDiagram().getUpStrokeWattMax()+"","","UPSTROKEIMAX","","","","A",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("下冲程最大功率","下冲程最大功率",calculateResponseData.getFESDiagram().getDownStrokeWattMax()+"",calculateResponseData.getFESDiagram().getDownStrokeWattMax()+"","","DOWNSTROKEIMAX","","","","A",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("电流平衡度","电流平衡度",calculateResponseData.getFESDiagram().getIDegreeBalance()+"",calculateResponseData.getFESDiagram().getIDegreeBalance()+"","","IDEGREEBALANCE","","","","%",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("功率平衡度","功率平衡度",calculateResponseData.getFESDiagram().getWattDegreeBalance()+"",calculateResponseData.getFESDiagram().getWattDegreeBalance()+"","","WATTDEGREEBALANCE","","","","%",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("移动距离","移动距离",calculateResponseData.getFESDiagram().getDeltaRadius()+"",calculateResponseData.getFESDiagram().getDeltaRadius()+"","","DELTARADIUS","","","","m",1));
+			
+			//充满系数、抽空充满系数
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("充满系数","充满系数",calculateResponseData.getFESDiagram().getFullnessCoefficient()+"",calculateResponseData.getFESDiagram().getFullnessCoefficient()+"","","FULLNESSCOEFFICIENT","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("抽空充满系数","抽空充满系数",calculateResponseData.getFESDiagram().getNoLiquidFullnessCoefficient()+"",calculateResponseData.getFESDiagram().getNoLiquidFullnessCoefficient()+"","","NOLIQUIDFULLNESSCOEFFICIENT","","","","小数",1));
+			//柱塞冲程、柱塞有效冲程、抽空柱塞有效冲程
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("柱塞冲程","柱塞冲程",calculateResponseData.getFESDiagram().getPlungerStroke()+"",calculateResponseData.getFESDiagram().getPlungerStroke()+"","","PLUNGERSTROKE","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("柱塞有效冲程","柱塞有效冲程",calculateResponseData.getFESDiagram().getAvailablePlungerStroke()+"",calculateResponseData.getFESDiagram().getAvailablePlungerStroke()+"","","AVAILABLEPLUNGERSTROKE","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("抽空柱塞有效冲程","抽空柱塞有效冲程",calculateResponseData.getFESDiagram().getNoLiquidAvailablePlungerStroke()+"",calculateResponseData.getFESDiagram().getNoLiquidAvailablePlungerStroke()+"","","NOLIQUIDAVAILABLEPLUNGERSTROKE","","","","m",1));
+			
+			//上下理论载荷线
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("上理论载荷线","上理论载荷线",calculateResponseData.getFESDiagram().getUpperLoadLine()+"",calculateResponseData.getFESDiagram().getUpperLoadLine()+"","","UPPERLOADLINE","","","","kN",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("考虑沉没压力的理论上载荷","考虑沉没压力的理论上载荷",calculateResponseData.getFESDiagram().getUpperLoadLineOfExact()+"",calculateResponseData.getFESDiagram().getUpperLoadLineOfExact()+"","","UPPERLOADLINEOFEXACT","","","","kN",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("下理论载荷线","下理论载荷线",calculateResponseData.getFESDiagram().getLowerLoadLine()+"",calculateResponseData.getFESDiagram().getLowerLoadLine()+"","","LOWERLOADLINE","","","","kN",1));
+
+			//位移最大、最小值索引
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("位移最大值索引","位移最大值索引",calculateResponseData.getFESDiagram().getSMaxIndex()+"",calculateResponseData.getFESDiagram().getSMaxIndex()+"","","SMAXINDEX","","","","",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("位移最小值索引","位移最小值索引",calculateResponseData.getFESDiagram().getSMinIndex()+"",calculateResponseData.getFESDiagram().getSMinIndex()+"","","SMININDEX","","","","",1));
+			
+			
+			//产量
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("理论排量","理论排量",calculateResponseData.getProduction().getTheoreticalProduction()+"",calculateResponseData.getProduction().getTheoreticalProduction()+"","","THEORETICALPRODUCTION","","","","m^3/d",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产液量","产液量",calculateResponseData.getProduction().getLiquidVolumetricProduction()+"",calculateResponseData.getProduction().getLiquidVolumetricProduction()+"","","LIQUIDVOLUMETRICPRODUCTION","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产油量","产油量",calculateResponseData.getProduction().getOilVolumetricProduction()+"",calculateResponseData.getProduction().getOilVolumetricProduction()+"","","OILVOLUMETRICPRODUCTION","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产水量","产水量",calculateResponseData.getProduction().getWaterVolumetricProduction()+"",calculateResponseData.getProduction().getWaterVolumetricProduction()+"","","WATERVOLUMETRICPRODUCTION","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("柱塞有效冲程计算产量","柱塞有效冲程计算产量",calculateResponseData.getProduction().getAvailablePlungerStrokeVolumetricProduction()+"",calculateResponseData.getProduction().getAvailablePlungerStrokeVolumetricProduction()+"","","AVAILABLEPLUNGERSTROKEPROD_V","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵间隙漏失量","泵间隙漏失量",calculateResponseData.getProduction().getPumpClearanceLeakVolumetricProduction()+"",calculateResponseData.getProduction().getPumpClearanceLeakVolumetricProduction()+"","","PUMPCLEARANCELEAKPROD_V","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("游动凡尔漏失量","游动凡尔漏失量",calculateResponseData.getProduction().getTVLeakVolumetricProduction()+"",calculateResponseData.getProduction().getTVLeakVolumetricProduction()+"","","TVLEAKVOLUMETRICPRODUCTION","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("固定凡尔漏失量","固定凡尔漏失量",calculateResponseData.getProduction().getSVLeakVolumetricProduction()+"",calculateResponseData.getProduction().getSVLeakVolumetricProduction()+"","","SVLEAKVOLUMETRICPRODUCTION","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("气影响","气影响",calculateResponseData.getProduction().getGasInfluenceVolumetricProduction()+"",calculateResponseData.getProduction().getGasInfluenceVolumetricProduction()+"","","GASINFLUENCEPROD_V","","","","m^3/d",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产液量","产液量",calculateResponseData.getProduction().getLiquidWeightProduction()+"",calculateResponseData.getProduction().getLiquidWeightProduction()+"","","LIQUIDWEIGHTPRODUCTION","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产油量","产油量",calculateResponseData.getProduction().getOilWeightProduction()+"",calculateResponseData.getProduction().getOilWeightProduction()+"","","OILWEIGHTPRODUCTION","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产水量","产水量",calculateResponseData.getProduction().getWaterWeightProduction()+"",calculateResponseData.getProduction().getWaterWeightProduction()+"","","WATERWEIGHTPRODUCTION","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("柱塞有效冲程计算产量","柱塞有效冲程计算产量",calculateResponseData.getProduction().getAvailablePlungerStrokeWeightProduction()+"",calculateResponseData.getProduction().getAvailablePlungerStrokeWeightProduction()+"","","AVAILABLEPLUNGERSTROKEPROD_W","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵间隙漏失量","泵间隙漏失量",calculateResponseData.getProduction().getPumpClearanceLeakWeightProduction()+"",calculateResponseData.getProduction().getPumpClearanceLeakWeightProduction()+"","","PUMPCLEARANCELEAKPROD_W","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("游动凡尔漏失量","游动凡尔漏失量",calculateResponseData.getProduction().getTVLeakWeightProduction()+"",calculateResponseData.getProduction().getTVLeakWeightProduction()+"","","TVLEAKWEIGHTPRODUCTION","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("固定凡尔漏失量","固定凡尔漏失量",calculateResponseData.getProduction().getSVLeakWeightProduction()+"",calculateResponseData.getProduction().getSVLeakWeightProduction()+"","","SVLEAKWEIGHTPRODUCTION","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("气影响","气影响",calculateResponseData.getProduction().getGasInfluenceWeightProduction()+"",calculateResponseData.getProduction().getGasInfluenceWeightProduction()+"","","GASINFLUENCEPROD_W","","","","t/d",1));
+			
+			//液面反演校正值、反演液面
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("液面反演校正值","液面反演校正值",calculateResponseData.getProduction().getLevelCorrectValue()+"",calculateResponseData.getProduction().getLevelCorrectValue()+"","","LEVELCORRECTVALUE","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("反演液面","反演液面",calculateResponseData.getProduction().getProducingfluidLevel()+"",calculateResponseData.getProduction().getProducingfluidLevel()+"","","INVERPRODUCINGFLUIDLEVEL","","","","m",1));
+			
+			//系统效率
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("有功功率","有功功率",calculateResponseData.getFESDiagram().getAvgWatt()+"",calculateResponseData.getFESDiagram().getAvgWatt()+"","","AVERAGEWATT","","","","kW",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("光杆功率","光杆功率",calculateResponseData.getSystemEfficiency().getPolishRodPower()+"",calculateResponseData.getSystemEfficiency().getPolishRodPower()+"","","POLISHRODPOWER","","","","kW",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("水功率","水功率",calculateResponseData.getSystemEfficiency().getWaterPower()+"",calculateResponseData.getSystemEfficiency().getWaterPower()+"","","WATERPOWER","","","","kW",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("地面效率","地面效率",calculateResponseData.getSystemEfficiency().getSurfaceSystemEfficiency()+"",calculateResponseData.getSystemEfficiency().getSurfaceSystemEfficiency()+"","","WATERPOWER","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("井下效率","井下效率",calculateResponseData.getSystemEfficiency().getWellDownSystemEfficiency()+"",calculateResponseData.getSystemEfficiency().getWellDownSystemEfficiency()+"","","SURFACESYSTEMEFFICIENCY","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("系统效率","系统效率",calculateResponseData.getSystemEfficiency().getSystemEfficiency()+"",calculateResponseData.getSystemEfficiency().getSystemEfficiency()+"","","SYSTEMEFFICIENCY","","","","小数",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("吨液百米耗电量","吨液百米耗电量",calculateResponseData.getSystemEfficiency().getEnergyPer100mLift()+"",calculateResponseData.getSystemEfficiency().getEnergyPer100mLift()+"","","ENERGYPER100MLIFT","","","","kW· h/100m· t",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("功图面积","功图面积",calculateResponseData.getFESDiagram().getArea()+"",calculateResponseData.getFESDiagram().getArea()+"","","AREA","","","","",1));
+			
+			//泵效
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("抽油杆伸长量","抽油杆伸长量",calculateResponseData.getPumpEfficiency().getRodFlexLength()+"",calculateResponseData.getPumpEfficiency().getRodFlexLength()+"","","RODFLEXLENGTH","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("油管伸缩量","油管伸缩量",calculateResponseData.getPumpEfficiency().getTubingFlexLength()+"",calculateResponseData.getPumpEfficiency().getTubingFlexLength()+"","","TUBINGFLEXLENGTH","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("惯性载荷增量","惯性载荷增量",calculateResponseData.getPumpEfficiency().getInertiaLength()+"",calculateResponseData.getPumpEfficiency().getInertiaLength()+"","","INERTIALENGTH","","","","m",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲程损失系数","冲程损失系数",calculateResponseData.getPumpEfficiency().getPumpEff1()+"",calculateResponseData.getPumpEfficiency().getPumpEff1()+"","","PUMPEFF1","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("充满系数","充满系数",calculateResponseData.getPumpEfficiency().getPumpEff2()+"",calculateResponseData.getPumpEfficiency().getPumpEff2()+"","","PUMPEFF2","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("间隙漏失系数","间隙漏失系数",calculateResponseData.getPumpEfficiency().getPumpEff3()+"",calculateResponseData.getPumpEfficiency().getPumpEff3()+"","","PUMPEFF3","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("液体收缩系数","液体收缩系数",calculateResponseData.getPumpEfficiency().getPumpEff4()+"",calculateResponseData.getPumpEfficiency().getPumpEff4()+"","","PUMPEFF4","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("总泵效","总泵效",calculateResponseData.getPumpEfficiency().getPumpEff()+"",calculateResponseData.getPumpEfficiency().getPumpEff()+"","","PUMPEFF","","","","小数",1));
+			
+			//泵入口出口参数
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵入口压力","泵入口压力",calculateResponseData.getProduction().getPumpIntakeP()+"",calculateResponseData.getProduction().getPumpIntakeP()+"","","PUMPINTAKEP","","","","MPa",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵入口温度","泵入口温度",calculateResponseData.getProduction().getPumpIntakeT()+"",calculateResponseData.getProduction().getPumpIntakeT()+"","","PUMPINTAKET","","","","℃",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵入口就地气液比","泵入口就地气液比",calculateResponseData.getProduction().getPumpIntakeGOL()+"",calculateResponseData.getProduction().getPumpIntakeGOL()+"","","PUMPINTAKEGOL","","","","m^3/m^3",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵入口粘度","泵入口粘度",calculateResponseData.getProduction().getPumpIntakeVisl()+"",calculateResponseData.getProduction().getPumpIntakeVisl()+"","","PUMPINTAKEVISL","","","","mPa·s",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵入口原油体积系数","泵入口原油体积系数",calculateResponseData.getProduction().getPumpIntakeBo()+"",calculateResponseData.getProduction().getPumpIntakeBo()+"","","PUMPINTAKEBO","","","","小数",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵出口压力","泵出口压力",calculateResponseData.getProduction().getPumpOutletP()+"",calculateResponseData.getProduction().getPumpOutletP()+"","","PUMPOUTLETP","","","","MPa",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵出口温度","泵出口温度",calculateResponseData.getProduction().getPumpOutletT()+"",calculateResponseData.getProduction().getPumpOutletT()+"","","PUMPOUTLETT","","","","℃",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵出口就地气液比","泵出口就地气液比",calculateResponseData.getProduction().getPumpOutletGOL()+"",calculateResponseData.getProduction().getPumpOutletGOL()+"","","PUMPOUTLETGOL","","","","m^3/m^3",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵出口粘度","泵出口粘度",calculateResponseData.getProduction().getPumpOutletVisl()+"",calculateResponseData.getProduction().getPumpOutletVisl()+"","","PUMPOUTLETVISL","","","","mPa·s",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵出口原油体积系数","泵出口原油体积系数",calculateResponseData.getProduction().getPumpOutletBo()+"",calculateResponseData.getProduction().getPumpOutletBo()+"","","PUMPOUTLETBO","","","","小数",1));
+			
+			
+			//杆参数
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("杆参数","杆参数",calculateResponseData.getRodCalData()+"",calculateResponseData.getRodCalData()+"","","RODSTRING","","","","",1));
+			jedis.disconnect();
+			jedis.close();
+		}else{
+			
+		}
+		return FESDiagramCalItemList;
 	}
 }

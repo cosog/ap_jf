@@ -565,7 +565,7 @@ public class MemoryDataManagerTask {
 			Jedis jedis = new Jedis();
 			String sql="select t3.code as instanceCode,t3.deviceType,t.unitid,t2.protocol,"
 					+ " t.id as itemId,t.itemname,t.itemcode,t.itemaddr,t.bitindex,"
-					+ "t.value,t.upperlimit,t.lowerlimit,t.hystersis,t.delay,t.alarmlevel,t.alarmsign,t.type,t.issendmessage,t.issendmail "
+					+ "t.value,t.upperlimit,t.lowerlimit,t.hystersis,t.delay,decode(t.alarmsign,0,0,t.alarmlevel) as alarmlevel,t.alarmsign,t.type,t.issendmessage,t.issendmail "
 					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3 "
 					+ " where t.unitid=t2.id and t2.id=t3.alarmunitid";
 			if(StringManagerUtils.isNotNull(unitId)){
