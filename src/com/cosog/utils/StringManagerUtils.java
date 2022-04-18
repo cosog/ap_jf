@@ -85,6 +85,8 @@ import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.svg.SVGDocument;
 
+import com.cosog.model.calculate.AcqInstanceOwnItem;
+import com.cosog.model.calculate.DisplayInstanceOwnItem;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -1206,7 +1208,6 @@ public class StringManagerUtils {
             }
         }
         return flag;
-
     }
 
     public static boolean clobDataFiter(String value) {
@@ -1224,6 +1225,121 @@ public class StringManagerUtils {
         }
         return flag;
 
+    }
+    
+    public static boolean databaseColumnFiter(String value) {
+        boolean flag = false;
+        String arrays[] = {
+        		"ID",
+        		"WELLID",
+        		"ACQTIME",
+        		"COMMSTATUS",
+        		"COMMTIME",
+        		"COMMTIMEEFFICIENCY",
+        		"COMMRANGE",
+        		"RUNSTATUS",
+        		"RUNTIMEEFFICIENCY",
+        		"RUNTIME",
+        		"RUNRANGE",
+        		"PRODUCTIONDATA",
+        		"PUMPINGMODELID",
+        		"BALANCEINFO",
+        		"FESDIAGRAMACQTIME",
+        		"STROKE",
+        		"SPM",
+        		"FMAX",
+        		"FMIN",
+        		"POSITION_CURVE",
+        		"ANGLE_CURVE",
+        		"LOAD_CURVE",
+        		"POWER_CURVE",
+        		"CURRENT_CURVE",
+        		"RESULTCODE",
+        		"FULLNESSCOEFFICIENT",
+        		"UPPERLOADLINE",
+        		"UPPERLOADLINEOFEXACT",
+        		"LOWERLOADLINE",
+        		"PUMPFSDIAGRAM",
+        		"THEORETICALPRODUCTION",
+        		"LIQUIDVOLUMETRICPRODUCTION",
+        		"OILVOLUMETRICPRODUCTION",
+        		"WATERVOLUMETRICPRODUCTION",
+        		"AVAILABLEPLUNGERSTROKEPROD_V",
+        		"PUMPCLEARANCELEAKPROD_V",
+        		"TVLEAKVOLUMETRICPRODUCTION",
+        		"SVLEAKVOLUMETRICPRODUCTION",
+        		"GASINFLUENCEPROD_V",
+        		"LIQUIDWEIGHTPRODUCTION",
+        		"OILWEIGHTPRODUCTION",
+        		"WATERWEIGHTPRODUCTION",
+        		"AVAILABLEPLUNGERSTROKEPROD_W",
+        		"PUMPCLEARANCELEAKPROD_W",
+        		"TVLEAKWEIGHTPRODUCTION",
+        		"SVLEAKWEIGHTPRODUCTION",
+        		"GASINFLUENCEPROD_W",
+        		"AVERAGEWATT",
+        		"POLISHRODPOWER",
+        		"WATERPOWER",
+        		"SURFACESYSTEMEFFICIENCY",
+        		"WELLDOWNSYSTEMEFFICIENCY",
+        		"SYSTEMEFFICIENCY",
+        		"ENERGYPER100MLIFT",
+        		"AREA",
+        		"RODFLEXLENGTH",
+        		"TUBINGFLEXLENGTH",
+        		"INERTIALENGTH",
+        		"PUMPEFF1",
+        		"PUMPEFF2",
+        		"PUMPEFF3",
+        		"PUMPEFF4",
+        		"PUMPEFF",
+        		"PUMPINTAKEP",
+        		"PUMPINTAKET",
+        		"PUMPINTAKEGOL",
+        		"PUMPINTAKEVISL",
+        		"PUMPINTAKEBO",
+        		"PUMPOUTLETP",
+        		"PUMPOUTLETT",
+        		"PUMPOUTLETGOL",
+        		"PUMPOUTLETVISL",
+        		"PUMPOUTLETBO",
+        		"RODSTRING",
+        		"PLUNGERSTROKE",
+        		"AVAILABLEPLUNGERSTROKE",
+        		"LEVELCORRECTVALUE",
+        		"INVERPRODUCINGFLUIDLEVEL",
+        		"NOLIQUIDFULLNESSCOEFFICIENT",
+        		"NOLIQUIDAVAILABLEPLUNGERSTROKE",
+        		"SMAXINDEX",
+        		"SMININDEX",
+        		"UPSTROKEIMAX",
+        		"DOWNSTROKEIMAX",
+        		"UPSTROKEWATTMAX",
+        		"DOWNSTROKEWATTMAX",
+        		"IDEGREEBALANCE",
+        		"WATTDEGREEBALANCE",
+        		"DELTARADIUS",
+        		"CRANKANGLE",
+        		"POLISHRODV",
+        		"POLISHRODA",
+        		"PR",
+        		"TF",
+        		"LOADTORQUE",
+        		"CRANKTORQUE",
+        		"CURRENTBALANCETORQUE",
+        		"CURRENTNETTORQUE",
+        		"EXPECTEDBALANCETORQUE",
+        		"EXPECTEDNETTORQUE",
+        		"WELLBORESLICE",
+        		"RESULTSTATUS",
+        		"SAVETIME"
+        };
+        for (String str: arrays) {
+            if (str.equalsIgnoreCase(value)) {
+                flag = true;
+            }
+        }
+        return flag;
     }
 
     public static boolean stringIsNull(String s) {
@@ -3336,4 +3452,55 @@ public class StringManagerUtils {
         }
         return rt.toString();
     }
+    
+    public static boolean existAcqItem(List<AcqInstanceOwnItem.AcqItem> acqInstanceOwnItemList, String key, boolean caseSensitive ){
+		boolean flag = false;
+		for (int i = 0; i < acqInstanceOwnItemList.size(); i++) {
+            boolean match = false;
+            if (caseSensitive) {
+                match = acqInstanceOwnItemList.get(i).getItemName().equals(key);
+            } else {
+                match = acqInstanceOwnItemList.get(i).getItemName().equalsIgnoreCase(key);
+            }
+            if (match) {
+                flag = true;
+                break;
+            }
+        }
+		return flag;
+	}
+	
+	public static boolean existDisplayItem(List<DisplayInstanceOwnItem.DisplayItem> displayItemList, String key, boolean caseSensitive ){
+		boolean flag = false;
+		for (int i = 0; i < displayItemList.size(); i++) {
+            boolean match = false;
+            if (caseSensitive) {
+                match = displayItemList.get(i).getItemName().equals(key);
+            } else {
+                match = displayItemList.get(i).getItemName().equalsIgnoreCase(key);
+            }
+            if (match) {
+                flag = true;
+                break;
+            }
+        }
+		return flag;
+	}
+	
+	public static boolean existDisplayItemCode(List<DisplayInstanceOwnItem.DisplayItem> displayItemList, String key, boolean caseSensitive ){
+		boolean flag = false;
+		for (int i = 0; i < displayItemList.size(); i++) {
+            boolean match = false;
+            if (caseSensitive) {
+                match = displayItemList.get(i).getItemCode().equals(key);
+            } else {
+                match = displayItemList.get(i).getItemCode().equalsIgnoreCase(key);
+            }
+            if (match) {
+                flag = true;
+                break;
+            }
+        }
+		return flag;
+	}
 }

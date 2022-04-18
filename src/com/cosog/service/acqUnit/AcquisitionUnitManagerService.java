@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
@@ -20,6 +21,7 @@ import com.cosog.model.AlarmShowStyle;
 import com.cosog.model.ProtocolAlarmInstance;
 import com.cosog.model.ProtocolSMSInstance;
 import com.cosog.model.User;
+import com.cosog.model.calculate.AcqInstanceOwnItem;
 import com.cosog.model.data.DataDictionary;
 import com.cosog.model.drive.KafkaConfig;
 import com.cosog.model.drive.ModbusProtocolAlarmUnitSaveData;
@@ -31,6 +33,7 @@ import com.cosog.service.base.CommonDataService;
 import com.cosog.service.data.DataitemsInfoService;
 import com.cosog.task.EquipmentDriverServerTask;
 import com.cosog.task.MemoryDataManagerTask;
+import com.cosog.task.MemoryDataManagerTask.CalItem;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.DataSourceConfig;
 import com.cosog.utils.EquipmentDriveMap;
@@ -1194,16 +1197,23 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		if("1".equalsIgnoreCase(deviceType)){
 			key="pcpCalItemList";
 		}
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
-		ArrayList<MemoryDataManagerTask.CalItem> calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
-		if(calItemList==null){
-			if("0".equalsIgnoreCase(deviceType)){
-				MemoryDataManagerTask.loadRPCCalculateItem();
-			}else{
-				MemoryDataManagerTask.loadPCPCalculateItem();
-			}
-			calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
+		Jedis jedis = new Jedis();
+		if(!jedis.exists(key.getBytes())){
+			MemoryDataManagerTask.loadRPCCalculateItem();
 		}
+		Set<byte[]>rpcCalItemSet= jedis.smembers(key.getBytes());
+		jedis.disconnect();
+		jedis.close();
+//		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
+//		ArrayList<MemoryDataManagerTask.CalItem> calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
+//		if(calItemList==null){
+//			if("0".equalsIgnoreCase(deviceType)){
+//				MemoryDataManagerTask.loadRPCCalculateItem();
+//			}else{
+//				MemoryDataManagerTask.loadPCPCalculateItem();
+//			}
+//			calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
+//		}
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
@@ -1247,7 +1257,9 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		}
 		
 		int index=1;
-		for(int j=0;j<calItemList.size();j++){
+		for(byte[] rpcCalItemByteArr:rpcCalItemSet){
+			CalItem calItem=(CalItem) SerializeObjectUnils.unserizlize(rpcCalItemByteArr);
+			
 			boolean checked=false;
 			String sort="";
 			String showLevel="";
@@ -1256,10 +1268,10 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			String isHistoryCurve="";
 			String historyCurveColor="";
 
-			checked=StringManagerUtils.existOrNot(itemsCodeList, calItemList.get(j).getCode(),false);
+			checked=StringManagerUtils.existOrNot(itemsCodeList, calItem.getCode(),false);
 			if(checked){
 				for(int k=0;k<itemsList.size();k++){
-					if(itemsCodeList.get(k).equalsIgnoreCase(calItemList.get(j).getCode())){
+					if(itemsCodeList.get(k).equalsIgnoreCase(calItem.getCode())){
 						sort=itemsSortList.get(k);
 						showLevel=itemsShowLevelList.get(k);
 						isRealtimeCurve=realtimeCurveList.get(k);
@@ -1272,15 +1284,15 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			}
 			result_json.append("{\"checked\":"+checked+","
 					+ "\"id\":"+(index)+","
-					+ "\"title\":\""+calItemList.get(j).getName()+"\","
-					+ "\"unit\":\""+calItemList.get(j).getUnit()+"\","
+					+ "\"title\":\""+calItem.getName()+"\","
+					+ "\"unit\":\""+calItem.getUnit()+"\","
 					+ "\"showLevel\":\""+showLevel+"\","
 					+ "\"sort\":\""+sort+"\","
 					+ "\"isRealtimeCurve\":\""+isRealtimeCurve+"\","
 					+ "\"realtimeCurveColor\":\""+realtimeCurveColor+"\","
 					+ "\"isHistoryCurve\":\""+isHistoryCurve+"\","
 					+ "\"historyCurveColor\":\""+historyCurveColor+"\","
-					+ "\"code\":\""+calItemList.get(j).getCode()+"\""
+					+ "\"code\":\""+calItem.getCode()+"\""
 					+ "},");
 			index++;
 		
@@ -1631,16 +1643,23 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		if("1".equalsIgnoreCase(deviceType)){
 			key="pcpCalItemList";
 		}
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
-		ArrayList<MemoryDataManagerTask.CalItem> calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
-		if(calItemList==null){
-			if("0".equalsIgnoreCase(deviceType)){
-				MemoryDataManagerTask.loadRPCCalculateItem();
-			}else{
-				MemoryDataManagerTask.loadPCPCalculateItem();
-			}
-			calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
+		Jedis jedis = new Jedis();
+		if(!jedis.exists(key.getBytes())){
+			MemoryDataManagerTask.loadRPCCalculateItem();
 		}
+		Set<byte[]>rpcCalItemSet= jedis.smembers(key.getBytes());
+		jedis.disconnect();
+		jedis.close();
+//		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
+//		ArrayList<MemoryDataManagerTask.CalItem> calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
+//		if(calItemList==null){
+//			if("0".equalsIgnoreCase(deviceType)){
+//				MemoryDataManagerTask.loadRPCCalculateItem();
+//			}else{
+//				MemoryDataManagerTask.loadPCPCalculateItem();
+//			}
+//			calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
+//		}
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
@@ -1670,7 +1689,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2,tbl_protocoldisplayinstance t3 "
 				+ " where t.unitid=t2.id and t2.id=t3.displayunitid and t.type=1 and t3.id= "+id
 				+ " order by t.id";
-		if(calItemList!=null){
+		if(rpcCalItemSet!=null){
 			List<?> list=this.findCallSql(sql);
 			for(int i=0;i<list.size();i++){
 				Object[] obj=(Object[])list.get(i);
@@ -1684,8 +1703,10 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				historyCurveList.add(obj[7]+"");
 				historyCurveColorList.add(obj[8]+"");
 			}
-			for(int j=0;j<calItemList.size();j++){
-				if(StringManagerUtils.existOrNot(itemsCodeList, calItemList.get(j).getCode(), false)){
+			int index=1;
+			for(byte[] rpcCalItemByteArr:rpcCalItemSet){
+				CalItem calItem=(CalItem) SerializeObjectUnils.unserizlize(rpcCalItemByteArr);
+				if(StringManagerUtils.existOrNot(itemsCodeList, calItem.getCode(), false)){
 					String sort="";
 					String showLevel="";
 					String isRealtimeCurve="";
@@ -1694,7 +1715,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 					String historyCurveColor="";
 
 					for(int k=0;k<itemsList.size();k++){
-						if(itemsCodeList.get(k).equalsIgnoreCase(calItemList.get(j).getCode())){
+						if(itemsCodeList.get(k).equalsIgnoreCase(calItem.getCode())){
 							sort=itemsSortList.get(k);
 							showLevel=itemsShowLevelList.get(k);
 							isRealtimeCurve=realtimeCurveList.get(k);
@@ -1705,9 +1726,9 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 						}
 					}
 					result_json.append("{"
-							+ "\"id\":"+(j+1)+","
-							+ "\"title\":\""+calItemList.get(j).getName()+"\","
-							+ "\"unit\":\""+calItemList.get(j).getUnit()+"\","
+							+ "\"id\":"+index+","
+							+ "\"title\":\""+calItem.getName()+"\","
+							+ "\"unit\":\""+calItem.getUnit()+"\","
 							+ "\"showLevel\":\""+showLevel+"\","
 							+ "\"sort\":\""+sort+"\","
 							+ "\"isRealtimeCurve\":\""+isRealtimeCurve+"\","
@@ -1715,6 +1736,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 							+ "\"isHistoryCurve\":\""+isHistoryCurve+"\","
 							+ "\"historyCurveColor\":\""+historyCurveColor+"\""
 							+ "},");
+					index++;
 				}
 			}
 		}

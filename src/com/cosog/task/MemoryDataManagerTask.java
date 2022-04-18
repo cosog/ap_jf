@@ -283,7 +283,7 @@ public class MemoryDataManagerTask {
 				rpcDeviceInfo.setSortNum(32);
 				rpcDeviceInfo.setAcqTime("");
 				rpcDeviceInfo.setAcquisitionItemInfoList(new ArrayList<AcquisitionItemInfo>());
-				System.out.println(gson.toJson(rpcDeviceInfo));
+//				System.out.println(gson.toJson(rpcDeviceInfo));
 				String key=rpcDeviceInfo.getId()+"";
 				jedis.hset("RPCDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(rpcDeviceInfo));//哈希(Hash)
 			}
@@ -368,7 +368,7 @@ public class MemoryDataManagerTask {
 					pcpDeviceInfo.setManualIntervention(null);
 				}
 				pcpDeviceInfo.setSortNum(21);
-				System.out.println(gson.toJson(pcpDeviceInfo));
+//				System.out.println(gson.toJson(pcpDeviceInfo));
 				String key=pcpDeviceInfo.getId()+"";
 				jedis.hset("PCPDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(pcpDeviceInfo));//哈希(Hash)
 			}
@@ -477,7 +477,7 @@ public class MemoryDataManagerTask {
 		try {
 			Jedis jedis = new Jedis();
 			String sql="select t3.code as instanceCode,t3.deviceType,t2.protocol,t.unitid,t.id as itemid,t.itemname,t.itemcode,t.bitindex,"
-					+ "t.showlevel,t.sort,t.realtimecurve,t.realtimecurvecolor,t.historycurve,t.historycurvecolor,t.type "
+					+ "t.showlevel,decode(t.sort,null,9999,t.sort) as sort,t.realtimecurve,t.realtimecurvecolor,t.historycurve,t.historycurvecolor,t.type "
 					+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2,tbl_protocoldisplayinstance t3 "
 					+ " where t.unitid=t2.id and t2.id=t3.displayunitid";
 			if(StringManagerUtils.isNotNull(unitId)){
@@ -518,7 +518,7 @@ public class MemoryDataManagerTask {
 				displayItem.setRealtimeCurveColor(rs.getString(12));
 				displayItem.setHistoryCurve(rs.getInt(13));
 				displayItem.setHistoryCurveColor(rs.getString(14));
-				
+				displayItem.setType(rs.getInt(15));
 				int index=-1;
 				for(int i=0;i<displayInstanceOwnItem.getItemList().size();i++){
 					if(displayItem.getItemId()==displayInstanceOwnItem.getItemList().get(i).getItemId()){
@@ -845,7 +845,8 @@ public class MemoryDataManagerTask {
 				}
 			}
 			jedis.set("AlarmShowStyle".getBytes(), SerializeObjectUnils.serialize(alarmShowStyle));
-			
+			jedis.disconnect();
+			jedis.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,4 +1,4 @@
-Ext.define('AP.store.diagnosis.SingleFESDiagramDetailsChartsStore', {
+Ext.define('AP.store.realTimeMonitoring.SingleFESDiagramDetailsChartsStore', {
     extend: 'Ext.data.Store',
     id: "SingleFESDiagramDetailsChartsStore_Id",
     alias: 'widget.SingleFESDiagramDetailsChartsStore',

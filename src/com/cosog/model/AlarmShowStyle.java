@@ -24,7 +24,9 @@ public class AlarmShowStyle implements java.io.Serializable {
 	
 	private AlarmLevelStyle Data;
 
-	public static class CommAlarmStyle{
+	public static class CommAlarmStyle implements java.io.Serializable {
+		private static final long serialVersionUID = 1L;
+		
     	private AlarmStyle online;
 
         private AlarmStyle offline;
@@ -46,7 +48,9 @@ public class AlarmShowStyle implements java.io.Serializable {
 		}
     }
     
-    public static class AlarmLevelStyle{
+    public static class AlarmLevelStyle  implements java.io.Serializable {
+    	private static final long serialVersionUID = 1L;
+    	
     	private AlarmStyle Normal;
 
         private AlarmStyle FirstLevel;
@@ -88,8 +92,9 @@ public class AlarmShowStyle implements java.io.Serializable {
 		}
     }
 	
-	public static class AlarmStyle
-	{
+	public static class AlarmStyle implements java.io.Serializable {
+		private static final long serialVersionUID = 1L;
+		
 	    private int Value;
 
 	    private String BackgroundColor;

@@ -500,7 +500,7 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             			CreateRPCDeviceRealTimeMonitoringDataTable(selectedItem.data.id,selectedItem.data.wellName,0)
                             		}
             					}else{
-            						Ext.create('AP.store.diagnosis.SingleFESDiagramDetailsChartsStore');
+            						Ext.create('AP.store.realTimeMonitoring.SingleFESDiagramDetailsChartsStore');
             					}
             				}
                 		}
