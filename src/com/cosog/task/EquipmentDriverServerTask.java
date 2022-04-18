@@ -56,7 +56,7 @@ public class EquipmentDriverServerTask {
 	}
 	
 	@SuppressWarnings({ "static-access", "unused" })
-//	@Scheduled(fixedRate = 1000*60*60*24*365*100)
+	@Scheduled(fixedRate = 1000*60*60*24*365*100)
 	public void driveServerTast() throws SQLException, ParseException,InterruptedException, IOException{
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
@@ -502,12 +502,13 @@ public class EquipmentDriverServerTask {
 					if(!StringManagerUtils.existOrNot(acquisitionItemColumns, modbusProtocolConfig.getProtocol().get(i).getItems().get(j).getTitle(),false)){
 						String itemName=modbusProtocolConfig.getProtocol().get(i).getItems().get(j).getTitle();
 						String itemColumn="";
-						if(!StringManagerUtils.existOrNotByValue(acquisitionItemColumns,StringManagerUtils.protocolItemNameToCol(modbusProtocolConfig.getProtocol().get(i).getItems().get(j).getTitle()),false)){
-							itemColumn=StringManagerUtils.protocolItemNameToCol(modbusProtocolConfig.getProtocol().get(i).getItems().get(j).getTitle());
+						String mappingColumn=StringManagerUtils.protocolItemNameToCol(modbusProtocolConfig.getProtocol().get(i).getItems().get(j).getTitle());
+						if((!StringManagerUtils.existOrNotByValue(acquisitionItemColumns,mappingColumn,false))&&(!StringManagerUtils.databaseColumnFiter(mappingColumn))){
+							itemColumn=mappingColumn;
 						}else{
 							for(int index=1;1==1;index++){
-								if(!StringManagerUtils.existOrNot(acquisitionItemColumns,StringManagerUtils.protocolItemNameToCol(modbusProtocolConfig.getProtocol().get(i).getItems().get(j).getTitle()+index),false)){
-									itemColumn=StringManagerUtils.protocolItemNameToCol(modbusProtocolConfig.getProtocol().get(i).getItems().get(j).getTitle())+index;
+								if((!StringManagerUtils.existOrNot(acquisitionItemColumns,mappingColumn+index,false))&&(!StringManagerUtils.databaseColumnFiter(mappingColumn+index))){
+									itemColumn=mappingColumn+index;
 									break;
 								}
 							}
@@ -540,6 +541,9 @@ public class EquipmentDriverServerTask {
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
+		String fiterColumnsArr[]={
+				"ID"
+		};
 		int result=0;
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
 		String columnsKey="rpcDeviceAcquisitionItemColumns";
@@ -553,7 +557,7 @@ public class EquipmentDriverServerTask {
 		Map<String,String> acquisitionItemColumns=acquisitionItemColumnsMap.get(columnsKey);
 		List<String> acquisitionItemDataBaseColumns=new ArrayList<String>();
 		String sql="select t.COLUMN_NAME from user_tab_cols t where t.TABLE_NAME=UPPER('"+tableName+"') "
-				+ " and UPPER(t.COLUMN_NAME) not in('ID','WELLID','ACQTIME','COMMSTATUS','COMMTIME','COMMTIMEEFFICIENCY','COMMRANGE','RUNSTATUS','RUNTIMEEFFICIENCY','RUNTIME','RUNRANGE')  "
+				//+ " and UPPER(t.COLUMN_NAME) not in('ID','WELLID','ACQTIME','COMMSTATUS','COMMTIME','COMMTIMEEFFICIENCY','COMMRANGE','RUNSTATUS','RUNTIMEEFFICIENCY','RUNTIME','RUNRANGE')  "
 				+ " order by t.COLUMN_ID";
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
@@ -563,7 +567,10 @@ public class EquipmentDriverServerTask {
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
-				acquisitionItemDataBaseColumns.add(rs.getString(1));
+				String columnName=rs.getString(1);
+				if(!StringManagerUtils.databaseColumnFiter(columnName)){
+					acquisitionItemDataBaseColumns.add(columnName);
+				}
 			}
 			//如驱动配置中不存在，删除字段
 			for(int i=0;i<acquisitionItemDataBaseColumns.size();i++){

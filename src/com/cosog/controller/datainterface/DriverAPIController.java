@@ -761,7 +761,7 @@ public class DriverAPIController extends BaseController{
 							int alarmLevel=0;
 							int sort=9999;
 							
-							if(existOrNot(acqInstanceOwnItem.getItemList(), title, false)){
+							if(StringManagerUtils.existAcqItem(acqInstanceOwnItem.getItemList(), title, false)){
 								updateRealtimeData+=",t."+columnName+"='"+rawValue+"'";
 								insertHistColumns+=","+columnName;
 								insertHistValue+=",'"+rawValue+"'";
@@ -1011,13 +1011,15 @@ public class DriverAPIController extends BaseController{
 					acquisitionItemInfo.setBitIndex(calItemResolutionDataList.get(i).getBitIndex());
 					if("resultName".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn())){
 						alarmLevel=rpcWorkTypeAlarmLevel;
+						if(alarmLevel>0){
+							acquisitionItemInfo.setAlarmInfo("工况报警:"+calItemResolutionDataList.get(i).getValue());
+							acquisitionItemInfo.setAlarmType(4);
+						}
 						
 					}
 					acquisitionItemInfo.setAlarmLevel(alarmLevel);
 					acquisitionItemInfo.setUnit(calItemResolutionDataList.get(i).getUnit());
 					acquisitionItemInfo.setSort(calItemResolutionDataList.get(i).getSort());
-					acquisitionItemInfo.setAlarmInfo("工况报警:"+calItemResolutionDataList.get(i).getValue());
-					acquisitionItemInfo.setAlarmType(4);
 					acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(i).getDelay());
 					acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(i).getIsSendMessage());
 					acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(i).getIsSendMail());
@@ -1088,7 +1090,7 @@ public class DriverAPIController extends BaseController{
 							List<AcquisitionItemInfo> userAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
 							for(int j=0;j<acquisitionItemInfoList.size();j++){
 								for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
-									if(existDisplayItem(displayInstanceOwnItem.getItemList(), acquisitionItemInfoList.get(j).getRawTitle(), false)){
+									if(StringManagerUtils.existDisplayItem(displayInstanceOwnItem.getItemList(), acquisitionItemInfoList.get(j).getRawTitle(), false)){
 										if(displayInstanceOwnItem.getItemList().get(k).getShowLevel()==0||displayInstanceOwnItem.getItemList().get(k).getShowLevel()>userInfo.getRoleShowLevel()){
 											acquisitionItemInfoList.get(j).setSort(displayInstanceOwnItem.getItemList().get(k).getSort());
 											userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
@@ -1327,7 +1329,7 @@ public class DriverAPIController extends BaseController{
 							int alarmLevel=0;
 							int sort=9999;
 							
-							if(existOrNot(acqInstanceOwnItem.getItemList(), title, false)){
+							if(StringManagerUtils.existAcqItem(acqInstanceOwnItem.getItemList(), title, false)){
 								updateRealtimeData+=",t."+columnName+"='"+rawValue+"'";
 								insertHistColumns+=","+columnName;
 								insertHistValue+=",'"+rawValue+"'";
@@ -1582,7 +1584,7 @@ public class DriverAPIController extends BaseController{
 							List<AcquisitionItemInfo> userAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
 							for(int j=0;j<acquisitionItemInfoList.size();j++){
 								for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
-									if(existDisplayItem(displayInstanceOwnItem.getItemList(), acquisitionItemInfoList.get(j).getRawTitle(), false)){
+									if(StringManagerUtils.existDisplayItem(displayInstanceOwnItem.getItemList(), acquisitionItemInfoList.get(j).getRawTitle(), false)){
 										if(displayInstanceOwnItem.getItemList().get(k).getShowLevel()==0||displayInstanceOwnItem.getItemList().get(k).getShowLevel()>userInfo.getRoleShowLevel()){
 											userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
 										}
@@ -1675,69 +1677,20 @@ public class DriverAPIController extends BaseController{
 		return null;
 	}
 	
-	public static boolean existOrNot(List<AcqInstanceOwnItem.AcqItem> acqInstanceOwnItemList, String key, boolean caseSensitive ){
-		boolean flag = false;
-		for (int i = 0; i < acqInstanceOwnItemList.size(); i++) {
-            boolean match = false;
-            if (caseSensitive) {
-                match = acqInstanceOwnItemList.get(i).getItemName().equals(key);
-            } else {
-                match = acqInstanceOwnItemList.get(i).getItemName().equalsIgnoreCase(key);
-            }
-            if (match) {
-                flag = true;
-                break;
-            }
-        }
-		return flag;
-	}
 	
-	public static boolean existDisplayItem(List<DisplayInstanceOwnItem.DisplayItem> displayItemList, String key, boolean caseSensitive ){
-		boolean flag = false;
-		for (int i = 0; i < displayItemList.size(); i++) {
-            boolean match = false;
-            if (caseSensitive) {
-                match = displayItemList.get(i).getItemName().equals(key);
-            } else {
-                match = displayItemList.get(i).getItemName().equalsIgnoreCase(key);
-            }
-            if (match) {
-                flag = true;
-                break;
-            }
-        }
-		return flag;
-	}
-	
-	public static boolean existDisplayItemCode(List<DisplayInstanceOwnItem.DisplayItem> displayItemList, String key, boolean caseSensitive ){
-		boolean flag = false;
-		for (int i = 0; i < displayItemList.size(); i++) {
-            boolean match = false;
-            if (caseSensitive) {
-                match = displayItemList.get(i).getItemCode().equals(key);
-            } else {
-                match = displayItemList.get(i).getItemCode().equalsIgnoreCase(key);
-            }
-            if (match) {
-                flag = true;
-                break;
-            }
-        }
-		return flag;
-	}
 	
 	public static List<ProtocolItemResolutionData> getFESDiagramCalItemData(RPCCalculateRequestData calculateRequestData,RPCCalculateResponseData calculateResponseData){
 		List<ProtocolItemResolutionData> FESDiagramCalItemList=new ArrayList<ProtocolItemResolutionData>();
+		//功图采集时间
+		FESDiagramCalItemList.add(new ProtocolItemResolutionData("功图采集时间","功图采集时间",calculateRequestData.getFESDiagram().getAcqTime(),calculateRequestData.getFESDiagram().getAcqTime(),"","FESDiagramAcqtime","","","","",1));
+		//冲程、冲次
+		FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲程","冲程",calculateRequestData.getFESDiagram().getStroke()+"",calculateRequestData.getFESDiagram().getStroke()+"","","Stroke","","","","m",1));
+		FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲次","冲次",calculateRequestData.getFESDiagram().getSPM()+"",calculateRequestData.getFESDiagram().getSPM()+"","","spm","","","","1/min",1));
 		if(calculateResponseData!=null&&calculateResponseData.getCalculationStatus().getResultStatus()==1){
 			Jedis jedis = new Jedis();
-			//功图采集时间
-			FESDiagramCalItemList.add(new ProtocolItemResolutionData("功图采集时间","功图采集时间",calculateRequestData.getFESDiagram().getAcqTime(),calculateRequestData.getFESDiagram().getAcqTime(),"","FESDiagramAcqtime","","","","",1));
 			//工况
 			WorkType workType=(WorkType) SerializeObjectUnils.unserizlize(jedis.hget("RPCWorkType".getBytes(), (calculateResponseData.getCalculationStatus().getResultCode()+"").getBytes()));
 			FESDiagramCalItemList.add(new ProtocolItemResolutionData("工况","工况",workType.getResultName(),workType.getResultName(),"","resultName","","","","",1));
-			//冲程、冲次
-			FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲程","冲程",calculateRequestData.getFESDiagram().getStroke()+"",calculateRequestData.getFESDiagram().getStroke()+"","","Stroke","","","","m",1));
-			FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲次","冲次",calculateRequestData.getFESDiagram().getSPM()+"",calculateRequestData.getFESDiagram().getSPM()+"","","spm","","","","1/min",1));
 			//最大最小载荷
 			String FMax="",FMin="";
 			if(calculateResponseData.getFESDiagram().getFMax()!=null&&calculateResponseData.getFESDiagram().getFMax().size()>0){
@@ -1842,7 +1795,102 @@ public class DriverAPIController extends BaseController{
 			jedis.disconnect();
 			jedis.close();
 		}else{
+			//工况
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("工况","工况","","","","resultName","","","","",1));
+			//最大最小载荷
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("最大载荷","最大载荷","","","","FMax","","","","kN",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("最小载荷","最小载荷","","","","FMin","","","","kN",1));
+			//平衡
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("上冲程最大电流","上冲程最大电流","","","","UPSTROKEIMAX","","","","A",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("下冲程最大电流","下冲程最大电流","","","","DOWNSTROKEIMAX","","","","A",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("上冲程最大功率","上冲程最大功率","","","","UPSTROKEIMAX","","","","A",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("下冲程最大功率","下冲程最大功率","","","","DOWNSTROKEIMAX","","","","A",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("电流平衡度","电流平衡度","","","","IDEGREEBALANCE","","","","%",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("功率平衡度","功率平衡度","","","","WATTDEGREEBALANCE","","","","%",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("移动距离","移动距离","","","","DELTARADIUS","","","","m",1));
 			
+			//充满系数、抽空充满系数
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("充满系数","充满系数","","","","FULLNESSCOEFFICIENT","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("抽空充满系数","抽空充满系数","","","","NOLIQUIDFULLNESSCOEFFICIENT","","","","小数",1));
+			//柱塞冲程、柱塞有效冲程、抽空柱塞有效冲程
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("柱塞冲程","柱塞冲程","","","","PLUNGERSTROKE","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("柱塞有效冲程","柱塞有效冲程","","","","AVAILABLEPLUNGERSTROKE","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("抽空柱塞有效冲程","抽空柱塞有效冲程","","","","NOLIQUIDAVAILABLEPLUNGERSTROKE","","","","m",1));
+			
+			//上下理论载荷线
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("上理论载荷线","上理论载荷线","","","","UPPERLOADLINE","","","","kN",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("考虑沉没压力的理论上载荷","考虑沉没压力的理论上载荷","","","","UPPERLOADLINEOFEXACT","","","","kN",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("下理论载荷线","下理论载荷线","","","","LOWERLOADLINE","","","","kN",1));
+
+			//位移最大、最小值索引
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("位移最大值索引","位移最大值索引","","","","SMAXINDEX","","","","",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("位移最小值索引","位移最小值索引","","","","SMININDEX","","","","",1));
+			
+			
+			//产量
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("理论排量","理论排量","","","","THEORETICALPRODUCTION","","","","m^3/d",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产液量","产液量","","","","LIQUIDVOLUMETRICPRODUCTION","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产油量","产油量","","","","OILVOLUMETRICPRODUCTION","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产水量","产水量","","","","WATERVOLUMETRICPRODUCTION","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("柱塞有效冲程计算产量","柱塞有效冲程计算产量","","","","AVAILABLEPLUNGERSTROKEPROD_V","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵间隙漏失量","泵间隙漏失量","","","","PUMPCLEARANCELEAKPROD_V","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("游动凡尔漏失量","游动凡尔漏失量","","","","TVLEAKVOLUMETRICPRODUCTION","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("固定凡尔漏失量","固定凡尔漏失量","","","","SVLEAKVOLUMETRICPRODUCTION","","","","m^3/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("气影响","气影响","","","","GASINFLUENCEPROD_V","","","","m^3/d",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产液量","产液量","","","","LIQUIDWEIGHTPRODUCTION","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产油量","产油量","","","","OILWEIGHTPRODUCTION","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("产水量","产水量","","","","WATERWEIGHTPRODUCTION","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("柱塞有效冲程计算产量","柱塞有效冲程计算产量","","","","AVAILABLEPLUNGERSTROKEPROD_W","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵间隙漏失量","泵间隙漏失量","","","","PUMPCLEARANCELEAKPROD_W","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("游动凡尔漏失量","游动凡尔漏失量","","","","TVLEAKWEIGHTPRODUCTION","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("固定凡尔漏失量","固定凡尔漏失量","","","","SVLEAKWEIGHTPRODUCTION","","","","t/d",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("气影响","气影响","","","","GASINFLUENCEPROD_W","","","","t/d",1));
+			
+			//液面反演校正值、反演液面
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("液面反演校正值","液面反演校正值","","","","LEVELCORRECTVALUE","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("反演液面","反演液面","","","","INVERPRODUCINGFLUIDLEVEL","","","","m",1));
+			
+			//系统效率
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("有功功率","有功功率","","","","AVERAGEWATT","","","","kW",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("光杆功率","光杆功率","","","","POLISHRODPOWER","","","","kW",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("水功率","水功率","","","","WATERPOWER","","","","kW",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("地面效率","地面效率","","","","WATERPOWER","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("井下效率","井下效率","","","","SURFACESYSTEMEFFICIENCY","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("系统效率","系统效率","","","","SYSTEMEFFICIENCY","","","","小数",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("吨液百米耗电量","吨液百米耗电量","","","","ENERGYPER100MLIFT","","","","kW· h/100m· t",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("功图面积","功图面积","","","","AREA","","","","",1));
+			
+			//泵效
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("抽油杆伸长量","抽油杆伸长量","","","","RODFLEXLENGTH","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("油管伸缩量","油管伸缩量","","","","TUBINGFLEXLENGTH","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("惯性载荷增量","惯性载荷增量","","","","INERTIALENGTH","","","","m",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲程损失系数","冲程损失系数","","","","PUMPEFF1","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("充满系数","充满系数","","","","PUMPEFF2","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("间隙漏失系数","间隙漏失系数","","","","PUMPEFF3","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("液体收缩系数","液体收缩系数","","","","PUMPEFF4","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("总泵效","总泵效","","","","PUMPEFF","","","","小数",1));
+			
+			//泵入口出口参数
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵入口压力","泵入口压力","","","","PUMPINTAKEP","","","","MPa",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵入口温度","泵入口温度","","","","PUMPINTAKET","","","","℃",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵入口就地气液比","泵入口就地气液比","","","","PUMPINTAKEGOL","","","","m^3/m^3",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵入口粘度","泵入口粘度","","","","PUMPINTAKEVISL","","","","mPa·s",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵入口原油体积系数","泵入口原油体积系数","","","","PUMPINTAKEBO","","","","小数",1));
+			
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵出口压力","泵出口压力","","","","PUMPOUTLETP","","","","MPa",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵出口温度","泵出口温度","","","","PUMPOUTLETT","","","","℃",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵出口就地气液比","泵出口就地气液比","","","","PUMPOUTLETGOL","","","","m^3/m^3",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵出口粘度","泵出口粘度","","","","PUMPOUTLETVISL","","","","mPa·s",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("泵出口原油体积系数","泵出口原油体积系数","","","","PUMPOUTLETBO","","","","小数",1));
+			
+			
+			//杆参数
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("杆参数","杆参数","","","","RODSTRING","","","","",1));
 		}
 		return FESDiagramCalItemList;
 	}
