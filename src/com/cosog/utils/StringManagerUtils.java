@@ -193,8 +193,10 @@ public class StringManagerUtils {
                 }
             } else // 非汉字字符,如图形符号或ASCII码  
             {
-                chinese = conversionStr(chinese, "ISO8859-1", "GB2312");
-                chinese = chinese.substring(0, 1);
+//              chinese = conversionStr(chinese, "ISO8859-1", "GB2312");
+//              chinese = chinese.substring(0, 1);
+            	//过滤掉汉字图形符号或ASCII码  
+            	chinese="";
             }
         }else{
         	int asciiValue=Integer.valueOf(chinese.charAt(0));
@@ -3458,9 +3460,9 @@ public class StringManagerUtils {
 		for (int i = 0; i < acqInstanceOwnItemList.size(); i++) {
             boolean match = false;
             if (caseSensitive) {
-                match = acqInstanceOwnItemList.get(i).getItemName().equals(key);
+                match = key.equals(acqInstanceOwnItemList.get(i).getItemName());
             } else {
-                match = acqInstanceOwnItemList.get(i).getItemName().equalsIgnoreCase(key);
+                match = key.equalsIgnoreCase(acqInstanceOwnItemList.get(i).getItemName());
             }
             if (match) {
                 flag = true;
@@ -3475,9 +3477,9 @@ public class StringManagerUtils {
 		for (int i = 0; i < displayItemList.size(); i++) {
             boolean match = false;
             if (caseSensitive) {
-                match = displayItemList.get(i).getItemName().equals(key);
+                match = key.equals(displayItemList.get(i).getItemName());
             } else {
-                match = displayItemList.get(i).getItemName().equalsIgnoreCase(key);
+                match = key.equalsIgnoreCase(displayItemList.get(i).getItemName());
             }
             if (match) {
                 flag = true;
@@ -3492,9 +3494,9 @@ public class StringManagerUtils {
 		for (int i = 0; i < displayItemList.size(); i++) {
             boolean match = false;
             if (caseSensitive) {
-                match = displayItemList.get(i).getItemCode().equals(key);
+                match = key.equals(displayItemList.get(i).getItemCode());
             } else {
-                match = displayItemList.get(i).getItemCode().equalsIgnoreCase(key);
+                match = key.equalsIgnoreCase(displayItemList.get(i).getItemCode());
             }
             if (match) {
                 flag = true;

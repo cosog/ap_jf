@@ -904,7 +904,9 @@ public class DriverAPIController extends BaseController{
 					type = new TypeToken<RPCCalculateResponseData>() {}.getType();
 					rpcCalculateResponseData=gson.fromJson(responseData, type);
 					if(rpcCalculateResponseData!=null&&rpcCalculateResponseData.getCalculationStatus().getResultStatus()==1){
-						workType=(WorkType) SerializeObjectUnils.unserizlize(jedis.hget("RPCWorkType".getBytes(), (rpcCalculateResponseData.getCalculationStatus().getResultCode()+"").getBytes()));
+						if(jedis.hexists("RPCWorkType".getBytes(), (rpcCalculateResponseData.getCalculationStatus().getResultCode()+"").getBytes())){
+							workType=(WorkType) SerializeObjectUnils.unserizlize(jedis.hget("RPCWorkType".getBytes(), (rpcCalculateResponseData.getCalculationStatus().getResultCode()+"").getBytes()));
+						}
 					}
 				}
 				if(workType!=null){
@@ -1091,7 +1093,7 @@ public class DriverAPIController extends BaseController{
 							for(int j=0;j<acquisitionItemInfoList.size();j++){
 								for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
 									if(StringManagerUtils.existDisplayItem(displayInstanceOwnItem.getItemList(), acquisitionItemInfoList.get(j).getRawTitle(), false)){
-										if(displayInstanceOwnItem.getItemList().get(k).getShowLevel()==0||displayInstanceOwnItem.getItemList().get(k).getShowLevel()>userInfo.getRoleShowLevel()){
+										if(displayInstanceOwnItem.getItemList().get(k).getShowLevel()==0||displayInstanceOwnItem.getItemList().get(k).getShowLevel()>=userInfo.getRoleShowLevel()){
 											acquisitionItemInfoList.get(j).setSort(displayInstanceOwnItem.getItemList().get(k).getSort());
 											userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
 										}

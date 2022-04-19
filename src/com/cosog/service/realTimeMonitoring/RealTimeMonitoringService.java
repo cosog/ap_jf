@@ -24,6 +24,7 @@ import com.cosog.model.calculate.AcqInstanceOwnItem;
 import com.cosog.model.calculate.DisplayInstanceOwnItem;
 import com.cosog.model.calculate.PCPDeviceInfo;
 import com.cosog.model.calculate.RPCDeviceInfo;
+import com.cosog.model.calculate.UserInfo;
 import com.cosog.model.data.DataDictionary;
 import com.cosog.model.drive.KafkaConfig;
 import com.cosog.model.drive.ModbusProtocolConfig;
@@ -655,6 +656,18 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		}
 		Set<byte[]>calItemSet= jedis.smembers(calItemsKey.getBytes());
 		
+		if(!jedis.exists("UserInfo".getBytes())){
+			MemoryDataManagerTask.loadUserInfo();
+		}
+		UserInfo userInfo=null;
+		if(jedis.hexists("UserInfo".getBytes(), userAccount.getBytes())){
+			userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), userAccount.getBytes()));
+		}
+		
+		if(!jedis.exists("RPCWorkType".getBytes())){
+			MemoryDataManagerTask.loadRPCWorkType();
+		}
+		
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
 			EquipmentDriverServerTask.loadAcquisitionItemColumns(StringManagerUtils.stringToInteger(deviceType));
@@ -690,7 +703,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
 		result_json.append("\"totalRoot\":[");
 		info_json.append("[");
-		if(displayInstanceOwnItem!=null){
+		if(displayInstanceOwnItem!=null&&userInfo!=null){
 			String protocolCode=displayInstanceOwnItem.getProtocol();
 			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			
@@ -703,9 +716,6 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			}
 			
 			if(protocol!=null){
-//				String[] itemsArr=(itemsObj[2]+"").split(",");
-//				String[] itemsSortArr=(itemsObj[3]+"").split(",");
-//				String[] itemsBitIndexArr=(itemsObj[4]+"").split(",");
 				List<ModbusProtocolConfig.Items> protocolItems=new ArrayList<ModbusProtocolConfig.Items>();
 				List<CalItem> calItemList=new ArrayList<CalItem>();
 				List<ProtocolItemResolutionData> protocolItemResolutionDataList=new ArrayList<ProtocolItemResolutionData>();
@@ -713,7 +723,9 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 					if((!"w".equalsIgnoreCase(protocol.getItems().get(j).getRWType())) 
 							&& (StringManagerUtils.existDisplayItem(displayInstanceOwnItem.getItemList(), protocol.getItems().get(j).getTitle(), false))){
 						for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
-							if(displayInstanceOwnItem.getItemList().get(k).getType()==0 && protocol.getItems().get(j).getTitle().equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(k).getItemName())){
+							if(displayInstanceOwnItem.getItemList().get(k).getType()==0 
+									&& displayInstanceOwnItem.getItemList().get(k).getShowLevel()>=userInfo.getRoleShowLevel()
+									&& protocol.getItems().get(j).getTitle().equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(k).getItemName())){
 								protocolItems.add(protocol.getItems().get(j));
 								break;
 							}
@@ -725,7 +737,15 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				for(byte[] calItemByteArr:calItemSet){
 					CalItem calItem=(CalItem) SerializeObjectUnils.unserizlize(calItemByteArr);
 					if(StringManagerUtils.existDisplayItemCode(displayInstanceOwnItem.getItemList(), calItem.getCode(), false)){
-						calItemList.add(calItem);
+						for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
+							if(displayInstanceOwnItem.getItemList().get(k).getType()==1
+									&& displayInstanceOwnItem.getItemList().get(k).getShowLevel()>=userInfo.getRoleShowLevel()
+									&& calItem.getCode().equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(k).getItemCode())){
+								calItemList.add(calItem);
+								break;
+							}
+						}
+						
 					}
 				}
 				String sql="select t.id,t.wellname,to_char(t2.acqtime,'yyyy-mm-dd hh24:mi:ss'), t2.commstatus,decode(t2.commstatus,1,'在线','离线') as commStatusName,decode(t2.commstatus,1,0,100) as commAlarmLevel ";
@@ -734,9 +754,9 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 					sql+=",t2."+col;
 				}
 
-//				for(int i=0;i<calItemList.size();i++){
-//					sql+=",t2."+calItemList.get(i).getCode();
-//				}
+				for(int i=0;i<calItemList.size();i++){
+					sql+=",t2."+calItemList.get(i).getCode();
+				}
 				sql+= " from "+deviceTableName+" t "
 						+ " left outer join "+tableName+" t2 on t2.wellid=t.id"
 						+ " where  t.id="+deviceId;
@@ -745,19 +765,27 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 					int row=1;
 					Object[] obj=(Object[]) list.get(0);
 					
-//					for(int i=0;i<calItemList.size();i++){
-//						String columnName=calItemList.get(i).getName();
-//						String rawColumnName=columnName;
-//						String value=obj[j+6]+"";
-//						String rawValue=value;
-//						String addr=protocolItems.get(j).getAddr()+"";
-//						String column=dataSaveMode==0?("addr"+protocolItems.get(j).getAddr()):(loadedAcquisitionItemColumnsMap.get(protocolItems.get(j).getTitle()));
-//						String columnDataType=protocolItems.get(j).getIFDataType();
-//						String resolutionMode=protocolItems.get(j).getResolutionMode()+"";
-//						String bitIndex="";
-//						String unit=protocolItems.get(j).getUnit();
-//						int sort=9999;
-//					}
+					for(int i=0;i<calItemList.size();i++){
+						String columnName=calItemList.get(i).getName();
+						String rawColumnName=columnName;
+						String value=obj[i+6+protocolItems.size()]+"";
+						String rawValue=value;
+						String addr="";
+						String column=calItemList.get(i).getCode();
+						String columnDataType="";
+						String resolutionMode="";
+						String bitIndex="";
+						String unit=calItemList.get(i).getUnit();
+						int sort=9999;
+						for(int l=0;l<displayInstanceOwnItem.getItemList().size();l++){
+							if(column.equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(l).getItemCode())){
+								sort=displayInstanceOwnItem.getItemList().get(l).getSort();
+								break;
+							}
+						}
+						ProtocolItemResolutionData protocolItemResolutionData =new ProtocolItemResolutionData(rawColumnName,columnName,value,rawValue,addr,column,columnDataType,resolutionMode,bitIndex,unit,sort);
+						protocolItemResolutionDataList.add(protocolItemResolutionData);
+					}
 					
 					for(int j=0;j<protocolItems.size();j++){
 						String columnName=protocolItems.get(j).getTitle();
