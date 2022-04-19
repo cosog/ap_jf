@@ -477,7 +477,7 @@ public class MemoryDataManagerTask {
 		try {
 			Jedis jedis = new Jedis();
 			String sql="select t3.code as instanceCode,t3.deviceType,t2.protocol,t.unitid,t.id as itemid,t.itemname,t.itemcode,t.bitindex,"
-					+ "t.showlevel,decode(t.sort,null,9999,t.sort) as sort,t.realtimecurve,t.realtimecurvecolor,t.historycurve,t.historycurvecolor,t.type "
+					+ "decode(t.showlevel,null,9999,t.showlevel) as showlevel,decode(t.sort,null,9999,t.sort) as sort,t.realtimecurve,t.realtimecurvecolor,t.historycurve,t.historycurvecolor,t.type "
 					+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2,tbl_protocoldisplayinstance t3 "
 					+ " where t.unitid=t2.id and t2.id=t3.displayunitid";
 			if(StringManagerUtils.isNotNull(unitId)){
