@@ -1334,7 +1334,10 @@ public class StringManagerUtils {
         		"EXPECTEDNETTORQUE",
         		"WELLBORESLICE",
         		"RESULTSTATUS",
-        		"SAVETIME"
+        		"SAVETIME",
+        		"RPM",
+        		"TORQUE",
+        		"REMARK"
         };
         for (String str: arrays) {
             if (str.equalsIgnoreCase(value)) {

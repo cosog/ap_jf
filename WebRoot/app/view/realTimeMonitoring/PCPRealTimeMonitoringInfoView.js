@@ -272,8 +272,6 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                                     }
                                 }
                             }]
-                		},{
-                			
                 		}],
                 		listeners: {
             				tabchange: function (tabPanel, newCard,oldCard, obj) {

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ import com.cosog.model.drive.ModbusDriverSaveData;
 import com.cosog.model.drive.ModbusProtocolAlarmUnitSaveData;
 import com.cosog.model.drive.ModbusProtocolAlarmInstanceSaveData;
 import com.cosog.model.drive.ModbusProtocolConfig;
+import com.cosog.model.drive.ModbusProtocolConfig.Items;
 import com.cosog.model.drive.ModbusProtocolConfig.ItemsMeaning;
 import com.cosog.model.drive.ModbusProtocolDisplayInstanceSaveData;
 import com.cosog.model.drive.ModbusProtocolInstanceSaveData;
@@ -1374,6 +1376,9 @@ public class AcquisitionUnitManagerController extends BaseController {
 						modbusProtocolConfig.getProtocol().get(i).setCode(modbusDriverSaveData.getProtocolName());
 						modbusProtocolConfig.getProtocol().get(i).setDeviceType(modbusDriverSaveData.getDeviceType());
 						modbusProtocolConfig.getProtocol().get(i).setSort(modbusDriverSaveData.getSort());
+						
+						List<String> delItemList=new ArrayList<String>();
+						
 						for(int j=0;j<modbusDriverSaveData.getDataConfig().size();j++){
 							boolean isAddItem=true;
 							String acqMode="passive";
@@ -1405,6 +1410,12 @@ public class AcquisitionUnitManagerController extends BaseController {
 									modbusProtocolConfig.getProtocol().get(i).getItems().get(k).setRatio(modbusDriverSaveData.getDataConfig().get(j).getRatio());
 									modbusProtocolConfig.getProtocol().get(i).getItems().get(k).setStoreDataType(modbusDriverSaveData.getDataConfig().get(j).getStoreDataType());
 									modbusProtocolConfig.getProtocol().get(i).getItems().get(k).setIFDataType(modbusDriverSaveData.getDataConfig().get(j).getIFDataType());
+									
+									//如果读写模式改变
+									if(!RWType.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getRWType())){
+										delItemList.add(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle());
+									}
+									
 									modbusProtocolConfig.getProtocol().get(i).getItems().get(k).setRWType(RWType);
 									modbusProtocolConfig.getProtocol().get(i).getItems().get(k).setResolutionMode(resolutionMode);
 									modbusProtocolConfig.getProtocol().get(i).getItems().get(k).setAcqMode(acqMode);
@@ -1453,16 +1464,18 @@ public class AcquisitionUnitManagerController extends BaseController {
 						}
 						
 						//处理删除项
-						for(int j=0;j<modbusProtocolConfig.getProtocol().get(i).getItems().size();j++){
+						Iterator<Items> it = modbusProtocolConfig.getProtocol().get(i).getItems().iterator();
+						while(it.hasNext()){
 							boolean isDel=true;
 							for(int k=0;k<modbusDriverSaveData.getDataConfig().size();k++){
-								if(modbusProtocolConfig.getProtocol().get(i).getItems().get(j).getTitle().equalsIgnoreCase(modbusDriverSaveData.getDataConfig().get(k).getTitle())){
+								if(((Items)it.next()).getTitle().equalsIgnoreCase(modbusDriverSaveData.getDataConfig().get(k).getTitle())){
 									isDel=false;
 									break;
 								}
 							}
 							if(isDel){
-								modbusProtocolConfig.getProtocol().get(i).getItems().remove(j);
+								delItemList.add(((Items)it.next()).getTitle());
+								it.remove();
 							}
 						}
 						//如果协议名称改变，更新数据库
@@ -1474,6 +1487,15 @@ public class AcquisitionUnitManagerController extends BaseController {
 							service.updateSql(unitSql);
 							service.updateSql(groupSql);
 							service.updateSql(alatmUnitSql);
+						}
+						if(delItemList.size()>0){
+							String delSql="delete from tbl_acq_item2group_conf t5 "
+									+ " where t5.id in "
+									+ "(select t4.id from tbl_acq_unit_conf t,tbl_acq_group2unit_conf t2,tbl_acq_group_conf t3,tbl_acq_item2group_conf t4 "
+									+ " where t.id=t2.unitid and t2.groupid=t3.id and t3.id=t4.groupid "
+									+ "and t.protocol='"+modbusDriverSaveData.getProtocolName()+"' "
+									+ " and t4.itemname in ("+StringManagerUtils.joinStringArr2(delItemList, ",")+"))";
+							service.updateSql(delSql);
 						}
 						Collections.sort(modbusProtocolConfig.getProtocol().get(i).getItems());
 						break;
@@ -1812,6 +1834,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 								AlarmUnitItem alarmUnitItem=new AlarmUnitItem();
 								alarmUnitItem.setUnitId(modbusProtocolAlarmUnitSaveData.getId());
 								alarmUnitItem.setItemName(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getItemName());
+								alarmUnitItem.setItemCode(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getItemCode());
 								alarmUnitItem.setItemAddr(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getItemAddr());
 								alarmUnitItem.setType(modbusProtocolAlarmUnitSaveData.getResolutionMode());
 								

@@ -61,7 +61,9 @@ Ext.define('AP.store.realTimeMonitoring.RPCRealTimeMonitoringWellListStore', {
                     			deviceRealtimeMonitoringCurve(0);
                     		}else if(activeId=="RPCRealTimeMonitoringTableTabPanel_Id"){
                         		CreateRPCDeviceRealTimeMonitoringDataTable(deviceId,deviceName,deviceType);
-                    		}
+                    		}else{
+        						Ext.create('AP.store.realTimeMonitoring.SingleFESDiagramDetailsChartsStore');
+        					}
                     		Ext.create('AP.store.realTimeMonitoring.RPCRealTimeMonitoringControlAndInfoStore');
                     	},
                     	itemdblclick: function (view,record,item,index,e,eOpts) {

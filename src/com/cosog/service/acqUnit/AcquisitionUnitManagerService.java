@@ -799,13 +799,13 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		result_json.append("\"totalRoot\":[");
 		
 		List<String> itemsList=new ArrayList<String>();
-		List<String> conditionsListItemsList=new ArrayList<String>();
+//		List<String> conditionsListItemsList=new ArrayList<String>();
 		
-		String conditionsSql="select t.resultname from tbl_rpc_worktype t order by t.resultcode";
+		String conditionsSql="select t.resultname,t.resultcode from tbl_rpc_worktype t order by t.resultcode";
 		List<?> conditionsList=this.findCallSql(conditionsSql);
-		for(int i=0;i<conditionsList.size();i++){
-			conditionsListItemsList.add(conditionsList.get(i).toString());
-		}
+//		for(int i=0;i<conditionsList.size();i++){
+//			conditionsListItemsList.add(conditionsList.get(i).toString());
+//		}
 		List<?> list=null;
 		if("3".equalsIgnoreCase(classes)){
 			String sql="select t.itemname,t.itemcode,t.delay,"
@@ -822,13 +822,15 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		}
 		
 		
-		for(int i=0;i<conditionsListItemsList.size();i++){
+		for(int i=0;i<conditionsList.size();i++){
 			boolean checked=false;
+			Object[] conditionsObj = (Object[]) conditionsList.get(i);
+			
 			String delay="",alarmLevel="",alarmSign="",isSendMessage="",isSendMail="";
-			if(StringManagerUtils.existOrNot(itemsList,conditionsListItemsList.get(i),false)){
+			if(StringManagerUtils.existOrNot(itemsList,conditionsObj[0]+"",false)){
 				for(int j=0;j<list.size();j++){
 					Object[] obj = (Object[]) list.get(j);
-					if(conditionsListItemsList.get(i).equalsIgnoreCase(obj[0]+"")){
+					if((conditionsObj[0]+"").equalsIgnoreCase(obj[0]+"")){
 						checked=true;
 						delay=obj[2]+"";
 						alarmLevel=obj[3]+"";
@@ -841,7 +843,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			}
 			result_json.append("{\"checked\":"+checked+","
 					+ "\"id\":"+(i+1)+","
-					+ "\"title\":\""+conditionsListItemsList.get(i)+"\","
+					+ "\"title\":\""+conditionsObj[0]+"\","
+					+ "\"code\":\""+conditionsObj[1]+"\","
 					+ "\"delay\":\""+delay+"\","
 					+ "\"alarmLevel\":\""+alarmLevel+"\","
 					+ "\"alarmSign\":\""+alarmSign+"\","
@@ -1199,21 +1202,15 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		}
 		Jedis jedis = new Jedis();
 		if(!jedis.exists(key.getBytes())){
-			MemoryDataManagerTask.loadRPCCalculateItem();
+			if("1".equalsIgnoreCase(deviceType)){
+				MemoryDataManagerTask.loadPCPCalculateItem();
+			}else{
+				MemoryDataManagerTask.loadRPCCalculateItem();
+			}
 		}
-		Set<byte[]>rpcCalItemSet= jedis.smembers(key.getBytes());
+		Set<byte[]>rpcCalItemSet= jedis.zrange(key.getBytes(), 0, -1);
 		jedis.disconnect();
 		jedis.close();
-//		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
-//		ArrayList<MemoryDataManagerTask.CalItem> calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
-//		if(calItemList==null){
-//			if("0".equalsIgnoreCase(deviceType)){
-//				MemoryDataManagerTask.loadRPCCalculateItem();
-//			}else{
-//				MemoryDataManagerTask.loadPCPCalculateItem();
-//			}
-//			calItemList= (ArrayList<MemoryDataManagerTask.CalItem>)memoryDataMap.get(key);
-//		}
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
@@ -1647,7 +1644,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		if(!jedis.exists(key.getBytes())){
 			MemoryDataManagerTask.loadRPCCalculateItem();
 		}
-		Set<byte[]>rpcCalItemSet= jedis.smembers(key.getBytes());
+		
+		Set<byte[]>rpcCalItemSet= jedis.zrange(key.getBytes(), 0, -1);
 		jedis.disconnect();
 		jedis.close();
 //		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
