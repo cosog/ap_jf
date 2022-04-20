@@ -680,7 +680,7 @@ public class DriverAPIController extends BaseController{
 		}
 		Map<String,String> loadedAcquisitionItemColumnsMap=acquisitionItemColumnsMap.get(columnsKey);
 		if(acqGroup!=null){
-			Set<byte[]>rpcCalItemSet= jedis.smembers("rpcCalItemList".getBytes());
+			Set<byte[]>rpcCalItemSet= jedis.zrange("rpcCalItemList".getBytes(), 0, -1);
 			String protocolName="";
 			AcqInstanceOwnItem acqInstanceOwnItem=null;
 			if(jedis.hexists("AcqInstanceOwnItem".getBytes(), rpcDeviceInfo.getInstanceCode().getBytes())){
@@ -1011,10 +1011,10 @@ public class DriverAPIController extends BaseController{
 					acquisitionItemInfo.setDataType(calItemResolutionDataList.get(i).getColumnDataType());
 					acquisitionItemInfo.setResolutionMode(calItemResolutionDataList.get(i).getResolutionMode());
 					acquisitionItemInfo.setBitIndex(calItemResolutionDataList.get(i).getBitIndex());
-					if("resultName".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn())){
+					if("resultCode".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn())){
 						alarmLevel=rpcWorkTypeAlarmLevel;
 						if(alarmLevel>0){
-							acquisitionItemInfo.setAlarmInfo("工况报警:"+calItemResolutionDataList.get(i).getValue());
+							acquisitionItemInfo.setAlarmInfo("工况报警:"+workType.getResultName());
 							acquisitionItemInfo.setAlarmType(4);
 						}
 						
@@ -1251,7 +1251,7 @@ public class DriverAPIController extends BaseController{
 		}
 		Map<String,String> loadedAcquisitionItemColumnsMap=acquisitionItemColumnsMap.get(columnsKey);
 		if(acqGroup!=null){
-			Set<byte[]>rpcCalItemSet= jedis.smembers("rpcCalItemList".getBytes());
+			Set<byte[]>rpcCalItemSet= jedis.zrange("rpcCalItemList".getBytes(), 0, -1);
 			String protocolName="";
 			AcqInstanceOwnItem acqInstanceOwnItem=null;
 			if(jedis.hexists("AcqInstanceOwnItem".getBytes(), pcpDeviceInfo.getInstanceCode().getBytes())){
@@ -1689,10 +1689,8 @@ public class DriverAPIController extends BaseController{
 		FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲程","冲程",calculateRequestData.getFESDiagram().getStroke()+"",calculateRequestData.getFESDiagram().getStroke()+"","","Stroke","","","","m",1));
 		FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲次","冲次",calculateRequestData.getFESDiagram().getSPM()+"",calculateRequestData.getFESDiagram().getSPM()+"","","spm","","","","1/min",1));
 		if(calculateResponseData!=null&&calculateResponseData.getCalculationStatus().getResultStatus()==1){
-			Jedis jedis = new Jedis();
 			//工况
-			WorkType workType=(WorkType) SerializeObjectUnils.unserizlize(jedis.hget("RPCWorkType".getBytes(), (calculateResponseData.getCalculationStatus().getResultCode()+"").getBytes()));
-			FESDiagramCalItemList.add(new ProtocolItemResolutionData("工况","工况",workType.getResultName(),workType.getResultName(),"","resultName","","","","",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("工况","工况",calculateResponseData.getCalculationStatus().getResultCode()+"",calculateResponseData.getCalculationStatus().getResultCode()+"","","resultCode","","","","",1));
 			//最大最小载荷
 			String FMax="",FMin="";
 			if(calculateResponseData.getFESDiagram().getFMax()!=null&&calculateResponseData.getFESDiagram().getFMax().size()>0){
@@ -1794,8 +1792,6 @@ public class DriverAPIController extends BaseController{
 			
 			//杆参数
 			FESDiagramCalItemList.add(new ProtocolItemResolutionData("杆参数","杆参数",calculateResponseData.getRodCalData()+"",calculateResponseData.getRodCalData()+"","","RODSTRING","","","","",1));
-			jedis.disconnect();
-			jedis.close();
 		}else{
 			//工况
 			FESDiagramCalItemList.add(new ProtocolItemResolutionData("工况","工况","","","","resultName","","","","",1));

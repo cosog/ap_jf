@@ -870,13 +870,14 @@ function CreateProtocolAlarmUnitFESDiagramConditionsConfigInfoTable(protocolName
 			var result =  Ext.JSON.decode(response.responseText);
 			if(protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper==null || protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot==undefined){
 				protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper = ProtocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.createNew("ModbusProtocolAlarmUnitFESDiagramConditionsConfigTableInfoDiv_id");
-				var colHeaders="['','序号','名称','延时(s)','报警级别','报警使能','是否发送短信','是否发送邮件']";
+				var colHeaders="['','序号','名称','延时(s)','报警级别','报警使能','是否发送短信','是否发送邮件','编码']";
 				var columns="[{data:'checked',type:'checkbox'},{data:'id'},{data:'title'},"
 					 	+"{data:'delay',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num(val, callback,this.row, this.col,protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper);}},"
 						+"{data:'alarmLevel',type:'dropdown',strict:true,allowInvalid:false,source:['正常','一级报警','二级报警','三级报警']}," 
 						+"{data:'alarmSign',type:'dropdown',strict:true,allowInvalid:false,source:['使能','失效']}," 
 						+"{data:'isSendMessage',type:'dropdown',strict:true,allowInvalid:false,source:['是','否']}," 
-						+"{data:'isSendMail',type:'dropdown',strict:true,allowInvalid:false,source:['是','否']}" 
+						+"{data:'isSendMail',type:'dropdown',strict:true,allowInvalid:false,source:['是','否']}," 
+						+"{data:'code'}"
 						+"]";
 				protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
 				protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.columns=Ext.JSON.decode(columns);
@@ -930,6 +931,10 @@ var ProtocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper = {
 	        	protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot = new Handsontable(hotElement, {
 	        		licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
 	        		data: data,
+	        		hiddenColumns: {
+	                    columns: [8],
+	                    indicators: false
+	                },
 	        		colWidths: [25,50,80,80,80,80,80,80],
 	                columns:protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.columns,
 	                stretchH: 'all',//延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
@@ -1081,6 +1086,7 @@ function SaveModbusProtocolAlarmUnitConfigTreeData(){
 						item.isSendMail=alarmItemsData[index][7];
 					}else if(saveData.resolutionMode==4){//功图工况
 						item.itemName=alarmItemsData[index][2];
+						item.itemCode=alarmItemsData[index][8];
 						item.delay=alarmItemsData[index][3];
 						item.alarmLevel=alarmItemsData[index][4];
 						item.alarmSign=alarmItemsData[index][5];
