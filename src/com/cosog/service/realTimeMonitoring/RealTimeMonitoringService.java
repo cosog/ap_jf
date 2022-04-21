@@ -240,39 +240,63 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 	
 	public String getDeviceRealTimeCommStatusStat(String orgId,String deviceType) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
-		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
-		int deviceTypeLower=100;
-		int deviceTypeUpper=200;
-		if(StringManagerUtils.stringToInteger(deviceType) ==1){
-			deviceTypeLower=200;
-			deviceTypeUpper=300;
+		Jedis jedis=null;
+		List<byte[]> deviceInfoByteList=null;
+		try{
+			jedis = new Jedis();
+			if(StringManagerUtils.stringToInteger(deviceType) ==0){
+				if(!jedis.exists("RPCDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+				}
+				deviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
+			}else{
+				if(!jedis.exists("PCPDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+				}
+				deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			jedis=null;
 		}
 		
-		
-		List<CommStatus> commStatusList=(List<CommStatus>) dataModelMap.get("DeviceCommStatus");
-		if(commStatusList==null){
-			EquipmentDriverServerTask.LoadDeviceCommStatus();
-			commStatusList=(List<CommStatus>) dataModelMap.get("DeviceCommStatus");
-		}
 		
 		result_json.append("{ \"success\":true,\"orgId\":\""+orgId+"\",\"deviceType\":"+deviceType+",");
 		int all=0,online=0,offline=0;
-		for(int i=0;i<commStatusList.size();i++){
-			CommStatus commStatus=commStatusList.get(i);
-			if(commStatus.getDeviceType()>=deviceTypeLower&&commStatus.getDeviceType()<deviceTypeUpper
-					&& StringManagerUtils.existOrNot(orgId.split(","), commStatus.getOrgId()+"")){
-				if(commStatus.getCommStatus()==1){
+		if(deviceInfoByteList!=null){
+			for(int i=0;i<deviceInfoByteList.size();i++){
+				int commStatus=0;
+				if(StringManagerUtils.stringToInteger(deviceType) ==0){
+					Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+					if (obj instanceof RPCDeviceInfo) {
+						RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)obj;
+						commStatus=rpcDeviceInfo.getCommStatus();
+					}
+				}else{
+					Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+					if (obj instanceof PCPDeviceInfo) {
+						PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)obj;
+						commStatus=pcpDeviceInfo.getCommStatus();
+					}
+				}
+				
+				if(commStatus==1){
 					online+=1;
 				}else{
 					offline+=1;;
 				}
 			}
 		}
+		
 		all=online+offline;
 		result_json.append("\"all\":"+all+",");
 		result_json.append("\"online\":"+online+",");
 		result_json.append("\"offline\":"+offline);
 		result_json.append("}");
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
+		}
 		return result_json.toString().replaceAll("\"null\"", "\"\"");
 	}
 	
@@ -1345,15 +1369,12 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				}
 			}
 			calItemSet= jedis.zrange(calItemsKey.getBytes(), 0, -1);
-			
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
 			jedis.disconnect();
 			jedis.close();
 		}
-		
-		
 		
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
@@ -1425,7 +1446,6 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 								itemNameList.add(itemName);
 								curveColorList.add(realtimecurvecolor.replaceAll("null", ""));
 							}
-							
 						}
 						break;
 					}

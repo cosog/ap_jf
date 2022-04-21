@@ -51,6 +51,8 @@ public class RPCDeviceInfo implements Serializable {
 	private String acqTime;
 	
 	private List<AcquisitionItemInfo> acquisitionItemInfoList;
+	
+	private Integer commStatus;
 
 	public Integer getId() {
 		return id;
@@ -298,6 +300,14 @@ public class RPCDeviceInfo implements Serializable {
 
 	public void setAcquisitionItemInfoList(List<AcquisitionItemInfo> acquisitionItemInfoList) {
 		this.acquisitionItemInfoList = acquisitionItemInfoList;
+	}
+
+	public Integer getCommStatus() {
+		return commStatus;
+	}
+
+	public void setCommStatus(Integer commStatus) {
+		this.commStatus = commStatus;
 	}
 
 }

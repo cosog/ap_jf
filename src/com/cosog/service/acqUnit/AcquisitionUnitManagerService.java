@@ -37,7 +37,6 @@ import com.cosog.task.MemoryDataManagerTask.CalItem;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.DataSourceConfig;
 import com.cosog.utils.EquipmentDriveMap;
-import com.cosog.utils.MemoryDataMap;
 import com.cosog.utils.Page;
 import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
