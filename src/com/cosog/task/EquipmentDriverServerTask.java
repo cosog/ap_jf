@@ -203,33 +203,6 @@ public class EquipmentDriverServerTask {
 		}
 	}
 	
-//	@SuppressWarnings("static-access")
-//	public static void loadProtocolConfig(){
-//		StringManagerUtils.printLog("驱动加载开始");
-//		Map<String, Object> equipmentDriveMap = EquipmentDriveMap.getMapObject();
-//		StringManagerUtils stringManagerUtils=new StringManagerUtils();
-//		Gson gson = new Gson();
-//		String path="";
-//		String protocolConfigData="";
-//		java.lang.reflect.Type type=null;
-//		//添加Modbus协议配置
-//		path=stringManagerUtils.getFilePath("ModbusProtocolConfig.json","protocolConfig/");
-//		protocolConfigData=stringManagerUtils.readFile(path,"utf-8");
-//		type = new TypeToken<ModbusProtocolConfig>() {}.getType();
-//		ModbusProtocolConfig modbusProtocolConfig=gson.fromJson(protocolConfigData, type);
-//		if(modbusProtocolConfig==null){
-//			modbusProtocolConfig=new ModbusProtocolConfig();
-//			modbusProtocolConfig.setProtocol(new ArrayList<ModbusProtocolConfig.Protocol>());
-//		}else if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()==null){
-//			modbusProtocolConfig.setProtocol(new ArrayList<ModbusProtocolConfig.Protocol>());
-//		}else if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()!=null&&modbusProtocolConfig.getProtocol().size()>0){
-//			Collections.sort(modbusProtocolConfig.getProtocol());
-//		}
-//		equipmentDriveMap.put("modbusProtocolConfig", modbusProtocolConfig);
-//		
-//		StringManagerUtils.printLog("驱动加载结束");
-//	}
-	
 	@SuppressWarnings({ "static-access", "resource" })
 	public static int syncDataMappingTable(){
 		Connection conn = null;   
@@ -1590,6 +1563,7 @@ public class EquipmentDriverServerTask {
 		return 0;
 	}
 	
+	@SuppressWarnings("resource")
 	public static int initDriverAcquisitionInfoConfigByProtocolInstance(String instanceCode,String method){
 		List<String> wellList=new ArrayList<String>();
 		Connection conn = null;   
@@ -1864,59 +1838,6 @@ public class EquipmentDriverServerTask {
 		json_buff.append("}");
 		StringManagerUtils.printLog("服务始化："+json_buff.toString());
 		StringManagerUtils.sendPostMethod(initUrl,json_buff.toString(),"utf-8");
-	}
-	
-	public static void LoadDeviceCommStatus() throws IOException, SQLException{
-		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
-		List<CommStatus> commStatusList=(List<CommStatus>) dataModelMap.get("DeviceCommStatus");
-		if(commStatusList!=null){
-			dataModelMap.remove("DeviceCommStatus");
-		}
-		commStatusList=new ArrayList<CommStatus>();
-		Connection conn = null;   
-		PreparedStatement pstmt = null;  
-		Statement stmt = null;  
-		ResultSet rs = null;
-		conn=OracleJdbcUtis.getConnection();
-		if(conn==null){
-			return ;
-		}
-		String sql="select t.wellname,t.devicetype,t.orgid,t2.commstatus,t.status "
-				+ " from tbl_rpcdevice t "
-				+ " left outer join tbl_rpcacqdata_latest t2 on t2.wellid=t.id "
-				+ " order by t.sortnum";
-		pstmt = conn.prepareStatement(sql); 
-		rs=pstmt.executeQuery();
-		while(rs.next()){
-			CommStatus commStatus=new CommStatus();
-			commStatus.setDeviceName(rs.getString(1));
-			commStatus.setDeviceType(rs.getInt(2));
-			commStatus.setOrgId(rs.getInt(3));
-			commStatus.setCommStatus(rs.getInt(4));
-			commStatus.setDeviceStatus(rs.getInt(5));
-			commStatusList.add(commStatus);
-		}
-		
-		sql="select t.wellname,t.devicetype,t.orgid,t2.commstatus,t.status "
-				+ " from tbl_pcpdevice t "
-				+ " left outer join tbl_pcpacqdata_latest t2 on t2.wellid=t.id "
-				+ " order by t.sortnum";
-		pstmt = conn.prepareStatement(sql); 
-		rs=pstmt.executeQuery();
-		while(rs.next()){
-			CommStatus commStatus=new CommStatus();
-			commStatus.setDeviceName(rs.getString(1));
-			commStatus.setDeviceType(rs.getInt(2));
-			commStatus.setOrgId(rs.getInt(3));
-			commStatus.setCommStatus(rs.getInt(4));
-			commStatus.setDeviceStatus(rs.getInt(5));
-			commStatusList.add(commStatus);
-		}
-		dataModelMap.put("DeviceCommStatus", commStatusList);
-//		if(!dataModelMap.containsKey("DeviceCommStatus")){
-//			dataModelMap.put("DeviceCommStatus", commStatusList);
-//		}
-		OracleJdbcUtis.closeDBConnection(conn, stmt, pstmt, rs);
 	}
 	
 	public static int initWellCommStatus(){

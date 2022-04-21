@@ -39,7 +39,6 @@ import com.cosog.model.calculate.RPCProductionData;
 import com.cosog.model.calculate.UserInfo;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.EquipmentDriveMap;
-import com.cosog.utils.MemoryDataMap;
 import com.cosog.utils.OracleJdbcUtis;
 import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
@@ -207,8 +206,10 @@ public class MemoryDataManagerTask {
 					+ "t.productiondata,t.balanceinfo,t.stroke,"
 					+ "t.pumpingmodelid,"
 					+ "t.manufacturer,t.model,t.crankrotationdirection,t.offsetangleofcrank,t.crankgravityradius,t.singlecrankweight,t.singlecrankpinweight,t.structuralunbalance,"
-					+ "t.sortnum "
-					+ " from viw_rpcdevice t";
+					+ "t.sortnum,"
+					+ "t2.commstatus "
+					+ " from viw_rpcdevice t"
+					+ " left outer join tbl_rpcacqdata_latest t2 on t2.wellid=t.id ";
 			if(StringManagerUtils.isNotNull(wellId)){
 				sql+=" and t.id in("+wellId+")";
 			}
@@ -280,10 +281,10 @@ public class MemoryDataManagerTask {
 					rpcDeviceInfo.setPumpingUnit(null);
 					rpcDeviceInfo.setManualIntervention(null);
 				}
-				rpcDeviceInfo.setSortNum(32);
+				rpcDeviceInfo.setSortNum(rs.getInt(32));
+				rpcDeviceInfo.setCommStatus(rs.getInt(33));
 				rpcDeviceInfo.setAcqTime("");
 				rpcDeviceInfo.setAcquisitionItemInfoList(new ArrayList<AcquisitionItemInfo>());
-//				System.out.println(gson.toJson(rpcDeviceInfo));
 				String key=rpcDeviceInfo.getId()+"";
 				jedis.hset("RPCDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(rpcDeviceInfo));//哈希(Hash)
 			}
@@ -297,7 +298,6 @@ public class MemoryDataManagerTask {
 	}
 	
 	public static void loadPCPDeviceInfo(List<String> wellIdList){
-		Map<String, Object> memoryDataMap = MemoryDataMap.getMapObject();
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
@@ -315,8 +315,10 @@ public class MemoryDataManagerTask {
 					+ "t.instancecode,t.instancename,t.alarminstancecode,t.alarminstancename,t.displayinstancecode,t.displayinstancename,"
 					+ "t.status,t.statusName,"
 					+ "t.productiondata,"
-					+ "t.sortnum "
-					+ " from viw_pcpdevice t";
+					+ "t.sortnum, "
+					+ "t2.commstatus "
+					+ " from viw_pcpdevice t"
+					+ " left outer join tbl_pcpacqdata_latest t2 on t2.wellid=t.id ";
 			if(StringManagerUtils.isNotNull(wellId)){
 				sql+=" and t.id in("+wellId+")";
 			}
@@ -367,8 +369,8 @@ public class MemoryDataManagerTask {
 					pcpDeviceInfo.setProduction(null);
 					pcpDeviceInfo.setManualIntervention(null);
 				}
-				pcpDeviceInfo.setSortNum(21);
-//				System.out.println(gson.toJson(pcpDeviceInfo));
+				pcpDeviceInfo.setSortNum(rs.getInt(21));
+				pcpDeviceInfo.setCommStatus(rs.getInt(22));
 				String key=pcpDeviceInfo.getId()+"";
 				jedis.hset("PCPDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(pcpDeviceInfo));//哈希(Hash)
 			}

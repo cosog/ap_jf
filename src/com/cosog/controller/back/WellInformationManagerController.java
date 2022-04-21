@@ -38,6 +38,7 @@ import com.cosog.model.gridmodel.WellHandsontableChangedData;
 import com.cosog.service.back.WellInformationManagerService;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.task.EquipmentDriverServerTask;
+import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.utils.Constants;
 import com.cosog.utils.Page;
 import com.cosog.utils.PagingConstants;
@@ -622,7 +623,11 @@ public class WellInformationManagerController extends BaseController {
 		//处理抽油机详情
 		this.wellInformationManagerService.saveRPCPumpingInfo(deviceId,stroke,balanceInfo);
 		
-		EquipmentDriverServerTask.LoadDeviceCommStatus();
+		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
+			MemoryDataManagerTask.loadRPCDeviceInfo(null);
+		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
+			MemoryDataManagerTask.loadPCPDeviceInfo(null);
+		}
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -654,7 +659,11 @@ public class WellInformationManagerController extends BaseController {
 			this.wellInformationManagerService.saveSMSDeviceData(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),user);
 		}
 		
-		EquipmentDriverServerTask.LoadDeviceCommStatus();
+		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
+			MemoryDataManagerTask.loadRPCDeviceInfo(null);
+		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
+			MemoryDataManagerTask.loadPCPDeviceInfo(null);
+		}
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -721,7 +730,7 @@ public class WellInformationManagerController extends BaseController {
 				rpcDeviceInformation.setOrgId(user.getUserOrgid());
 			}
 			this.rpcDeviceManagerService.doRPCDeviceAdd(rpcDeviceInformation);
-			EquipmentDriverServerTask.LoadDeviceCommStatus();
+			MemoryDataManagerTask.loadRPCDeviceInfo(null);
 			List<String> addWellList=new ArrayList<String>();
 			addWellList.add(rpcDeviceInformation.getWellName());
 			if(rpcDeviceInformation.getStatus()==1){
@@ -776,7 +785,7 @@ public class WellInformationManagerController extends BaseController {
 		try {
 			User user = (User) session.getAttribute("userLogin");
 			this.pcpDeviceManagerService.doPCPDeviceAdd(pcpDeviceInformation);
-			EquipmentDriverServerTask.LoadDeviceCommStatus();
+			MemoryDataManagerTask.loadPCPDeviceInfo(null);
 			List<String> addWellList=new ArrayList<String>();
 			addWellList.add(pcpDeviceInformation.getWellName());
 			if(pcpDeviceInformation.getStatus()==1){
