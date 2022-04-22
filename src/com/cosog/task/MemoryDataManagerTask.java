@@ -240,6 +240,7 @@ public class MemoryDataManagerTask {
 				String balanceInfo=rs.getString(21);
 				float stroke=rs.getFloat(22);
 				int pumpingModelId=rs.getInt(23);
+				rpcDeviceInfo.setPumpingModelId(pumpingModelId);
 				if(StringManagerUtils.isNotNull(productionData)){
 					type = new TypeToken<RPCDeviceInfo>() {}.getType();
 					RPCDeviceInfo rpcProductionData=gson.fromJson(productionData, type);
