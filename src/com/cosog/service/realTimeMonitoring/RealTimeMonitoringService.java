@@ -1547,7 +1547,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		if(configFile.getOthers().getProductionUnit()!=0){
 			prodCol=" liquidVolumetricProduction";
 		}
-        String sql="select well.wellName as wellName, to_char(t.acqTime,'yyyy-mm-dd hh24:mi:ss') as acqTime,"
+        String sql="select well.wellName as wellName, to_char(t.fesdiagramAcqTime,'yyyy-mm-dd hh24:mi:ss') as acqTime,"
         		+ " t.pumpfsdiagram,"
         		+ " t.upperloadline,t.lowerloadline, t.fmax,t.fmin,t.stroke,t.spm, "
         		+ " t."+prodCol+","
@@ -1696,7 +1696,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
         StringBuffer pumpFSDiagramStrBuff = new StringBuffer();
         String tableName="tbl_rpcacqdata_latest";
         
-        String sql="select well.wellName, to_char(t.acqTime,'yyyy-mm-dd hh24:mi:ss') as acqTime,"
+        String sql="select well.wellName, to_char(t.fesdiagramAcqTime,'yyyy-mm-dd hh24:mi:ss') as acqTime,"
         		+ " t.upstrokewattmax,t.downstrokewattmax,t.wattdegreebalance,t.upstrokeimax,t.downstrokeimax,t.idegreebalance,t.deltaRadius*100,"
         		+ " t.position_curve,t.load_curve,t.power_curve,t.current_curve,"
         		+ " t.crankangle,t.loadtorque,t.cranktorque,t.currentbalancetorque,t.currentnettorque,"

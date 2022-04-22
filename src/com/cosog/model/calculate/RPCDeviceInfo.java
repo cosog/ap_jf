@@ -28,6 +28,7 @@ public class RPCDeviceInfo implements Serializable {
 	private String videoUrl;
 	private Integer status;
 	private String statusName;
+	private Integer pumpingModelId;
 	private Integer sortNum;
 
     private FluidPVT FluidPVT;
@@ -308,6 +309,14 @@ public class RPCDeviceInfo implements Serializable {
 
 	public void setCommStatus(Integer commStatus) {
 		this.commStatus = commStatus;
+	}
+
+	public Integer getPumpingModelId() {
+		return pumpingModelId;
+	}
+
+	public void setPumpingModelId(Integer pumpingModelId) {
+		this.pumpingModelId = pumpingModelId;
 	}
 
 }

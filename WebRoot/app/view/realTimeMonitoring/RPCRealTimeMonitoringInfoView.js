@@ -276,7 +276,6 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             padding: 0,
                             autoScroll:true,
                             scrollable: true,
-                            height:900,
                             id: 'RPCRealTimeMonitoringFSDiagramAnalysisTabPanel_Id',
                             layout: {
                                 type: 'vbox',
@@ -286,8 +285,7 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             items: [{
                             		border: false,
                             		margin: '0 0 0 0',
-//                            		flex: 1,
-                            		height:300,
+                            		flex: 1,
                             		layout: {
                             	        type: 'hbox',
                             	        pack: 'start',
@@ -298,7 +296,6 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             	    	layout: 'fit',
                             	    	margin: '0 0 0 0',
                                         flex: 1,
-                                        height:300,
                                         align:'stretch',
                                         html: '<div id=\"FSDiagramAnalysisSingleWellboreDetailsDiv1_id\" style="width:100%;height:100%;"></div>',
                                         listeners: {
@@ -313,7 +310,6 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             	    	layout: 'fit',
                             	    	margin: '0 0 0 1',
                                         flex: 1,
-                                        height:300,
                                         align:'stretch',
                                         html: '<div id=\"FSDiagramAnalysisSingleWellboreDetailsDiv2_id\" style="width:100%;height:100%;"></div>',
                                         listeners: {
@@ -326,7 +322,7 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             	    }]
                             	},{
                             		border: false,
-//                            		flex: 1,
+                            		flex: 1,
                             		margin: '1 0 0 0',
                             		layout: {
                             	        type: 'hbox',
@@ -338,7 +334,6 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             	    	layout: 'fit',
                             	    	margin: '0 0 0 0',
                                         flex: 1,
-                                        height:300,
                                         align:'stretch',
                                         html: '<div id=\"FSDiagramAnalysisSingleWellboreDetailsDiv3_id\" style="width:100%;height:100%;"></div>',
                                         listeners: {
@@ -353,7 +348,6 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             	    	layout: 'fit',
                             	    	margin: '0 0 0 1',
                                         flex: 1,
-                                        height:300,
                                         align:'stretch',
                                         html: '<div id=\"FSDiagramAnalysisSingleWellboreDetailsDiv4_id\" style="width:100%;height:100%;"></div>',
                                         listeners: {
