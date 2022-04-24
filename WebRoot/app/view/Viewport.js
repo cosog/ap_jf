@@ -283,8 +283,6 @@ function websocketOnMessage(evt) {
 		                	}else {
 		                		expectedTorqueChartTitle="预期扭矩曲线";
 		                	}
-		                	
-		                	
 		                	showPSDiagram(data.surfaceChartsData, "FSDiagramAnalysisSingleSurfaceDetailsDiv1_id");
 		                	showASDiagram(data.surfaceChartsData, "FSDiagramAnalysisSingleSurfaceDetailsDiv3_id");
 		                	showBalanceAnalysisCurveChart(data.surfaceChartsData.crankAngle,data.surfaceChartsData.loadRorque,data.surfaceChartsData.crankTorque,data.surfaceChartsData.currentBalanceTorque,data.surfaceChartsData.currentNetTorque,

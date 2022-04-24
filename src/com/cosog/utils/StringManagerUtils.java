@@ -3508,4 +3508,18 @@ public class StringManagerUtils {
         }
 		return flag;
 	}
+	
+	public static boolean stringToArrExistNum(String str,int num){
+		boolean flag = false;
+		if(StringManagerUtils.isNotNull(str)){
+			String[] strArr=str.split(",");
+			for(String s:strArr){
+				if(StringManagerUtils.stringToInteger(s)==num){
+					flag = true;
+	                break;
+				}
+			}
+		}
+		return flag;
+	}
 }

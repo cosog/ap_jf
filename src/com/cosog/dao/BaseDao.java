@@ -2271,9 +2271,8 @@ public class BaseDao extends HibernateDaoSupport {
 					+ "?,?,?,?,?,?,?,?,?,?,"
 					+ "?,?,?,?,?,?,?,?,?,?,?,?,"
 					+ "?,?,?,"
-					+ "?,?,?,?,"
-					+ "?,?,"
-					+ "?)}");
+					+ "?,?,?,?"
+					+ ")}");
 			cs.setString(1,rpcDeviceInfo.getId()+"");
 			cs.setString(2,rpcDeviceInfo.getAcqTime());
 			
@@ -2486,10 +2485,6 @@ public class BaseDao extends HibernateDaoSupport {
 			cs.setClob(91,expectedNetTorqueClob);
 			//井深切片
 			cs.setClob(92,wellboreSliceClob);
-			
-			cs.setString(93,"");
-			cs.setString(94,"");
-			cs.setString(95,"");
 			cs.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2514,7 +2509,7 @@ public class BaseDao extends HibernateDaoSupport {
 			
 			cs.setFloat(3,calculateRequestData.getRPM());
 			
-			cs.setString(4,PCPProductionDataToString(calculateRequestData));//生产数据Id
+			cs.setString(4,PCPProductionDataToString(calculateRequestData));
 			cs.setInt(5,calculateResponseData==null?0:calculateResponseData.getCalculationStatus().getResultStatus());//计算标志
 			if(calculateResponseData!=null&&(calculateResponseData.getCalculationStatus().getResultStatus()==1||calculateResponseData.getCalculationStatus().getResultStatus()==-99)){//如果计算成功
 				//工况代码
