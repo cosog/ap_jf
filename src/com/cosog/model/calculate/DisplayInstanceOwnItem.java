@@ -3,6 +3,8 @@ package com.cosog.model.calculate;
 import java.io.Serializable;
 import java.util.List;
 
+import com.cosog.model.drive.ModbusProtocolConfig.ItemsMeaning;
+
 public class DisplayInstanceOwnItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -12,7 +14,7 @@ public class DisplayInstanceOwnItem implements Serializable {
 	public int unitId;
 	public List<DisplayItem> itemList;
 	
-	public static class DisplayItem implements Serializable {
+	public static class DisplayItem implements Serializable , Comparable<DisplayItem>{
 		private static final long serialVersionUID = 1L;
 		public int itemId;
 		public String itemName;
@@ -98,7 +100,10 @@ public class DisplayInstanceOwnItem implements Serializable {
 		public void setType(int type) {
 			this.type = type;
 		}
-		
+		@Override
+		public int compareTo(DisplayItem displayItem) {     //重写Comparable接口的compareTo方法
+			return this.sort-displayItem.getSort();   // 根据值或者位升序排列，降序修改相减顺序即可
+		}
 	}
 	
 	public String getInstanceCode() {

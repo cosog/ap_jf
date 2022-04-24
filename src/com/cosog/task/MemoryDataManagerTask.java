@@ -131,6 +131,7 @@ public class MemoryDataManagerTask {
 		}
 		
 		Jedis jedis = new Jedis();
+		
 		jedis.set("modbusProtocolConfig".getBytes(), SerializeObjectUnils.serialize(modbusProtocolConfig));
 		jedis.disconnect();
 		jedis.close();
@@ -338,12 +339,12 @@ public class MemoryDataManagerTask {
 				pcpDeviceInfo.setSignInId(rs.getString(9));
 				pcpDeviceInfo.setSlave(rs.getString(10));
 				pcpDeviceInfo.setVideoUrl(rs.getString(11));
-				pcpDeviceInfo.setInstanceCode(rs.getString(12));
-				pcpDeviceInfo.setInstanceName(rs.getString(13));
-				pcpDeviceInfo.setAlarmInstanceCode(rs.getString(14));
-				pcpDeviceInfo.setAlarmInstanceName(rs.getString(15));
-				pcpDeviceInfo.setDisplayInstanceCode(rs.getString(16));
-				pcpDeviceInfo.setDisplayInstanceName(rs.getString(17));
+				pcpDeviceInfo.setInstanceCode(rs.getString(12)+"");
+				pcpDeviceInfo.setInstanceName(rs.getString(13)+"");
+				pcpDeviceInfo.setAlarmInstanceCode(rs.getString(14)+"");
+				pcpDeviceInfo.setAlarmInstanceName(rs.getString(15)+"");
+				pcpDeviceInfo.setDisplayInstanceCode(rs.getString(16)+"");
+				pcpDeviceInfo.setDisplayInstanceName(rs.getString(17)+"");
 				pcpDeviceInfo.setStatus(rs.getInt(18));
 				pcpDeviceInfo.setStatusName(rs.getString(19));
 				String productionData=rs.getString(20);
@@ -417,9 +418,9 @@ public class MemoryDataManagerTask {
 					acqInstanceOwnItem=new AcqInstanceOwnItem();
 				}
 				
-				acqInstanceOwnItem.setInstanceCode(rs.getString(1));
+				acqInstanceOwnItem.setInstanceCode(rs.getString(1)+"");
 				acqInstanceOwnItem.setDeviceType(rs.getInt(2));
-				acqInstanceOwnItem.setProtocol(rs.getString(3));
+				acqInstanceOwnItem.setProtocol(rs.getString(3)+"");
 				acqInstanceOwnItem.setUnitId(rs.getInt(4));
 				acqInstanceOwnItem.setAcqCycle(rs.getInt(5));
 				acqInstanceOwnItem.setSaveCycle(rs.getInt(6));
@@ -429,8 +430,8 @@ public class MemoryDataManagerTask {
 				}
 				AcqItem acqItem=new AcqItem();
 				acqItem.setItemId(rs.getInt(7));
-				acqItem.setItemName(rs.getString(8));
-				acqItem.setItemCode(rs.getString(9));
+				acqItem.setItemName(rs.getString(8)+"");
+				acqItem.setItemCode(rs.getString(9)+"");
 				acqItem.setBitIndex(rs.getInt(10));
 				acqItem.setGroupId(rs.getInt(11));
 				
@@ -512,15 +513,15 @@ public class MemoryDataManagerTask {
 				DisplayItem displayItem=new DisplayItem();
 				displayItem.setUnitId(rs.getInt(4));
 				displayItem.setItemId(rs.getInt(5));
-				displayItem.setItemName(rs.getString(6));
-				displayItem.setItemCode(rs.getString(7));
+				displayItem.setItemName(rs.getString(6)+"");
+				displayItem.setItemCode(rs.getString(7)+"");
 				displayItem.setBitIndex(rs.getInt(8));
 				displayItem.setShowLevel(rs.getInt(9));
 				displayItem.setSort(rs.getInt(10));
 				displayItem.setRealtimeCurve(rs.getInt(11));
-				displayItem.setRealtimeCurveColor(rs.getString(12));
+				displayItem.setRealtimeCurveColor(rs.getString(12)+"");
 				displayItem.setHistoryCurve(rs.getInt(13));
-				displayItem.setHistoryCurveColor(rs.getString(14));
+				displayItem.setHistoryCurveColor(rs.getString(14)+"");
 				displayItem.setType(rs.getInt(15));
 				int index=-1;
 				for(int i=0;i<displayInstanceOwnItem.getItemList().size();i++){
@@ -534,7 +535,7 @@ public class MemoryDataManagerTask {
 				}else{
 					displayInstanceOwnItem.getItemList().add(displayItem);
 				}
-				
+				Collections.sort(displayInstanceOwnItem.getItemList());
 				String key=displayInstanceOwnItem.getInstanceCode();
 				jedis.hset("DisplayInstanceOwnItem".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(displayInstanceOwnItem));//哈希(Hash)
 			}
@@ -783,14 +784,16 @@ public class MemoryDataManagerTask {
 	}
 	
 	@SuppressWarnings("resource")
-	public static void initAlarmStyle(){
+	public static AlarmShowStyle initAlarmStyle(){
 		Connection conn = null;   
 		PreparedStatement pstmt = null;  
 		Statement stmt = null;  
 		ResultSet rs = null;
+		Jedis jedis=null;
+		AlarmShowStyle alarmShowStyle=null;
 		try {
-			Jedis jedis = new Jedis();
-			AlarmShowStyle alarmShowStyle=new AlarmShowStyle();
+			
+			alarmShowStyle=new AlarmShowStyle();
 			String sql="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
 					+ " (select * from tbl_code t where t.itemcode='BJYS' ) v1,"
 					+ " (select * from tbl_code t where t.itemcode='BJQJYS' ) v2,"
@@ -806,7 +809,7 @@ public class MemoryDataManagerTask {
 			
 			conn=OracleJdbcUtis.getConnection();
 			if(conn==null){
-				return ;
+				return null;
 			}
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
@@ -848,6 +851,7 @@ public class MemoryDataManagerTask {
 					alarmShowStyle.getComm().getOnline().setOpacity(rs.getString(4));
 				}
 			}
+			jedis = new Jedis();
 			jedis.set("AlarmShowStyle".getBytes(), SerializeObjectUnils.serialize(alarmShowStyle));
 			jedis.disconnect();
 			jedis.close();
@@ -857,6 +861,7 @@ public class MemoryDataManagerTask {
 		} finally{
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
+		return alarmShowStyle;
 	}
 	
 	public static ModbusProtocolConfig getModbusProtocolConfig(){

@@ -322,22 +322,25 @@ public class HistoryQueryController extends BaseController  {
 			deviceTableName="tbl_pcpdevice";
 			tableName="tbl_pcpacqdata_hist";
 		}
-		if(!StringManagerUtils.isNotNull(endDate)){
-			String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd hh24:mi:ss') from "+tableName+" t where t.wellId="+deviceId;
-			List list = this.service.reportDateJssj(sql);
-			if (list.size() > 0 &&list.get(0)!=null&&!list.get(0).toString().equals("null")) {
-				endDate = list.get(0).toString();
-			} else {
-				endDate = StringManagerUtils.getCurrentTime("yyyy-MM-dd HH:mm:ss");
+		if(user!=null){
+			if(!StringManagerUtils.isNotNull(endDate)){
+				String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd hh24:mi:ss') from "+tableName+" t where t.wellId="+deviceId;
+				List list = this.service.reportDateJssj(sql);
+				if (list.size() > 0 &&list.get(0)!=null&&!list.get(0).toString().equals("null")) {
+					endDate = list.get(0).toString();
+				} else {
+					endDate = StringManagerUtils.getCurrentTime("yyyy-MM-dd HH:mm:ss");
+				}
+				if(!StringManagerUtils.isNotNull(startDate)){
+					startDate=endDate.split(" ")[0]+" 00:00:00";
+				}
 			}
-			if(!StringManagerUtils.isNotNull(startDate)){
-				startDate=endDate.split(" ")[0]+" 00:00:00";
-			}
+			
+			
+			this.pager = new Page("pagerForm", request);
+			json = historyQueryService.getHistoryQueryCurveData(deviceId,deviceName,deviceType,startDate,endDate,user.getUserId());
 		}
 		
-		
-		this.pager = new Page("pagerForm", request);
-		json = historyQueryService.getHistoryQueryCurveData(deviceId,deviceName,deviceType,startDate,endDate);
 		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();

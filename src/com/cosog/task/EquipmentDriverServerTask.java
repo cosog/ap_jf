@@ -65,29 +65,31 @@ public class EquipmentDriverServerTask {
 		
 		initWellCommStatus();
 		
-//		String path="";
-//		StringManagerUtils stringManagerUtils=new StringManagerUtils();
-//		path=stringManagerUtils.getFilePath("test1.json","test/");
-//		String distreteData=stringManagerUtils.readFile(path,"utf-8");
-//		
-//		path=stringManagerUtils.getFilePath("test2.json","test/");
-//		String distreteData2=stringManagerUtils.readFile(path,"utf-8");
-//		
-//		path=stringManagerUtils.getFilePath("test3.json","test/");
-//		String onLineData=stringManagerUtils.readFile(path,"utf-8");
-//		
-//		path=stringManagerUtils.getFilePath("test4.json","test/");
-//		String offLineData=stringManagerUtils.readFile(path,"utf-8");
-//		
-//		String url=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/group";
-//		String onlineUrl=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/online";
-//		
-//		int i=0;
+		String path="";
+		StringManagerUtils stringManagerUtils=new StringManagerUtils();
+		path=stringManagerUtils.getFilePath("test1.json","test/");
+		String distreteData=stringManagerUtils.readFile(path,"utf-8");
+		
+		path=stringManagerUtils.getFilePath("test2.json","test/");
+		String distreteData2=stringManagerUtils.readFile(path,"utf-8");
+		
+		path=stringManagerUtils.getFilePath("test3.json","test/");
+		String onLineData=stringManagerUtils.readFile(path,"utf-8");
+		
+		path=stringManagerUtils.getFilePath("test4.json","test/");
+		String offLineData=stringManagerUtils.readFile(path,"utf-8");
+		
+		String url=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/group";
+		String onlineUrl=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/online";
+		
+		StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+		
+		int i=0;
 //		while(true){
 //			if(i%2==0){
 //				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
 //			}else{
-//				StringManagerUtils.sendPostMethod(url, distreteData2,"utf-8");
+//				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
 //			}
 //			
 ////			if(i%2==0){
@@ -104,57 +106,56 @@ public class EquipmentDriverServerTask {
 		
 		
 
-//		loadProtocolConfig();
-		initServerConfig();
-		initProtocolConfig("","");
-		initInstanceConfig(null,"");
-		initSMSInstanceConfig(null,"");
-		initSMSDevice(null,"");
-		initRPCDriverAcquisitionInfoConfig(null,"");
-		initPCPDriverAcquisitionInfoConfig(null,"");
-		boolean sendMsg=false;
-		do{
-			String responseData=StringManagerUtils.sendPostMethod(probeUrl, "","utf-8");
-			type = new TypeToken<DriverProbeResponse>() {}.getType();
-			DriverProbeResponse driverProbeResponse=gson.fromJson(responseData, type);
-			String Ver="";
-			if(driverProbeResponse!=null){
-				sendMsg=false;
-				if(!driverProbeResponse.getHttpServerInitStatus()){
-					initServerConfig();
-				}
-				if(!driverProbeResponse.getProtocolInitStatus()){
-					initProtocolConfig("","");
-				}
-				if(!driverProbeResponse.getInstanceInitStatus()){
-					initInstanceConfig(null,"");
-					initSMSInstanceConfig(null,"");
-				}
-				if(!driverProbeResponse.getSMSInitStatus()){
-					initSMSDevice(null,"");
-				}
-				if(!driverProbeResponse.getIDInitStatus()){
-					//清空内存
-					Map<String, Object> dataModelMap = DataModelMap.getMapObject();
-					Map<String,InitializedDeviceInfo> initializedDeviceList=(Map<String,InitializedDeviceInfo>) dataModelMap.get("InitializedDeviceList");
-					if(initializedDeviceList!=null){
-						dataModelMap.remove("InitializedDeviceList");
-						initializedDeviceList=new HashMap<String,InitializedDeviceInfo>();
-						dataModelMap.put("InitializedDeviceList", initializedDeviceList);
-					}
-					
-					initRPCDriverAcquisitionInfoConfig(null,"");
-					initPCPDriverAcquisitionInfoConfig(null,"");
-				}
-				Ver=driverProbeResponse.getVer();
-			}else{
-				if(!sendMsg){
-					StringManagerUtils.sendPostMethod(allOfflineUrl, "","utf-8");
-					sendMsg=true;
-				}
-			}
-			Thread.sleep(1000*1);
-		}while(true);
+//		initServerConfig();
+//		initProtocolConfig("","");
+//		initInstanceConfig(null,"");
+//		initSMSInstanceConfig(null,"");
+//		initSMSDevice(null,"");
+//		initRPCDriverAcquisitionInfoConfig(null,"");
+//		initPCPDriverAcquisitionInfoConfig(null,"");
+//		boolean sendMsg=false;
+//		do{
+//			String responseData=StringManagerUtils.sendPostMethod(probeUrl, "","utf-8");
+//			type = new TypeToken<DriverProbeResponse>() {}.getType();
+//			DriverProbeResponse driverProbeResponse=gson.fromJson(responseData, type);
+//			String Ver="";
+//			if(driverProbeResponse!=null){
+//				sendMsg=false;
+//				if(!driverProbeResponse.getHttpServerInitStatus()){
+//					initServerConfig();
+//				}
+//				if(!driverProbeResponse.getProtocolInitStatus()){
+//					initProtocolConfig("","");
+//				}
+//				if(!driverProbeResponse.getInstanceInitStatus()){
+//					initInstanceConfig(null,"");
+//					initSMSInstanceConfig(null,"");
+//				}
+//				if(!driverProbeResponse.getSMSInitStatus()){
+//					initSMSDevice(null,"");
+//				}
+//				if(!driverProbeResponse.getIDInitStatus()){
+//					//清空内存
+//					Map<String, Object> dataModelMap = DataModelMap.getMapObject();
+//					Map<String,InitializedDeviceInfo> initializedDeviceList=(Map<String,InitializedDeviceInfo>) dataModelMap.get("InitializedDeviceList");
+//					if(initializedDeviceList!=null){
+//						dataModelMap.remove("InitializedDeviceList");
+//						initializedDeviceList=new HashMap<String,InitializedDeviceInfo>();
+//						dataModelMap.put("InitializedDeviceList", initializedDeviceList);
+//					}
+//					
+//					initRPCDriverAcquisitionInfoConfig(null,"");
+//					initPCPDriverAcquisitionInfoConfig(null,"");
+//				}
+//				Ver=driverProbeResponse.getVer();
+//			}else{
+//				if(!sendMsg){
+//					StringManagerUtils.sendPostMethod(allOfflineUrl, "","utf-8");
+//					sendMsg=true;
+//				}
+//			}
+//			Thread.sleep(1000*1);
+//		}while(true);
 	}
 	
 	public static class DriverProbeResponse{

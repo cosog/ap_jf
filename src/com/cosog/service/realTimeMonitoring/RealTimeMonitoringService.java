@@ -61,26 +61,34 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 	
 	public String getDeviceRealTimeStat(String orgId,String deviceType) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
-		Jedis jedis = new Jedis();
-		if(!jedis.exists("AlarmShowStyle".getBytes())){
-			MemoryDataManagerTask.initAlarmStyle();
+		Jedis jedis = null;
+		AlarmShowStyle alarmShowStyle=null;
+		List<byte[]> deviceInfoByteList=null;
+		try{
+			jedis = new Jedis();
+			if(!jedis.exists("AlarmShowStyle".getBytes())){
+				MemoryDataManagerTask.initAlarmStyle();
+			}
+			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
+			
+			if(StringManagerUtils.stringToInteger(deviceType) ==0){
+				if(!jedis.exists("RPCDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+				}
+				deviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
+			}else{
+				if(!jedis.exists("PCPDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+				}
+				deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
-		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
-		jedis.disconnect();
-		jedis.close();
-		String tableName="tbl_rpcacqdata_latest";
-		String deviceTableName="tbl_rpcdevice";
-		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			tableName="tbl_pcpacqdata_latest";
-			deviceTableName="tbl_pcpdevice";
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
 		}
-		
-		String sql="select t.commstatus,count(1) from "+tableName+" t,"+deviceTableName+" t2 "
-				+ " where t.wellid=t2.id and t2.orgid in("+orgId+") "
-				+"  group by t.commstatus";
-		
-		
-		List<?> list = this.findCallSql(sql);
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50,children:[] },"
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"item\",children:[] },"
@@ -88,18 +96,66 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				+ "]";
 		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
 		result_json.append("\"totalCount\":3,");
-		
 		int total=0,online=0,offline=0;
-		result_json.append("\"totalRoot\":[");
-		for(int i=0;i<list.size();i++){
-			Object[] obj=(Object[]) list.get(i);
-			if(StringManagerUtils.stringToInteger(obj[0]+"")==1){
-				online=StringManagerUtils.stringToInteger(obj[1]+"");
-			}else{
-				offline=StringManagerUtils.stringToInteger(obj[1]+"");
+		if(jedis==null){
+			String tableName="tbl_rpcacqdata_latest";
+			String deviceTableName="viw_rpcdevice";
+			if(StringManagerUtils.stringToInteger(deviceType)!=0){
+				tableName="tbl_pcpacqdata_latest";
+				deviceTableName="viw_pcpdevice";
+			}
+			
+			String sql="select t2.commstatus,count(1) from "+deviceTableName+" t "
+					+ " left outer join "+tableName+" t2 on  t2.wellid=t.id "
+					+ " where t.orgid in("+orgId+") ";
+			sql+=" group by t2.commstatus";
+			
+			List<?> list = this.findCallSql(sql);
+			for(int i=0;i<list.size();i++){
+				Object[] obj=(Object[]) list.get(i);
+				if(StringManagerUtils.stringToInteger(obj[0]+"")==1){
+					online=StringManagerUtils.stringToInteger(obj[1]+"");
+				}else{
+					offline=StringManagerUtils.stringToInteger(obj[1]+"");
+				}
+			}
+		}else{
+			if(deviceInfoByteList!=null){
+				for(int i=0;i<deviceInfoByteList.size();i++){
+					int commStatus=0;
+					if(StringManagerUtils.stringToInteger(deviceType) ==0){
+						Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+						if (obj instanceof RPCDeviceInfo) {
+							RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)obj;
+							if(StringManagerUtils.stringToArrExistNum(orgId, rpcDeviceInfo.getOrgId())){
+								commStatus=rpcDeviceInfo.getCommStatus();
+								if(commStatus==1){
+									online+=1;
+								}else{
+									offline+=1;;
+								}
+							}
+						}
+					}else{
+						Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+						if (obj instanceof PCPDeviceInfo) {
+							PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)obj;
+							if(StringManagerUtils.stringToArrExistNum(orgId, pcpDeviceInfo.getOrgId())){
+								commStatus=pcpDeviceInfo.getCommStatus();
+								if(commStatus==1){
+									online+=1;
+								}else{
+									offline+=1;;
+								}
+							}
+						}
+					}
+				}
 			}
 		}
+		
 		total=online+offline;
+		result_json.append("\"totalRoot\":[");
 		result_json.append("{\"id\":1,");
 		result_json.append("\"item\":\"全部\",");
 		result_json.append("\"itemCode\":\"all\",");
@@ -122,29 +178,35 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 	
 	public String getRealTimeMonitoringCommStatusStatData(String orgId,String deviceType,String deviceTypeStatValue) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
-		Jedis jedis = new Jedis();
-		if(!jedis.exists("AlarmShowStyle".getBytes())){
-			MemoryDataManagerTask.initAlarmStyle();
+		Jedis jedis = null;
+		AlarmShowStyle alarmShowStyle=null;
+		List<byte[]> deviceInfoByteList=null;
+		try{
+			jedis = new Jedis();
+			if(!jedis.exists("AlarmShowStyle".getBytes())){
+				MemoryDataManagerTask.initAlarmStyle();
+			}
+			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
+			
+			if(StringManagerUtils.stringToInteger(deviceType) ==0){
+				if(!jedis.exists("RPCDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+				}
+				deviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
+			}else{
+				if(!jedis.exists("PCPDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+				}
+				deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
-		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
-		jedis.disconnect();
-		jedis.close();
-		String tableName="tbl_rpcacqdata_latest";
-		String deviceTableName="viw_rpcdevice";
-		if(StringManagerUtils.stringToInteger(deviceType)!=0){
-			tableName="tbl_pcpacqdata_latest";
-			deviceTableName="viw_pcpdevice";
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
 		}
 		
-		String sql="select t2.commstatus,count(1) from "+deviceTableName+" t "
-				+ " left outer join "+tableName+" t2 on  t2.wellid=t.id "
-				+ " where t.orgid in("+orgId+") ";
-		if(StringManagerUtils.isNotNull(deviceTypeStatValue)){
-			sql+=" and t.devicetypename='"+deviceTypeStatValue+"'";
-		}
-		sql+=" group by t2.commstatus";
-		
-		List<?> list = this.findCallSql(sql);
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50,children:[] },"
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"item\",children:[] },"
@@ -152,18 +214,69 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				+ "]";
 		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
 		result_json.append("\"totalCount\":3,");
-		
 		int total=0,online=0,offline=0;
-		result_json.append("\"totalRoot\":[");
-		for(int i=0;i<list.size();i++){
-			Object[] obj=(Object[]) list.get(i);
-			if(StringManagerUtils.stringToInteger(obj[0]+"")==1){
-				online=StringManagerUtils.stringToInteger(obj[1]+"");
-			}else{
-				offline=StringManagerUtils.stringToInteger(obj[1]+"");
+		if(jedis==null){
+			String tableName="tbl_rpcacqdata_latest";
+			String deviceTableName="viw_rpcdevice";
+			if(StringManagerUtils.stringToInteger(deviceType)!=0){
+				tableName="tbl_pcpacqdata_latest";
+				deviceTableName="viw_pcpdevice";
+			}
+			
+			String sql="select t2.commstatus,count(1) from "+deviceTableName+" t "
+					+ " left outer join "+tableName+" t2 on  t2.wellid=t.id "
+					+ " where t.orgid in("+orgId+") ";
+			if(StringManagerUtils.isNotNull(deviceTypeStatValue)){
+				sql+=" and t.devicetypename='"+deviceTypeStatValue+"'";
+			}
+			sql+=" group by t2.commstatus";
+			
+			List<?> list = this.findCallSql(sql);
+			for(int i=0;i<list.size();i++){
+				Object[] obj=(Object[]) list.get(i);
+				if(StringManagerUtils.stringToInteger(obj[0]+"")==1){
+					online=StringManagerUtils.stringToInteger(obj[1]+"");
+				}else{
+					offline=StringManagerUtils.stringToInteger(obj[1]+"");
+				}
+			}
+		}else{
+			if(deviceInfoByteList!=null){
+				for(int i=0;i<deviceInfoByteList.size();i++){
+					int commStatus=0;
+					if(StringManagerUtils.stringToInteger(deviceType) ==0){
+						Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+						if (obj instanceof RPCDeviceInfo) {
+							RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)obj;
+							if(StringManagerUtils.stringToArrExistNum(orgId, rpcDeviceInfo.getOrgId())){
+								commStatus=rpcDeviceInfo.getCommStatus();
+								if(commStatus==1){
+									online+=1;
+								}else{
+									offline+=1;;
+								}
+							}
+						}
+					}else{
+						Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+						if (obj instanceof PCPDeviceInfo) {
+							PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)obj;
+							if(StringManagerUtils.stringToArrExistNum(orgId, pcpDeviceInfo.getOrgId())){
+								commStatus=pcpDeviceInfo.getCommStatus();
+								if(commStatus==1){
+									online+=1;
+								}else{
+									offline+=1;;
+								}
+							}
+						}
+					}
+				}
 			}
 		}
+		
 		total=online+offline;
+		result_json.append("\"totalRoot\":[");
 		result_json.append("{\"id\":1,");
 		result_json.append("\"item\":\"全部\",");
 		result_json.append("\"itemCode\":\"all\",");
@@ -186,13 +299,21 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 	
 	public String getRealTimeMonitoringDeviceTypeStatData(String orgId,String deviceType,String commStatusStatValue) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
-		Jedis jedis = new Jedis();
-		if(!jedis.exists("AlarmShowStyle".getBytes())){
-			MemoryDataManagerTask.initAlarmStyle();
+		Jedis jedis = null;
+		AlarmShowStyle alarmShowStyle=null;
+		try{
+			jedis = new Jedis();
+			if(!jedis.exists("AlarmShowStyle".getBytes())){
+				MemoryDataManagerTask.initAlarmStyle();
+			}
+			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
+		}catch(Exception e){
+			e.printStackTrace();
 		}
-		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
-		jedis.disconnect();
-		jedis.close();
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
+		}
 		String tableName="tbl_rpcacqdata_latest";
 		String deviceTableName="viw_rpcdevice";
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
@@ -263,27 +384,59 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		
 		result_json.append("{ \"success\":true,\"orgId\":\""+orgId+"\",\"deviceType\":"+deviceType+",");
 		int all=0,online=0,offline=0;
-		if(deviceInfoByteList!=null){
-			for(int i=0;i<deviceInfoByteList.size();i++){
-				int commStatus=0;
-				if(StringManagerUtils.stringToInteger(deviceType) ==0){
-					Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
-					if (obj instanceof RPCDeviceInfo) {
-						RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)obj;
-						commStatus=rpcDeviceInfo.getCommStatus();
-					}
+		if(jedis==null){
+			String tableName="tbl_rpcacqdata_latest";
+			String deviceTableName="viw_rpcdevice";
+			if(StringManagerUtils.stringToInteger(deviceType)!=0){
+				tableName="tbl_pcpacqdata_latest";
+				deviceTableName="viw_pcpdevice";
+			}
+			
+			String sql="select t2.commstatus,count(1) from "+deviceTableName+" t "
+					+ " left outer join "+tableName+" t2 on  t2.wellid=t.id "
+					+ " where t.orgid in("+orgId+") ";
+			sql+=" group by t2.commstatus";
+			
+			List<?> list = this.findCallSql(sql);
+			for(int i=0;i<list.size();i++){
+				Object[] obj=(Object[]) list.get(i);
+				if(StringManagerUtils.stringToInteger(obj[0]+"")==1){
+					online=StringManagerUtils.stringToInteger(obj[1]+"");
 				}else{
-					Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
-					if (obj instanceof PCPDeviceInfo) {
-						PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)obj;
-						commStatus=pcpDeviceInfo.getCommStatus();
-					}
+					offline=StringManagerUtils.stringToInteger(obj[1]+"");
 				}
-				
-				if(commStatus==1){
-					online+=1;
-				}else{
-					offline+=1;;
+			}
+		}else{
+			if(deviceInfoByteList!=null){
+				for(int i=0;i<deviceInfoByteList.size();i++){
+					int commStatus=0;
+					if(StringManagerUtils.stringToInteger(deviceType) ==0){
+						Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+						if (obj instanceof RPCDeviceInfo) {
+							RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)obj;
+							if(StringManagerUtils.stringToArrExistNum(orgId, rpcDeviceInfo.getOrgId())){
+								commStatus=rpcDeviceInfo.getCommStatus();
+								if(commStatus==1){
+									online+=1;
+								}else{
+									offline+=1;;
+								}
+							}
+						}
+					}else{
+						Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+						if (obj instanceof PCPDeviceInfo) {
+							PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)obj;
+							if(StringManagerUtils.stringToArrExistNum(orgId, pcpDeviceInfo.getOrgId())){
+								commStatus=pcpDeviceInfo.getCommStatus();
+								if(commStatus==1){
+									online+=1;
+								}else{
+									offline+=1;;
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -626,6 +779,11 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		StringBuffer info_json = new StringBuffer();
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
 		Jedis jedis = new Jedis();
+		AlarmShowStyle alarmShowStyle=null;
+		DisplayInstanceOwnItem displayInstanceOwnItem=null;
+		AlarmInstanceOwnItem alarmInstanceOwnItem=null;
+		Set<byte[]>calItemSet=null;
+		UserInfo userInfo=null;
 		String tableName="tbl_rpcacqdata_latest";
 		String deviceTableName="tbl_rpcdevice";
 		String columnsKey="rpcDeviceAcquisitionItemColumns";
@@ -638,67 +796,78 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			deviceInfoKey="PCPDeviceInfo";
 			calItemsKey="pcpCalItemList";
 		}
-		String displayInstanceCoe="";
+		String displayInstanceCode="";
 		String alarmInstanceCode="";
-		if(StringManagerUtils.stringToInteger(deviceType)==0){
-			if(!jedis.exists(deviceInfoKey.getBytes())){
-				MemoryDataManagerTask.loadRPCDeviceInfo(null);
-			}
-			RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
-			displayInstanceCoe=rpcDeviceInfo.getDisplayInstanceCode();
-			alarmInstanceCode=rpcDeviceInfo.getAlarmInstanceCode();
-		}else{
-			if(!jedis.exists(deviceInfoKey.getBytes())){
-				MemoryDataManagerTask.loadPCPDeviceInfo(null);
-			}
-			PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
-			displayInstanceCoe=pcpDeviceInfo.getDisplayInstanceCode();
-			alarmInstanceCode=pcpDeviceInfo.getAlarmInstanceCode();
-		}
 		
-		
-		
-		if(!jedis.exists("AlarmShowStyle".getBytes())){
-			MemoryDataManagerTask.initAlarmStyle();
-		}
-		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
-		
-		if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-			MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
-		}
-		DisplayInstanceOwnItem displayInstanceOwnItem=null;
-		if(StringManagerUtils.isNotNull(displayInstanceCoe)&&jedis.hexists("DisplayInstanceOwnItem".getBytes(),displayInstanceCoe.getBytes())){
-			displayInstanceOwnItem=(DisplayInstanceOwnItem) SerializeObjectUnils.unserizlize(jedis.hget("DisplayInstanceOwnItem".getBytes(), displayInstanceCoe.getBytes()));
-		}
-		
-		if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-			MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
-		}
-		AlarmInstanceOwnItem alarmInstanceOwnItem=null;
-		if(StringManagerUtils.isNotNull(alarmInstanceCode)&&jedis.hexists("AlarmInstanceOwnItem".getBytes(),alarmInstanceCode.getBytes())){
-			alarmInstanceOwnItem=(AlarmInstanceOwnItem) SerializeObjectUnils.unserizlize(jedis.hget("AlarmInstanceOwnItem".getBytes(),alarmInstanceCode.getBytes()));
-		}
-		
-		if(!jedis.exists(calItemsKey.getBytes())){
+		try{
 			if(StringManagerUtils.stringToInteger(deviceType)==0){
-				MemoryDataManagerTask.loadRPCCalculateItem();
+				if(!jedis.exists(deviceInfoKey.getBytes())){
+					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+				}
+				RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
+				displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode();
+				alarmInstanceCode=rpcDeviceInfo.getAlarmInstanceCode();
 			}else{
-				MemoryDataManagerTask.loadPCPCalculateItem();
+				if(!jedis.exists(deviceInfoKey.getBytes())){
+					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+				}
+				PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
+				displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode();
+				alarmInstanceCode=pcpDeviceInfo.getAlarmInstanceCode();
 			}
+			
+			
+			
+			if(!jedis.exists("AlarmShowStyle".getBytes())){
+				MemoryDataManagerTask.initAlarmStyle();
+			}
+			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
+			
+			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+			}
+			
+			if(StringManagerUtils.isNotNull(displayInstanceCode)&&jedis.hexists("DisplayInstanceOwnItem".getBytes(),displayInstanceCode.getBytes())){
+				displayInstanceOwnItem=(DisplayInstanceOwnItem) SerializeObjectUnils.unserizlize(jedis.hget("DisplayInstanceOwnItem".getBytes(), displayInstanceCode.getBytes()));
+			}
+			
+			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+			}
+			
+			if(StringManagerUtils.isNotNull(alarmInstanceCode)&&jedis.hexists("AlarmInstanceOwnItem".getBytes(),alarmInstanceCode.getBytes())){
+				alarmInstanceOwnItem=(AlarmInstanceOwnItem) SerializeObjectUnils.unserizlize(jedis.hget("AlarmInstanceOwnItem".getBytes(),alarmInstanceCode.getBytes()));
+			}
+			
+			if(!jedis.exists(calItemsKey.getBytes())){
+				if(StringManagerUtils.stringToInteger(deviceType)==0){
+					MemoryDataManagerTask.loadRPCCalculateItem();
+				}else{
+					MemoryDataManagerTask.loadPCPCalculateItem();
+				}
+			}
+			calItemSet= jedis.zrange(calItemsKey.getBytes(), 0, -1);
+			
+			if(!jedis.exists("UserInfo".getBytes())){
+				MemoryDataManagerTask.loadUserInfo();
+			}
+			
+			if(jedis.hexists("UserInfo".getBytes(), userAccount.getBytes())){
+				userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), userAccount.getBytes()));
+			}
+			
+			if(!jedis.exists("RPCWorkType".getBytes())){
+				MemoryDataManagerTask.loadRPCWorkType();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
-		Set<byte[]>calItemSet= jedis.zrange(calItemsKey.getBytes(), 0, -1);
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
+		}
 		
-		if(!jedis.exists("UserInfo".getBytes())){
-			MemoryDataManagerTask.loadUserInfo();
-		}
-		UserInfo userInfo=null;
-		if(jedis.hexists("UserInfo".getBytes(), userAccount.getBytes())){
-			userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), userAccount.getBytes()));
-		}
 		
-		if(!jedis.exists("RPCWorkType".getBytes())){
-			MemoryDataManagerTask.loadRPCWorkType();
-		}
 		
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
@@ -1055,8 +1224,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		result_json.append(",\"CellInfo\":"+info_json);
 		result_json.append(",\"AlarmShowStyle\":"+new Gson().toJson(alarmShowStyle));
 		result_json.append("}");
-		jedis.disconnect();
-		jedis.close();
+		
 		return result_json.toString().replaceAll("null", "");
 	}
 	
@@ -1340,25 +1508,51 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		Jedis jedis=null;
 		UserInfo userInfo=null;
 		Set<byte[]>calItemSet=null;
+		DisplayInstanceOwnItem displayInstanceOwnItem=null;
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
-		
+		String displayInstanceCode="";
 		String tableName="tbl_rpcacqdata_hist";
 		String deviceTableName="tbl_rpcdevice";
 		String columnsKey="rpcDeviceAcquisitionItemColumns";
 		String calItemsKey="rpcCalItemList";
+		String deviceInfoKey="RPCDeviceInfo";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
 			tableName="tbl_pcpacqdata_hist";
 			deviceTableName="tbl_pcpdevice";
 			columnsKey="pcpDeviceAcquisitionItemColumns";
 			calItemsKey="pcpCalItemList";
+			deviceInfoKey="PCPDeviceInfo";
 		}
 		try{
 			jedis = new Jedis();
 			if(!jedis.exists("UserInfo".getBytes())){
 				MemoryDataManagerTask.loadUserInfo();
 			}
+			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+			}
 			if(jedis.hexists("UserInfo".getBytes(), userAccount.getBytes())){
 				userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), userAccount.getBytes()));
+			}
+			
+			
+			if(StringManagerUtils.stringToInteger(deviceType)==0){
+				if(!jedis.exists(deviceInfoKey.getBytes())){
+					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+				}
+				RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
+				displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode();
+			}else{
+				if(!jedis.exists(deviceInfoKey.getBytes())){
+					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+				}
+				PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
+				displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode();
+			}
+			
+			if(jedis!=null&&jedis.hexists("DisplayInstanceOwnItem".getBytes(), displayInstanceCode.getBytes())){
+				displayInstanceOwnItem=(DisplayInstanceOwnItem) SerializeObjectUnils.unserizlize(jedis.hget("DisplayInstanceOwnItem".getBytes(), displayInstanceCode.getBytes()));
+				Collections.sort(displayInstanceOwnItem.getItemList());
 			}
 			
 			if(!jedis.exists(calItemsKey.getBytes())){
@@ -1372,7 +1566,10 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
-			jedis.disconnect();
+			if(jedis!=null){
+				jedis.disconnect();
+			}
+			
 			jedis.close();
 		}
 		
@@ -1383,71 +1580,127 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		Map<String,String> loadedAcquisitionItemColumnsMap=acquisitionItemColumnsMap.get(columnsKey);
 		
 		
-		String protocolSql="select upper(t3.protocol) from "+deviceTableName+" t,tbl_protocolinstance t2,tbl_acq_unit_conf t3 where t.instancecode=t2.code and t2.unitid=t3.id"
-				+ " and  t.id="+deviceId;
-		
-		String curveItemsSql="select t4.itemname,t4.bitindex,t4.realtimecurvecolor,t4.itemcode,t4.type "
-				+ " from "+deviceTableName+" t,tbl_protocoldisplayinstance t2,tbl_display_unit_conf t3,tbl_display_items2unit_conf t4 "
-				+ " where t.displayinstancecode=t2.code and t2.displayunitid=t3.id and t3.id=t4.unitid and t4.type<>2 "
-				+ " and t.id="+deviceId+" and t4.realtimecurve>=0 "
-				+ " order by t4.realtimecurve,t4.sort,t4.id";
-		List<?> protocolList = this.findCallSql(protocolSql);
-		List<?> curveItemList = this.findCallSql(curveItemsSql);
-		String protocolName="";
-		String unit="";
-		String dataType="";
-		int resolutionMode=0;
 		List<String> itemNameList=new ArrayList<String>();
 		List<String> itemColumnList=new ArrayList<String>();
 		List<String> curveColorList=new ArrayList<String>();
-		if(protocolList.size()>0){
-			protocolName=protocolList.get(0)+"";
+		if(displayInstanceOwnItem!=null){
+			String protocolName=displayInstanceOwnItem.getProtocol();
 			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 			if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()!=null){
 				for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
 					if(protocolName.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(i).getName())){
-						for(int j=0;j<curveItemList.size();j++){
-							Object[] itemObj=(Object[]) curveItemList.get(j);
-							String itemname=itemObj[0]+"";
-							String bitindex=itemObj[1]+"";
-							String realtimecurvecolor=itemObj[2]+"";
-							String itemcode=itemObj[3]+"";
-							String type=itemObj[4]+"";
-							if("0".equalsIgnoreCase(type)){
-								for(int k=0;k<modbusProtocolConfig.getProtocol().get(i).getItems().size();k++){
-									if(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle().equalsIgnoreCase(itemname)){
-										String col=dataSaveMode==0?("addr"+modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getAddr()):(loadedAcquisitionItemColumnsMap.get(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle()));
-										itemColumnList.add(col);
-										if(StringManagerUtils.isNotNull(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getUnit())){
-											itemNameList.add(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle()+"("+modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getUnit()+")");
-										}else{
-											itemNameList.add(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle());
-										}
-										curveColorList.add(realtimecurvecolor.replaceAll("null", ""));
-										break;
-									}
-								}
-							}else if("1".equalsIgnoreCase(type)){
-								itemColumnList.add(itemcode);
-								String itemName=itemname;
-								if(calItemSet!=null){
-									for(byte[] calItemByteArr:calItemSet){
-										CalItem calItem=(CalItem) SerializeObjectUnils.unserizlize(calItemByteArr);
-										if(itemcode.equalsIgnoreCase(calItem.getCode())){
-											if(StringManagerUtils.isNotNull(calItem.getUnit())){
-												itemName=itemName+"("+calItem.getUnit()+")";
+						for(int j=0;j<displayInstanceOwnItem.getItemList().size();j++){
+							if(displayInstanceOwnItem.getItemList().get(j).getRealtimeCurve()>0 && displayInstanceOwnItem.getItemList().get(j).getShowLevel()>=userInfo.getRoleShowLevel()){
+								String itemname=displayInstanceOwnItem.getItemList().get(j).getItemName();
+								String bitindex=displayInstanceOwnItem.getItemList().get(j).getBitIndex()+"";
+								String realtimecurvecolor=displayInstanceOwnItem.getItemList().get(j).getRealtimeCurveColor();
+								String itemcode=displayInstanceOwnItem.getItemList().get(j).getItemCode();
+								String type=displayInstanceOwnItem.getItemList().get(j).getType()+"";
+								if("0".equalsIgnoreCase(type)){
+									for(int k=0;k<modbusProtocolConfig.getProtocol().get(i).getItems().size();k++){
+										if(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle().equalsIgnoreCase(itemname)){
+											String col=dataSaveMode==0?("addr"+modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getAddr()):(loadedAcquisitionItemColumnsMap.get(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle()));
+											itemColumnList.add(col);
+											if(StringManagerUtils.isNotNull(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getUnit())){
+												itemNameList.add(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle()+"("+modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getUnit()+")");
+											}else{
+												itemNameList.add(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle());
 											}
+											curveColorList.add(realtimecurvecolor.replaceAll("null", ""));
 											break;
 										}
-										
 									}
+								}else if("1".equalsIgnoreCase(type)){
+									itemColumnList.add(itemcode);
+									String itemName=itemname;
+									if(calItemSet!=null){
+										for(byte[] calItemByteArr:calItemSet){
+											CalItem calItem=(CalItem) SerializeObjectUnils.unserizlize(calItemByteArr);
+											if(itemcode.equalsIgnoreCase(calItem.getCode())){
+												if(StringManagerUtils.isNotNull(calItem.getUnit())){
+													itemName=itemName+"("+calItem.getUnit()+")";
+												}
+												break;
+											}
+											
+										}
+									}
+									
+									itemNameList.add(itemName);
+									curveColorList.add(realtimecurvecolor.replaceAll("null", ""));
 								}
-								
-								itemNameList.add(itemName);
-								curveColorList.add(realtimecurvecolor.replaceAll("null", ""));
+							
 							}
 						}
 						break;
+					}
+				}
+			}
+		}else{
+			String protocolSql="select upper(t3.protocol) from "+deviceTableName+" t,tbl_protocolinstance t2,tbl_acq_unit_conf t3 where t.instancecode=t2.code and t2.unitid=t3.id"
+					+ " and  t.id="+deviceId;
+			String curveItemsSql="select t4.itemname,t4.bitindex,t4.realtimecurvecolor,t4.itemcode,t4.type "
+					+ " from "+deviceTableName+" t,tbl_protocoldisplayinstance t2,tbl_display_unit_conf t3,tbl_display_items2unit_conf t4 "
+					+ " where t.displayinstancecode=t2.code and t2.displayunitid=t3.id and t3.id=t4.unitid and t4.type<>2 "
+					+ " and t.id="+deviceId+" and t4.realtimecurve>=0 "
+					+ " and decode(t4.showlevel,null,9999,t4.showlevel)>=( select r.showlevel from tbl_role r,tbl_user u where u.user_type=r.role_id and u.user_no="+userAccount+" )"
+					+ " order by t4.realtimecurve,t4.sort,t4.id";
+			List<?> protocolList = this.findCallSql(protocolSql);
+			List<?> curveItemList = this.findCallSql(curveItemsSql);
+			String protocolName="";
+			String unit="";
+			String dataType="";
+			int resolutionMode=0;
+			
+			if(protocolList.size()>0){
+				protocolName=protocolList.get(0)+"";
+				ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
+				if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()!=null){
+					for(int i=0;i<modbusProtocolConfig.getProtocol().size();i++){
+						if(protocolName.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(i).getName())){
+							for(int j=0;j<curveItemList.size();j++){
+								Object[] itemObj=(Object[]) curveItemList.get(j);
+								String itemname=itemObj[0]+"";
+								String bitindex=itemObj[1]+"";
+								String realtimecurvecolor=itemObj[2]+"";
+								String itemcode=itemObj[3]+"";
+								String type=itemObj[4]+"";
+								if("0".equalsIgnoreCase(type)){
+									for(int k=0;k<modbusProtocolConfig.getProtocol().get(i).getItems().size();k++){
+										if(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle().equalsIgnoreCase(itemname)){
+											String col=dataSaveMode==0?("addr"+modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getAddr()):(loadedAcquisitionItemColumnsMap.get(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle()));
+											itemColumnList.add(col);
+											if(StringManagerUtils.isNotNull(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getUnit())){
+												itemNameList.add(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle()+"("+modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getUnit()+")");
+											}else{
+												itemNameList.add(modbusProtocolConfig.getProtocol().get(i).getItems().get(k).getTitle());
+											}
+											curveColorList.add(realtimecurvecolor.replaceAll("null", ""));
+											break;
+										}
+									}
+								}else if("1".equalsIgnoreCase(type)){
+									itemColumnList.add(itemcode);
+									String itemName=itemname;
+									if(calItemSet!=null){
+										for(byte[] calItemByteArr:calItemSet){
+											CalItem calItem=(CalItem) SerializeObjectUnils.unserizlize(calItemByteArr);
+											if(itemcode.equalsIgnoreCase(calItem.getCode())){
+												if(StringManagerUtils.isNotNull(calItem.getUnit())){
+													itemName=itemName+"("+calItem.getUnit()+")";
+												}
+												break;
+											}
+											
+										}
+									}
+									
+									itemNameList.add(itemName);
+									curveColorList.add(realtimecurvecolor.replaceAll("null", ""));
+								}
+							}
+							break;
+						}
 					}
 				}
 			}
