@@ -2407,6 +2407,23 @@ function getDateAndTime(dateStr,h,m,s){
 	return dateStr+' '+hStr+":"+mStr+':'+sStr;
 };
 
+showSurfaceCard = function(result, divid) {
+    var positionCurveData=result.positionCurveData.split(","); 
+    var loadCurveData=result.loadCurveData.split(",");
+	var data = "["; // 功图data
+	for (var i=0; i <= positionCurveData.length; i++) {
+		if(i<positionCurveData.length){
+			data += "[" + changeTwoDecimal(positionCurveData[i]) + ","+changeTwoDecimal(loadCurveData[i])+"],";
+		}else{
+			data += "[" + changeTwoDecimal(positionCurveData[1]) + ","+changeTwoDecimal(loadCurveData[1])+"]";//将图形的第一个点拼到最后面，使图形闭合
+		}
+	}
+	data+="]";
+	var pointdata = Ext.JSON.decode(data);
+//	var pointdata = JSON.parse(data);
+	initSurfaceCardChart(pointdata, result, divid);
+	return false;
+}
 
 /* 
  * 在泵功图中提取光杆功图

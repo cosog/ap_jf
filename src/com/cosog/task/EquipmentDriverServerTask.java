@@ -82,27 +82,27 @@ public class EquipmentDriverServerTask {
 		String url=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/group";
 		String onlineUrl=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/online";
 		
-		StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+//		StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
 		
 		int i=0;
-//		while(true){
+		while(true){
+			if(i%2==0){
+				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+			}else{
+				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+			}
+			
 //			if(i%2==0){
-//				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+//				StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
 //			}else{
-//				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+//				StringManagerUtils.sendPostMethod(onlineUrl, offLineData,"utf-8");
 //			}
-//			
-////			if(i%2==0){
-////				StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
-////			}else{
-////				StringManagerUtils.sendPostMethod(onlineUrl, offLineData,"utf-8");
-////			}
-//			i++;
-//			
-////			StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
-//			
-//			Thread.sleep(1000*5);
-//		}
+			i++;
+	
+//		StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
+			
+			Thread.sleep(1000*60*10);
+		}
 		
 		
 

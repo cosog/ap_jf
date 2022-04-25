@@ -3492,18 +3492,20 @@ public class StringManagerUtils {
 		return flag;
 	}
 	
-	public static boolean existDisplayItemCode(List<DisplayInstanceOwnItem.DisplayItem> displayItemList, String key, boolean caseSensitive ){
+	public static boolean existDisplayItemCode(List<DisplayInstanceOwnItem.DisplayItem> displayItemList, String key, boolean caseSensitive,int type ){
 		boolean flag = false;
 		for (int i = 0; i < displayItemList.size(); i++) {
-            boolean match = false;
-            if (caseSensitive) {
-                match = key.equals(displayItemList.get(i).getItemCode());
-            } else {
-                match = key.equalsIgnoreCase(displayItemList.get(i).getItemCode());
-            }
-            if (match) {
-                flag = true;
-                break;
+            if((type==0&&displayItemList.get(i).getType()!=2)||(type==1&&displayItemList.get(i).getType()==2)){
+            	boolean match = false;
+                if (caseSensitive) {
+                    match = key.equals(displayItemList.get(i).getItemCode());
+                } else {
+                    match = key.equalsIgnoreCase(displayItemList.get(i).getItemCode());
+                }
+                if (match) {
+                    flag = true;
+                    break;
+                }
             }
         }
 		return flag;

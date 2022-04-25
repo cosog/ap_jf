@@ -1,5 +1,6 @@
 package com.cosog.controller.historyQuery;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -384,6 +385,47 @@ public class HistoryQueryController extends BaseController  {
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
 		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/querySurfaceCard")
+	public String querySurfaceCard() throws IOException {
+		orgId = ParamUtils.getParameter(request, "orgId");
+		String deviceName = ParamUtils.getParameter(request, "deviceName");
+		String deviceId = ParamUtils.getParameter(request, "deviceId");
+		deviceType = ParamUtils.getParameter(request, "deviceType");
+		startDate = ParamUtils.getParameter(request, "startDate");
+		endDate = ParamUtils.getParameter(request, "endDate");
+		response.setContentType("application/json;charset=" + Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		this.pager = new Page("pagerForm", request);
+		String tableName="tbl_rpcacqdata_hist";
+		String json = "";
+		try {
+			if(StringManagerUtils.isNotNull(deviceId)&&!StringManagerUtils.isNotNull(endDate)){
+				String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd hh24:mi:ss') from "+tableName+" t where t.wellId= "+deviceId;
+				List list = this.service.reportDateJssj(sql);
+				if (list.size() > 0 &&list.get(0)!=null&&!list.get(0).toString().equals("null")) {
+					endDate = list.get(0).toString();
+				} else {
+					endDate = StringManagerUtils.getCurrentTime("yyyy-MM-dd HH:mm:ss");
+				}
+				if(!StringManagerUtils.isNotNull(startDate)){
+					startDate=endDate.split(" ")[0]+" 00:00:00";
+				}
+			}
+			pager.setStart_date(startDate);
+			pager.setEnd_date(endDate);
+			
+			json = this.historyQueryService.querySurfaceCard(orgId,deviceId,deviceName,deviceType,pager);
+			pw.print(json);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		pw.flush();
 		pw.close();
 		return null;

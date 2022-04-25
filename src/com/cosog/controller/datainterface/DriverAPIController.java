@@ -708,6 +708,7 @@ public class DriverAPIController extends BaseController{
 									rpcDeviceInfo.getProduction().setWaterCut(StringManagerUtils.stringToFloat(rawValue));
 								}else if("FESDiagramAcqtime".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
 									rpcCalculateRequestData.getFESDiagram().setAcqTime(rawValue);
+									rpcCalculateRequestData.getFESDiagram().setAcqTime(acqTime);
 								}else if("stroke".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
 									rpcCalculateRequestData.getFESDiagram().setStroke(StringManagerUtils.stringToFloat(rawValue));
 								}else if("spm".equalsIgnoreCase(dataMappingColumn.getCalColumn())){
@@ -864,19 +865,27 @@ public class DriverAPIController extends BaseController{
 					acquisitionItemInfo.setResolutionMode(calItemResolutionDataList.get(i).getResolutionMode());
 					acquisitionItemInfo.setBitIndex(calItemResolutionDataList.get(i).getBitIndex());
 					if("resultCode".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn())){
-						alarmLevel=rpcWorkTypeAlarmLevel;
-						if(alarmLevel>0){
-							acquisitionItemInfo.setAlarmInfo("工况报警:"+workType.getResultName());
-							acquisitionItemInfo.setAlarmType(4);
-						}
 						
+						if(workType!=null){
+							for(int k=0;alarmInstanceOwnItem!=null&&k<alarmInstanceOwnItem.getItemList().size();k++){
+								if(alarmInstanceOwnItem.getItemList().get(k).getType()==4&&workType.getResultName().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemName())){
+									rpcWorkTypeAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
+									if(rpcWorkTypeAlarmLevel>0){
+										acquisitionItemInfo.setAlarmInfo("工况报警:"+workType.getResultName());
+										acquisitionItemInfo.setAlarmType(4);
+										acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
+										acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
+										acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+									}
+									break;
+								}
+							}
+						}
 					}
 					acquisitionItemInfo.setAlarmLevel(alarmLevel);
 					acquisitionItemInfo.setUnit(calItemResolutionDataList.get(i).getUnit());
 					acquisitionItemInfo.setSort(calItemResolutionDataList.get(i).getSort());
-					acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(i).getDelay());
-					acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(i).getIsSendMessage());
-					acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(i).getIsSendMail());
+					
 
 					if(acquisitionItemInfo.getAlarmLevel()>0){
 						alarm=true;
@@ -969,7 +978,7 @@ public class DriverAPIController extends BaseController{
 					wellBoreChartsData.append("\"stroke\":\""+rpcCalculateRequestData.getFESDiagram().getStroke()+"\",");
 					wellBoreChartsData.append("\"spm\":\""+rpcCalculateRequestData.getFESDiagram().getSPM()+"\",");
 					wellBoreChartsData.append("\"liquidProduction\":\""+(rpcCalculateResponseData!=null&&rpcCalculateResponseData.getCalculationStatus().getResultStatus()==1&&rpcCalculateResponseData.getCalculationStatus().getResultCode()!=1232?rpcCalculateResponseData.getProduction().getLiquidVolumetricProduction():"")+"\",");
-					wellBoreChartsData.append("\"resultName\":\""+workType!=null?workType.getResultName():""+"\",");
+					wellBoreChartsData.append("\"resultName\":\""+(workType!=null?workType.getResultName():"")+"\",");
 					wellBoreChartsData.append("\"resultCode\":\""+(rpcCalculateResponseData!=null&&rpcCalculateResponseData.getCalculationStatus().getResultStatus()==1?rpcCalculateResponseData.getCalculationStatus().getResultCode():"")+"\",");
 					
 					
@@ -1004,9 +1013,9 @@ public class DriverAPIController extends BaseController{
 					surfaceChartsData.append("\"deltaRadius\":\""+(rpcCalculateResponseData!=null&&rpcCalculateResponseData.getCalculationStatus().getResultStatus()==1&&rpcCalculateResponseData.getCalculationStatus().getResultCode()!=1232?rpcCalculateResponseData.getFESDiagram().getIDegreeBalance():"")+"\",");
 					
 					surfaceChartsData.append("\"positionCurveData\":\""+StringUtils.join(rpcCalculateRequestData.getFESDiagram().getS(), ",")+"\",");
-					surfaceChartsData.append("\"loadCurveData\":\""+StringUtils.join(rpcCalculateRequestData.getFESDiagram().getF(), ",")+"\"");
+					surfaceChartsData.append("\"loadCurveData\":\""+StringUtils.join(rpcCalculateRequestData.getFESDiagram().getF(), ",")+"\",");
 					surfaceChartsData.append("\"powerCurveData\":\""+StringUtils.join(rpcCalculateRequestData.getFESDiagram().getWatt(), ",")+"\",");
-					surfaceChartsData.append("\"currentCurveData\":\""+StringUtils.join(rpcCalculateRequestData.getFESDiagram().getI(), ",")+"\"");
+					surfaceChartsData.append("\"currentCurveData\":\""+StringUtils.join(rpcCalculateRequestData.getFESDiagram().getI(), ",")+"\",");
 					
 					surfaceChartsData.append("\"crankAngle\":\""+(rpcCalculateResponseData!=null&&rpcCalculateResponseData.getCalculationStatus().getResultStatus()==1&&rpcCalculateResponseData.getCalculationStatus().getResultCode()!=1232?StringUtils.join(rpcCalculateResponseData.getFESDiagram().getCrankAngle(), ","):"")+"\",");
 					surfaceChartsData.append("\"loadRorque\":\""+(rpcCalculateResponseData!=null&&rpcCalculateResponseData.getCalculationStatus().getResultStatus()==1&&rpcCalculateResponseData.getCalculationStatus().getResultCode()!=1232?StringUtils.join(rpcCalculateResponseData.getFESDiagram().getLoadTorque(), ","):"")+"\",");
@@ -1043,16 +1052,23 @@ public class DriverAPIController extends BaseController{
 							//筛选
 							List<AcquisitionItemInfo> userAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
 							for(int j=0;j<acquisitionItemInfoList.size();j++){
-								for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
-									if(StringManagerUtils.existDisplayItem(displayInstanceOwnItem.getItemList(), acquisitionItemInfoList.get(j).getRawTitle(), false)){
-										if(displayInstanceOwnItem.getItemList().get(k).getShowLevel()==0||displayInstanceOwnItem.getItemList().get(k).getShowLevel()>=userInfo.getRoleShowLevel()){
-											acquisitionItemInfoList.get(j).setSort(displayInstanceOwnItem.getItemList().get(k).getSort());
-											userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
+								if(StringManagerUtils.existDisplayItemCode(displayInstanceOwnItem.getItemList(), acquisitionItemInfoList.get(j).getColumn(), false,0)){
+									for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
+										if(acquisitionItemInfoList.get(j).getColumn().equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(k).getItemCode()) && displayInstanceOwnItem.getItemList().get(k).getType()!=2){
+											if(displayInstanceOwnItem.getItemList().get(k).getShowLevel()==0||displayInstanceOwnItem.getItemList().get(k).getShowLevel()>=userInfo.getRoleShowLevel()){
+												acquisitionItemInfoList.get(j).setSort(displayInstanceOwnItem.getItemList().get(k).getSort());
+												userAcquisitionItemInfoList.add(acquisitionItemInfoList.get(j));
+											}
+											break;
 										}
-										break;
 									}
 								}
+								
+								
+								
+								
 							}
+							
 							//排序
 							Collections.sort(userAcquisitionItemInfoList);
 							//插入排序间隔的空项
