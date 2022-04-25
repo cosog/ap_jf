@@ -1,6 +1,7 @@
 package com.cosog.service.historyQuery;
 
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.engine.jdbc.SerializableClobProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,15 +32,18 @@ import com.cosog.task.MemoryDataManagerTask;
 import com.cosog.task.MemoryDataManagerTask.CalItem;
 import com.cosog.utils.AcquisitionItemColumnsMap;
 import com.cosog.utils.Config;
+import com.cosog.utils.ConfigFile;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.EquipmentDriveMap;
 import com.cosog.utils.Page;
+import com.cosog.utils.PageHandler;
 import com.cosog.utils.ProtocolItemResolutionData;
 import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import oracle.sql.CLOB;
 import redis.clients.jedis.Jedis;
 
 @Service("historyQueryService")
@@ -836,7 +841,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				//计算项
 				for(byte[] calItemByteArr:calItemSet){
 					CalItem calItem=(CalItem) SerializeObjectUnils.unserizlize(calItemByteArr);
-					if(StringManagerUtils.existDisplayItemCode(displayInstanceOwnItem.getItemList(), calItem.getCode(), false)){
+					if(StringManagerUtils.existDisplayItemCode(displayInstanceOwnItem.getItemList(), calItem.getCode(), false,0)){
 						for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
 							if(displayInstanceOwnItem.getItemList().get(k).getType()==1
 									&& displayInstanceOwnItem.getItemList().get(k).getShowLevel()>=userInfo.getRoleShowLevel()
@@ -859,7 +864,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				}
 				sql+= " from "+deviceTableName+" t "
 						+ " left outer join "+tableName+" t2 on t2.wellid=t.id"
-						+ " where  t.id="+recordId;
+						+ " where  t2.id="+recordId;
 				List<?> list = this.findCallSql(sql);
 				if(list.size()>0){
 					int row=1;
@@ -1187,13 +1192,13 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 					MemoryDataManagerTask.loadRPCDeviceInfo(null);
 				}
 				RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
-				displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode();
+				displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode()+"";
 			}else{
 				if(!jedis.exists(deviceInfoKey.getBytes())){
 					MemoryDataManagerTask.loadPCPDeviceInfo(null);
 				}
 				PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
-				displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode();
+				displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode()+"";
 			}
 			
 			if(jedis!=null&&jedis.hexists("DisplayInstanceOwnItem".getBytes(), displayInstanceCode.getBytes())){
@@ -1501,5 +1506,75 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result=this.getBaseDao().updateOrDeleteBySql(updateSql);
 		}
 		return result;
+	}
+	
+	public String querySurfaceCard(String orgId,String deviceId,String deviceName,String deviceType,Page pager) throws SQLException, IOException {
+		StringBuffer dynSbf = new StringBuffer();
+		ConfigFile configFile=Config.getInstance().configFile;
+		int intPage = pager.getPage();
+		int limit = pager.getLimit();
+		int start = pager.getStart();
+		int maxvalue = limit + start;
+		String allsql="",sql="";
+		allsql="select t.id,well.wellname,to_char(t.fesdiagramacqtime,'yyyy-mm-dd hh24:mi:ss') as acqTime,"
+				+ " t.stroke,t.spm,"
+				+ " t.fmax,t.fmin,t.position_curve,t.load_curve,"
+				+ " t.resultcode,t2.resultname,t.upperloadline,t.lowerloadline,t.liquidvolumetricproduction "
+				+ " from tbl_rpcdevice well,tbl_rpcacqdata_hist t,tbl_rpc_worktype t2 "
+				+ " where well.id=t.wellid and t.resultcode=t2.resultcode "
+				+ " and t.wellid="+deviceId+" "
+				+ " and t.fesdiagramacqtime between to_date('"+pager.getStart_date()+"','yyyy-mm-dd hh24:mi:ss') and to_date('"+pager.getEnd_date()+"','yyyy-mm-dd hh24:mi:ss') order by t.fesdiagramacqtime desc";
+		
+		sql="select b.* from (select a.*,rownum as rn from  ("+ allsql +") a where rownum <= "+ maxvalue +") b where rn > "+ start +"";
+		int totals = getTotalCountRows(allsql);//获取总记录数
+		List<?> list=this.findCallSql(sql);
+		PageHandler handler = new PageHandler(intPage, totals, limit);
+		int totalPages = handler.getPageCount(); // 总页数
+		dynSbf.append("{\"success\":true,\"totals\":" + totals + ",\"totalPages\":\"" + totalPages + "\",\"start_date\":\""+pager.getStart_date()+"\",\"end_date\":\""+pager.getEnd_date()+"\",\"list\":[");
+		
+		for (int i = 0; i < list.size(); i++) {
+			Object[] obj = (Object[]) list.get(i);
+			CLOB realClob=null;
+			SerializableClobProxy   proxy=null;
+			String DiagramXData="";
+	        String DiagramYData="";
+	        String pointCount="";
+	        if(obj[7]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[7]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				DiagramXData=StringManagerUtils.CLOBtoString(realClob);
+			}
+	        if(StringManagerUtils.isNotNull(DiagramXData)){
+				pointCount=DiagramXData.split(",").length+"";
+			}
+	        if(obj[8]!=null){
+				proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[8]);
+				realClob = (CLOB) proxy.getWrappedClob(); 
+				DiagramYData=StringManagerUtils.CLOBtoString(realClob);
+			}
+	        
+			dynSbf.append("{ \"id\":\"" + obj[0] + "\",");
+			dynSbf.append("\"wellName\":\"" + obj[1] + "\",");
+			dynSbf.append("\"acqTime\":\"" + obj[2] + "\",");
+			dynSbf.append("\"stroke\":\""+obj[3]+"\",");
+			dynSbf.append("\"spm\":\""+obj[4]+"\",");
+			dynSbf.append("\"fmax\":\""+obj[5]+"\",");
+			dynSbf.append("\"fmin\":\""+obj[6]+"\",");
+			
+			dynSbf.append("\"resultName\":\""+obj[10]+"\",");
+			
+			dynSbf.append("\"upperLoadLine\":\"" + obj[11] + "\",");
+			dynSbf.append("\"lowerLoadLine\":\"" + obj[12] + "\",");
+			dynSbf.append("\"liquidProduction\":\""+obj[13]+"\",");
+			
+			dynSbf.append("\"pointCount\":\""+pointCount+"\","); 
+			dynSbf.append("\"positionCurveData\":\""+DiagramXData+"\",");
+			dynSbf.append("\"loadCurveData\":\""+DiagramYData+"\"},");
+		}
+		if(dynSbf.toString().endsWith(",")){
+			dynSbf.deleteCharAt(dynSbf.length() - 1);
+		}
+		dynSbf.append("]}");
+		return dynSbf.toString().replaceAll("null", "");
 	}
 }

@@ -920,7 +920,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				//计算项
 				for(byte[] calItemByteArr:calItemSet){
 					CalItem calItem=(CalItem) SerializeObjectUnils.unserizlize(calItemByteArr);
-					if(StringManagerUtils.existDisplayItemCode(displayInstanceOwnItem.getItemList(), calItem.getCode(), false)){
+					if(StringManagerUtils.existDisplayItemCode(displayInstanceOwnItem.getItemList(), calItem.getCode(), false,0)){
 						for(int k=0;k<displayInstanceOwnItem.getItemList().size();k++){
 							if(displayInstanceOwnItem.getItemList().get(k).getType()==1
 									&& displayInstanceOwnItem.getItemList().get(k).getShowLevel()>=userInfo.getRoleShowLevel()
