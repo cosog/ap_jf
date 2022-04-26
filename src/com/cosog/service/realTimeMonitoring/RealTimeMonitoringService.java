@@ -73,12 +73,12 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			
 			if(StringManagerUtils.stringToInteger(deviceType) ==0){
 				if(!jedis.exists("RPCDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
 				}
 				deviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
 			}else{
 				if(!jedis.exists("PCPDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
 				}
 				deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
 			}
@@ -190,12 +190,12 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			
 			if(StringManagerUtils.stringToInteger(deviceType) ==0){
 				if(!jedis.exists("RPCDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
 				}
 				deviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
 			}else{
 				if(!jedis.exists("PCPDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
 				}
 				deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
 			}
@@ -367,12 +367,12 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			jedis = new Jedis();
 			if(StringManagerUtils.stringToInteger(deviceType) ==0){
 				if(!jedis.exists("RPCDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
 				}
 				deviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
 			}else{
 				if(!jedis.exists("PCPDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
 				}
 				deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
 			}
@@ -802,21 +802,23 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		try{
 			if(StringManagerUtils.stringToInteger(deviceType)==0){
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
 				}
-				RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
-				displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode();
-				alarmInstanceCode=rpcDeviceInfo.getAlarmInstanceCode();
+				if(jedis.hexists(deviceInfoKey.getBytes(), deviceId.getBytes())){
+					RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
+					displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode();
+					alarmInstanceCode=rpcDeviceInfo.getAlarmInstanceCode();
+				}
 			}else{
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
 				}
-				PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
-				displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode();
-				alarmInstanceCode=pcpDeviceInfo.getAlarmInstanceCode();
+				if(jedis.hexists(deviceInfoKey.getBytes(), deviceId.getBytes())){
+					PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
+					displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode();
+					alarmInstanceCode=pcpDeviceInfo.getAlarmInstanceCode();
+				}
 			}
-			
-			
 			
 			if(!jedis.exists("AlarmShowStyle".getBytes())){
 				MemoryDataManagerTask.initAlarmStyle();
@@ -849,7 +851,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			calItemSet= jedis.zrange(calItemsKey.getBytes(), 0, -1);
 			
 			if(!jedis.exists("UserInfo".getBytes())){
-				MemoryDataManagerTask.loadUserInfo();
+				MemoryDataManagerTask.loadUserInfo(null);
 			}
 			
 			if(jedis.hexists("UserInfo".getBytes(), userAccount.getBytes())){
@@ -1526,7 +1528,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		try{
 			jedis = new Jedis();
 			if(!jedis.exists("UserInfo".getBytes())){
-				MemoryDataManagerTask.loadUserInfo();
+				MemoryDataManagerTask.loadUserInfo(null);
 			}
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
 				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
@@ -1538,13 +1540,13 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			
 			if(StringManagerUtils.stringToInteger(deviceType)==0){
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
 				}
 				RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
 				displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode();
 			}else{
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
 				}
 				PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
 				displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode();

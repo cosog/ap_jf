@@ -203,7 +203,11 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                     xtype: 'tabpanel',
                     id:"RPCHistoryQueryTabPanel",
             		activeTab: 0,
+            		autoScroll: true,
+                    split: true,
+                    collapsible: true,
             		border: false,
+            		header:false,
             		tabPosition: 'top',
             		tbar:[{
                         xtype: 'datefield',
@@ -410,8 +414,6 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
             				var activeId = tabPanel.getActiveTab().id;
             				if(activeId=="RPCHistoryDataTabPanel"){
         						Ext.getCmp("RPCHistoryDataExportBtn_Id").show();
-        						Ext.getCmp("RPCHistoryDiagramTileBtn_Id").hide();
-        						Ext.getCmp("RPCHistoryDiagramOverlayBtn_Id").hide();
         						Ext.getCmp("SurfaceCardTotalCount_Id").hide();
         						var gridPanel = Ext.getCmp("RPCHistoryQueryDataGridPanel_Id");
                                 if (isNotVal(gridPanel)) {
@@ -419,12 +421,20 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                                 }else{
                                 	Ext.create("AP.store.historyQuery.RPCHistoryDataStore");
                                 }
-        					}else{
+        					}else if(activeId=="RPCHistoryDiagramTabPanel"){
         						Ext.getCmp("RPCHistoryDataExportBtn_Id").hide();
-        						Ext.getCmp("RPCHistoryDiagramTileBtn_Id").show();
-        						Ext.getCmp("RPCHistoryDiagramOverlayBtn_Id").show();
         						Ext.getCmp("SurfaceCardTotalCount_Id").show();
         						loadSurfaceCardList(1);
+        					}else if(activeId=="RPCHistoryDiagramOverlayTabPanel"){
+        						Ext.getCmp("RPCHistoryDataExportBtn_Id").hide();
+        						Ext.getCmp("SurfaceCardTotalCount_Id").hide();
+        						
+        						var gridPanel = Ext.getCmp("RPCHistoryQueryFSdiagramOverlayGrid_Id");
+                                if (isNotVal(gridPanel)) {
+                                	gridPanel.getStore().load();
+                                }else{
+                                	Ext.create("AP.store.historyQuery.RPCHistoryQueryDiagramOverlayStore");
+                                }
         					}
                         }
                     }, {
@@ -492,108 +502,7 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                        	 	var columnStr=Ext.getCmp("RPCHistoryQueryDataColumnStr_Id").getValue();
                        	 	exportHistoryQueryDataExcel(orgId,deviceType,deviceId,deviceName,getDateAndTime(startDate,startTime_Hour,startTime_Minute,startTime_Second),getDateAndTime(endDate,endTime_Hour,endTime_Minute,endTime_Second),fileName,title,columnStr);
                         }
-                    }, {
-                        xtype: 'button',
-                        text: '图形平铺',
-//                        iconCls: 'export',
-                        id:'RPCHistoryDiagramTileBtn_Id',
-                        hidden:true,
-                        handler: function (v, o) {
-                        	var r = /^(2[0-3]|[0-1]?\d|\*|-|\/)$/;
-                        	var r2 = /^[1-5]?\d([\/-][1-5]?\d)?$/;
-                        	var startTime_Hour=Ext.getCmp('RPCHistoryQueryStartTime_Hour_Id').getValue();
-                        	if(!r.test(startTime_Hour)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>小时为0~23之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryStartTime_Hour_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	var startTime_Minute=Ext.getCmp('RPCHistoryQueryStartTime_Minute_Id').getValue();
-                        	if(!r2.test(startTime_Minute)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>分钟为0~59之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryStartTime_Minute_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	var startTime_Second=Ext.getCmp('RPCHistoryQueryStartTime_Second_Id').getValue();
-                        	if(!r2.test(startTime_Second)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>秒为0~59之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryStartTime_Second_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	
-                        	var endTime_Hour=Ext.getCmp('RPCHistoryQueryEndTime_Hour_Id').getValue();
-                        	if(!r.test(endTime_Hour)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>小时为0~23之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryEndTime_Hour_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	var endTime_Minute=Ext.getCmp('RPCHistoryQueryEndTime_Minute_Id').getValue();
-                        	if(!r2.test(endTime_Minute)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>分钟为0~59之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryEndTime_Minute_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	var endTime_Second=Ext.getCmp('RPCHistoryQueryEndTime_Second_Id').getValue();
-                        	if(!r2.test(endTime_Second)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>秒为0~59之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryEndTime_Second_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	
-                        	$("#surfaceCardContainer").html('');
-                        	loadSurfaceCardList(1);
-                        }
-                    }, {
-                        xtype: 'button',
-                        text: '图形叠加',
-//                        iconCls: 'export',
-                        id:'RPCHistoryDiagramOverlayBtn_Id',
-                        hidden:true,
-                        handler: function (v, o) {
-                        	var r = /^(2[0-3]|[0-1]?\d|\*|-|\/)$/;
-                        	var r2 = /^[1-5]?\d([\/-][1-5]?\d)?$/;
-                        	var startTime_Hour=Ext.getCmp('RPCHistoryQueryStartTime_Hour_Id').getValue();
-                        	if(!r.test(startTime_Hour)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>小时为0~23之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryStartTime_Hour_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	var startTime_Minute=Ext.getCmp('RPCHistoryQueryStartTime_Minute_Id').getValue();
-                        	if(!r2.test(startTime_Minute)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>分钟为0~59之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryStartTime_Minute_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	var startTime_Second=Ext.getCmp('RPCHistoryQueryStartTime_Second_Id').getValue();
-                        	if(!r2.test(startTime_Second)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>秒为0~59之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryStartTime_Second_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	
-                        	var endTime_Hour=Ext.getCmp('RPCHistoryQueryEndTime_Hour_Id').getValue();
-                        	if(!r.test(endTime_Hour)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>小时为0~23之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryEndTime_Hour_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	var endTime_Minute=Ext.getCmp('RPCHistoryQueryEndTime_Minute_Id').getValue();
-                        	if(!r2.test(endTime_Minute)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>分钟为0~59之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryEndTime_Minute_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	var endTime_Second=Ext.getCmp('RPCHistoryQueryEndTime_Second_Id').getValue();
-                        	if(!r2.test(endTime_Second)){
-                        		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>秒为0~59之间的整数。");
-                        		Ext.getCmp('RPCHistoryQueryEndTime_Second_Id').focus(true, 100);
-                        		return;
-                        	}
-                        	
-                        	$("#surfaceCardContainer").html('');
-                        	var htmlResult='<div id="FSDiagramOverlayChartDiv_Id" style="width:100%;height:100%;"></div>';
-                            $("#surfaceCardContainer").append(htmlResult);
-                        }
-                    }, '->', {
+                    },'->', {
                         id: 'SurfaceCardTotalCount_Id',
                         xtype: 'component',
                         tpl: cosog.string.totalCount + ': {count}', // 总记录数
@@ -640,18 +549,31 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                             
                         }]
             		},{
-            			title: '历史图形',
+            			title: '图形平铺',
             			id:"RPCHistoryDiagramTabPanel",
             			border: false,
                         layout: "fit",
                         autoScroll: true,
-                        html: '<div id="surfaceCardContainer" class="hbox"></div>',
+                        html: '<div id="surfaceCardContainer" class="hbox" style="width:100%;height:100%;"></div>',
                         listeners: {
                         	resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                        		var GridPanel = Ext.getCmp("RPCHistoryQueryDeviceListGridPanel_Id");
-                        		if(isNotVal(GridPanel)){
-                        			loadSurfaceCardList(1);
-                        		}
+//                        		var GridPanel = Ext.getCmp("RPCHistoryQueryDeviceListGridPanel_Id");
+//                        		if(isNotVal(GridPanel)){
+//                        			loadSurfaceCardList(1);
+//                        		}
+
+                            	var container=$('#surfaceCardContainer');
+    		        			if(container!=undefined && container.length>0){
+    		        				var containerChildren=container[0].children;
+    		        				if(containerChildren!=undefined && containerChildren.length>0){
+    		        					for(var i=0;i<containerChildren.length;i++){
+    		        						var chart = $("#"+containerChildren[i].id).highcharts(); 
+    		        						if(isNotVal(chart)){
+    		        							chart.setSize($("#"+containerChildren[i].id).offsetWidth, $("#"+containerChildren[i].id).offsetHeight, true);
+    		        						}
+    		        					}
+    		        				}
+    		        			}
                             },
                             render: function (p, o, i, c) {
                                 p.body.on('scroll', function () {
@@ -676,13 +598,86 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                                 }, this);
                             }
                         }
+            		},{
+            			title: '图形叠加',
+            			id:"RPCHistoryDiagramOverlayTabPanel",
+                        layout: {
+                            type: 'hbox',
+                            pack: 'start',
+                            align: 'stretch'
+                        },
+                        items: [
+                            {
+                                border: false,
+                                margin: '0 0 0 0',
+                                flex: 1,
+                                height: 900,
+                                autoScroll: true,
+                                scrollable: true,
+                                layout: {
+                                    type: 'vbox',
+                                    pack: 'start',
+                                    align: 'stretch'
+                                },
+                                items: [{
+                                    border: false,
+                                    margin: '0 0 1 0',
+                                    height: 300,
+                                    align:'stretch',
+                                    layout: 'fit',
+                                    id: 'RPCHistoryQueryOverlayPanel_Id',
+                                    html: '<div id="RPCHistoryQueryOverlayDiv_Id" style="width:100%;height:100%;"></div>',
+                                    listeners: {
+                                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            if ($("#RPCHistoryQueryOverlayDiv_Id").highcharts() != undefined && $("#RPCHistoryQueryOverlayDiv_Id").highcharts() != null) {
+                                                $("#RPCHistoryQueryOverlayDiv_Id").highcharts().setSize(adjWidth, adjHeight, true);
+                                            }
+                                        }
+                                    }
+                             }, {
+                                    border: false,
+                                    margin: '0 0 1 0',
+                                    height: 300,
+                                    align:'stretch',
+                                    layout: 'fit',
+                                    id: 'RPCHistoryQueryPowerOverlayPanel_Id',
+                                    html: '<div id="RPCHistoryQueryPowerOverlayDiv_Id" style="width:100%;height:100%;"></div>',
+                                    listeners: {
+                                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            if ($("#RPCHistoryQueryPowerOverlayDiv_Id").highcharts() != undefined && $("#RPCHistoryQueryPowerOverlayDiv_Id").highcharts() != null) {
+                                                $("#RPCHistoryQueryPowerOverlayDiv_Id").highcharts().setSize(adjWidth, adjHeight, true);
+                                            }
+                                        }
+                                    }
+                             }, {
+                                    border: false,
+                                    margin: '0 0 0 0',
+                                    height: 300,
+                                    align:'stretch',
+                                    layout: 'fit',
+                                    id: 'RPCHistoryQueryCurrentOverlayPanel_Id',
+                                    html: '<div id="RPCHistoryQueryCurrentOverlayDiv_Id" style="width:100%;height:100%;"></div>',
+                                    listeners: {
+                                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                            if ($("#RPCHistoryQueryCurrentOverlayDiv_Id").highcharts() != undefined && $("#RPCHistoryQueryCurrentOverlayDiv_Id").highcharts() != null) {
+                                                $("#RPCHistoryQueryCurrentOverlayDiv_Id").highcharts().setSize(adjWidth, adjHeight, true);
+                                            }
+                                        }
+                                    }
+                             }]
+                         },{
+                       	  border: false,
+                             flex: 1,
+                             autoScroll: true,
+                             scrollable: true,
+                             layout: 'fit',
+                             id: 'RPCHistoryQueryFSdiagramOverlayTable_Id'
+                         }]
             		}],
             		listeners: {
         				tabchange: function (tabPanel, newCard,oldCard, obj) {
         					if(newCard.id=="RPCHistoryDataTabPanel"){
         						Ext.getCmp("RPCHistoryDataExportBtn_Id").show();
-        						Ext.getCmp("RPCHistoryDiagramTileBtn_Id").hide();
-        						Ext.getCmp("RPCHistoryDiagramOverlayBtn_Id").hide();
         						Ext.getCmp("SurfaceCardTotalCount_Id").hide();
         						var gridPanel = Ext.getCmp("RPCHistoryQueryDataGridPanel_Id");
                                 if (isNotVal(gridPanel)) {
@@ -690,12 +685,20 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                                 }else{
                                 	Ext.create("AP.store.historyQuery.RPCHistoryDataStore");
                                 }
-        					}else{
+        					}else if(newCard.id=="RPCHistoryDiagramTabPanel"){
         						Ext.getCmp("RPCHistoryDataExportBtn_Id").hide();
-        						Ext.getCmp("RPCHistoryDiagramTileBtn_Id").show();
-        						Ext.getCmp("RPCHistoryDiagramOverlayBtn_Id").show();
         						Ext.getCmp("SurfaceCardTotalCount_Id").show();
         						loadSurfaceCardList(1);
+        					}else if(newCard.id=="RPCHistoryDiagramOverlayTabPanel"){
+        						Ext.getCmp("RPCHistoryDataExportBtn_Id").hide();
+        						Ext.getCmp("SurfaceCardTotalCount_Id").hide();
+        						
+        						var gridPanel = Ext.getCmp("RPCHistoryQueryFSdiagramOverlayGrid_Id");
+                                if (isNotVal(gridPanel)) {
+                                	gridPanel.getStore().load();
+                                }else{
+                                	Ext.create("AP.store.historyQuery.RPCHistoryQueryDiagramOverlayStore");
+                                }
         					}
         				}
             		}
@@ -784,6 +787,8 @@ loadSurfaceCardList = function (page) {
             var gtHeight = gtWidth * 0.75; // 有滚动条时图形高度
             var gtWidth2 = gtWidth + 'px';
             var gtHeight2 = gtHeight + 'px';
+            gtWidth2 = (100/columnCount) + '%';
+            gtHeight2 = 50 + '%';
             var htmlResult = '';
             var divId = '';
 
@@ -806,4 +811,43 @@ loadSurfaceCardList = function (page) {
             Ext.Msg.alert(cosog.string.ts, "【<font color=red>" + cosog.string.execption + " </font>】：" + cosog.string.contactadmin + "！");
         }
     });
+};
+
+function createRPCHistoryQueryDiagramOverlayTableColumn(columnInfo) {
+    var myArr = columnInfo;
+
+    var myColumns = "[";
+    for (var i = 0; i < myArr.length; i++) {
+        var attr = myArr[i];
+        var width_ = "";
+        var lock_ = "";
+        var hidden_ = "";
+        if (attr.hidden == true) {
+            hidden_ = ",hidden:true";
+        }
+        if (isNotVal(attr.lock)) {
+            //lock_ = ",locked:" + attr.lock;
+        }
+        if (isNotVal(attr.width)) {
+            width_ = ",width:" + attr.width;
+        }
+        myColumns += "{text:'" + attr.header + "',lockable:true,align:'center' "+ width_ ;
+        if (attr.dataIndex.toUpperCase() == 'resultName'.toUpperCase()) {
+            myColumns +=",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceColor(value,o,p,e);}";
+        }else if (attr.dataIndex == 'id') {
+            myColumns +=",xtype: 'rownumberer',sortable : false,locked:true";
+        } else if (attr.dataIndex.toUpperCase()=='wellName'.toUpperCase()) {
+            myColumns +=",sortable : false,locked:true,dataIndex:'" + attr.dataIndex + "',renderer:function(value){return \"<span data-qtip=\"+(value==undefined?\"\":value)+\">\"+(value==undefined?\"\":value)+\"</span>\";}";
+        }else if (attr.dataIndex.toUpperCase() == 'acqTime'.toUpperCase()) {
+            myColumns += ",sortable : false,locked:false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceTimeFormat(value,o,p,e);}";
+        } else {
+            myColumns += hidden_ + lock_ + ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value){return \"<span data-qtip=\"+(value==undefined?\"\":value)+\">\"+(value==undefined?\"\":value)+\"</span>\";}";
+        }
+        myColumns += "}";
+        if (i < myArr.length - 1) {
+            myColumns += ",";
+        }
+    }
+    myColumns += "]";
+    return myColumns;
 };

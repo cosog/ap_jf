@@ -61,8 +61,6 @@ Ext.define('AP.store.historyQuery.RPCHistoryQueryWellListStore', {
             				var activeId = tabPanel.getActiveTab().id;
             				if(activeId=="RPCHistoryDataTabPanel"){
         						Ext.getCmp("RPCHistoryDataExportBtn_Id").show();
-        						Ext.getCmp("RPCHistoryDiagramTileBtn_Id").hide();
-        						Ext.getCmp("RPCHistoryDiagramOverlayBtn_Id").hide();
         						Ext.getCmp("SurfaceCardTotalCount_Id").hide();
         						var gridPanel = Ext.getCmp("RPCHistoryQueryDataGridPanel_Id");
                                 if (isNotVal(gridPanel)) {
@@ -70,12 +68,20 @@ Ext.define('AP.store.historyQuery.RPCHistoryQueryWellListStore', {
                                 }else{
                                 	Ext.create("AP.store.historyQuery.RPCHistoryDataStore");
                                 }
-        					}else{
+        					}else if(activeId=="RPCHistoryDiagramTabPanel"){
         						Ext.getCmp("RPCHistoryDataExportBtn_Id").hide();
-        						Ext.getCmp("RPCHistoryDiagramTileBtn_Id").show();
-        						Ext.getCmp("RPCHistoryDiagramOverlayBtn_Id").show();
         						Ext.getCmp("SurfaceCardTotalCount_Id").show();
         						loadSurfaceCardList(1);
+        					}else if(activeId=="RPCHistoryDiagramOverlayTabPanel"){
+        						Ext.getCmp("RPCHistoryDataExportBtn_Id").hide();
+        						Ext.getCmp("SurfaceCardTotalCount_Id").hide();
+        						
+        						var gridPanel = Ext.getCmp("RPCHistoryQueryFSdiagramOverlayGrid_Id");
+                                if (isNotVal(gridPanel)) {
+                                	gridPanel.getStore().load();
+                                }else{
+                                	Ext.create("AP.store.historyQuery.RPCHistoryQueryDiagramOverlayStore");
+                                }
         					}
                     	}
                     }

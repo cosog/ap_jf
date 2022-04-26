@@ -1064,6 +1064,7 @@ public class BaseDao extends HibernateDaoSupport {
 			
 			if(initWellList.size()>0){
 				EquipmentDriverServerTask.initRPCDriverAcquisitionInfoConfig(initWellList,"update");
+				MemoryDataManagerTask.loadRPCDeviceInfo(initWellList,1);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1204,6 +1205,7 @@ public class BaseDao extends HibernateDaoSupport {
 			saveDeviceOperationLog(updateWellList,addWellList,deleteWellList,deviceType,user);
 			
 			if(initWellList.size()>0){
+				MemoryDataManagerTask.loadRPCDeviceInfo(initWellList,1);
 				EquipmentDriverServerTask.initRPCDriverAcquisitionInfoConfig(initWellList,"update");
 			}
 		} catch (SQLException e) {
@@ -1355,6 +1357,7 @@ public class BaseDao extends HibernateDaoSupport {
 			saveDeviceOperationLog(updateWellList,addWellList,deleteWellList,deviceType,user);
 			
 			if(initWellList.size()>0){
+				MemoryDataManagerTask.loadPCPDeviceInfo(initWellList,1);
 				EquipmentDriverServerTask.initPCPDriverAcquisitionInfoConfig(initWellList,"update");
 			}
 		} catch (SQLException e) {
@@ -1496,6 +1499,7 @@ public class BaseDao extends HibernateDaoSupport {
 			saveDeviceOperationLog(updateWellList,addWellList,deleteWellList,deviceType,user);
 			
 			if(initWellList.size()>0){
+				MemoryDataManagerTask.loadPCPDeviceInfo(initWellList,1);
 				EquipmentDriverServerTask.initPCPDriverAcquisitionInfoConfig(initWellList,"update");
 			}
 		} catch (SQLException e) {

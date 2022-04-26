@@ -554,6 +554,9 @@ public class AcquisitionUnitManagerController extends BaseController {
 				}
 				EquipmentDriverServerTask.initInstanceConfigByAcqGroupId(groupId+"","update");
 				EquipmentDriverServerTask.initPumpDriverAcquisitionInfoConfigByAcqGroupId(groupId+"","update");
+				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId(groupId);
+				this.acquisitionUnitItemManagerService.doAcquisitionGroupOwnItemChange(groupId);
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemByAcqGroupId(groupId);
 			}
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
@@ -697,6 +700,8 @@ public class AcquisitionUnitManagerController extends BaseController {
 						displayUnitItem.setMatrix(module_[10]);
 						this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
 					}
+					
+					MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId);
 				}
 			}
 			result = "{success:true,msg:true}";
@@ -714,7 +719,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 	/**
 	 * @return NUll
 	 * @throws IOException
-	 * 显示单元安排采集项
+	 * 显示单元安排控制项
 	 */
 	@RequestMapping("/grantCtrlItemsToDisplayUnitPermission")
 	public String grantCtrlItemsToDisplayUnitPermission() throws IOException {
@@ -788,6 +793,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 						displayUnitItem.setMatrix(module_[6]);
 						this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
 					}
+					MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId);
 				}
 			}
 			result = "{success:true,msg:true}";
@@ -805,7 +811,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 	/**
 	 * @return NUll
 	 * @throws IOException
-	 * 显示单元安排采集项
+	 * 显示单元安排计算项
 	 */
 	@RequestMapping("/grantCalItemsToDisplayUnitPermission")
 	public String grantCalItemsToDisplayUnitPermission() throws IOException {
@@ -846,6 +852,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 					displayUnitItem.setMatrix(module_[8]);
 					this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
 				}
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId);
 			}
 		
 			result = "{success:true,msg:true}";
@@ -1551,10 +1558,17 @@ public class AcquisitionUnitManagerController extends BaseController {
 				}
 			}
 			StringManagerUtils.writeFile(path,StringManagerUtils.jsonStringFormat(gson.toJson(modbusProtocolConfig)));
-			Jedis jedis = new Jedis();
-			jedis.set("modbusProtocolConfig".getBytes(), SerializeObjectUnils.serialize(modbusProtocolConfig));
-			jedis.disconnect();
-			jedis.close();
+			Jedis jedis=null;
+			try{
+				jedis = new Jedis();
+				jedis.set("modbusProtocolConfig".getBytes(), SerializeObjectUnils.serialize(modbusProtocolConfig));
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			if(jedis!=null){
+				jedis.disconnect();
+				jedis.close();
+			}
 			if(StringManagerUtils.isNotNull(modbusDriverSaveData.getProtocolName())){
 				EquipmentDriverServerTask.initProtocolConfig(modbusDriverSaveData.getProtocolName(),"update");
 				EquipmentDriverServerTask.initInstanceConfigByProtocolName(modbusDriverSaveData.getProtocolName(),"update");
@@ -1639,6 +1653,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 				for(int i=0;i<acquisitionGroupHandsontableChangeData.getDelidslist().size();i++){
 					this.acquisitionUnitManagerService.doAcquisitionGroupBulkDelete(acquisitionGroupHandsontableChangeData.getDelidslist().get(i));
 					EquipmentDriverServerTask.initInstanceConfigByAcqUnitId(unitId, "update");
+					MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId);
 				}
 			}
 			if(acquisitionGroupHandsontableChangeData.getUpdatelist()!=null){
@@ -1897,6 +1912,8 @@ public class AcquisitionUnitManagerController extends BaseController {
 								this.alarmUnitItemManagerService.grantAlarmItemsPermission(alarmUnitItem);
 							}
 						}
+						
+						MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId(modbusProtocolAlarmUnitSaveData.getId()+"");
 					}
 					
 					json = "{success:true,msg:true}";
