@@ -3910,3 +3910,306 @@ function initBalanceCurveChartTowY(catagories,series,divId,titletext,subtitle,yt
 				series : series
 			});
 }
+
+/* 
+ * 拼接叠加功图曲线数据
+ */
+showFSDiagramOverlayChart = function(get_rawData,divid,visible,diagramType) {
+	var color=new Array("#000000","#00ff00"); // 线条颜色
+	var list=get_rawData.totalRoot;
+	var upperLoadLine=null;
+	var lowerLoadLine=null;
+	var fmax=null;
+	var fmin=null;
+	var strokeMax=0;
+	var visiblestr='';
+	if(!visible){
+		visiblestr='visible:false,';
+	};
+	if(list.length>0){
+		fmax=list[0].fmax;
+		fmin=list[0].fmin;
+	}
+	var title='';
+	var ytext='';
+	var color=new Array("#000000","#00ff00"); // 线条颜色
+	var subtitle=get_rawData.wellName+"["+get_rawData.start_date+"~"+get_rawData.end_date+"]";
+	if(diagramType===0){//如果是功图
+		title='光杆功图叠加';
+		ytext='载荷(kN)';
+	}else if(diagramType===1){//电功图
+		title= "电功图叠加";
+		ytext="有功功率(kW)"
+	}else if(diagramType===2){//电流图
+		title= "电流图叠加";
+		ytext="电流(A)"
+	}
+	
+	var minValue=null;
+	var series = "[";
+	for (var i =0; i < list.length; i++){
+		if(list[i].upperLoadLine!="" && parseFloat(list[i].upperLoadLine)>0){
+			upperLoadLine=list[i].upperLoadLine;
+		}
+		if(list[i].lowerLoadLine!="" && parseFloat(list[i].lowerLoadLine)>0){
+			lowerLoadLine=list[i].lowerLoadLine;
+		}
+		
+		
+		if(parseFloat(list[i].fmax)>fmax){
+			fmax=parseFloat(list[i].fmax);
+		}
+		if(parseFloat(list[i].fmin)<fmin){
+			fmin=parseFloat(list[i].fmin);
+		}
+		if(parseFloat(list[i].stroke)>strokeMax){
+			strokeMax=parseFloat(list[i].stroke);
+		}
+		var xData = list[i].positionCurveData.split(",");
+		var yData;
+		if(diagramType===0){//如果是功图
+			yData = list[i].loadCurveData.split(",");
+			
+			var hour=list[i].acqTime.split(' ')[1].split(':')[0]
+			if(parseInt(hour)<6 ){
+				color=new Array("#000000","#000000");
+			}else if(parseInt(hour)>=6 && parseInt(hour)<12){
+				color=new Array("#000000","#dd1212");
+			}else if(parseInt(hour)>=12 && parseInt(hour)<18){
+				color=new Array("#000000","#507fea");
+			}else{
+				color=new Array("#000000","#00ff00");
+			}
+			
+			
+			minValue=0;
+		}else if(diagramType===1){//电功图
+			yData = list[i].powerCurveData.split(",");
+			color=new Array("#000000","#CC0000");
+		}else if(diagramType===2){//电流图
+			yData = list[i].currentCurveData.split(",");
+			color=new Array("#000000","#0033FF");
+		}
+		var data = "[";
+		for (var j=0; j <= xData.length; j++) {
+			if(j<(xData.length)){
+				data += "[" + changeTwoDecimal(xData[j]) + ","+changeTwoDecimal(yData[j])+"],";
+			}else{
+				data += "[" + changeTwoDecimal(xData[0]) + ","+changeTwoDecimal(yData[0])+"]";//将图形的第一个点拼到最后面，使图形闭合
+			}
+		}
+		data+="]";
+		if(list.length==1){
+			    series+="{name: '"+list[i].id+"',visible:"+visible + ",color: '" + color[1] + " ' , " + "lineWidth:2," + "data:" + data + "}";
+		}else{
+			if(i==0){
+				series+="{name: '"+list[i].id+"',visible:"+visible + ",color: '" + color[1] + " ' , " + "lineWidth:2," + "data:" + data + "},";
+			}else if((i>0)&&(i<(list.length-1))){
+	            series+="{name: '"+list[i].id+"',visible:"+visible + ",color: '" + color[1] + " ' , " + "lineWidth:2," + "data:" + data + "},";
+	        }else{
+				series+="{name: '"+list[i].id+"',visible:"+visible + ",color: '" + color[1] + " ' , " + "lineWidth:2," + "data:" + data + "}";
+			}
+		}
+	}
+	
+	if(strokeMax>0 && diagramType===0){//如果是功图
+		series+=",{type: 'line',color: '#d12',dashStyle: 'Dash',lineWidth:2,name: '理论上载荷线',data: [[0," +parseFloat(upperLoadLine)+"], ["+parseFloat(strokeMax)+", "+parseFloat(upperLoadLine)+"]],marker: {enabled: false},states: {hover: {lineWidth: 0}},enableMouseTracking: true}";
+		series+=",{type: 'line',color: '#d12',dashStyle: 'Dash',lineWidth:2,name: '理论下载荷线',data: [[0," +parseFloat(lowerLoadLine)+"], ["+parseFloat(strokeMax)+", "+parseFloat(lowerLoadLine)+"]],marker: {enabled: false},states: {hover: {lineWidth: 0}},enableMouseTracking: true}";
+	}
+	
+	series+="]";
+	
+	var pointdata = Ext.JSON.decode(series);
+	
+	var upperlimit=parseFloat(fmax)+5;
+    if(parseFloat(upperLoadLine)==0||parseFloat(fmax)==0){
+    	upperlimit=null;
+    }else if(parseFloat(upperLoadLine)>=parseFloat(fmax)){
+    	upperlimit=parseFloat(upperLoadLine)+5;
+    }
+    var underlimit=parseFloat(fmin)-5;
+    if(parseFloat(lowerLoadLine)==0||parseFloat(fmin)==0){
+    	underlimit=null;
+    }else if(parseFloat(lowerLoadLine)<=parseFloat(fmin)){
+    	underlimit=parseFloat(lowerLoadLine)-5;
+    }
+    if(underlimit<0){
+    	underlimit=0;
+    }
+    underlimit=0;
+    if(isNaN(upperlimit)){
+    	upperlimit=null;
+    }
+    if(diagramType===0){//如果是功图
+    	initFSDiagramOverlayChart(pointdata, title,subtitle,ytext,get_rawData.wellName, get_rawData.calculateDate, divid,upperLoadLine,lowerLoadLine,upperlimit,underlimit,strokeMax);
+	}else {
+		initPSDiagramOverlayChart(pointdata, title,subtitle,ytext,get_rawData.wellName, get_rawData.calculateDate, divid);
+	}
+	
+	return false;
+}
+
+function initFSDiagramOverlayChart(series, title,subtitle,ytext, wellName, acqTime, divid,upperLoadLine,lowerLoadLine,upperlimit,underlimit,strokeMax) {
+	mychart = new Highcharts.Chart({
+				chart: {                                                                             
+		            type: 'scatter',      // 散点图   
+		            renderTo : divid,
+		            borderWidth : 0,
+		            zoomType: 'xy'
+		        },                                                                                   
+		        title: {  
+		        	text: title
+		        },                                                                                   
+		        subtitle: {                                                                          
+		            text: subtitle//+' ['+acqTime+']'                                                      
+		        },
+		        credits: {
+		            enabled: false
+		        },
+		        xAxis: {                                                                             
+		            title: {                                                                         
+		                enabled: true,                                                               
+		                text: cosog.string.position,    // 位移（m）
+		                align:'middle',//"low"，"middle" 和 "high"，分别表示于最小值对齐、居中对齐、与最大值对齐
+		                style: {
+//                          color: '#000',
+//                          fontWeight: 'normal',
+		                	fontSize: '12px',
+		                	padding: '5px'
+                      }
+		            },  
+		            startOnTick: false,      //是否强制轴线在标线处开始
+		            endOnTick: false,        //是否强制轴线在标线处结束                                                                  
+		            showLastLabel: true,
+		            minorTickInterval: ''    // 最小刻度间隔
+		            //min:0                                                            
+		        },                                                                                   
+		        yAxis: {                                                                             
+		            title: {                                                                         
+		                text: ytext    // 载荷（kN）                                                          
+		            },
+		            allowDecimals: false,    // 刻度值是否为小数
+		            //endOnTick: false,        //是否强制轴线在标线处结束   
+		            minorTickInterval: '',    // 不显示次刻度线
+		            min:0
+		        },
+		        exporting:{    
+                    enabled:true,    
+                    filename:'class-booking-chart',    
+                    url:context + '/exportHighcharsPicController/export'
+               },
+		        legend: {                                                                            
+		            layout: 'vertical',                                                              
+		            align: 'left',                                                                   
+		            verticalAlign: 'top',                                                            
+		            x: 100,                                                                          
+		            y: 70,                                                                           
+		            floating: true,                                                                  
+		            backgroundColor: '#FFFFFF',                                                      
+		            borderWidth: 1  ,
+		            enabled: false
+		        },                                                                                   
+		        plotOptions: {                                                                       
+		            scatter: {                                                                       
+		                marker: {                                                                    
+		                    radius: 0,                                                               
+		                    states: {                                                                
+		                        hover: {                                                             
+		                            enabled: true,                                                   
+		                            lineColor: '#646464'                                    
+		                        }                                                                    
+		                    }                                                                        
+		                },                                                                           
+		                states: {                                                                    
+		                    hover: {                                                                 
+		                        marker: {                                                            
+		                            enabled: false                                                   
+		                        }                                                                    
+		                    }                                                                        
+		                },                                                                           
+		                tooltip: {                                                                   
+		                    headerFormat: '',                                
+		                    pointFormat: '{point.x}, {point.y}'                                
+		                }                                                                            
+		            }                                                                                
+		        }, 
+		        series: series 
+	});
+}
+
+function initPSDiagramOverlayChart(series, title,subtitle,ytext, wellName, acqTime, divid) {
+	mychart = new Highcharts.Chart({
+				chart: {                                                                             
+		            type: 'scatter',      // 散点图   
+		            renderTo : divid,
+		            borderWidth : 0,
+		            zoomType: 'xy'
+		        },                                                                                   
+		        title: {  
+		        	text: title
+		        },                                                                                   
+		        subtitle: {                                                                          
+		            text: subtitle//+' ['+acqTime+']'                                                      
+		        },
+		        credits: {
+		            enabled: false
+		        },
+		        xAxis: {                                                                             
+		            title: {                                                                         
+		                enabled: true,                                                               
+		                text: cosog.string.position,    // 位移（m）
+		                align:'middle',//"low"，"middle" 和 "high"，分别表示于最小值对齐、居中对齐、与最大值对齐
+		                style: {
+		                	fontSize: '12px',
+		                	padding: '5px'
+                      }
+		            },  
+		            startOnTick: false,      //是否强制轴线在标线处开始
+		            endOnTick: false,        //是否强制轴线在标线处结束                                                                  
+		            showLastLabel: true,
+		            minorTickInterval: ''    // 最小刻度间隔
+		            //min:0                                                            
+		        },                                                                                   
+		        yAxis: {                                                                             
+		            title: {                                                                         
+		                text: ytext                                             
+		            },
+		            allowDecimals: false,    // 刻度值是否为小数
+		            //endOnTick: false,        //是否强制轴线在标线处结束   
+		            minorTickInterval: ''    // 不显示次刻度线
+		        },
+		        exporting:{    
+                    enabled:true,    
+                    filename:'class-booking-chart',    
+                    url:context + '/exportHighcharsPicController/export'
+               },
+		        legend: {
+		            enabled: false
+		        },                                                                                   
+		        plotOptions: {                                                                       
+		            scatter: {                                                                       
+		                marker: {                                                                    
+		                    radius: 0,                                                               
+		                    states: {                                                                
+		                        hover: {                                                             
+		                            enabled: true,                                                   
+		                            lineColor: '#646464'                                    
+		                        }                                                                    
+		                    }                                                                        
+		                },                                                                           
+		                states: {                                                                    
+		                    hover: {                                                                 
+		                        marker: {                                                            
+		                            enabled: false                                                   
+		                        }                                                                    
+		                    }                                                                        
+		                },                                                                           
+		                tooltip: {                                                                   
+		                    headerFormat: '',                                
+		                    pointFormat: '{point.x}, {point.y}'                                
+		                }                                                                            
+		            }                                                                                
+		        }, 
+		        series: series 
+	});
+};

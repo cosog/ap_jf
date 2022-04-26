@@ -102,8 +102,8 @@ public class MemoryDataManagerTask {
 		loadAlarmInstanceOwnItemByUnitId("");
 		loadDisplayInstanceOwnItemByUnitId("");
 //		
-		loadRPCDeviceInfo(null);
-		loadPCPDeviceInfo(null);
+		loadRPCDeviceInfo(null,0);
+		loadPCPDeviceInfo(null,0);
 		jedis.disconnect();
 		jedis.close();
 	}
@@ -130,11 +130,18 @@ public class MemoryDataManagerTask {
 			Collections.sort(modbusProtocolConfig.getProtocol());
 		}
 		
-		Jedis jedis = new Jedis();
-		
-		jedis.set("modbusProtocolConfig".getBytes(), SerializeObjectUnils.serialize(modbusProtocolConfig));
-		jedis.disconnect();
-		jedis.close();
+		Jedis jedis=null;
+		try {
+			jedis = new Jedis();
+			jedis.set("modbusProtocolConfig".getBytes(), SerializeObjectUnils.serialize(modbusProtocolConfig));
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
+		}
 		StringManagerUtils.printLog("驱动加载结束");
 	}
 	
@@ -146,8 +153,9 @@ public class MemoryDataManagerTask {
 		if(conn==null){
         	return;
         }
+		Jedis jedis=null;
 		try {
-			Jedis jedis = new Jedis();
+			jedis = new Jedis();
 			String sql="select t.id,t.name,t.mappingcolumn,t.calcolumn,t.protocoltype,t.mappingmode,t.repetitiontimes from TBL_DATAMAPPING t order by t.protocoltype,t.id";
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
@@ -163,8 +171,6 @@ public class MemoryDataManagerTask {
 				String key=dataMapping.getProtocolType()+"_"+dataMapping.getMappingColumn();
 				jedis.hset("ProtocolMappingColumn".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(dataMapping));//哈希(Hash)
 			}
-			jedis.disconnect();
-			jedis.close();
 //			Set<String> aa=jedis.hkeys("ProtocolMappingColumn");
 //			Set<byte[]> bb=jedis.hkeys("ProtocolMappingColumn".getBytes());
 //			System.out.println("ProtocolMappingColumn中所有的key:"+aa);
@@ -181,14 +187,18 @@ public class MemoryDataManagerTask {
 //			
 //			System.out.println("判断某个key是否存在:"+jedis.hexists("ProtocolMappingColumn".getBytes(), testKey));
 //			System.out.println("判断某个key的值:"+jedis.hget("ProtocolMappingColumn".getBytes(), testKey));
-		}catch (SQLException e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		} finally{
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
 	}
 	
-	public static void loadRPCDeviceInfo(List<String> wellIdList){
+	public static void loadRPCDeviceInfo(List<String> wellList,int condition){//condition 0 -设备ID 1-设备名称
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -198,9 +208,16 @@ public class MemoryDataManagerTask {
 		if(conn==null){
         	return;
         }
-		try { 
-			Jedis jedis = new Jedis();
-			String wellId=StringUtils.join(wellIdList, ",");
+		Jedis jedis=null;
+		try {
+			jedis = new Jedis();
+			String wells="";
+			if(condition==0){
+				wells=StringUtils.join(wellList, ",");
+			}else{
+				wells=StringManagerUtils.joinStringArr2(wellList, ",");
+			}	
+					
 			String sql="select t.id,t.orgid,t.orgName,t.wellname,t.devicetype,t.devicetypename,t.applicationscenarios,t.applicationScenariosName,t.signinid,t.slave,t.videourl,"
 					+ "t.instancecode,t.instancename,t.alarminstancecode,t.alarminstancename,t.displayinstancecode,t.displayinstancename,"
 					+ "t.status,t.statusName,"
@@ -211,8 +228,13 @@ public class MemoryDataManagerTask {
 					+ "t2.commstatus "
 					+ " from viw_rpcdevice t"
 					+ " left outer join tbl_rpcacqdata_latest t2 on t2.wellid=t.id ";
-			if(StringManagerUtils.isNotNull(wellId)){
-				sql+=" and t.id in("+wellId+")";
+			if(StringManagerUtils.isNotNull(wells)){
+				if(condition==0){
+					sql+=" and t.id in("+wells+")";
+				}else{
+					sql+=" and t.wellName in("+wells+")";
+				}
+				
 			}
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
@@ -290,16 +312,18 @@ public class MemoryDataManagerTask {
 				String key=rpcDeviceInfo.getId()+"";
 				jedis.hset("RPCDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(rpcDeviceInfo));//哈希(Hash)
 			}
-			jedis.disconnect();
-			jedis.close();
-		}catch (SQLException e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		} finally{
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
 		}
 	}
 	
-	public static void loadPCPDeviceInfo(List<String> wellIdList){
+	public static void loadPCPDeviceInfo(List<String> wellList,int condition){//condition 0 -设备ID 1-设备名称
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
@@ -310,9 +334,15 @@ public class MemoryDataManagerTask {
 		if(conn==null){
         	return;
         }
-		try { 
-			Jedis jedis = new Jedis();
-			String wellId=StringUtils.join(wellIdList, ",");
+		Jedis jedis=null;
+		try {
+			jedis = new Jedis();
+			String wells="";
+			if(condition==0){
+				wells=StringUtils.join(wellList, ",");
+			}else{
+				wells=StringManagerUtils.joinStringArr2(wellList, ",");
+			}	
 			String sql="select t.id,t.orgid,t.orgName,t.wellname,t.devicetype,t.devicetypename,t.applicationscenarios,t.applicationScenariosName,t.signinid,t.slave,t.videourl,"
 					+ "t.instancecode,t.instancename,t.alarminstancecode,t.alarminstancename,t.displayinstancecode,t.displayinstancename,"
 					+ "t.status,t.statusName,"
@@ -321,8 +351,13 @@ public class MemoryDataManagerTask {
 					+ "t2.commstatus "
 					+ " from viw_pcpdevice t"
 					+ " left outer join tbl_pcpacqdata_latest t2 on t2.wellid=t.id ";
-			if(StringManagerUtils.isNotNull(wellId)){
-				sql+=" and t.id in("+wellId+")";
+			if(StringManagerUtils.isNotNull(wells)){
+				if(condition==0){
+					sql+=" and t.id in("+wells+")";
+				}else{
+					sql+=" and t.wellName in("+wells+")";
+				}
+				
 			}
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
@@ -376,12 +411,15 @@ public class MemoryDataManagerTask {
 				String key=pcpDeviceInfo.getId()+"";
 				jedis.hset("PCPDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(pcpDeviceInfo));//哈希(Hash)
 			}
-			jedis.disconnect();
-			jedis.close();
-		}catch (SQLException e) {
+			
+		}catch (Exception e) {
 			e.printStackTrace();
 		} finally{
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
 		}
 	}
 	
@@ -393,17 +431,35 @@ public class MemoryDataManagerTask {
 		if(conn==null){
         	return;
         }
+		Jedis jedis=null;
 		try {
-			Jedis jedis = new Jedis();
+			jedis = new Jedis();
+			String instanceSql="select t.code from tbl_protocolinstance t where 1=1 ";
 			String sql="select t5.code as instanceCode,t5.deviceType,t4.protocol,t3.unitid ,"
 					+ "t2.acq_cycle,t2.save_cycle,"
 					+ "t.id as itemid,t.itemname,t.itemcode,t.bitindex,t.groupid"
 					+ " from tbl_acq_item2group_conf t,tbl_acq_group_conf t2,tbl_acq_group2unit_conf t3,tbl_acq_unit_conf t4,tbl_protocolinstance t5 "
 					+ " where t.groupid=t2.id and t2.id=t3.groupid and t3.unitid=t4.id and t4.id=t5.unitid and t2.type=0";
 			if(StringManagerUtils.isNotNull(groupId)){
-				sql+=" and t.groupid="+groupId;
+				sql+=" and t5.unitid in (select t6.unitid from tbl_acq_group2unit_conf t6 where t6.groupid="+groupId+")";
+				instanceSql+=" and t.unitid in (select t6.unitid from tbl_acq_group2unit_conf t6 where t6.groupid="+groupId+")";
 			}
 			sql+=" order by t5.code, t.groupid,t.id";
+			
+			pstmt = conn.prepareStatement(instanceSql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				if(jedis.exists("AcqInstanceOwnItem".getBytes())){
+					if(jedis.hexists("AcqInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
+						jedis.hdel("AcqInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
+					}
+				}
+			}
+			if(pstmt!=null)
+        		pstmt.close();  
+        	if(rs!=null)
+        		rs.close();
+			
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
@@ -458,11 +514,13 @@ public class MemoryDataManagerTask {
 //				AcqInstanceOwnItem acqInstanceOwnItem=(AcqInstanceOwnItem) obj;
 //				System.out.println(new Gson().toJson(acqInstanceOwnItem));
 //	        }
-			jedis.disconnect();
-			jedis.close();
-		}catch (SQLException e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		} finally{
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
 	}
@@ -478,16 +536,35 @@ public class MemoryDataManagerTask {
 		if(conn==null){
         	return;
         }
+		Jedis jedis=null;
 		try {
-			Jedis jedis = new Jedis();
+			jedis = new Jedis();
+			String instanceSql="select t.code from tbl_protocoldisplayinstance t where 1=1 ";
 			String sql="select t3.code as instanceCode,t3.deviceType,t2.protocol,t.unitid,t.id as itemid,t.itemname,t.itemcode,t.bitindex,"
 					+ "decode(t.showlevel,null,9999,t.showlevel) as showlevel,decode(t.sort,null,9999,t.sort) as sort,t.realtimecurve,t.realtimecurvecolor,t.historycurve,t.historycurvecolor,t.type "
 					+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2,tbl_protocoldisplayinstance t3 "
 					+ " where t.unitid=t2.id and t2.id=t3.displayunitid";
 			if(StringManagerUtils.isNotNull(unitId)){
 				sql+=" and t.unitid="+unitId;
+				instanceSql+=" and t.displayunitid="+unitId;
 			}
 			sql+=" order by t3.code, t.unitid,t.id";
+			
+			pstmt = conn.prepareStatement(instanceSql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				if(jedis.exists("DisplayInstanceOwnItem".getBytes())){
+					if(jedis.hexists("DisplayInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
+						jedis.hdel("DisplayInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
+					}
+				}
+			}
+			if(pstmt!=null)
+        		pstmt.close();  
+        	if(rs!=null)
+        		rs.close();
+			
+			
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
@@ -525,7 +602,7 @@ public class MemoryDataManagerTask {
 				displayItem.setType(rs.getInt(15));
 				int index=-1;
 				for(int i=0;i<displayInstanceOwnItem.getItemList().size();i++){
-					if(displayItem.getItemId()==displayInstanceOwnItem.getItemList().get(i).getItemId()){
+					if(displayItem.getItemCode().equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(i).getItemCode()) && displayItem.getType()==displayInstanceOwnItem.getItemList().get(i).getType()){
 						index=i;
 						break;
 					}
@@ -545,9 +622,40 @@ public class MemoryDataManagerTask {
 //				DisplayInstanceOwnItem displayInstanceOwnItem=(DisplayInstanceOwnItem) obj;
 //				System.out.println(new Gson().toJson(displayInstanceOwnItem));
 //	        }
-			jedis.disconnect();
-			jedis.close();
-		}catch (SQLException e) {
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
+	}
+	
+	public static void loadDisplayInstanceOwnItemByAcqGroupId(String groupId){
+		Connection conn = null;   
+		PreparedStatement pstmt = null;   
+		ResultSet rs = null;
+		int result=0;
+		
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		try {
+			List<String> unitIdList=new ArrayList<String>();
+			String sql="select t.id from tbl_acq_unit_conf t,tbl_acq_group2unit_conf t2,tbl_acq_group_conf t3 where t.id=t2.unitid and t2.groupid=t3.id and t3.id="+groupId+"";
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				unitIdList.add(rs.getInt(1)+"");
+			}
+			for(int i=0;i<unitIdList.size();i++){
+				loadDisplayInstanceOwnItemByUnitId(unitIdList.get(i));
+			}
+		}catch (Exception e) {
 			e.printStackTrace();
 		} finally{
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
@@ -565,8 +673,10 @@ public class MemoryDataManagerTask {
 		if(conn==null){
         	return;
         }
+		Jedis jedis=null;
 		try {
-			Jedis jedis = new Jedis();
+			jedis = new Jedis();
+			String instanceSql="select t.code from tbl_protocolalarminstance t where 1=1 ";
 			String sql="select t3.code as instanceCode,t3.deviceType,t.unitid,t2.protocol,"
 					+ " t.id as itemId,t.itemname,t.itemcode,t.itemaddr,t.bitindex,"
 					+ "t.value,t.upperlimit,t.lowerlimit,t.hystersis,t.delay,decode(t.alarmsign,0,0,t.alarmlevel) as alarmlevel,t.alarmsign,t.type,t.issendmessage,t.issendmail "
@@ -574,8 +684,24 @@ public class MemoryDataManagerTask {
 					+ " where t.unitid=t2.id and t2.id=t3.alarmunitid";
 			if(StringManagerUtils.isNotNull(unitId)){
 				sql+=" and t.unitid="+unitId;
+				instanceSql+=" and t.alarmunitid="+unitId;
 			}
 			sql+=" order by t3.code, t.unitid,t.id";
+			
+			pstmt = conn.prepareStatement(instanceSql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				if(jedis.exists("AlarmInstanceOwnItem".getBytes())){
+					if(jedis.hexists("AlarmInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
+						jedis.hdel("AlarmInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
+					}
+				}
+			}
+			if(pstmt!=null)
+        		pstmt.close();  
+        	if(rs!=null)
+        		rs.close();
+			
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
@@ -643,60 +769,78 @@ public class MemoryDataManagerTask {
 //				AlarmInstanceOwnItem alarmInstanceOwnItem=(AlarmInstanceOwnItem) obj;
 //				System.out.println(new Gson().toJson(alarmInstanceOwnItem));
 //	        }
-			jedis.disconnect();
-			jedis.close();
-		}catch (SQLException e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		} finally{
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
 		}
 	}
 	
 	public static void loadRPCCalculateItem(){
-		Jedis jedis = new Jedis();
-		//有序集合
-		jedis.zadd("rpcCalItemList".getBytes(),1, SerializeObjectUnils.serialize(new CalItem("工况","ResultCode","")));
-		jedis.zadd("rpcCalItemList".getBytes(),2, SerializeObjectUnils.serialize(new CalItem("最大载荷","FMax","kN")));
-		jedis.zadd("rpcCalItemList".getBytes(),3, SerializeObjectUnils.serialize(new CalItem("最小载荷","FMin","kN")));
-		jedis.zadd("rpcCalItemList".getBytes(),4, SerializeObjectUnils.serialize(new CalItem("充满系数","FullnessCoefficient","")));
-		jedis.zadd("rpcCalItemList".getBytes(),5, SerializeObjectUnils.serialize(new CalItem("理论排量","TheoreticalProduction","m^3/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),6, SerializeObjectUnils.serialize(new CalItem("产液量","LiquidVolumetricProduction","m^3/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),7, SerializeObjectUnils.serialize(new CalItem("产油量","OilVolumetricProduction","m^3/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),8, SerializeObjectUnils.serialize(new CalItem("产水量","WaterVolumetricProduction","m^3/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),9, SerializeObjectUnils.serialize(new CalItem("柱塞有效冲程计算产量","AvailablePlungerStrokeVolumetricProduction","m^3/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),10, SerializeObjectUnils.serialize(new CalItem("泵间隙漏失量","PumpClearanceLeakVolumetricProduction","m^3/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),11, SerializeObjectUnils.serialize(new CalItem("游动凡尔漏失量","TVLeakVolumetricProduction","m^3/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),12, SerializeObjectUnils.serialize(new CalItem("固定凡尔漏失量","SVLeakVolumetricProduction","m^3/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),13, SerializeObjectUnils.serialize(new CalItem("气影响","GasInfluenceVolumetricProduction","m^3/d")));
-		
-		jedis.zadd("rpcCalItemList".getBytes(),14, SerializeObjectUnils.serialize(new CalItem("产液量","LiquidWeightProduction","t/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),15, SerializeObjectUnils.serialize(new CalItem("产油量","OilWeightProduction","t/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),16, SerializeObjectUnils.serialize(new CalItem("产水量","WaterWeightProduction","t/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),17, SerializeObjectUnils.serialize(new CalItem("柱塞有效冲程计算产量","AvailablePlungerStrokeWeightProduction","t/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),18, SerializeObjectUnils.serialize(new CalItem("泵间隙漏失量","PumpClearanceLeakWeightProduction","t/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),19, SerializeObjectUnils.serialize(new CalItem("游动凡尔漏失量","TVLeakWeightProduction","t/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),20, SerializeObjectUnils.serialize(new CalItem("固定凡尔漏失量","SVLeakWeightProduction","t/d")));
-		jedis.zadd("rpcCalItemList".getBytes(),21, SerializeObjectUnils.serialize(new CalItem("气影响","GasInfluenceWeightProduction","t/d")));
-		jedis.disconnect();
-		jedis.close();
+		Jedis jedis=null;
+		try {
+			jedis = new Jedis();
+			//有序集合
+			jedis.zadd("rpcCalItemList".getBytes(),1, SerializeObjectUnils.serialize(new CalItem("工况","ResultCode","")));
+			jedis.zadd("rpcCalItemList".getBytes(),2, SerializeObjectUnils.serialize(new CalItem("最大载荷","FMax","kN")));
+			jedis.zadd("rpcCalItemList".getBytes(),3, SerializeObjectUnils.serialize(new CalItem("最小载荷","FMin","kN")));
+			jedis.zadd("rpcCalItemList".getBytes(),4, SerializeObjectUnils.serialize(new CalItem("充满系数","FullnessCoefficient","")));
+			jedis.zadd("rpcCalItemList".getBytes(),5, SerializeObjectUnils.serialize(new CalItem("理论排量","TheoreticalProduction","m^3/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),6, SerializeObjectUnils.serialize(new CalItem("产液量","LiquidVolumetricProduction","m^3/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),7, SerializeObjectUnils.serialize(new CalItem("产油量","OilVolumetricProduction","m^3/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),8, SerializeObjectUnils.serialize(new CalItem("产水量","WaterVolumetricProduction","m^3/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),9, SerializeObjectUnils.serialize(new CalItem("柱塞有效冲程计算产量","AvailablePlungerStrokeVolumetricProduction","m^3/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),10, SerializeObjectUnils.serialize(new CalItem("泵间隙漏失量","PumpClearanceLeakVolumetricProduction","m^3/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),11, SerializeObjectUnils.serialize(new CalItem("游动凡尔漏失量","TVLeakVolumetricProduction","m^3/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),12, SerializeObjectUnils.serialize(new CalItem("固定凡尔漏失量","SVLeakVolumetricProduction","m^3/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),13, SerializeObjectUnils.serialize(new CalItem("气影响","GasInfluenceVolumetricProduction","m^3/d")));
+			
+			jedis.zadd("rpcCalItemList".getBytes(),14, SerializeObjectUnils.serialize(new CalItem("产液量","LiquidWeightProduction","t/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),15, SerializeObjectUnils.serialize(new CalItem("产油量","OilWeightProduction","t/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),16, SerializeObjectUnils.serialize(new CalItem("产水量","WaterWeightProduction","t/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),17, SerializeObjectUnils.serialize(new CalItem("柱塞有效冲程计算产量","AvailablePlungerStrokeWeightProduction","t/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),18, SerializeObjectUnils.serialize(new CalItem("泵间隙漏失量","PumpClearanceLeakWeightProduction","t/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),19, SerializeObjectUnils.serialize(new CalItem("游动凡尔漏失量","TVLeakWeightProduction","t/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),20, SerializeObjectUnils.serialize(new CalItem("固定凡尔漏失量","SVLeakWeightProduction","t/d")));
+			jedis.zadd("rpcCalItemList".getBytes(),21, SerializeObjectUnils.serialize(new CalItem("气影响","GasInfluenceWeightProduction","t/d")));
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
+		}
 	}
 	
 	public static void loadPCPCalculateItem(){
-		Jedis jedis = new Jedis();
-		
-		jedis.zadd("pcpCalItemList".getBytes(),1, SerializeObjectUnils.serialize(new CalItem("理论排量","TheoreticalProduction","m^3/d")));
-		jedis.zadd("pcpCalItemList".getBytes(),2, SerializeObjectUnils.serialize(new CalItem("产液量","LiquidVolumetricProduction","m^3/d")));
-		jedis.zadd("pcpCalItemList".getBytes(),3, SerializeObjectUnils.serialize(new CalItem("产油量","OilVolumetricProduction","m^3/d")));
-		jedis.zadd("pcpCalItemList".getBytes(),4, SerializeObjectUnils.serialize(new CalItem("产水量","WaterVolumetricProduction","m^3/d")));
-		
-		jedis.zadd("pcpCalItemList".getBytes(),5, SerializeObjectUnils.serialize(new CalItem("产液量","LiquidWeightProduction","t/d")));
-		jedis.zadd("pcpCalItemList".getBytes(),6, SerializeObjectUnils.serialize(new CalItem("产油量","OilWeightProduction","t/d")));
-		jedis.zadd("pcpCalItemList".getBytes(),7, SerializeObjectUnils.serialize(new CalItem("产水量","WaterWeightProduction","t/d")));
-		jedis.disconnect();
-		jedis.close();
+		Jedis jedis=null;
+		try {
+			jedis = new Jedis();
+			//有序集合
+			jedis.zadd("pcpCalItemList".getBytes(),1, SerializeObjectUnils.serialize(new CalItem("理论排量","TheoreticalProduction","m^3/d")));
+			jedis.zadd("pcpCalItemList".getBytes(),2, SerializeObjectUnils.serialize(new CalItem("产液量","LiquidVolumetricProduction","m^3/d")));
+			jedis.zadd("pcpCalItemList".getBytes(),3, SerializeObjectUnils.serialize(new CalItem("产油量","OilVolumetricProduction","m^3/d")));
+			jedis.zadd("pcpCalItemList".getBytes(),4, SerializeObjectUnils.serialize(new CalItem("产水量","WaterVolumetricProduction","m^3/d")));
+			
+			jedis.zadd("pcpCalItemList".getBytes(),5, SerializeObjectUnils.serialize(new CalItem("产液量","LiquidWeightProduction","t/d")));
+			jedis.zadd("pcpCalItemList".getBytes(),6, SerializeObjectUnils.serialize(new CalItem("产油量","OilWeightProduction","t/d")));
+			jedis.zadd("pcpCalItemList".getBytes(),7, SerializeObjectUnils.serialize(new CalItem("产水量","WaterWeightProduction","t/d")));
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
+		}
 	}
 	
-	public static void loadUserInfo(){
+	public static void loadUserInfo(List<String> userList){
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -704,15 +848,20 @@ public class MemoryDataManagerTask {
 		if(conn==null){
         	return;
         }
+		String users=StringManagerUtils.joinStringArr2(userList, ",");
+		Jedis jedis=null;
 		try {
-			Jedis jedis = new Jedis();
+			jedis = new Jedis();
 			String sql="select t.user_no,t.user_id,t.user_name,t.user_pwd,t.user_orgid,"
 					+ " t.user_in_email,t.user_phone,"
 					+ " t.user_quicklogin,t.user_enable,t.user_receivesms,t.user_receivemail,"
 					+ " t.user_type,t2.role_name,t2.role_level,t2.role_flag,t2.showlevel "
 					+ " from tbl_user t,tbl_role t2 "
-					+ " where t.user_type=t2.role_id"
-					+ " order by t.user_no";
+					+ " where t.user_type=t2.role_id";
+			if(StringManagerUtils.isNotNull(users)){
+				sql+=" and t.user_id in ("+users+")";
+			}
+			sql+= " order by t.user_no";
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
@@ -740,11 +889,13 @@ public class MemoryDataManagerTask {
 				String key=userInfo.getUserId();
 				jedis.hset("UserInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(userInfo));//哈希(Hash)
 			}
-			jedis.disconnect();
-			jedis.close();
-		}catch (SQLException e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		} finally{
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
 	}
@@ -757,8 +908,9 @@ public class MemoryDataManagerTask {
 		if(conn==null){
         	return;
         }
+		Jedis jedis=null;
 		try {
-			Jedis jedis = new Jedis();
+			jedis = new Jedis();
 			String sql="select t.id,t.resultcode,t.resultname,t.resultdescription,t.optimizationsuggestion,t.remark "
 					+ " from TBL_RPC_WORKTYPE t order by t.resultcode";
 			pstmt = conn.prepareStatement(sql);
@@ -774,11 +926,13 @@ public class MemoryDataManagerTask {
 				String key=workType.getResultCode()+"";
 				jedis.hset("RPCWorkType".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(workType));//哈希(Hash)
 			}
-			jedis.disconnect();
-			jedis.close();
 		}catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
 	}
@@ -792,7 +946,6 @@ public class MemoryDataManagerTask {
 		Jedis jedis=null;
 		AlarmShowStyle alarmShowStyle=null;
 		try {
-			
 			alarmShowStyle=new AlarmShowStyle();
 			String sql="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
 					+ " (select * from tbl_code t where t.itemcode='BJYS' ) v1,"
@@ -853,25 +1006,38 @@ public class MemoryDataManagerTask {
 			}
 			jedis = new Jedis();
 			jedis.set("AlarmShowStyle".getBytes(), SerializeObjectUnils.serialize(alarmShowStyle));
-			jedis.disconnect();
-			jedis.close();
-		} catch (SQLException e) {
+			
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally{
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
 		return alarmShowStyle;
 	}
 	
 	public static ModbusProtocolConfig getModbusProtocolConfig(){
-		Jedis jedis = new Jedis();
-		if(!jedis.exists("modbusProtocolConfig".getBytes())){
-			MemoryDataManagerTask.loadProtocolConfig();
+		Jedis jedis=null;
+		ModbusProtocolConfig modbusProtocolConfig=null;
+		try {
+			jedis = new Jedis();
+			if(!jedis.exists("modbusProtocolConfig".getBytes())){
+				MemoryDataManagerTask.loadProtocolConfig();
+			}
+			modbusProtocolConfig=(ModbusProtocolConfig)SerializeObjectUnils.unserizlize(jedis.get("modbusProtocolConfig".getBytes()));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally{
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
 		}
-		ModbusProtocolConfig modbusProtocolConfig=(ModbusProtocolConfig)SerializeObjectUnils.unserizlize(jedis.get("modbusProtocolConfig".getBytes()));
-		jedis.disconnect();
-		jedis.close();
 		return modbusProtocolConfig;
 	}
 	

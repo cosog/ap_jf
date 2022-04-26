@@ -67,12 +67,12 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			
 			if(StringManagerUtils.stringToInteger(deviceType) ==0){
 				if(!jedis.exists("RPCDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
 				}
 				deviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
 			}else{
 				if(!jedis.exists("PCPDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
 				}
 				deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
 			}
@@ -723,14 +723,14 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		try{
 			if(StringManagerUtils.stringToInteger(deviceType)==0){
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
 				}
 				RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
 				displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode();
 				alarmInstanceCode=rpcDeviceInfo.getAlarmInstanceCode();
 			}else{
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
 				}
 				PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
 				displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode();
@@ -770,7 +770,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			calItemSet= jedis.zrange(calItemsKey.getBytes(), 0, -1);
 			
 			if(!jedis.exists("UserInfo".getBytes())){
-				MemoryDataManagerTask.loadUserInfo();
+				MemoryDataManagerTask.loadUserInfo(null);
 			}
 			
 			if(jedis.hexists("UserInfo".getBytes(), userAccount.getBytes())){
@@ -1177,7 +1177,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		try{
 			jedis = new Jedis();
 			if(!jedis.exists("UserInfo".getBytes())){
-				MemoryDataManagerTask.loadUserInfo();
+				MemoryDataManagerTask.loadUserInfo(null);
 			}
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
 				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
@@ -1189,13 +1189,13 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			
 			if(StringManagerUtils.stringToInteger(deviceType)==0){
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
 				}
 				RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
 				displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode()+"";
 			}else{
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
 				}
 				PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
 				displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode()+"";
@@ -1575,6 +1575,140 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			dynSbf.deleteCharAt(dynSbf.length() - 1);
 		}
 		dynSbf.append("]}");
+		return dynSbf.toString().replaceAll("null", "");
+	}
+	
+	@SuppressWarnings("deprecation")
+	public String getFESDiagramOverlayData(String orgId,String deviceId,String deviceName,String deviceType,Page pager) throws SQLException, IOException {
+		StringBuffer dynSbf = new StringBuffer();
+		ConfigFile configFile=Config.getInstance().configFile;
+		DataDictionary ddic = null;
+		
+		String prodCol="liquidWeightProduction";
+		if(configFile.getOthers().getProductionUnit()!=0){
+			prodCol="liquidVolumetricProduction";
+		}
+		Jedis jedis = new Jedis();
+		AlarmShowStyle alarmShowStyle=null;
+		AlarmInstanceOwnItem alarmInstanceOwnItem=null;
+		RPCDeviceInfo rpcDeviceInfo=null;
+		String alarmInstanceCode="";
+		try{
+			if(!jedis.exists("RPCDeviceInfo".getBytes())){
+				MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+			}
+			if(jedis.hexists("RPCDeviceInfo".getBytes(), deviceId.getBytes())){
+				rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget("RPCDeviceInfo".getBytes(), deviceId.getBytes()));
+				alarmInstanceCode=rpcDeviceInfo.getAlarmInstanceCode();
+			}
+			
+			if(!jedis.exists("AlarmShowStyle".getBytes())){
+				MemoryDataManagerTask.initAlarmStyle();
+			}
+			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
+			
+			
+			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+			}
+			
+			if(StringManagerUtils.isNotNull(alarmInstanceCode)&&jedis.hexists("AlarmInstanceOwnItem".getBytes(),alarmInstanceCode.getBytes())){
+				alarmInstanceOwnItem=(AlarmInstanceOwnItem) SerializeObjectUnils.unserizlize(jedis.hget("AlarmInstanceOwnItem".getBytes(),alarmInstanceCode.getBytes()));
+			}
+			
+			if(!jedis.exists("RPCWorkType".getBytes())){
+				MemoryDataManagerTask.loadRPCWorkType();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
+		}
+		
+		
+		
+		String sql="select t.id,well.wellname,to_char(t.fesdiagramacqtime,'yyyy-mm-dd hh24:mi:ss') as acqTime,"
+				+ " t.resultcode,t2.resultname,"
+				+ " t.stroke,t.spm,"
+				+ " t.fmax,t.fmin,"
+				+ " t.upperloadline,t.lowerloadline,t."+prodCol+", "
+				+ " t.iDegreeBalance,t.wattDegreeBalance,"
+				+ " t.position_curve,t.load_curve,t.power_curve,t.current_curve"
+				+ " from tbl_rpcdevice well,tbl_rpcacqdata_hist t,tbl_rpc_worktype t2 "
+				+ " where well.id=t.wellid and t.resultcode=t2.resultcode "
+				+ " and t.wellid="+deviceId+" "
+				+ " and t.fesdiagramacqtime between to_date('"+pager.getStart_date()+"','yyyy-mm-dd hh24:mi:ss') and to_date('"+pager.getEnd_date()+"','yyyy-mm-dd hh24:mi:ss') "
+				+ " order by t.fesdiagramacqtime desc";
+		
+		List<?> list=this.findCallSql(sql);
+		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId("FESDiagramOverlay");
+		String columns = ddic.getTableHeader();
+		dynSbf.append("{\"success\":true,\"totalCount\":" + list.size() + ",\"wellName\":\""+deviceName+"\",\"start_date\":\""+pager.getStart_date()+"\",\"end_date\":\""+pager.getEnd_date()+"\",\"columns\":"+columns+",\"totalRoot\":[");
+		if (list.size() > 0) {
+			for (int i = 0; i < list.size(); i++) {
+				Object[] obj = (Object[]) list.get(i);
+				String positionCurveData="",loadCurveData="",powerCurveData="",currentCurveData="";
+				int resultAlarmLevel=0;
+				String resultCode=obj[3]+"";
+				if(alarmInstanceOwnItem!=null){
+					for(int j=0;j<alarmInstanceOwnItem.getItemList().size();j++){
+						if(alarmInstanceOwnItem.getItemList().get(j).getType()==4 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(resultCode)){
+							resultAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
+							break;
+						}
+					}
+				}
+				SerializableClobProxy   proxy=null;
+				CLOB realClob=null;
+				if(obj[14]!=null){
+					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[14]);
+					realClob = (CLOB) proxy.getWrappedClob(); 
+					positionCurveData=StringManagerUtils.CLOBtoString(realClob);
+				}
+				if(obj[15]!=null){
+					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[15]);
+					realClob = (CLOB) proxy.getWrappedClob(); 
+					loadCurveData=StringManagerUtils.CLOBtoString(realClob);
+				}
+				if(obj[16]!=null){
+					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[16]);
+					realClob = (CLOB) proxy.getWrappedClob(); 
+					powerCurveData=StringManagerUtils.CLOBtoString(realClob);
+				}
+				if(obj[17]!=null){
+					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[17]);
+					realClob = (CLOB) proxy.getWrappedClob(); 
+					currentCurveData=StringManagerUtils.CLOBtoString(realClob);
+				}
+				dynSbf.append("{ \"id\":\"" + obj[0] + "\",");
+				dynSbf.append("\"wellName\":\"" + obj[1] + "\",");
+				dynSbf.append("\"acqTime\":\"" + obj[2] + "\",");
+				dynSbf.append("\"resultCode\":\""+resultCode+"\",");
+				dynSbf.append("\"resultName\":\""+obj[4]+"\",");
+				dynSbf.append("\"resultAlarmLevel\":\""+resultAlarmLevel+"\",");
+				dynSbf.append("\"stroke\":\""+obj[5]+"\",");
+				dynSbf.append("\"spm\":\""+obj[6]+"\",");
+				dynSbf.append("\"fmax\":\""+obj[7]+"\",");
+				dynSbf.append("\"fmin\":\""+obj[8]+"\",");
+				dynSbf.append("\"upperLoadLine\":\""+obj[9]+"\",");
+				dynSbf.append("\"lowerLoadLine\":\""+obj[10]+"\",");
+				dynSbf.append("\""+prodCol+"\":\""+obj[11]+"\",");
+				dynSbf.append("\"iDegreeBalance\":\"" + obj[12] + "\",");
+				dynSbf.append("\"wattDegreeBalance\":\"" + obj[13] + "\",");
+				dynSbf.append("\"positionCurveData\":\"" + positionCurveData + "\",");
+				dynSbf.append("\"loadCurveData\":\"" + loadCurveData + "\",");
+				dynSbf.append("\"powerCurveData\":\"" + powerCurveData + "\",");
+				dynSbf.append("\"currentCurveData\":\"" + currentCurveData + "\"},");
+			}
+			if(dynSbf.toString().endsWith(",")){
+				dynSbf.deleteCharAt(dynSbf.length() - 1);
+			}
+		}
+		dynSbf.append("]");
+		dynSbf.append(",\"AlarmShowStyle\":"+new Gson().toJson(alarmShowStyle));
+		dynSbf.append("}");
 		return dynSbf.toString().replaceAll("null", "");
 	}
 }

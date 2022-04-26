@@ -623,11 +623,6 @@ public class WellInformationManagerController extends BaseController {
 		//处理抽油机详情
 		this.wellInformationManagerService.saveRPCPumpingInfo(deviceId,stroke,balanceInfo);
 		
-		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-			MemoryDataManagerTask.loadRPCDeviceInfo(null);
-		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
-			MemoryDataManagerTask.loadPCPDeviceInfo(null);
-		}
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -657,12 +652,6 @@ public class WellInformationManagerController extends BaseController {
 			json=this.wellInformationManagerService.batchAddPCPDevice(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),isCheckout,user);
 		}else if(StringManagerUtils.stringToInteger(deviceType)>=300){
 			this.wellInformationManagerService.saveSMSDeviceData(wellHandsontableChangedData,orgId,StringManagerUtils.stringToInteger(deviceType),user);
-		}
-		
-		if(StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200){
-			MemoryDataManagerTask.loadRPCDeviceInfo(null);
-		}else if(StringManagerUtils.stringToInteger(deviceType)>=200&&StringManagerUtils.stringToInteger(deviceType)<300){
-			MemoryDataManagerTask.loadPCPDeviceInfo(null);
 		}
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
@@ -730,7 +719,9 @@ public class WellInformationManagerController extends BaseController {
 				rpcDeviceInformation.setOrgId(user.getUserOrgid());
 			}
 			this.rpcDeviceManagerService.doRPCDeviceAdd(rpcDeviceInformation);
-			MemoryDataManagerTask.loadRPCDeviceInfo(null);
+			List<String> wells=new ArrayList<String>();
+			wells.add(rpcDeviceInformation.getWellName());
+			MemoryDataManagerTask.loadRPCDeviceInfo(wells,1);
 			List<String> addWellList=new ArrayList<String>();
 			addWellList.add(rpcDeviceInformation.getWellName());
 			if(rpcDeviceInformation.getStatus()==1){
@@ -785,7 +776,11 @@ public class WellInformationManagerController extends BaseController {
 		try {
 			User user = (User) session.getAttribute("userLogin");
 			this.pcpDeviceManagerService.doPCPDeviceAdd(pcpDeviceInformation);
-			MemoryDataManagerTask.loadPCPDeviceInfo(null);
+			
+			List<String> wells=new ArrayList<String>();
+			wells.add(pcpDeviceInformation.getWellName());
+			MemoryDataManagerTask.loadPCPDeviceInfo(wells,1);
+			
 			List<String> addWellList=new ArrayList<String>();
 			addWellList.add(pcpDeviceInformation.getWellName());
 			if(pcpDeviceInformation.getStatus()==1){

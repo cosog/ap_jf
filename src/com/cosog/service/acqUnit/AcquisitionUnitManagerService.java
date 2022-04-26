@@ -3023,6 +3023,13 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	
 	public void doAcquisitionGroupBulkDelete(final String ids) throws Exception {
 		int delorUpdateCount;
+		
+		String delDisplayItem="delete from TBL_DISPLAY_ITEMS2UNIT_CONF t "
+				+ " where t.type<>1 "
+				+ " and t.unitid in (select t2.id from tbl_display_unit_conf t2,tbl_acq_unit_conf t3,tbl_acq_group2unit_conf t4,tbl_acq_group_conf t5 "
+				+ "      where t2.acqunitid=t3.id and t3.id=t4.unitid and t4.groupid=t5.id and t5.id="+ids+") ";
+		delorUpdateCount=this.getBaseDao().updateOrDeleteBySql(delDisplayItem);
+		
 		String sql="delete from TBL_ACQ_ITEM2GROUP_CONF t where t.groupid in ("+ids+")";
 		delorUpdateCount=this.getBaseDao().updateOrDeleteBySql(sql);
 		
@@ -3031,6 +3038,15 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		
 		final String hql = "DELETE AcquisitionGroup u where u.id in (" + ids + ")";
 		super.bulkObjectDelete(hql);
+	}
+	
+	public void doAcquisitionGroupOwnItemChange(final String ids) throws Exception {
+		String sql="delete from TBL_DISPLAY_ITEMS2UNIT_CONF t "
+				+ " where t.type<>1 "
+				+ " and t.unitid in (select t2.id from tbl_display_unit_conf t2,tbl_acq_unit_conf t3,tbl_acq_group2unit_conf t4,tbl_acq_group_conf t5 "
+				+ "      where t2.acqunitid=t3.id and t3.id=t4.unitid and t4.groupid=t5.id and t5.id="+ids+") "
+				+ " and t.itemname not in( select t7.itemname from tbl_acq_group_conf t6,tbl_acq_item2group_conf t7 where t6.id=t7.groupid and t6.id="+ids+"  )";
+		this.getBaseDao().updateOrDeleteBySql(sql);
 	}
 	
 	public void doAcquisitionUnitAdd(T acquisitionUnit) throws Exception {

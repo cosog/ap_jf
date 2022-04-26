@@ -89,7 +89,7 @@ public class EquipmentDriverServerTask {
 			if(i%2==0){
 				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
 			}else{
-				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+				StringManagerUtils.sendPostMethod(url, distreteData2,"utf-8");
 			}
 			
 //			if(i%2==0){
