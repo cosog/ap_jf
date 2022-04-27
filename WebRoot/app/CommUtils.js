@@ -3969,19 +3969,17 @@ showFSDiagramOverlayChart = function(get_rawData,divid,visible,diagramType) {
 		var yData;
 		if(diagramType===0){//如果是功图
 			yData = list[i].loadCurveData.split(",");
-			
-			var hour=list[i].acqTime.split(' ')[1].split(':')[0]
-			if(parseInt(hour)<6 ){
-				color=new Array("#000000","#000000");
-			}else if(parseInt(hour)>=6 && parseInt(hour)<12){
-				color=new Array("#000000","#dd1212");
-			}else if(parseInt(hour)>=12 && parseInt(hour)<18){
-				color=new Array("#000000","#507fea");
-			}else{
-				color=new Array("#000000","#00ff00");
-			}
-			
-			
+//			var hour=list[i].acqTime.split(' ')[1].split(':')[0]
+//			if(parseInt(hour)<6 ){
+//				color=new Array("#000000","#000000");
+//			}else if(parseInt(hour)>=6 && parseInt(hour)<12){
+//				color=new Array("#000000","#dd1212");
+//			}else if(parseInt(hour)>=12 && parseInt(hour)<18){
+//				color=new Array("#000000","#507fea");
+//			}else{
+//				color=new Array("#000000","#00ff00");
+//			}
+			color=new Array("#000000","#00ff00");
 			minValue=0;
 		}else if(diagramType===1){//电功图
 			yData = list[i].powerCurveData.split(",");

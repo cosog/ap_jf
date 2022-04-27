@@ -1580,7 +1580,10 @@ public class StringManagerUtils {
 
     //Clob转字符串
     public static String CLOBtoString2(Clob clob) throws SQLException, IOException {
-        BufferedReader reader = null;
+    	if (clob == null) {
+            return "";
+        }
+    	BufferedReader reader = null;
         InputStreamReader is = new InputStreamReader(clob.getAsciiStream());
         reader = new BufferedReader(is);
         String result = "";

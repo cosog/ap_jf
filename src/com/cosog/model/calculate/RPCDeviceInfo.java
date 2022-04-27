@@ -51,9 +51,29 @@ public class RPCDeviceInfo implements Serializable {
 
 	private String acqTime;
 	
+	private String saveTime;
+	
 	private List<AcquisitionItemInfo> acquisitionItemInfoList;
 	
 	private Integer commStatus;
+	
+	private float commTime;
+	
+	private float commEff;
+	
+	private String commRange;
+	
+	private Integer runStatus;
+	
+	private float runTime;
+	
+	private float runEff;
+	
+	private String runRange;
+	
+	private float totalKWattH;
+	
+	private float todayKWattH;
 
 	public Integer getId() {
 		return id;
@@ -317,6 +337,86 @@ public class RPCDeviceInfo implements Serializable {
 
 	public void setPumpingModelId(Integer pumpingModelId) {
 		this.pumpingModelId = pumpingModelId;
+	}
+
+	public float getCommTime() {
+		return commTime;
+	}
+
+	public void setCommTime(float commTime) {
+		this.commTime = commTime;
+	}
+
+	public float getCommEff() {
+		return commEff;
+	}
+
+	public void setCommEff(float commEff) {
+		this.commEff = commEff;
+	}
+
+	public String getCommRange() {
+		return commRange;
+	}
+
+	public void setCommRange(String commRange) {
+		this.commRange = commRange;
+	}
+
+	public Integer getRunStatus() {
+		return runStatus;
+	}
+
+	public void setRunStatus(Integer runStatus) {
+		this.runStatus = runStatus;
+	}
+
+	public float getRunTime() {
+		return runTime;
+	}
+
+	public void setRunTime(float runTime) {
+		this.runTime = runTime;
+	}
+
+	public float getRunEff() {
+		return runEff;
+	}
+
+	public void setRunEff(float runEff) {
+		this.runEff = runEff;
+	}
+
+	public String getRunRange() {
+		return runRange;
+	}
+
+	public void setRunRange(String runRange) {
+		this.runRange = runRange;
+	}
+
+	public float getTotalKWattH() {
+		return totalKWattH;
+	}
+
+	public void setTotalKWattH(float totalKWattH) {
+		this.totalKWattH = totalKWattH;
+	}
+
+	public float getTodayKWattH() {
+		return todayKWattH;
+	}
+
+	public void setTodayKWattH(float todayKWattH) {
+		this.todayKWattH = todayKWattH;
+	}
+
+	public String getSaveTime() {
+		return saveTime;
+	}
+
+	public void setSaveTime(String saveTime) {
+		this.saveTime = saveTime;
 	}
 
 }

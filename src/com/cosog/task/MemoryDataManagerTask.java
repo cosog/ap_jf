@@ -225,7 +225,10 @@ public class MemoryDataManagerTask {
 					+ "t.pumpingmodelid,"
 					+ "t.manufacturer,t.model,t.crankrotationdirection,t.offsetangleofcrank,t.crankgravityradius,t.singlecrankweight,t.singlecrankpinweight,t.structuralunbalance,"
 					+ "t.sortnum,"
-					+ "t2.commstatus "
+					+ "to_char(t2.acqtime,'yyyy-mm-dd hh24:mi:ss'),"
+					+ "t2.commstatus,t2.commtime,t2.commtimeefficiency,t2.commrange,"
+					+ "t2.runstatus,t2.runtime,t2.runtimeefficiency,t2.runrange,"
+					+ "t2.totalkwatth,t2.todaykwatth "
 					+ " from viw_rpcdevice t"
 					+ " left outer join tbl_rpcacqdata_latest t2 on t2.wellid=t.id ";
 			if(StringManagerUtils.isNotNull(wells)){
@@ -306,8 +309,23 @@ public class MemoryDataManagerTask {
 					rpcDeviceInfo.setManualIntervention(null);
 				}
 				rpcDeviceInfo.setSortNum(rs.getInt(32));
-				rpcDeviceInfo.setCommStatus(rs.getInt(33));
-				rpcDeviceInfo.setAcqTime("");
+				
+				rpcDeviceInfo.setAcqTime(rs.getString(33));
+				rpcDeviceInfo.setSaveTime("");
+				
+				rpcDeviceInfo.setCommStatus(rs.getInt(34));
+				rpcDeviceInfo.setCommTime(rs.getFloat(35));
+				rpcDeviceInfo.setCommEff(rs.getFloat(36));
+				rpcDeviceInfo.setCommRange(StringManagerUtils.CLOBtoString2(rs.getClob(37)));
+				
+				rpcDeviceInfo.setRunStatus(rs.getInt(38));
+				rpcDeviceInfo.setRunTime(rs.getFloat(39));
+				rpcDeviceInfo.setRunEff(rs.getFloat(40));
+				rpcDeviceInfo.setRunRange(StringManagerUtils.CLOBtoString2(rs.getClob(41)));
+				
+				rpcDeviceInfo.setTotalKWattH(rs.getFloat(42));
+				rpcDeviceInfo.setTodayKWattH(rs.getFloat(43));
+				
 				rpcDeviceInfo.setAcquisitionItemInfoList(new ArrayList<AcquisitionItemInfo>());
 				String key=rpcDeviceInfo.getId()+"";
 				jedis.hset("RPCDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(rpcDeviceInfo));//哈希(Hash)
@@ -348,7 +366,10 @@ public class MemoryDataManagerTask {
 					+ "t.status,t.statusName,"
 					+ "t.productiondata,"
 					+ "t.sortnum, "
-					+ "t2.commstatus "
+					+ "to_char(t2.acqtime,'yyyy-mm-dd hh24:mi:ss'),"
+					+ "t2.commstatus,t2.commtime,t2.commtimeefficiency,t2.commrange,"
+					+ "t2.runstatus,t2.runtime,t2.runtimeefficiency,t2.runrange,"
+					+ "t2.totalkwatth,t2.todaykwatth "
 					+ " from viw_pcpdevice t"
 					+ " left outer join tbl_pcpacqdata_latest t2 on t2.wellid=t.id ";
 			if(StringManagerUtils.isNotNull(wells)){
@@ -407,7 +428,22 @@ public class MemoryDataManagerTask {
 					pcpDeviceInfo.setManualIntervention(null);
 				}
 				pcpDeviceInfo.setSortNum(rs.getInt(21));
-				pcpDeviceInfo.setCommStatus(rs.getInt(22));
+				
+				pcpDeviceInfo.setAcqTime(rs.getString(22));
+				pcpDeviceInfo.setSaveTime("");
+				
+				pcpDeviceInfo.setCommStatus(rs.getInt(23));
+				pcpDeviceInfo.setCommTime(rs.getFloat(24));
+				pcpDeviceInfo.setCommEff(rs.getFloat(25));
+				pcpDeviceInfo.setCommRange(StringManagerUtils.CLOBtoString2(rs.getClob(26)));
+				
+				pcpDeviceInfo.setRunStatus(rs.getInt(27));
+				pcpDeviceInfo.setRunTime(rs.getFloat(28));
+				pcpDeviceInfo.setRunEff(rs.getFloat(29));
+				pcpDeviceInfo.setRunRange(StringManagerUtils.CLOBtoString2(rs.getClob(30)));
+				
+				pcpDeviceInfo.setTotalKWattH(rs.getFloat(31));
+				pcpDeviceInfo.setTodayKWattH(rs.getFloat(32));
 				String key=pcpDeviceInfo.getId()+"";
 				jedis.hset("PCPDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(pcpDeviceInfo));//哈希(Hash)
 			}
