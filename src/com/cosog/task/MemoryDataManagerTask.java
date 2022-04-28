@@ -29,11 +29,13 @@ import com.cosog.model.calculate.AlarmInstanceOwnItem;
 import com.cosog.model.calculate.AlarmInstanceOwnItem.AlarmItem;
 import com.cosog.model.calculate.DisplayInstanceOwnItem;
 import com.cosog.model.calculate.DisplayInstanceOwnItem.DisplayItem;
+import com.cosog.model.calculate.PCPCalculateResponseData;
 import com.cosog.model.drive.AcquisitionItemInfo;
 import com.cosog.model.drive.ModbusProtocolConfig;
 import com.cosog.model.calculate.PCPDeviceInfo;
 import com.cosog.model.calculate.PCPProductionData;
 import com.cosog.model.calculate.RPCCalculateRequestData;
+import com.cosog.model.calculate.RPCCalculateResponseData;
 import com.cosog.model.calculate.RPCDeviceInfo;
 import com.cosog.model.calculate.RPCProductionData;
 import com.cosog.model.calculate.UserInfo;
@@ -57,55 +59,28 @@ public class MemoryDataManagerTask {
 	}
 	
 	@Scheduled(fixedRate = 1000*60*60*24*365*100)
-	public void loadMemoryData() throws SQLException, ParseException,InterruptedException, IOException{
-		Jedis jedis = new Jedis();
-        jedis.flushDB();
-//		try {
-//            
-//            DataMapping dataMapping=new DataMapping();
-//			dataMapping.setId(1);
-//			dataMapping.setName("aa");
-//			dataMapping.setMappingColumn("bb");
-//			dataMapping.setCalColumn("cc");
-//			dataMapping.setProtocolType(0);
-//			dataMapping.setMappingMode(0);
-//			dataMapping.setRepetitionTimes(1);
-//			
-////			byte[] personByte = SerializeObjectUnils.serialize(dataMapping);
-////            jedis.set("goodsName".getBytes(),personByte);
-////            System.out.println("存入redis完毕");
-////            
-////            byte[] byt = jedis.get("goodsName".getBytes());
-////            Object obj = SerializeObjectUnils.unserizlize(byt);
-////            
-////            if (obj instanceof DataMapping) {
-////                System.out.println(((DataMapping) obj).getId());
-////                System.out.println(((DataMapping) obj).getName());
-////                System.out.println(((DataMapping) obj).getMappingColumn());
-////            }
-//            
-//            
-//            jedis.hset("ProtocolMappingColumn".getBytes(), "cc".getBytes(), SerializeObjectUnils.serialize(dataMapping));//哈希(Hash)
-//            byte[]byt=  jedis.hget("ProtocolMappingColumn".getBytes(), "cc".getBytes());
-//            Object obj = SerializeObjectUnils.unserizlize(byt);
-//            if (obj instanceof DataMapping) {
-//                System.out.println(((DataMapping) obj).getId());
-//                System.out.println(((DataMapping) obj).getName());
-//                System.out.println(((DataMapping) obj).getMappingColumn());
-//            }
-//        } catch (Exception e) {
-//        	e.printStackTrace();
-//            System.out.println("登录无法更新该用户缓存");
-//        }
-		
-		loadAcqInstanceOwnItemByGroupId("");
-		loadAlarmInstanceOwnItemByUnitId("");
-		loadDisplayInstanceOwnItemByUnitId("");
-//		
-		loadRPCDeviceInfo(null,0);
-		loadPCPDeviceInfo(null,0);
-		jedis.disconnect();
-		jedis.close();
+	public void loadMemoryData(){
+		Jedis jedis=null;
+		try{
+			jedis = new Jedis();
+			jedis.flushDB();
+			
+			loadAcqInstanceOwnItemByGroupId("");
+			loadAlarmInstanceOwnItemByUnitId("");
+			loadDisplayInstanceOwnItemByUnitId("");
+			
+			loadRPCDeviceInfo(null,0);
+			loadPCPDeviceInfo(null,0);
+			
+			loadTodayFESDiagram(null,0);
+			loadTodayRPMData(null,0);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		if(jedis!=null && jedis.isConnected() ){
+			jedis.disconnect();
+			jedis.close();
+		}
 	}
 	
 	@SuppressWarnings("static-access")
@@ -360,7 +335,7 @@ public class MemoryDataManagerTask {
 				wells=StringUtils.join(wellList, ",");
 			}else{
 				wells=StringManagerUtils.joinStringArr2(wellList, ",");
-			}	
+			}
 			String sql="select t.id,t.orgid,t.orgName,t.wellname,t.devicetype,t.devicetypename,t.applicationscenarios,t.applicationScenariosName,t.signinid,t.slave,t.videourl,"
 					+ "t.instancecode,t.instancename,t.alarminstancecode,t.alarminstancename,t.displayinstancecode,t.displayinstancename,"
 					+ "t.status,t.statusName,"
@@ -378,7 +353,6 @@ public class MemoryDataManagerTask {
 				}else{
 					sql+=" and t.wellName in("+wells+")";
 				}
-				
 			}
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
@@ -1075,6 +1049,218 @@ public class MemoryDataManagerTask {
 			}
 		}
 		return modbusProtocolConfig;
+	}
+	
+	public static void loadTodayFESDiagram(List<String> wellList,int condition){//condition 0 -设备ID 1-设备名称
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		Jedis jedis=null;
+		try {
+			jedis = new Jedis();
+			String currentDate=StringManagerUtils.getCurrentTime("yyyy-MM-dd");
+			String wells="";
+			if(condition==0){
+				wells=StringUtils.join(wellList, ",");
+			}else{
+				wells=StringManagerUtils.joinStringArr2(wellList, ",");
+			}	
+					
+			String sql="select t2.id as wellId,t2.wellname,"//2
+					+ "to_char(t.fesdiagramacqtime,'yyyy-mm-dd hh24:mi:ss') as acqTime,"//3
+					+ "t.stroke,t.spm,t.fmax,t.fmin,t.fullnesscoefficient,t.resultcode,"//9
+					+ "t.theoreticalproduction,"//10
+					+ "t.liquidvolumetricproduction,t.oilvolumetricproduction,t.watervolumetricproduction,"//13
+					+ "t.liquidweightproduction,t.oilweightproduction,t.waterweightproduction,"//16
+					+ "t.wattdegreebalance,t.idegreebalance,t.deltaradius,"//19
+					+ "t.systemefficiency,t.surfacesystemefficiency,t.welldownsystemefficiency,t.energyper100mlift,"//23
+					+ "t.pumpeff1,t.pumpeff2,t.pumpeff3,t.pumpeff4,t.pumpeff,"//28
+					+ "t.productiondata "//29
+					+ "from tbl_rpcacqdata_hist t,tbl_rpcdevice t2 "
+					+ "where t.wellid=t2.id  "
+					+ " and t.resultstatus=1"
+					+ " and t.fesdiagramacqtime between to_date('"+currentDate+"') and to_date('"+currentDate+"','yyyy-mm-dd')+1 ";
+			if(StringManagerUtils.isNotNull(wells)){
+				if(condition==0){
+					sql+=" and t2.id in("+wells+")";
+				}else{
+					sql+=" and t2.wellName in("+wells+")";
+				}
+				
+			}
+			sql+= "order by t2.id, t.fesdiagramacqtime";
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				String key=rs.getInt(1)+"";
+				
+				RPCCalculateResponseData responseData =new RPCCalculateResponseData(); 
+				responseData.init();
+				
+				responseData.setWellName(rs.getString(2));
+				responseData.getFESDiagram().setAcqTime(rs.getString(3));
+				responseData.getFESDiagram().setStroke(rs.getFloat(4));
+				responseData.getFESDiagram().setSPM(rs.getFloat(5));
+				responseData.getFESDiagram().getFMax().add(rs.getFloat(6));
+				responseData.getFESDiagram().getFMin().add(rs.getFloat(7));
+				responseData.getFESDiagram().setFullnessCoefficient(rs.getFloat(8));
+				responseData.getCalculationStatus().setResultCode(rs.getInt(9));
+				
+				responseData.getProduction().setTheoreticalProduction(rs.getFloat(10));
+				responseData.getProduction().setLiquidVolumetricProduction(rs.getFloat(11));
+				responseData.getProduction().setOilVolumetricProduction(rs.getFloat(12));
+				responseData.getProduction().setWaterVolumetricProduction(rs.getFloat(13));
+				responseData.getProduction().setLiquidWeightProduction(rs.getFloat(14));
+				responseData.getProduction().setOilWeightProduction(rs.getFloat(15));
+				responseData.getProduction().setWaterWeightProduction(rs.getFloat(16));
+				
+				responseData.getFESDiagram().setWattDegreeBalance(rs.getFloat(17));
+				responseData.getFESDiagram().setIDegreeBalance(rs.getFloat(18));
+				responseData.getFESDiagram().setDeltaRadius(rs.getFloat(19));
+				
+				responseData.getSystemEfficiency().setSystemEfficiency(rs.getFloat(20));
+				responseData.getSystemEfficiency().setSurfaceSystemEfficiency(rs.getFloat(21));
+				responseData.getSystemEfficiency().setWellDownSystemEfficiency(rs.getFloat(22));
+				responseData.getSystemEfficiency().setEnergyPer100mLift(rs.getFloat(23));
+				
+				responseData.getPumpEfficiency().setPumpEff1(rs.getFloat(24));
+				responseData.getPumpEfficiency().setPumpEff2(rs.getFloat(25));
+				responseData.getPumpEfficiency().setPumpEff3(rs.getFloat(26));
+				responseData.getPumpEfficiency().setPumpEff4(rs.getFloat(27));
+				responseData.getPumpEfficiency().setPumpEff(rs.getFloat(28));
+				
+				String productionData=rs.getString(29)+"";
+				if(StringManagerUtils.isNotNull(productionData)){
+					type = new TypeToken<RPCDeviceInfo>() {}.getType();
+					RPCDeviceInfo rpcProductionData=gson.fromJson(productionData, type);
+					if(rpcProductionData!=null){
+						responseData.getProduction().setWaterCut(rpcProductionData.getProduction().getWaterCut());
+					}
+				}
+				
+				if(!jedis.exists("RPCDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+				}
+				if(jedis.hexists("RPCDeviceInfo".getBytes(), key.getBytes())){
+					RPCDeviceInfo memRPCDeviceInfo =(RPCDeviceInfo) SerializeObjectUnils.unserizlize(jedis.hget("RPCDeviceInfo".getBytes(), key.getBytes()));
+					memRPCDeviceInfo.getRPCCalculateList().add(responseData);
+					
+					jedis.hset("RPCDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(memRPCDeviceInfo));
+				}
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
+		}
+	}
+	
+	public static void loadTodayRPMData(List<String> wellList,int condition){//condition 0 -设备ID 1-设备名称
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		Jedis jedis=null;
+		try {
+			jedis = new Jedis();
+			String currentDate=StringManagerUtils.getCurrentTime("yyyy-MM-dd");
+			String wells="";
+			if(condition==0){
+				wells=StringUtils.join(wellList, ",");
+			}else{
+				wells=StringManagerUtils.joinStringArr2(wellList, ",");
+			}	
+					
+			String sql="select t2.id,t2.wellname,to_char(t.acqtime,'yyyy-mm-dd hh24:mi:ss') as acqTime,"
+					+ "t.rpm,t.resultcode,"
+					+ "t.theoreticalproduction,"
+					+ "t.liquidvolumetricproduction,t.oilvolumetricproduction,t.watervolumetricproduction,"
+					+ "t.liquidweightproduction,t.oilweightproduction,t.waterweightproduction,"
+					+ "t.systemefficiency,"
+					+ "t.pumpeff1,t.pumpeff2,t.pumpeff,"
+					+ "t.productiondata "
+					+ " from tbl_pcpacqdata_hist t,tbl_pcpdevice t2 "
+					+ " where t.wellid=t2.id and t.resultstatus=1 and t.acqtime between to_date('"+currentDate+"','"+currentDate+"') and to_date('2022-04-26','yyyy-mm-dd')+1";
+			if(StringManagerUtils.isNotNull(wells)){
+				if(condition==0){
+					sql+=" and t2.id in("+wells+")";
+				}else{
+					sql+=" and t2.wellName in("+wells+")";
+				}
+				
+			}
+			sql+= "order by t2.id, t.acqtime";
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				String key=rs.getInt(1)+"";
+				
+				PCPCalculateResponseData responseData =new PCPCalculateResponseData(); 
+				responseData.init();
+				
+				responseData.setWellName(rs.getString(2));
+				responseData.setAcqTime(rs.getString(3));
+				
+				responseData.setRPM(rs.getFloat(4));
+				responseData.getCalculationStatus().setResultCode(rs.getInt(5));
+				
+				responseData.getProduction().setTheoreticalProduction(rs.getFloat(6));
+				responseData.getProduction().setLiquidVolumetricProduction(rs.getFloat(7));
+				responseData.getProduction().setOilVolumetricProduction(rs.getFloat(8));
+				responseData.getProduction().setWaterVolumetricProduction(rs.getFloat(9));
+				responseData.getProduction().setLiquidWeightProduction(rs.getFloat(10));
+				responseData.getProduction().setOilWeightProduction(rs.getFloat(11));
+				responseData.getProduction().setWaterWeightProduction(rs.getFloat(12));
+				
+				
+				responseData.getSystemEfficiency().setSystemEfficiency(rs.getFloat(13));
+				
+				responseData.getPumpEfficiency().setPumpEff1(rs.getFloat(14));
+				responseData.getPumpEfficiency().setPumpEff2(rs.getFloat(15));
+				responseData.getPumpEfficiency().setPumpEff(rs.getFloat(16));
+				
+				String productionData=rs.getString(17)+"";
+				if(StringManagerUtils.isNotNull(productionData)){
+					type = new TypeToken<PCPDeviceInfo>() {}.getType();
+					PCPDeviceInfo pcpProductionData=gson.fromJson(productionData, type);
+					if(pcpProductionData!=null){
+						responseData.getProduction().setWaterCut(pcpProductionData.getProduction().getWaterCut());
+					}
+				}
+				
+				if(!jedis.exists("PCPDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+				}
+				if(jedis.hexists("PCPDeviceInfo".getBytes(), key.getBytes())){
+					PCPDeviceInfo memPCPDeviceInfo =(PCPDeviceInfo) SerializeObjectUnils.unserizlize(jedis.hget("PCPDeviceInfo".getBytes(), key.getBytes()));
+					memPCPDeviceInfo.getPCPCalculateList().add(responseData);
+					jedis.hset("PCPDeviceInfo".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(memPCPDeviceInfo));
+				}
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+			if(jedis!=null&&jedis.isConnected()){
+				jedis.disconnect();
+				jedis.close();
+			}
+		}
 	}
 	
 	public static class CalItem implements Serializable {
