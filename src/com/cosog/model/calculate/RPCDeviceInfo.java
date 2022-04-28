@@ -1,6 +1,7 @@
 package com.cosog.model.calculate;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.cosog.model.calculate.RPCCalculateResponseData;
@@ -74,6 +75,8 @@ public class RPCDeviceInfo implements Serializable {
 	private float totalKWattH;
 	
 	private float todayKWattH;
+	
+	private List<RPCCalculateResponseData> RPCCalculateList;
 
 	public Integer getId() {
 		return id;
@@ -417,6 +420,17 @@ public class RPCDeviceInfo implements Serializable {
 
 	public void setSaveTime(String saveTime) {
 		this.saveTime = saveTime;
+	}
+
+	public List<RPCCalculateResponseData> getRPCCalculateList() {
+		if(RPCCalculateList==null){
+			this.setRPCCalculateList(new ArrayList<RPCCalculateResponseData>());
+		}
+		return this.RPCCalculateList;
+	}
+
+	public void setRPCCalculateList(List<RPCCalculateResponseData> rPCCalculateList) {
+		RPCCalculateList = rPCCalculateList;
 	}
 
 }

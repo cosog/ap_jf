@@ -1,6 +1,7 @@
 package com.cosog.model.calculate;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.cosog.model.calculate.PCPCalculateRequestData.*;
@@ -59,6 +60,9 @@ public class PCPDeviceInfo implements Serializable {
 	private float totalKWattH;
 	
 	private float todayKWattH;
+	
+	private List<PCPCalculateResponseData> PCPCalculateList;
+	
 	public Integer getId() {
 		return id;
 	}
@@ -486,5 +490,18 @@ public class PCPDeviceInfo implements Serializable {
 
 	public void setSaveTime(String saveTime) {
 		this.saveTime = saveTime;
+	}
+
+
+	public List<PCPCalculateResponseData> getPCPCalculateList() {
+		if(PCPCalculateList==null){
+			this.setPCPCalculateList(new ArrayList<PCPCalculateResponseData>());
+		}
+		return this.PCPCalculateList;
+	}
+
+
+	public void setPCPCalculateList(List<PCPCalculateResponseData> pCPCalculateList) {
+		PCPCalculateList = pCPCalculateList;
 	}
 }
