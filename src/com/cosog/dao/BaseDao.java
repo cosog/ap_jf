@@ -2595,10 +2595,6 @@ public class BaseDao extends HibernateDaoSupport {
 		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
 		CallableStatement cs=null;
 		
-		
-		
-		
-		
 		CLOB resultStrClob=new CLOB((OracleConnection) conn);
 		resultStrClob = oracle.sql.CLOB.createTemporary(conn,false,1);
 		resultStrClob.putString(1, totalAnalysisResponseData.getResultString());
@@ -2691,18 +2687,95 @@ public class BaseDao extends HibernateDaoSupport {
 		return true;
 	}
 	
+	
+	public Boolean saveRPMTotalCalculateData(PCPDeviceInfo pcpDeviceInfo,TotalAnalysisResponseData totalAnalysisResponseData,String date) throws SQLException, ParseException {
+		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
+		CallableStatement cs=null;
+		
+		CLOB commRanceClob=new CLOB((OracleConnection) conn);
+		commRanceClob = oracle.sql.CLOB.createTemporary(conn,false,1);
+		commRanceClob.putString(1, totalAnalysisResponseData.getCommRange());
+		
+		CLOB runRanceClob=new CLOB((OracleConnection) conn);
+		runRanceClob = oracle.sql.CLOB.createTemporary(conn,false,1);
+		runRanceClob.putString(1, totalAnalysisResponseData.getRunRange());
+		
+		
+		try {
+			cs = conn.prepareCall("{call prd_save_pcp_rpmdaily("
+					+ "?,?,"
+					+ "?,"
+					+ "?,"
+					+ "?,"
+					+ "?,?,?,?,"
+					+ "?,?,?,?,"
+					+ "?,?,?"
+					+ "?,?,"
+					+ "?,?,?,?,"
+					+ "?,?,?,?,"
+					+ "?"
+					+ ")}");
+			cs.setInt(1,pcpDeviceInfo.getId());
+			cs.setInt(2,totalAnalysisResponseData.getResultStatus());
+			
+			cs.setInt(3,totalAnalysisResponseData.getExtendedDays());
+			
+			cs.setFloat(4, totalAnalysisResponseData.getRPM().getValue());
+			
+			cs.setFloat(5, totalAnalysisResponseData.getTheoreticalProduction().getValue());
+			
+			cs.setFloat(6, totalAnalysisResponseData.getLiquidVolumetricProduction().getValue());
+			cs.setFloat(7, totalAnalysisResponseData.getOilVolumetricProduction().getValue());
+			cs.setFloat(8, totalAnalysisResponseData.getWaterVolumetricProduction().getValue());
+			cs.setFloat(9, totalAnalysisResponseData.getVolumeWaterCut().getValue());
+			
+			cs.setFloat(10, totalAnalysisResponseData.getLiquidWeightProduction().getValue());
+			cs.setFloat(11, totalAnalysisResponseData.getOilWeightProduction().getValue());
+			cs.setFloat(12, totalAnalysisResponseData.getWaterWeightProduction().getValue());
+			cs.setFloat(13, totalAnalysisResponseData.getWeightWaterCut().getValue());
+			
+			cs.setFloat(14, totalAnalysisResponseData.getPumpEff().getValue());
+			cs.setFloat(15, totalAnalysisResponseData.getPumpEff1().getValue());
+			cs.setFloat(16, totalAnalysisResponseData.getPumpEff2().getValue());
+			
+			cs.setFloat(17, totalAnalysisResponseData.getSystemEfficiency().getValue());
+			cs.setFloat(18, totalAnalysisResponseData.getEnergyPer100mLift().getValue());
+			
+			cs.setInt(19,totalAnalysisResponseData.getCommStatus());
+			cs.setFloat(20, totalAnalysisResponseData.getCommTime());
+			cs.setFloat(21, totalAnalysisResponseData.getCommTimeEfficiency());
+			cs.setClob(22,commRanceClob);
+			
+			cs.setInt(23,totalAnalysisResponseData.getRunStatus());
+			cs.setFloat(24, totalAnalysisResponseData.getRunTime());
+			cs.setFloat(25, totalAnalysisResponseData.getRunTimeEfficiency());
+			cs.setClob(26,runRanceClob);
+			
+			cs.setString(27, date);
+			cs.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}finally{
+			if(cs!=null)
+				cs.close();
+			conn.close();
+		}
+		return true;
+	}
+	
 	public static String RPCProductionDataToString(RPCCalculateRequestData calculateRequestData){
 		StringBuffer productionDataBuff = new StringBuffer();
 		Gson gson=new Gson();
 		productionDataBuff.append("{");
-		productionDataBuff.append("\"FluidPVT\":"+(gson.toJson(calculateRequestData.getFluidPVT()!=null?gson.toJson(calculateRequestData.getFluidPVT()):"{}")+","));
-		productionDataBuff.append("\"Reservoir\":"+(gson.toJson(calculateRequestData.getReservoir()!=null?gson.toJson(calculateRequestData.getReservoir()):"{}")+","));
-		productionDataBuff.append("\"RodString\":"+(gson.toJson(calculateRequestData.getRodString()!=null?gson.toJson(calculateRequestData.getRodString()):"{}")+","));
-		productionDataBuff.append("\"TubingString\":"+(gson.toJson(calculateRequestData.getTubingString()!=null?gson.toJson(calculateRequestData.getTubingString()):"{}")+","));
-		productionDataBuff.append("\"CasingString\":"+(gson.toJson(calculateRequestData.getCasingString()!=null?gson.toJson(calculateRequestData.getCasingString()):"{}")+","));
-		productionDataBuff.append("\"Pump\":"+(gson.toJson(calculateRequestData.getPump()!=null?gson.toJson(calculateRequestData.getPump()):"{}")+","));
-		productionDataBuff.append("\"Production\":"+(gson.toJson(calculateRequestData.getProduction()!=null?gson.toJson(calculateRequestData.getProduction()):"{}")+","));
-		productionDataBuff.append("\"ManualIntervention\":"+(gson.toJson(calculateRequestData.getManualIntervention()!=null?gson.toJson(calculateRequestData.getManualIntervention()):"{}")+","));
+		productionDataBuff.append("\"FluidPVT\":"+(calculateRequestData.getFluidPVT()!=null?gson.toJson(calculateRequestData.getFluidPVT()):"{}")+",");
+		productionDataBuff.append("\"Reservoir\":"+(calculateRequestData.getReservoir()!=null?gson.toJson(calculateRequestData.getReservoir()):"{}")+",");
+		productionDataBuff.append("\"RodString\":"+(calculateRequestData.getRodString()!=null?gson.toJson(calculateRequestData.getRodString()):"{}")+",");
+		productionDataBuff.append("\"TubingString\":"+(calculateRequestData.getTubingString()!=null?gson.toJson(calculateRequestData.getTubingString()):"{}")+",");
+		productionDataBuff.append("\"CasingString\":"+(calculateRequestData.getCasingString()!=null?gson.toJson(calculateRequestData.getCasingString()):"{}")+",");
+		productionDataBuff.append("\"Pump\":"+(calculateRequestData.getPump()!=null?gson.toJson(calculateRequestData.getPump()):"{}")+",");
+		productionDataBuff.append("\"Production\":"+(calculateRequestData.getProduction()!=null?gson.toJson(calculateRequestData.getProduction()):"{}")+",");
+		productionDataBuff.append("\"ManualIntervention\":"+(calculateRequestData.getManualIntervention()!=null?gson.toJson(calculateRequestData.getManualIntervention()):"{}"));
 		productionDataBuff.append("}");
 		return productionDataBuff.toString();
 	}
@@ -2711,14 +2784,14 @@ public class BaseDao extends HibernateDaoSupport {
 		StringBuffer productionDataBuff = new StringBuffer();
 		Gson gson=new Gson();
 		productionDataBuff.append("{");
-		productionDataBuff.append("\"FluidPVT\":"+(gson.toJson(calculateRequestData.getFluidPVT()!=null?gson.toJson(calculateRequestData.getFluidPVT()):"{}")+","));
-		productionDataBuff.append("\"Reservoir\":"+(gson.toJson(calculateRequestData.getReservoir()!=null?gson.toJson(calculateRequestData.getReservoir()):"{}")+","));
-		productionDataBuff.append("\"RodString\":"+(gson.toJson(calculateRequestData.getRodString()!=null?gson.toJson(calculateRequestData.getRodString()):"{}")+","));
-		productionDataBuff.append("\"TubingString\":"+(gson.toJson(calculateRequestData.getTubingString()!=null?gson.toJson(calculateRequestData.getTubingString()):"{}")+","));
-		productionDataBuff.append("\"CasingString\":"+(gson.toJson(calculateRequestData.getCasingString()!=null?gson.toJson(calculateRequestData.getCasingString()):"{}")+","));
-		productionDataBuff.append("\"Pump\":"+(gson.toJson(calculateRequestData.getPump()!=null?gson.toJson(calculateRequestData.getPump()):"{}")+","));
-		productionDataBuff.append("\"Production\":"+(gson.toJson(calculateRequestData.getProduction()!=null?gson.toJson(calculateRequestData.getProduction()):"{}")+","));
-		productionDataBuff.append("\"ManualIntervention\":"+(gson.toJson(calculateRequestData.getManualIntervention()!=null?gson.toJson(calculateRequestData.getManualIntervention()):"{}")+","));
+		productionDataBuff.append("\"FluidPVT\":"+(calculateRequestData.getFluidPVT()!=null?gson.toJson(calculateRequestData.getFluidPVT()):"{}")+",");
+		productionDataBuff.append("\"Reservoir\":"+(calculateRequestData.getReservoir()!=null?gson.toJson(calculateRequestData.getReservoir()):"{}")+",");
+		productionDataBuff.append("\"RodString\":"+(calculateRequestData.getRodString()!=null?gson.toJson(calculateRequestData.getRodString()):"{}")+",");
+		productionDataBuff.append("\"TubingString\":"+(calculateRequestData.getTubingString()!=null?gson.toJson(calculateRequestData.getTubingString()):"{}")+",");
+		productionDataBuff.append("\"CasingString\":"+(calculateRequestData.getCasingString()!=null?gson.toJson(calculateRequestData.getCasingString()):"{}")+",");
+		productionDataBuff.append("\"Pump\":"+(calculateRequestData.getPump()!=null?gson.toJson(calculateRequestData.getPump()):"{}")+",");
+		productionDataBuff.append("\"Production\":"+(calculateRequestData.getProduction()!=null?gson.toJson(calculateRequestData.getProduction()):"{}")+",");
+		productionDataBuff.append("\"ManualIntervention\":"+(calculateRequestData.getManualIntervention()!=null?gson.toJson(calculateRequestData.getManualIntervention()):"{}"));
 		productionDataBuff.append("}");
 		return productionDataBuff.toString();
 	}

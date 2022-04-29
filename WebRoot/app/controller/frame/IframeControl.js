@@ -164,6 +164,7 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 		&& module_Code != "PumpingModelManager"
 		&& module_Code != "DeviceRealTimeMonitoring"
 		&& module_Code != "DeviceHistoryQuery"
+		&& module_Code != "DailyReport"
 		&& module_Code != "LogQuery"
 		&& module_Code != "AlarmQuery"
 		&& module_Code != "AlarmSet") {
@@ -373,6 +374,24 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 				gridPanel.getStore().load();
 			}else{
 				Ext.create('AP.store.historyQuery.PCPHistoryQueryWellListStore');
+			}
+		}
+	}else if(module_Code == "DailyReport"){
+		var tabPanel = Ext.getCmp("ProductionWellDailyReportPanel_Id");
+		var activeId = tabPanel.getActiveTab().id;
+		if(activeId=="RPCDailyReportPanel_Id"){
+			var gridPanel = Ext.getCmp("RPCDailyReportGridPanel_Id");
+			if (isNotVal(gridPanel)) {
+				gridPanel.getStore().load();
+			}else{
+				Ext.create('AP.store.reportOut.RPCDailyReportWellListStore');
+			}
+		}else if(activeId=="PCPDailyReportPanel_Id"){
+			var gridPanel = Ext.getCmp("PPCDailyReportGridPanel_Id");
+			if (isNotVal(gridPanel)) {
+				gridPanel.getStore().load();
+			}else{
+				Ext.create('AP.store.reportOut.PPCDailyReportWellListStore');
 			}
 		}
 	}else if(module_Code == "LogQuery"){

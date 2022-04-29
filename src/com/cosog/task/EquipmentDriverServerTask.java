@@ -64,6 +64,7 @@ public class EquipmentDriverServerTask {
 		String probeUrl=Config.getInstance().configFile.getDriverConfig().getProbe().getInit();
 		
 		initWellCommStatus();
+		MemoryDataManagerTask.loadMemoryData();
 		
 		String path="";
 		StringManagerUtils stringManagerUtils=new StringManagerUtils();
