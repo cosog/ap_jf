@@ -11,6 +11,7 @@ import com.cosog.model.calculate.DiskProbeResponseData;
 import com.cosog.model.calculate.EnergyCalculateResponseData;
 import com.cosog.model.calculate.MemoryProbeResponseData;
 import com.cosog.model.calculate.PCPCalculateResponseData;
+import com.cosog.model.calculate.PCPDeviceInfo;
 import com.cosog.model.calculate.RPCCalculateResponseData;
 import com.cosog.model.calculate.RPCDeviceInfo;
 import com.cosog.model.calculate.TimeEffResponseData;
@@ -132,6 +133,8 @@ public class CalculateUtils {
 		List<Float> FMaxList=new ArrayList<Float>();
 		List<Float> FMinList=new ArrayList<Float>();
 		
+		List<Float> fullnessCoefficientList=new ArrayList<Float>();
+		
 		List<Float> theoreticalProductionList=new ArrayList<Float>();
 		List<Float> liquidVolumetricProductionList=new ArrayList<Float>();
 		List<Float> oilVolumetricProductionList=new ArrayList<Float>();
@@ -160,41 +163,44 @@ public class CalculateUtils {
 		List<Float> energyPer100mLiftList=new ArrayList<Float>();
 		
 		for(RPCCalculateResponseData responseData:deviceInfo.getRPCCalculateList()){
-			acqTimeList.add(responseData.getFESDiagram().getAcqTime());
-			commStatusList.add(deviceInfo.getCommStatus());
-			runStatusList.add(deviceInfo.getRunStatus());
-			
-			ResultCodeList.add(responseData.getCalculationStatus().getResultCode());
-			strokeList.add(responseData.getFESDiagram().getStroke());
-			spmList.add(responseData.getFESDiagram().getSPM());
-			FMaxList.add(responseData.getFESDiagram().getFMax().get(0));
-			FMinList.add(responseData.getFESDiagram().getFMin().get(0));
-			
-			theoreticalProductionList.add(responseData.getProduction().getTheoreticalProduction());
-			liquidVolumetricProductionList.add(responseData.getProduction().getLiquidVolumetricProduction());
-			oilVolumetricProductionList.add(responseData.getProduction().getOilVolumetricProduction());
-			waterVolumetricProductionList.add(responseData.getProduction().getWaterVolumetricProduction());
-			volumeWaterCutList.add(responseData.getProduction().getWaterCut());
-			
-			liquidWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
-			oilWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
-			waterWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
-//			weightWaterCutList.add(responseData.getProduction().getLiquidVolumetricProduction());
-			
-			pumpEffList.add(responseData.getPumpEfficiency().getPumpEff());
-			pumpEff1List.add(responseData.getPumpEfficiency().getPumpEff1());
-			pumpEff2List.add(responseData.getPumpEfficiency().getPumpEff2());
-			pumpEff3List.add(responseData.getPumpEfficiency().getPumpEff3());
-			pumpEff4List.add(responseData.getPumpEfficiency().getPumpEff4());
-			
-			wattDegreeBalanceList.add(responseData.getFESDiagram().getWattDegreeBalance());
-			iDegreeBalanceList.add(responseData.getFESDiagram().getIDegreeBalance());
-			deltaRadiusList.add(responseData.getFESDiagram().getDeltaRadius());
-			
-			surfaceSystemEfficiencyList.add(responseData.getSystemEfficiency().getSurfaceSystemEfficiency());
-			wellDownSystemEfficiencyList.add(responseData.getSystemEfficiency().getWellDownSystemEfficiency());
-			systemEfficiencyList.add(responseData.getSystemEfficiency().getSystemEfficiency());
-			energyPer100mLiftList.add(responseData.getSystemEfficiency().getEnergyPer100mLift());
+			if(responseData.getFESDiagram().getAcqTime().indexOf(date)>=0 && !StringManagerUtils.existOrNot(acqTimeList, responseData.getFESDiagram().getAcqTime(), false)){
+				acqTimeList.add(responseData.getFESDiagram().getAcqTime());
+				commStatusList.add(deviceInfo.getCommStatus());
+				runStatusList.add(deviceInfo.getRunStatus());
+				
+				ResultCodeList.add(responseData.getCalculationStatus().getResultCode());
+				strokeList.add(responseData.getFESDiagram().getStroke());
+				spmList.add(responseData.getFESDiagram().getSPM());
+				FMaxList.add(responseData.getFESDiagram().getFMax().get(0));
+				FMinList.add(responseData.getFESDiagram().getFMin().get(0));
+				fullnessCoefficientList.add(responseData.getFESDiagram().getFullnessCoefficient());
+				
+				theoreticalProductionList.add(responseData.getProduction().getTheoreticalProduction());
+				liquidVolumetricProductionList.add(responseData.getProduction().getLiquidVolumetricProduction());
+				oilVolumetricProductionList.add(responseData.getProduction().getOilVolumetricProduction());
+				waterVolumetricProductionList.add(responseData.getProduction().getWaterVolumetricProduction());
+				volumeWaterCutList.add(responseData.getProduction().getWaterCut());
+				
+				liquidWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
+				oilWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
+				waterWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
+//				weightWaterCutList.add(responseData.getProduction().getLiquidVolumetricProduction());
+				
+				pumpEffList.add(responseData.getPumpEfficiency().getPumpEff());
+				pumpEff1List.add(responseData.getPumpEfficiency().getPumpEff1());
+				pumpEff2List.add(responseData.getPumpEfficiency().getPumpEff2());
+				pumpEff3List.add(responseData.getPumpEfficiency().getPumpEff3());
+				pumpEff4List.add(responseData.getPumpEfficiency().getPumpEff4());
+				
+				wattDegreeBalanceList.add(responseData.getFESDiagram().getWattDegreeBalance());
+				iDegreeBalanceList.add(responseData.getFESDiagram().getIDegreeBalance());
+				deltaRadiusList.add(responseData.getFESDiagram().getDeltaRadius());
+				
+				surfaceSystemEfficiencyList.add(responseData.getSystemEfficiency().getSurfaceSystemEfficiency());
+				wellDownSystemEfficiencyList.add(responseData.getSystemEfficiency().getWellDownSystemEfficiency());
+				systemEfficiencyList.add(responseData.getSystemEfficiency().getSystemEfficiency());
+				energyPer100mLiftList.add(responseData.getSystemEfficiency().getEnergyPer100mLift());
+			}
 		}
 		
 		dataSbf.append("{\"AKString\":\"\",");
@@ -228,6 +234,7 @@ public class CalculateUtils {
 		dataSbf.append("\"SPM\":["+StringUtils.join(spmList, ",")+"],");
 		dataSbf.append("\"FMax\":["+StringUtils.join(FMaxList, ",")+"],");
 		dataSbf.append("\"FMin\":["+StringUtils.join(FMinList, ",")+"],");
+		dataSbf.append("\"FullnessCoefficient\":["+StringUtils.join(fullnessCoefficientList, ",")+"],");
 		dataSbf.append("\"PumpEff\":["+StringUtils.join(pumpEffList, ",")+"],");
 		dataSbf.append("\"PumpEff1\":["+StringUtils.join(pumpEff1List, ",")+"],");
 		dataSbf.append("\"PumpEff2\":["+StringUtils.join(pumpEff2List, ",")+"],");
@@ -236,6 +243,94 @@ public class CalculateUtils {
 		dataSbf.append("\"WattDegreeBalance\":["+StringUtils.join(wattDegreeBalanceList, ",")+"],");
 		dataSbf.append("\"IDegreeBalance\":["+StringUtils.join(iDegreeBalanceList, ",")+"],");
 		dataSbf.append("\"DeltaRadius\":["+StringUtils.join(deltaRadiusList, ",")+"]");
+		dataSbf.append("}");
+		
+		return dataSbf.toString();
+	}
+	
+	public static String getRPMTotalRequestData(String date,PCPDeviceInfo deviceInfo){
+		StringBuffer dataSbf= new StringBuffer();
+		
+		List<String> acqTimeList=new ArrayList<String>();
+		List<Integer> commStatusList=new ArrayList<Integer>();
+		List<Integer> runStatusList=new ArrayList<Integer>();
+		
+		List<Float> rpmList=new ArrayList<Float>();
+		
+		List<Float> theoreticalProductionList=new ArrayList<Float>();
+		List<Float> liquidVolumetricProductionList=new ArrayList<Float>();
+		List<Float> oilVolumetricProductionList=new ArrayList<Float>();
+		List<Float> waterVolumetricProductionList=new ArrayList<Float>();
+		List<Float> volumeWaterCutList=new ArrayList<Float>();
+		
+		List<Float> liquidWeightProductionList=new ArrayList<Float>();
+		List<Float> oilWeightProductionList=new ArrayList<Float>();
+		List<Float> waterWeightProductionList=new ArrayList<Float>();
+		List<Float> weightWaterCutList=new ArrayList<Float>();
+		
+		List<Float> pumpEffList=new ArrayList<Float>();
+		List<Float> pumpEff1List=new ArrayList<Float>();
+		List<Float> pumpEff2List=new ArrayList<Float>();
+		
+		List<Float> systemEfficiencyList=new ArrayList<Float>();
+		List<Float> energyPer100mLiftList=new ArrayList<Float>();
+		
+		for(PCPCalculateResponseData responseData:deviceInfo.getPCPCalculateList()){
+			if(responseData.getAcqTime().indexOf(date)>=0 && !StringManagerUtils.existOrNot(acqTimeList, responseData.getAcqTime(), false)){
+				acqTimeList.add(responseData.getAcqTime());
+				commStatusList.add(deviceInfo.getCommStatus());
+				runStatusList.add(deviceInfo.getRunStatus());
+				
+				rpmList.add(responseData.getRPM());
+				
+				theoreticalProductionList.add(responseData.getProduction().getTheoreticalProduction());
+				liquidVolumetricProductionList.add(responseData.getProduction().getLiquidVolumetricProduction());
+				oilVolumetricProductionList.add(responseData.getProduction().getOilVolumetricProduction());
+				waterVolumetricProductionList.add(responseData.getProduction().getWaterVolumetricProduction());
+				volumeWaterCutList.add(responseData.getProduction().getWaterCut());
+				
+				liquidWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
+				oilWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
+				waterWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
+//				weightWaterCutList.add(responseData.getProduction().getLiquidVolumetricProduction());
+				
+				pumpEffList.add(responseData.getPumpEfficiency().getPumpEff());
+				pumpEff1List.add(responseData.getPumpEfficiency().getPumpEff1());
+				pumpEff2List.add(responseData.getPumpEfficiency().getPumpEff2());
+				
+				systemEfficiencyList.add(responseData.getSystemEfficiency().getSystemEfficiency());
+				energyPer100mLiftList.add(responseData.getSystemEfficiency().getEnergyPer100mLift());
+			}
+		}
+		
+		dataSbf.append("{\"AKString\":\"\",");
+		dataSbf.append("\"WellName\":\""+deviceInfo.getWellName()+"\",");
+		dataSbf.append("\"Date\":\""+date+"\",");
+		dataSbf.append("\"OffsetHour\":0,");
+		dataSbf.append("\"AcqTime\":["+StringManagerUtils.joinStringArr(acqTimeList, ",")+"],");
+		dataSbf.append("\"CommStatus\":["+StringUtils.join(commStatusList, ",")+"],");
+		dataSbf.append("\"CommTime\":"+deviceInfo.getCommTime()+",");
+		dataSbf.append("\"CommTimeEfficiency\":"+deviceInfo.getCommEff()+",");
+		dataSbf.append("\"CommRange\":\""+deviceInfo.getCommRange()+"\",");
+		dataSbf.append("\"RunStatus\":["+StringUtils.join(runStatusList, ",")+"],");
+		dataSbf.append("\"RunTime\":"+deviceInfo.getRunTime()+",");
+		dataSbf.append("\"RunTimeEfficiency\":"+deviceInfo.getRunEff()+",");
+		dataSbf.append("\"RunRange\":\""+deviceInfo.getRunRange()+"\",");
+		dataSbf.append("\"RPM\":["+StringUtils.join(rpmList, ",")+"],");
+		dataSbf.append("\"TheoreticalProduction\":["+StringUtils.join(theoreticalProductionList, ",")+"],");
+		dataSbf.append("\"LiquidVolumetricProduction\":["+StringUtils.join(liquidVolumetricProductionList, ",")+"],");
+		dataSbf.append("\"OilVolumetricProduction\":["+StringUtils.join(oilVolumetricProductionList, ",")+"],");
+		dataSbf.append("\"WaterVolumetricProduction\":["+StringUtils.join(waterVolumetricProductionList, ",")+"],");
+		dataSbf.append("\"VolumeWaterCut\":["+StringUtils.join(volumeWaterCutList, ",")+"],");
+		dataSbf.append("\"LiquidWeightProduction\":["+StringUtils.join(liquidWeightProductionList, ",")+"],");
+		dataSbf.append("\"OilWeightProduction\":["+StringUtils.join(oilWeightProductionList, ",")+"],");
+		dataSbf.append("\"WaterWeightProduction\":["+StringUtils.join(waterWeightProductionList, ",")+"],");
+//		dataSbf.append("\"WeightWaterCut\":["+StringUtils.join(weightWaterCutList, ",")+"],");
+		dataSbf.append("\"SystemEfficiency\":["+StringUtils.join(systemEfficiencyList, ",")+"],");
+		dataSbf.append("\"EnergyPer100mLift\":["+StringUtils.join(energyPer100mLiftList, ",")+"],");
+		dataSbf.append("\"PumpEff\":["+StringUtils.join(pumpEffList, ",")+"],");
+		dataSbf.append("\"PumpEff1\":["+StringUtils.join(pumpEff1List, ",")+"],");
+		dataSbf.append("\"PumpEff2\":["+StringUtils.join(pumpEff2List, ",")+"]");
 		dataSbf.append("}");
 		
 		return dataSbf.toString();

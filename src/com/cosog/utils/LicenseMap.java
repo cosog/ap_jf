@@ -20,6 +20,7 @@ public final class LicenseMap {
 		moduleList0.add(9999);//功能导航
 		moduleList0.add(1998);//实时监控
 		moduleList0.add(2018);//历史查询
+		moduleList0.add(2158);//生产报表
 		moduleList0.add(2038);//日志
 		moduleList0.add(2058);//故障查询
 		moduleList0.add(27);//权限管理
@@ -39,21 +40,6 @@ public final class LicenseMap {
 		moduleList0.add(1777);//驱动配置
 		moduleMap.put(0, moduleList0);
 		
-//		List<Integer> moduleList1=new ArrayList<Integer>();//自动化采集
-//		moduleList0.add(9999);//功能导航
-//		moduleList0.add(1998);//实时监控
-//		moduleList0.add(27);//权限管理
-//		moduleList0.add(24);//单位管理
-//		moduleList0.add(28);//用户管理
-//		moduleList0.add(29);//角色管理
-//		moduleList0.add(31);//数据配置
-//		moduleList0.add(1777);//数据源
-//		moduleList0.add(34);//井名信息
-//		moduleList0.add(23);//系统配置
-//		moduleList0.add(26);//模块配置
-//		moduleList0.add(894);//字典配置
-//		moduleList0.add(47);//报警配置
-//		moduleMap.put(1, moduleList1);
 	}
 
 	public static Map<Integer, License> getMapObject() {

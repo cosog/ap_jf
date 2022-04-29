@@ -58,8 +58,8 @@ public class MemoryDataManagerTask {
 		return instance;
 	}
 	
-	@Scheduled(fixedRate = 1000*60*60*24*365*100)
-	public void loadMemoryData(){
+//	@Scheduled(fixedRate = 1000*60*60*24*365*100)
+	public static void loadMemoryData(){
 		Jedis jedis=null;
 		try{
 			jedis = new Jedis();
@@ -1085,7 +1085,7 @@ public class MemoryDataManagerTask {
 					+ "from tbl_rpcacqdata_hist t,tbl_rpcdevice t2 "
 					+ "where t.wellid=t2.id  "
 					+ " and t.resultstatus=1"
-					+ " and t.fesdiagramacqtime between to_date('"+currentDate+"') and to_date('"+currentDate+"','yyyy-mm-dd')+1 ";
+					+ " and t.fesdiagramacqtime between to_date('"+currentDate+"','yyyy-mm-dd') and to_date('"+currentDate+"','yyyy-mm-dd')+1 ";
 			if(StringManagerUtils.isNotNull(wells)){
 				if(condition==0){
 					sql+=" and t2.id in("+wells+")";
@@ -1195,7 +1195,7 @@ public class MemoryDataManagerTask {
 					+ "t.pumpeff1,t.pumpeff2,t.pumpeff,"
 					+ "t.productiondata "
 					+ " from tbl_pcpacqdata_hist t,tbl_pcpdevice t2 "
-					+ " where t.wellid=t2.id and t.resultstatus=1 and t.acqtime between to_date('"+currentDate+"','"+currentDate+"') and to_date('2022-04-26','yyyy-mm-dd')+1";
+					+ " where t.wellid=t2.id and t.resultstatus=1 and t.acqtime between to_date('"+currentDate+"','yyyy-mm-dd') and to_date('"+currentDate+"','yyyy-mm-dd')+1";
 			if(StringManagerUtils.isNotNull(wells)){
 				if(condition==0){
 					sql+=" and t2.id in("+wells+")";

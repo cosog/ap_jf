@@ -1584,9 +1584,9 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		ConfigFile configFile=Config.getInstance().configFile;
 		DataDictionary ddic = null;
 		
-		String prodCol="liquidWeightProduction";
+		String prodCol="liquidWeightProduction,liquidWeightProduction_L";
 		if(configFile.getOthers().getProductionUnit()!=0){
-			prodCol="liquidVolumetricProduction";
+			prodCol="liquidVolumetricProduction,liquidVolumetricProduction_L";
 		}
 		Jedis jedis = new Jedis();
 		AlarmShowStyle alarmShowStyle=null;
@@ -1633,7 +1633,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				+ " t.resultcode,t2.resultname,"
 				+ " t.stroke,t.spm,"
 				+ " t.fmax,t.fmin,"
-				+ " t.upperloadline,t.lowerloadline,t."+prodCol+", "
+				+ " t.upperloadline,t.lowerloadline,"+prodCol+", "
 				+ " t.iDegreeBalance,t.wattDegreeBalance,"
 				+ " t.position_curve,t.load_curve,t.power_curve,t.current_curve"
 				+ " from tbl_rpcdevice well,tbl_rpcacqdata_hist t,tbl_rpc_worktype t2 "
@@ -1663,22 +1663,22 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				SerializableClobProxy   proxy=null;
 				CLOB realClob=null;
 				if(obj[14]!=null){
-					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[14]);
+					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[15]);
 					realClob = (CLOB) proxy.getWrappedClob(); 
 					positionCurveData=StringManagerUtils.CLOBtoString(realClob);
 				}
 				if(obj[15]!=null){
-					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[15]);
+					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[16]);
 					realClob = (CLOB) proxy.getWrappedClob(); 
 					loadCurveData=StringManagerUtils.CLOBtoString(realClob);
 				}
 				if(obj[16]!=null){
-					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[16]);
+					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[17]);
 					realClob = (CLOB) proxy.getWrappedClob(); 
 					powerCurveData=StringManagerUtils.CLOBtoString(realClob);
 				}
 				if(obj[17]!=null){
-					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[17]);
+					proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[18]);
 					realClob = (CLOB) proxy.getWrappedClob(); 
 					currentCurveData=StringManagerUtils.CLOBtoString(realClob);
 				}
@@ -1694,9 +1694,10 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				dynSbf.append("\"fmin\":\""+obj[8]+"\",");
 				dynSbf.append("\"upperLoadLine\":\""+obj[9]+"\",");
 				dynSbf.append("\"lowerLoadLine\":\""+obj[10]+"\",");
-				dynSbf.append("\""+prodCol+"\":\""+obj[11]+"\",");
-				dynSbf.append("\"iDegreeBalance\":\"" + obj[12] + "\",");
-				dynSbf.append("\"wattDegreeBalance\":\"" + obj[13] + "\",");
+				dynSbf.append("\""+prodCol.split(",")[0]+"\":\""+obj[11]+"\",");
+				dynSbf.append("\""+prodCol.split(",")[1]+"\":\""+obj[12]+"\",");
+				dynSbf.append("\"iDegreeBalance\":\"" + obj[13] + "\",");
+				dynSbf.append("\"wattDegreeBalance\":\"" + obj[14] + "\",");
 				dynSbf.append("\"positionCurveData\":\"" + positionCurveData + "\",");
 				dynSbf.append("\"loadCurveData\":\"" + loadCurveData + "\",");
 				dynSbf.append("\"powerCurveData\":\"" + powerCurveData + "\",");
