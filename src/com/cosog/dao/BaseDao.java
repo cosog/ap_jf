@@ -2795,4 +2795,92 @@ public class BaseDao extends HibernateDaoSupport {
 		productionDataBuff.append("}");
 		return productionDataBuff.toString();
 	}
+	
+	@SuppressWarnings("resource")
+	public Boolean saveRecalculateData(CalculateManagerHandsontableChangedData calculateManagerHandsontableChangedData) throws SQLException {
+		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
+		CallableStatement cs=null;
+		PreparedStatement ps=null;
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		try {
+			cs = conn.prepareCall("{call prd_save_rpc_recalculateparam(?,"
+					+ "?,?,?,?,?,?,"
+					+ "?,?,?,?,?,?,?,"
+					+ "?,?,?,"
+					+ "?,?,"
+					+ "?,?,"
+					+ "?,"
+					+ "?,?)}");
+			if(calculateManagerHandsontableChangedData.getUpdatelist()!=null){
+				for(int i=0;i<calculateManagerHandsontableChangedData.getUpdatelist().size();i++){
+					
+					
+					
+					if(StringManagerUtils.isNotNull(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getWellName())){
+						String rodString="";
+						rodString+=calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodGrade1()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodOutsideDiameter1()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodInsideDiameter1()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength1()+";"
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodGrade2()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodOutsideDiameter2()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodInsideDiameter2()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength2()+";"
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodGrade3()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodOutsideDiameter3()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodInsideDiameter3()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength3()+";"
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodGrade4()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodOutsideDiameter4()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodInsideDiameter4()+","
+									+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength4();
+						
+						cs.setString(1, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getId());
+						
+						cs.setString(2, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getCrudeoilDensity());
+						cs.setString(3, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getWaterDensity());
+						cs.setString(4, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getNaturalGasRelativeDensity());
+						cs.setString(5, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getSaturationPressure());
+						cs.setString(6, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getReservoirDepth());
+						cs.setString(7, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getReservoirTemperature());
+						
+						cs.setString(8, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getTubingPressure());
+						cs.setString(9, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getCasingPressure());
+						cs.setString(10, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getWellHeadFluidTemperature());
+						cs.setString(11, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getWeightWaterCut());
+						cs.setString(12, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getProductionGasOilRatio());
+						cs.setString(13, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getProducingFluidLevel());
+						cs.setString(14, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getPumpSettingDepth());
+						
+						cs.setString(15, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getPumpTypeName());
+						cs.setString(16, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getBarrelTypeName());
+						cs.setString(17, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getPumpGrade());
+						cs.setString(18, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getPumpboreDiameter());
+						cs.setString(19, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getPlungerLength());
+						
+						cs.setString(20, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getTubingStringInsideDiameter());
+						cs.setString(21, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getCasingStringInsideDiameter());
+						
+						cs.setString(22, rodString);
+						
+						cs.setString(23, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getAnchoringStateName());
+						cs.setString(24, calculateManagerHandsontableChangedData.getUpdatelist().get(i).getNetGrossRatio());
+						cs.executeUpdate();
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally{
+			if(ps!=null){
+				ps.close();
+			}
+			if(cs!=null){
+				cs.close();
+			}
+			conn.close();
+		}
+		return true;
+	}
 }

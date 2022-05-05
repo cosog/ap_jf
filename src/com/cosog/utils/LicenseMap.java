@@ -32,6 +32,8 @@ public final class LicenseMap {
 		moduleList0.add(2098);//螺杆泵管理
 		moduleList0.add(2078);//短信设备管理
 		moduleList0.add(2118);//辅件设备管理
+		moduleList0.add(2178);//数据维护
+		moduleList0.add(2179);//计算维护
 		moduleList0.add(23);//系统配置
 		moduleList0.add(26);//模块配置
 		moduleList0.add(894);//字典配置
