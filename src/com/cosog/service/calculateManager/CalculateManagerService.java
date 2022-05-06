@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.cosog.dao.BaseDao;
 import com.cosog.model.AlarmShowStyle;
+import com.cosog.model.calculate.PCPCalculateRequestData;
 import com.cosog.model.calculate.RPCCalculateRequestData;
 import com.cosog.model.calculate.RPCProductionData;
 import com.cosog.model.calculate.RPCCalculateRequestData.EveryCasing;
@@ -63,15 +64,15 @@ public class CalculateManagerService<T> extends BaseService<T> {
 	private DataitemsInfoService dataitemsInfoService;
 	@Autowired
 	private CalculateDataService calculateDataService;
-	public String getCalculateResultData(String orgId, String wellName, Page pager,String wellType,String startDate,String endDate,String calculateSign,String calculateType)
+	public String getCalculateResultData(String orgId, String wellName, Page pager,String deviceType,String startDate,String endDate,String calculateSign,String calculateType)
 			throws Exception {
 		String json="";
 		if("1".equals(calculateType)){
-			json=this.getFESDiagramCalculateResultData(orgId, wellName, pager, wellType, startDate, endDate, calculateSign, calculateType);
+			json=this.getFESDiagramCalculateResultData(orgId, wellName, pager, deviceType, startDate, endDate, calculateSign, calculateType);
 		}else if("2".equals(calculateType)){
-			
+			json=this.getRPMCalculateResultData(orgId, wellName, pager, deviceType, startDate, endDate, calculateSign, calculateType);
 		}else if("5".equals(calculateType)){//电参反演地面功图
-			json=this.getElecInverCalculateResultData(orgId, wellName, pager, wellType, startDate, endDate, calculateSign, calculateType);
+			json=this.getElecInverCalculateResultData(orgId, wellName, pager, deviceType, startDate, endDate, calculateSign, calculateType);
 		}
 		
 		return json;
@@ -89,7 +90,7 @@ public class CalculateManagerService<T> extends BaseService<T> {
 		return json;
 	}
 	
-	public String getFESDiagramCalculateResultData(String orgId, String wellName, Page pager,String wellType,String startDate,String endDate,String calculateSign,String calculateType)
+	public String getFESDiagramCalculateResultData(String orgId, String wellName, Page pager,String deviceType,String startDate,String endDate,String calculateSign,String calculateType)
 			throws Exception {
 		DataDictionary ddic = null;
 		Gson gson = new Gson();
@@ -138,8 +139,8 @@ public class CalculateManagerService<T> extends BaseService<T> {
 		for(int i=0;i<list.size();i++){
 			Object[] obj = (Object[]) list.get(i);
 			String productionData=obj[8].toString();
-			type = new TypeToken<RPCProductionData>() {}.getType();
-			RPCProductionData rpcProductionData=gson.fromJson(productionData, type);
+			type = new TypeToken<RPCCalculateRequestData>() {}.getType();
+			RPCCalculateRequestData rpcProductionData=gson.fromJson(productionData, type);
 			
 			result_json.append("{\"id\":\""+obj[0]+"\",");
 			result_json.append("\"wellId\":\""+obj[1]+"\",");
@@ -217,6 +218,138 @@ public class CalculateManagerService<T> extends BaseService<T> {
 				
 				if(rpcProductionData.getManualIntervention()!=null){
 					result_json.append("\"netGrossRatio\":\""+rpcProductionData.getManualIntervention().getNetGrossRatio()+"\",");
+				}
+			}else{
+				
+			}
+			
+			if(result_json.toString().endsWith(",")){
+				result_json = result_json.deleteCharAt(result_json.length() - 1);
+			}
+			result_json.append("},");
+			
+			
+		}
+		if(result_json.toString().endsWith(",")){
+			result_json = result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]}");
+		
+//		String getResult = this.findCustomPageBySqlEntity(sql,finalSql, columns, 20 + "", pager);
+		String json=result_json.toString().replaceAll("null", "");
+		return json;
+	}
+	
+	public String getRPMCalculateResultData(String orgId, String wellName, Page pager,String deviceType,String startDate,String endDate,String calculateSign,String calculateType)
+			throws Exception {
+		DataDictionary ddic = null;
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		String columns= "";
+		String sql="";
+		String finalSql="";
+		String sqlAll="";
+		String ddicName="screwPumpCalculateManager";
+		StringBuffer result_json = new StringBuffer();
+		ConfigFile configFile=Config.getInstance().configFile;
+		
+		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
+		columns = ddic.getTableHeader();
+		
+		String prodCol=" t.liquidWeightProduction,t.oilWeightProduction,";
+		if(configFile.getOthers().getProductionUnit()!=0){
+			prodCol=" t.liquidVolumetricProduction,t.oilVolumetricProduction,";
+		}
+		
+		sql="select t.id,t.wellId,t.wellName,to_char(t.acqtime,'yyyy-mm-dd hh24:mi:ss'),"
+			+ "decode(t.resultStatus,1,'计算成功',0,'未计算',2,'未计算','计算失败'),"
+			+ prodCol
+			+ "t.productiondata"
+			+ " from viw_pcp_calculatemain t where t.orgid in("+orgId+") "
+			+ " and t.acqtime between to_date('"+startDate+"','yyyy-mm-dd') and to_date('"+endDate+"','yyyy-mm-dd')+1";
+		if(StringManagerUtils.isNotNull(wellName)){
+			sql+=" and  t.wellName = '" + wellName.trim() + "' ";
+		}
+		if(StringManagerUtils.isNotNull(calculateSign)){
+			if("0".equals(calculateSign)){
+				sql+=" and  t.resultstatus in(0,2) ";
+			}else{
+				sql+=" and  t.resultstatus = " + calculateSign + " ";
+			}
+		}
+		sql+=" order by t.acqtime desc, t.wellName";
+		int maxvalue=pager.getLimit()+pager.getStart();
+		finalSql="select * from   ( select a.*,rownum as rn from ("+sql+" ) a where  rownum <="+maxvalue+") b where rn >"+pager.getStart();
+		
+		int totals=this.getTotalCountRows(sql);
+		List<?> list = this.findCallSql(finalSql);
+		
+		result_json.append("{\"success\":true,\"totalCount\":"+totals+",\"columns\":"+columns+",\"totalRoot\":[");
+		for(int i=0;i<list.size();i++){
+			Object[] obj = (Object[]) list.get(i);
+			String productionData=obj[7].toString();
+			type = new TypeToken<PCPCalculateRequestData>() {}.getType();
+			PCPCalculateRequestData calculateRequestData=gson.fromJson(productionData, type);
+			
+			result_json.append("{\"id\":\""+obj[0]+"\",");
+			result_json.append("\"wellId\":\""+obj[1]+"\",");
+			result_json.append("\"wellName\":\""+obj[2]+"\",");
+			result_json.append("\"acqTime\":\""+obj[3]+"\",");
+			result_json.append("\"resultStatus\":\""+obj[4]+"\",");
+			
+			if(configFile.getOthers().getProductionUnit()==0){
+				result_json.append("\"liquidWeightProduction\":\""+obj[5]+"\",");
+				result_json.append("\"oilWeightProduction\":\""+obj[6]+"\",");
+			}else{
+				result_json.append("\"liquidVolumetricProduction\":\""+obj[5]+"\",");
+				result_json.append("\"oilVolumetricProduction\":\""+obj[6]+"\",");
+			}
+			
+			if(calculateRequestData!=null){
+				if(calculateRequestData.getFluidPVT()!=null){
+					result_json.append("\"crudeoilDensity\":\""+calculateRequestData.getFluidPVT().getCrudeOilDensity()+"\",");
+					result_json.append("\"waterDensity\":\""+calculateRequestData.getFluidPVT().getWaterDensity()+"\",");
+					result_json.append("\"naturalGasRelativeDensity\":\""+calculateRequestData.getFluidPVT().getNaturalGasRelativeDensity()+"\",");
+					result_json.append("\"saturationPressure\":\""+calculateRequestData.getFluidPVT().getSaturationPressure()+"\",");
+				}
+				if(calculateRequestData.getReservoir()!=null){
+					result_json.append("\"reservoirDepth\":\""+calculateRequestData.getReservoir().getDepth()+"\",");
+					result_json.append("\"reservoirTemperature\":\""+calculateRequestData.getReservoir().getTemperature()+"\",");
+				}
+				if(calculateRequestData.getProduction()!=null){
+					result_json.append("\"tubingPressure\":\""+calculateRequestData.getProduction().getTubingPressure()+"\",");
+					result_json.append("\"casingPressure\":\""+calculateRequestData.getProduction().getCasingPressure()+"\",");
+					result_json.append("\"wellHeadFluidTemperature\":\""+calculateRequestData.getProduction().getWellHeadTemperature()+"\",");
+					result_json.append("\"weightWaterCut\":\""+calculateRequestData.getProduction().getWaterCut()+"\",");
+					result_json.append("\"productionGasOilRatio\":\""+calculateRequestData.getProduction().getProductionGasOilRatio()+"\",");
+					result_json.append("\"producingFluidLevel\":\""+calculateRequestData.getProduction().getProducingfluidLevel()+"\",");
+					result_json.append("\"pumpSettingDepth\":\""+calculateRequestData.getProduction().getPumpSettingDepth()+"\",");
+				}
+				if(calculateRequestData.getPump()!=null){
+					
+					result_json.append("\"barrelLength\":\""+calculateRequestData.getPump().getBarrelLength()+"\",");
+					result_json.append("\"barrelSeries\":\""+calculateRequestData.getPump().getBarrelSeries()+"\",");
+					result_json.append("\"rotorDiameter\":\""+calculateRequestData.getPump().getRotorDiameter()+"\",");
+					result_json.append("\"qpr\":\""+calculateRequestData.getPump().getQPR()+"\",");
+				}
+				if(calculateRequestData.getTubingString()!=null&&calculateRequestData.getTubingString().getEveryTubing()!=null&&calculateRequestData.getTubingString().getEveryTubing().size()>0){
+					result_json.append("\"tubingStringInsideDiameter\":\""+calculateRequestData.getTubingString().getEveryTubing().get(0).getInsideDiameter()*1000+"\",");
+				}
+				if(calculateRequestData.getCasingString()!=null&&calculateRequestData.getCasingString().getEveryCasing()!=null&&calculateRequestData.getCasingString().getEveryCasing().size()>0){
+					result_json.append("\"casingStringInsideDiameter\":\""+calculateRequestData.getCasingString().getEveryCasing().get(0).getInsideDiameter()*1000+"\",");
+				}
+				
+				if(calculateRequestData.getRodString()!=null && calculateRequestData.getRodString().getEveryRod()!=null){
+					for(int j=0;j<calculateRequestData.getRodString().getEveryRod().size();j++){
+						result_json.append("\"rodGrade"+(j+1)+"\":\""+calculateRequestData.getRodString().getEveryRod().get(j).getGrade()+"\",");
+						result_json.append("\"rodOutsideDiameter"+(j+1)+"\":\""+calculateRequestData.getRodString().getEveryRod().get(j).getOutsideDiameter()*1000+"\",");
+						result_json.append("\"rodInsideDiameter"+(j+1)+"\":\""+calculateRequestData.getRodString().getEveryRod().get(j).getInsideDiameter()*1000+"\",");
+						result_json.append("\"rodLength"+(j+1)+"\":\""+calculateRequestData.getRodString().getEveryRod().get(j).getLength()+"\",");
+					}
+				}
+				
+				if(calculateRequestData.getManualIntervention()!=null){
+					result_json.append("\"netGrossRatio\":\""+calculateRequestData.getManualIntervention().getNetGrossRatio()+"\",");
 				}
 			}else{
 				
@@ -574,7 +707,7 @@ public class CalculateManagerService<T> extends BaseService<T> {
 				
 				production.setTubingPressure(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getTubingPressure()));
 				production.setCasingPressure(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getCasingPressure()));
-				production.setWellHeadFluidTemperature(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getWellHeadFluidTemperature()));
+				production.setWellHeadTemperature(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getWellHeadFluidTemperature()));
 				production.setWaterCut(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getWeightWaterCut()));
 				production.setProductionGasOilRatio(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getProductionGasOilRatio()));
 				production.setProducingfluidLevel(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getProducingFluidLevel()));
@@ -780,30 +913,18 @@ public class CalculateManagerService<T> extends BaseService<T> {
 	
 	public String getFSDiagramCalculateRequestData(String recordId,String wellName,String acqTime) throws SQLException, IOException, ParseException{
 		String requestData="{}";
-//		String sql="select t3.wellname,to_char(t.fesdiagramacqTime,'yyyy-mm-dd hh24:mi:ss'),"
-//				+ " t2.crudeOilDensity,t2.waterDensity,t2.naturalGasRelativeDensity,t2.saturationPressure,t2.reservoirdepth,t2.reservoirtemperature,"
-//				+ " t2.rodstring,"
-//				+ " t2.tubingstringinsidediameter,"
-//				+ " t2.pumptype,t2.barreltype,t2.pumpgrade,t2.plungerlength,t2.pumpborediameter,"
-//				+ " t2.casingstringinsidediameter,"
-//				+ " t2.volumeWaterCut,t2.productiongasoilratio,t2.tubingpressure,t2.casingpressure,t2.wellheadfluidtemperature,"
-//				+ " t2.producingfluidlevel,t2.pumpsettingdepth,"
-//				+ " decode(t.resultstatus,2,t.levelcorrectvalue,t3.levelcorrectvalue) as levelcorrectvalue,"
-//				+ " t2.netgrossratio,"
-//				+ " t.stroke,t.spm,"
-//				+ " t.position_curve,t.load_curve,t.power_curve,t.current_curve,"
-//				+ " decode(t.datasource,1,1,0) as datasource,"
-//				+ " 0 as manualInterventionCode,"
-//				+ " t.resultstatus,t.id"
-//				+ " from tbl_rpc_diagram_hist t,tbl_rpc_productiondata_hist t2,tbl_wellinformation t3"
-//				+ " where t.wellid=t3.id and t.productiondataid=t2.id  "
-//				+ " and t3.wellname='"+wellName+"'"
-//				+ " and t.acqTime=to_date('"+acqTime+"','yyyy-mm-dd hh24:mi:ss')";
-//		List<?> list = this.findCallSql(sql);
-//		if(list.size()>0){
-//			Object[] obj=(Object[])list.get(0);
-//			requestData=calculateDataService.getObjectToRPCCalculateRequestData(obj);
-//		}
+		String sql="select t2.wellname,to_char(t.fesdiagramacqTime,'yyyy-mm-dd hh24:mi:ss'),"
+				+ " t.stroke,t.spm,"
+				+ " t.position_curve,t.load_curve,t.power_curve,t.current_curve,"
+				+ " t.levelcorrectvalue,t.productiondata"
+				+ " from tbl_rpcacqdata_hist t,tbl_rpcdevice t2"
+				+ " where t.wellid=t2.id  "
+				+ " and t.id="+recordId;
+		List<?> list = this.findCallSql(sql);
+		if(list.size()>0){
+			Object[] obj=(Object[])list.get(0);
+			requestData=calculateDataService.getObjectToRPCCalculateRequestData(obj);
+		}
 		return requestData;
 	}
 	

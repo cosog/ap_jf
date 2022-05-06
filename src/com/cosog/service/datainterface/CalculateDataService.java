@@ -21,6 +21,8 @@ import org.hibernate.engine.jdbc.SerializableClobProxy;
 import org.springframework.stereotype.Service;
 
 import com.cosog.model.calculate.CommResponseData;
+import com.cosog.model.calculate.RPCCalculateRequestData;
+import com.cosog.model.calculate.RPCProductionData;
 import com.cosog.model.calculate.TimeEffResponseData;
 import com.cosog.model.drive.AcquisitionGroupResolutionData;
 import com.cosog.model.drive.AcquisitionItemInfo;
@@ -149,5 +151,87 @@ public class CalculateDataService<T> extends BaseService<T> {
 		if(isSendMail&&receivingEMailAccount.size()>0){
 			StringManagerUtils.sendEMail(((StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200)?"泵":"管")+"设备"+wellName+"报警", EMailContent, receivingEMailAccount);
 		}
+	}
+	
+	public String getObjectToRPCCalculateRequestData(Object[] object) throws SQLException, IOException, ParseException{
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		String result="";
+		try{
+			String productionData=object[9].toString(); 
+			type = new TypeToken<RPCCalculateRequestData>() {}.getType();
+			RPCCalculateRequestData calculateRequestData=gson.fromJson(productionData, type);
+			if(calculateRequestData==null){
+				calculateRequestData=new RPCCalculateRequestData();
+				calculateRequestData.init();
+			}
+			calculateRequestData.setWellName(object[0]+"");
+			//功图数据
+			calculateRequestData.setFESDiagram(new RPCCalculateRequestData.FESDiagram());
+	        calculateRequestData.getFESDiagram().setAcqTime(object[1]+"");
+	        calculateRequestData.getFESDiagram().setStroke(StringManagerUtils.stringToFloat(object[2]+""));
+	        calculateRequestData.getFESDiagram().setSPM(StringManagerUtils.stringToFloat(object[3]+""));
+			
+	        List<Float> F=new ArrayList<Float>();
+	        List<Float> S=new ArrayList<Float>();
+	        List<Float> Watt=new ArrayList<Float>();
+	        List<Float> I=new ArrayList<Float>();
+	        SerializableClobProxy proxy=null;
+	        CLOB realClob =null;
+	        String clobStr="";
+	        String[] curveData=null;
+	        if(object[4]!=null){//位移曲线
+	        	proxy = (SerializableClobProxy)Proxy.getInvocationHandler(object[4]);
+				realClob = (CLOB) proxy.getWrappedClob();
+				clobStr=StringManagerUtils.CLOBtoString(realClob);
+				curveData=clobStr.split(",");
+				for(int i=0;i<curveData.length;i++){
+					S.add(StringManagerUtils.stringToFloat(curveData[i]));
+				}
+	        }
+	        if(object[5]!=null){//载荷曲线
+	        	proxy = (SerializableClobProxy)Proxy.getInvocationHandler(object[5]);
+				realClob = (CLOB) proxy.getWrappedClob();
+				clobStr=StringManagerUtils.CLOBtoString(realClob);
+				curveData=clobStr.split(",");
+				for(int i=0;i<curveData.length;i++){
+					F.add(StringManagerUtils.stringToFloat(curveData[i]));
+				}
+	        }
+	        if(object[6]!=null){//功率曲线
+	        	proxy = (SerializableClobProxy)Proxy.getInvocationHandler(object[6]);
+				realClob = (CLOB) proxy.getWrappedClob();
+				clobStr=StringManagerUtils.CLOBtoString(realClob);
+				if(StringManagerUtils.isNotNull(clobStr)){
+					curveData=clobStr.split(",");
+					for(int i=0;i<curveData.length;i++){
+						Watt.add(StringManagerUtils.stringToFloat(curveData[i]));
+					}
+				}
+	        }
+	        if(object[7]!=null){//电流曲线
+	        	proxy = (SerializableClobProxy)Proxy.getInvocationHandler(object[7]);
+				realClob = (CLOB) proxy.getWrappedClob();
+				clobStr=StringManagerUtils.CLOBtoString(realClob);
+				if(StringManagerUtils.isNotNull(clobStr)){
+					curveData=clobStr.split(",");
+					for(int i=0;i<curveData.length;i++){
+						I.add(StringManagerUtils.stringToFloat(curveData[i]));
+					}
+				}
+	        }
+	        calculateRequestData.getFESDiagram().setF(F);
+	        calculateRequestData.getFESDiagram().setS(S);
+	        calculateRequestData.getFESDiagram().setWatt(Watt);
+	        calculateRequestData.getFESDiagram().setI(I);
+	        
+	        calculateRequestData.getProduction().setLevelCorrectValue(StringManagerUtils.stringToFloat(object[8]+""));
+	        
+	        result=gson.toJson(calculateRequestData);
+		}catch(Exception e){
+			e.printStackTrace();
+			return "";
+		}
+		return result;
 	}
 }
