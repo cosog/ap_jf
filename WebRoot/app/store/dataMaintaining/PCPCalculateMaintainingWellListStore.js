@@ -1,6 +1,6 @@
-Ext.define('AP.store.dataMaintaining.CalculateManagerWellListStore', {
+Ext.define('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore', {
     extend: 'Ext.data.Store',
-    alias: 'widget.CalculateManagerWellListStore',
+    alias: 'widget.PCPCalculateMaintainingWellListStore',
     fields: ['id','wellName'],
     autoLoad: true,
     pageSize: 10000,
@@ -22,12 +22,12 @@ Ext.define('AP.store.dataMaintaining.CalculateManagerWellListStore', {
             //获得列表数
             var get_rawData = store.proxy.reader.rawData;
             var arrColumns = get_rawData.columns;
-            var CalculateManagerWellListGridPanel = Ext.getCmp("CalculateManagerWellListGridPanel_Id");
-            if (!isNotVal(CalculateManagerWellListGridPanel)) {
-                var column = createCalculateManagerWellListWellListDataColumn(arrColumns);
+            var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
+            if (!isNotVal(gridPanel)) {
+                var column = createCalculateManagerWellListColumn(arrColumns);
                 var newColumns = Ext.JSON.decode(column);
-                CalculateManagerWellListGridPanel = Ext.create('Ext.grid.Panel', {
-                    id: "CalculateManagerWellListGridPanel_Id",
+                gridPanel = Ext.create('Ext.grid.Panel', {
+                    id: "PCPCalculateMaintainingWellListGridPanel_Id",
                     border: false,
                     autoLoad: true,
                     columnLines: true,
@@ -51,53 +51,60 @@ Ext.define('AP.store.dataMaintaining.CalculateManagerWellListStore', {
                     listeners: {
                     	selectionchange: function (view, selected, o) {
                     		if(selected.length>0){
-                    			Ext.getCmp('CalculateManagerWellListComBox_Id').setValue(selected[0].data.wellName);
-                            	Ext.getCmp('CalculateManagerWellListComBox_Id').setRawValue(selected[0].data.wellName);
+                    			Ext.getCmp('PCPCalculateMaintainingWellListComBox_Id').setValue(selected[0].data.wellName);
+                            	Ext.getCmp('PCPCalculateMaintainingWellListComBox_Id').setRawValue(selected[0].data.wellName);
                     		}else{
-                    			Ext.getCmp('CalculateManagerWellListComBox_Id').setValue('');
-                            	Ext.getCmp('CalculateManagerWellListComBox_Id').setRawValue('');
+                    			Ext.getCmp('PCPCalculateMaintainingWellListComBox_Id').setValue('');
+                            	Ext.getCmp('PCPCalculateMaintainingWellListComBox_Id').setRawValue('');
                     		}
-                    		Ext.create('AP.store.calculateManager.CalculateManagerDataStore');
+
+                    		var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
+    						if (isNotVal(gridPanel)) {
+    							gridPanel.getStore().load();
+    						}else{
+    							Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
+    						}
+    						var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
+    						if (isNotVal(bbar)) {
+    							if(bbar.getStore().isEmptyStore){
+    								var PCPCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+    								bbar.setStore(PCPCalculateMaintainingDataStore);
+    							}else{
+    								bbar.getStore().loadPage(1);
+    							}
+    						}else{
+    							Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+    						}
                     	},
                     	select: function(grid, record, index, eOpts) {
                     		
                         }
                     }
                 });
-                var CalculateManagerWellListPanel = Ext.getCmp("CalculateManagerWellListPanel_Id");
-                CalculateManagerWellListPanel.add(CalculateManagerWellListGridPanel);
+                var wellListPanel = Ext.getCmp("PCPCalculateMaintainingWellListPanel_Id");
+                wellListPanel.add(gridPanel);
             }
             if(get_rawData.totalCount>0){
-            	CalculateManagerWellListGridPanel.getSelectionModel().deselectAll(true);
+            	gridPanel.getSelectionModel().deselectAll(true);
             }
         },
         beforeload: function (store, options) {
         	var orgId = Ext.getCmp('leftOrg_Id').getValue();
-        	var wellName = Ext.getCmp('CalculateManagerWellListComBox_Id').getValue();
+        	var wellName = Ext.getCmp('PCPCalculateMaintainingWellListComBox_Id').getValue();
         	
-        	var startDate=Ext.getCmp('CalculateManagerStartDate_Id').rawValue;
-            var endDate=Ext.getCmp('CalculateManagerEndDate_Id').rawValue;
-            var calculateSign=Ext.getCmp('CalculateManagerCalculateSignComBox_Id').getValue();
+        	var startDate=Ext.getCmp('PCPCalculateMaintainingStartDate_Id').rawValue;
+            var endDate=Ext.getCmp('PCPCalculateMaintainingEndDate_Id').rawValue;
+            var calculateSign=Ext.getCmp('PCPCalculateMaintainingCalculateSignComBox_Id').getValue();
         	
-        	var wellType=200;
-            var calculateType=1;//1-抽油机诊断计产 2-螺杆泵诊断计产 3-抽油机汇总计算  4-螺杆泵汇总计算 5-电参反演地面功图计算
-            var tabPanelId = Ext.getCmp("CalculateManagerTabPanel").getActiveTab().id;
-            if(tabPanelId=="PumpingUnitCalculateManagerPanel"){
-            	wellType=200;
-            	calculateType=1;
-			}else if(tabPanelId=="ScrewPumpCalculateManagerPanel"){
-				wellType=400;
-				calculateType=2;
-			}else if(tabPanelId=="ElectricInversionCalculateManagerPanel"){
-				calculateType=5;
-			}
+        	var deviceType=1;
+            var calculateType=2;//1-抽油机诊断计产 2-螺杆泵诊断计产 3-抽油机汇总计算  4-螺杆泵汇总计算 5-电参反演地面功图计算
             var new_params = {
             		orgId: orgId,
             		wellName: wellName,
                     startDate:startDate,
                     endDate:endDate,
                     calculateSign:calculateSign,
-                    wellType:wellType,
+                    deviceType:deviceType,
                     calculateType:calculateType
                 };
             Ext.apply(store.proxy.extraParams, new_params);

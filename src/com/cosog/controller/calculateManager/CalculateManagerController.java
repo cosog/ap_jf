@@ -65,7 +65,7 @@ public class CalculateManagerController extends BaseController {
 		orgId = ParamUtils.getParameter(request, "orgId");
 		wellName = ParamUtils.getParameter(request, "wellName");
 		
-		String wellType = ParamUtils.getParameter(request, "wellType");
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
 		String startDate = ParamUtils.getParameter(request, "startDate");
 		String endDate = ParamUtils.getParameter(request, "endDate");
 		String calculateSign = ParamUtils.getParameter(request, "calculateSign");
@@ -79,8 +79,12 @@ public class CalculateManagerController extends BaseController {
 				orgId = "" + user.getUserorgids();
 			}
 		}
+		String tableName="tbl_rpcacqdata_hist";
+		if(StringManagerUtils.stringToInteger(deviceType)!=0){
+			tableName="tbl_pcpacqdata_hist";
+		}
 		if(!StringManagerUtils.isNotNull(endDate)){
-			String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd') from tbl_rpc_diagram_hist t";
+			String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd') from "+tableName+" t";
 			List list = this.service.reportDateJssj(sql);
 			if (list.size() > 0 &&list.get(0)!=null&&!list.get(0).toString().equals("null")) {
 				endDate = list.get(0).toString();
@@ -96,7 +100,7 @@ public class CalculateManagerController extends BaseController {
 		pager.setStart_date(startDate);
 		pager.setEnd_date(endDate);
 		
-		String json = calculateManagerService.getCalculateResultData(orgId, wellName, pager,wellType,startDate,endDate,calculateSign,calculateType);
+		String json = calculateManagerService.getCalculateResultData(orgId, wellName, pager,deviceType,startDate,endDate,calculateSign,calculateType);
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw;
@@ -117,7 +121,7 @@ public class CalculateManagerController extends BaseController {
 		orgId = ParamUtils.getParameter(request, "orgId");
 		wellName = ParamUtils.getParameter(request, "wellName");
 		
-		String wellType = ParamUtils.getParameter(request, "wellType");
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
 		String startDate = ParamUtils.getParameter(request, "startDate");
 		String endDate = ParamUtils.getParameter(request, "endDate");
 		String calculateSign = ParamUtils.getParameter(request, "calculateSign");
@@ -131,8 +135,12 @@ public class CalculateManagerController extends BaseController {
 				orgId = "" + user.getUserorgids();
 			}
 		}
+		String tableName="tbl_rpcacqdata_hist";
+		if(StringManagerUtils.stringToInteger(deviceType)!=0){
+			tableName="tbl_pcpacqdata_hist";
+		}
 		if(!StringManagerUtils.isNotNull(endDate)){
-			String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd') from tbl_rpc_diagram_hist t";
+			String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd') from "+tableName+" t";
 			List list = this.service.reportDateJssj(sql);
 			if (list.size() > 0 &&list.get(0)!=null&&!list.get(0).toString().equals("null")) {
 				endDate = list.get(0).toString();
@@ -148,7 +156,7 @@ public class CalculateManagerController extends BaseController {
 		pager.setStart_date(startDate);
 		pager.setEnd_date(endDate);
 		
-		String json = calculateManagerService.getWellList(orgId, wellName, pager,wellType,startDate,endDate,calculateSign,calculateType);
+		String json = calculateManagerService.getWellList(orgId, wellName, pager,deviceType,startDate,endDate,calculateSign,calculateType);
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw;
@@ -352,7 +360,7 @@ public class CalculateManagerController extends BaseController {
 	public String getCalculateStatusList() throws Exception {
 		orgId = ParamUtils.getParameter(request, "orgId");
 		String welName = ParamUtils.getParameter(request, "welName");
-		String wellType = ParamUtils.getParameter(request, "wellType");
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
 		String startDate = ParamUtils.getParameter(request, "startDate");
 		String endDate = ParamUtils.getParameter(request, "endDate");
 		if (!StringManagerUtils.isNotNull(orgId)) {
@@ -363,8 +371,12 @@ public class CalculateManagerController extends BaseController {
 				orgId = "" + user.getUserOrgid();
 			}
 		}
+		String tableName="tbl_rpcacqdata_hist";
+		if(StringManagerUtils.stringToInteger(deviceType)!=0){
+			tableName="tbl_pcpacqdata_hist";
+		}
 		if(!StringManagerUtils.isNotNull(endDate)){
-			String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd') from tbl_rpc_diagram_hist t";
+			String sql = " select to_char(max(t.acqTime),'yyyy-mm-dd') from "+tableName+" t";
 			List list = this.service.reportDateJssj(sql);
 			if (list.size() > 0 &&list.get(0)!=null&&!list.get(0).toString().equals("null")) {
 				endDate = list.get(0).toString();
@@ -376,7 +388,7 @@ public class CalculateManagerController extends BaseController {
 		if(!StringManagerUtils.isNotNull(startDate)){
 			startDate=StringManagerUtils.addDay(StringManagerUtils.stringToDate(endDate),0);
 		}
-		String json = this.calculateManagerService.getCalculateStatusList(orgId,welName,wellType,startDate,endDate);
+		String json = this.calculateManagerService.getCalculateStatusList(orgId,welName,deviceType,startDate,endDate);
 //		HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
@@ -400,7 +412,7 @@ public class CalculateManagerController extends BaseController {
 	public String recalculateByProductionData() throws Exception {
 		orgId = ParamUtils.getParameter(request, "orgId");
 		String wellName = ParamUtils.getParameter(request, "wellName");
-		String wellType = ParamUtils.getParameter(request, "wellType");
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
 		String startDate = ParamUtils.getParameter(request, "startDate");
 		String endDate = ParamUtils.getParameter(request, "endDate");
 		String calculateSign = ParamUtils.getParameter(request, "calculateSign");
@@ -412,7 +424,7 @@ public class CalculateManagerController extends BaseController {
 				orgId = "" + user.getUserOrgid();
 			}
 		}
-		this.calculateManagerService.recalculateByProductionData(orgId,wellName,wellType,startDate,endDate,calculateSign);
+		this.calculateManagerService.recalculateByProductionData(orgId,wellName,deviceType,startDate,endDate,calculateSign);
 		String json ="{success:true}";
 //		HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("application/json;charset=utf-8");

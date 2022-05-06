@@ -167,7 +167,8 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 		&& module_Code != "DailyReport"
 		&& module_Code != "LogQuery"
 		&& module_Code != "AlarmQuery"
-		&& module_Code != "AlarmSet") {
+		&& module_Code != "AlarmSet"
+		&& module_Code != "CalculateMaintaining") {
 		if (modules.length > 2) {
 			if(secondTab_Code!= modules[2]){
 				modules[2]=secondTab_Code;
@@ -482,6 +483,47 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 		}
 	}else if(module_Code == "AlarmSet"){
 		getAlarmLevelColor();
+	}else if(module_Code == "CalculateMaintaining"){
+		var tabPanel = Ext.getCmp("CalculateMaintainingTabPanel");
+		var activeId = tabPanel.getActiveTab().id;
+		if(activeId=="RPCCalculateMaintainingInfoPanel_Id"){
+			var gridPanel = Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id");
+			if (isNotVal(gridPanel)) {
+				gridPanel.getStore().load();
+			}else{
+				Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
+			}
+			
+			var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
+			if (isNotVal(bbar)) {
+				if(bbar.getStore().isEmptyStore){
+					var RPCCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+					bbar.setStore(RPCCalculateMaintainingDataStore);
+				}else{
+					bbar.getStore().loadPage(1);
+				}
+			}else{
+				Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+			}
+		}else if(activeId=="PCPCalculateMaintainingInfoPanel_Id"){
+			var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
+			if (isNotVal(gridPanel)) {
+				gridPanel.getStore().load();
+			}else{
+				Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
+			}
+			var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
+			if (isNotVal(bbar)) {
+				if(bbar.getStore().isEmptyStore){
+					var PCPCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+					bbar.setStore(PCPCalculateMaintainingDataStore);
+				}else{
+					bbar.getStore().loadPage(1);
+				}
+			}else{
+				Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+			}
+		}
 	}else {
 		return false;
 	}
