@@ -788,11 +788,114 @@ public class CalculateManagerService<T> extends BaseService<T> {
 				this.getBaseDao().updateOrDeleteBySql(updateSql);
 			}
 		}
-		
-		
-		
-		
-		
+		getBaseDao().saveRecalculateData(calculateManagerHandsontableChangedData);
+	}
+	
+	public void saveRPMReCalculateData(CalculateManagerHandsontableChangedData calculateManagerHandsontableChangedData) throws Exception {
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		if(calculateManagerHandsontableChangedData.getUpdatelist()!=null){
+			for(int i=0;i<calculateManagerHandsontableChangedData.getUpdatelist().size();i++){
+				StringBuffer productionDataBuff = new StringBuffer();
+				
+				PCPCalculateRequestData.FluidPVT fluidPVT=new PCPCalculateRequestData.FluidPVT();
+				PCPCalculateRequestData.Reservoir reservoir=new PCPCalculateRequestData.Reservoir();
+				
+				PCPCalculateRequestData.TubingString tubingString=new PCPCalculateRequestData.TubingString();
+				tubingString.setEveryTubing(new ArrayList<PCPCalculateRequestData.EveryTubing>());
+				tubingString.getEveryTubing().add(new PCPCalculateRequestData.EveryTubing());
+				
+				PCPCalculateRequestData.CasingString  casingString=new PCPCalculateRequestData.CasingString();
+				casingString.setEveryCasing(new ArrayList<PCPCalculateRequestData.EveryCasing>());
+				casingString.getEveryCasing().add(new PCPCalculateRequestData.EveryCasing());
+				
+				PCPCalculateRequestData.RodString rodString=new PCPCalculateRequestData.RodString();
+				rodString.setEveryRod(new ArrayList<PCPCalculateRequestData.EveryRod>());
+				
+				PCPCalculateRequestData.Production production=new PCPCalculateRequestData.Production();
+				
+				PCPCalculateRequestData.Pump pump =new PCPCalculateRequestData.Pump();
+				
+				PCPCalculateRequestData.ManualIntervention manualIntervention=new PCPCalculateRequestData.ManualIntervention();
+				
+				fluidPVT.setCrudeOilDensity(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getCrudeoilDensity()));
+				fluidPVT.setWaterDensity(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getWaterDensity()));
+				fluidPVT.setNaturalGasRelativeDensity(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getNaturalGasRelativeDensity()));
+				fluidPVT.setSaturationPressure(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getSaturationPressure()));
+				
+				reservoir.setDepth(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getReservoirDepth()));
+				reservoir.setTemperature(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getReservoirTemperature()));
+				
+				tubingString.getEveryTubing().get(0).setInsideDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getTubingStringInsideDiameter())*0.001));
+				casingString.getEveryCasing().get(0).setInsideDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getCasingStringInsideDiameter())*0.001));
+				
+				production.setTubingPressure(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getTubingPressure()));
+				production.setCasingPressure(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getCasingPressure()));
+				production.setWellHeadTemperature(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getWellHeadFluidTemperature()));
+				production.setWaterCut(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getWeightWaterCut()));
+				production.setProductionGasOilRatio(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getProductionGasOilRatio()));
+				production.setProducingfluidLevel(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getProducingFluidLevel()));
+				production.setPumpSettingDepth(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getPumpSettingDepth()));
+				
+				pump.setBarrelLength(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getBarrelLength()));
+				pump.setBarrelSeries(StringManagerUtils.stringToInteger(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getBarrelSeries()));
+				pump.setRotorDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRotorDiameter())*0.001));
+				pump.setQPR(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getQPR()));
+				
+				if(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength1())>0){
+					PCPCalculateRequestData.EveryRod everyRod=new PCPCalculateRequestData.EveryRod();
+					everyRod.setGrade(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodGrade1());
+					everyRod.setInsideDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodInsideDiameter1())*0.001));
+					everyRod.setOutsideDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodOutsideDiameter1())*0.001));
+					everyRod.setLength(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength1()));
+					rodString.getEveryRod().add(everyRod);
+				}
+				
+				if(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength2())>0){
+					PCPCalculateRequestData.EveryRod everyRod=new PCPCalculateRequestData.EveryRod();
+					everyRod.setGrade(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodGrade2());
+					everyRod.setInsideDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodInsideDiameter2())*0.001));
+					everyRod.setOutsideDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodOutsideDiameter2())*0.001));
+					everyRod.setLength(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength2()));
+					rodString.getEveryRod().add(everyRod);
+				}
+				
+				if(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength3())>0){
+					PCPCalculateRequestData.EveryRod everyRod=new PCPCalculateRequestData.EveryRod();
+					everyRod.setGrade(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodGrade3());
+					everyRod.setInsideDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodInsideDiameter3())*0.001));
+					everyRod.setOutsideDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodOutsideDiameter3())*0.001));
+					everyRod.setLength(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength3()));
+					rodString.getEveryRod().add(everyRod);
+				}
+				
+				if(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength4())>0){
+					PCPCalculateRequestData.EveryRod everyRod=new PCPCalculateRequestData.EveryRod();
+					everyRod.setGrade(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodGrade4());
+					everyRod.setInsideDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodInsideDiameter4())*0.001));
+					everyRod.setOutsideDiameter((float) (StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodOutsideDiameter4())*0.001));
+					everyRod.setLength(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getRodLength4()));
+					rodString.getEveryRod().add(everyRod);
+				}
+				
+				manualIntervention.setNetGrossRatio(StringManagerUtils.stringToFloat(calculateManagerHandsontableChangedData.getUpdatelist().get(i).getNetGrossRatio()));
+				
+				productionDataBuff.append("{");
+				productionDataBuff.append("\"FluidPVT\":"+(fluidPVT!=null?gson.toJson(fluidPVT):"{}")+",");
+				productionDataBuff.append("\"Reservoir\":"+(reservoir!=null?gson.toJson(reservoir):"{}")+",");
+				productionDataBuff.append("\"RodString\":"+(rodString!=null?gson.toJson(rodString):"{}")+",");
+				productionDataBuff.append("\"TubingString\":"+(tubingString!=null?gson.toJson(tubingString):"{}")+",");
+				productionDataBuff.append("\"CasingString\":"+(casingString!=null?gson.toJson(casingString):"{}")+",");
+				productionDataBuff.append("\"Pump\":"+(pump!=null?gson.toJson(pump):"{}")+",");
+				productionDataBuff.append("\"Production\":"+(production!=null?gson.toJson(production):"{}")+",");
+				productionDataBuff.append("\"ManualIntervention\":"+(manualIntervention!=null?gson.toJson(manualIntervention):"{}"));
+				productionDataBuff.append("}");
+				
+				String updateSql="update tbl_pcpacqdata_hist t set t.resultstatus=2,t.productiondata='"+productionDataBuff.toString()+"' where t.id="+calculateManagerHandsontableChangedData.getUpdatelist().get(i).getId();
+				
+				this.getBaseDao().updateOrDeleteBySql(updateSql);
+			}
+		}
 		getBaseDao().saveRecalculateData(calculateManagerHandsontableChangedData);
 	}
 //	
@@ -881,15 +984,17 @@ public class CalculateManagerService<T> extends BaseService<T> {
 	public int recalculateByProductionData(String orgId, String wellName, String deviceType,String startDate,String endDate,String calculateSign)throws Exception {
 		String tableName="tbl_rpcacqdata_hist";
 		String deviceTableName="tbl_rpcdevice";
+		String acqTimeColumn="fesdiagramacqtime";
 		if(StringManagerUtils.stringToInteger(deviceType)!=0){
 			tableName="tbl_pcpacqdata_hist";
 			deviceTableName="tbl_pcpdevice";
+			acqTimeColumn="acqtime";
 		}
 		
-		String updateSql="update tbl_pcpacqdata_hist t "
+		String updateSql="update "+tableName+" t "
 				+ " set (productiondata,resultstatus)"
-				+ "=(select productiondata,2 from "+deviceTableName+" t2 where t2.id=t.wellid) "
-				+ " where t.fesdiagramacqtime between to_date('"+startDate+"','yyyy-mm-dd') and to_date('"+endDate+"','yyyy-mm-dd')+1";
+				+ "=(select t2.productiondata,2 from "+deviceTableName+" t2 where t2.id=t.wellid) "
+				+ " where t."+acqTimeColumn+" between to_date('"+startDate+"','yyyy-mm-dd') and to_date('"+endDate+"','yyyy-mm-dd')+1";
 		if(StringManagerUtils.isNotNull(calculateSign)){
 			updateSql+=" and t.resultstatus in ("+calculateSign+")";
 		}
@@ -905,6 +1010,8 @@ public class CalculateManagerService<T> extends BaseService<T> {
 		String requestData="{}";
 		if("1".equals(calculateType)){
 			requestData=this.getFSDiagramCalculateRequestData(recordId,wellName,acqTime);
+		}if("2".equals(calculateType)){
+			requestData=this.getRPMCalculateRequestData(recordId,wellName,acqTime);
 		}else if("5".equals(calculateType)){
 			requestData=this.getElecInverCalculateRequestData(wellName,acqTime);
 		}
@@ -924,6 +1031,21 @@ public class CalculateManagerService<T> extends BaseService<T> {
 		if(list.size()>0){
 			Object[] obj=(Object[])list.get(0);
 			requestData=calculateDataService.getObjectToRPCCalculateRequestData(obj);
+		}
+		return requestData;
+	}
+	
+	public String getRPMCalculateRequestData(String recordId,String wellName,String acqTime) throws SQLException, IOException, ParseException{
+		String requestData="{}";
+		String sql="select t2.wellname,to_char(t.acqTime,'yyyy-mm-dd hh24:mi:ss'),"
+				+ " t.rpm,t.productiondata"
+				+ " from tbl_pcpacqdata_hist t,tbl_pcpdevice t2"
+				+ " where t.wellid=t2.id  "
+				+ " and t.id="+recordId;
+		List<?> list = this.findCallSql(sql);
+		if(list.size()>0){
+			Object[] obj=(Object[])list.get(0);
+			requestData=calculateDataService.getObjectToRPMCalculateRequestData(obj);
 		}
 		return requestData;
 	}
@@ -1057,6 +1179,159 @@ public class CalculateManagerService<T> extends BaseService<T> {
 		}
 		
 		return requestData;
+	}
+	
+	public String getTotalCalculateResultData(String orgId, String wellName, Page pager,String deviceType,String startDate,String endDate,String calculateType)
+			throws Exception {
+		String json="";
+		if("3".equals(calculateType)){
+			json=this.getFESDiagramTotalCalculateResultData(orgId, wellName, pager, deviceType, startDate, endDate,  calculateType);
+		}else if("4".equals(calculateType)){
+			json=this.getRPMTotalCalculateResultData(orgId, wellName, pager, deviceType, startDate, endDate, calculateType);
+		}
+		
+		return json;
+	}
+	
+	public String getFESDiagramTotalCalculateResultData(String orgId, String wellName, Page pager,String deviceType,String startDate,String endDate,String calculateType)
+			throws Exception {
+		DataDictionary ddic = null;
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		String columns= "";
+		String sql="";
+		String finalSql="";
+		String sqlAll="";
+		String ddicName="totalCalculateManager";
+		StringBuffer result_json = new StringBuffer();
+		ConfigFile configFile=Config.getInstance().configFile;
+		
+		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
+		columns = ddic.getTableHeader();
+		
+		String prodCol=" t.liquidWeightProduction,t.oilWeightProduction,";
+		if(configFile.getOthers().getProductionUnit()!=0){
+			prodCol=" t.liquidVolumetricProduction,t.oilVolumetricProduction,";
+		}
+		
+		sql="select t.id,t.wellId,t.wellName,to_char(t.caldate,'yyyy-mm-dd'),"
+			+ "t.resultname,t.resultString,"
+			+ prodCol
+			+ " t.pumpeff,t.systemefficiency,t.wattDegreeBalance,t.iDegreeBalance,t.todayKWattH"
+			+ " from viw_rpcdailycalculationdata t where t.org_id in("+orgId+") "
+			+ " and t.caldate between to_date('"+startDate+"','yyyy-mm-dd') and to_date('"+endDate+"','yyyy-mm-dd')+1";
+		if(StringManagerUtils.isNotNull(wellName)){
+			sql+=" and  t.wellName = '" + wellName.trim() + "' ";
+		}
+		sql+=" order by t.caldate desc, t.wellName";
+		int maxvalue=pager.getLimit()+pager.getStart();
+		finalSql="select * from   ( select a.*,rownum as rn from ("+sql+" ) a where  rownum <="+maxvalue+") b where rn >"+pager.getStart();
+		
+		int totals=this.getTotalCountRows(sql);
+		List<?> list = this.findCallSql(finalSql);
+		
+		result_json.append("{\"success\":true,\"totalCount\":"+totals+",\"columns\":"+columns+",\"totalRoot\":[");
+		for(int i=0;i<list.size();i++){
+			Object[] obj = (Object[]) list.get(i);
+			String productionData=obj[8].toString();
+			type = new TypeToken<RPCCalculateRequestData>() {}.getType();
+			RPCCalculateRequestData rpcProductionData=gson.fromJson(productionData, type);
+			
+			result_json.append("{\"id\":\""+obj[0]+"\",");
+			result_json.append("\"wellId\":\""+obj[1]+"\",");
+			result_json.append("\"wellName\":\""+obj[2]+"\",");
+			result_json.append("\"calDate\":\""+obj[3]+"\",");
+			result_json.append("\"resultName\":\""+obj[4]+"\",");
+			result_json.append("\"resultString\":\""+obj[5]+"\",");
+			
+			if(configFile.getOthers().getProductionUnit()==0){
+				result_json.append("\"liquidWeightProduction\":\""+obj[6]+"\",");
+				result_json.append("\"oilWeightProduction\":\""+obj[7]+"\",");
+			}else{
+				result_json.append("\"liquidVolumetricProduction\":\""+obj[6]+"\",");
+				result_json.append("\"oilVolumetricProduction\":\""+obj[7]+"\",");
+			}
+			
+			result_json.append("\"pumpEff\":\""+obj[8]+"\",");
+			result_json.append("\"systemEfficiency\":\""+obj[9]+"\",");
+			result_json.append("\"wattDegreeBalance\":\""+obj[10]+"\",");
+			result_json.append("\"iDegreeBalance\":\""+obj[10]+"\",");
+			result_json.append("\"todayKWattH\":\""+obj[5]+"\"},");
+		}
+		if(result_json.toString().endsWith(",")){
+			result_json = result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]}");
+		String json=result_json.toString().replaceAll("null", "");
+		return json;
+	}
+	
+	public String getRPMTotalCalculateResultData(String orgId, String wellName, Page pager,String deviceType,String startDate,String endDate,String calculateType)
+			throws Exception {
+		DataDictionary ddic = null;
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		String columns= "";
+		String sql="";
+		String finalSql="";
+		String sqlAll="";
+		String ddicName="RPMTotalCalculateManager";
+		StringBuffer result_json = new StringBuffer();
+		ConfigFile configFile=Config.getInstance().configFile;
+		
+		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
+		columns = ddic.getTableHeader();
+		
+		String prodCol=" t.liquidWeightProduction,t.oilWeightProduction,";
+		if(configFile.getOthers().getProductionUnit()!=0){
+			prodCol=" t.liquidVolumetricProduction,t.oilVolumetricProduction,";
+		}
+		
+		sql="select t.id,t.wellId,t.wellName,to_char(t.caldate,'yyyy-mm-dd'),"
+			+ prodCol
+			+ " t.pumpeff,t.systemefficiency,t.todayKWattH"
+			+ " from viw_pcpdailycalculationdata t where t.org_id in("+orgId+") "
+			+ " and t.caldate between to_date('"+startDate+"','yyyy-mm-dd') and to_date('"+endDate+"','yyyy-mm-dd')+1";
+		if(StringManagerUtils.isNotNull(wellName)){
+			sql+=" and  t.wellName = '" + wellName.trim() + "' ";
+		}
+		sql+=" order by t.caldate desc, t.wellName";
+		int maxvalue=pager.getLimit()+pager.getStart();
+		finalSql="select * from   ( select a.*,rownum as rn from ("+sql+" ) a where  rownum <="+maxvalue+") b where rn >"+pager.getStart();
+		
+		int totals=this.getTotalCountRows(sql);
+		List<?> list = this.findCallSql(finalSql);
+		
+		result_json.append("{\"success\":true,\"totalCount\":"+totals+",\"columns\":"+columns+",\"totalRoot\":[");
+		for(int i=0;i<list.size();i++){
+			Object[] obj = (Object[]) list.get(i);
+			String productionData=obj[8].toString();
+			type = new TypeToken<RPCCalculateRequestData>() {}.getType();
+			RPCCalculateRequestData rpcProductionData=gson.fromJson(productionData, type);
+			
+			result_json.append("{\"id\":\""+obj[0]+"\",");
+			result_json.append("\"wellId\":\""+obj[1]+"\",");
+			result_json.append("\"wellName\":\""+obj[2]+"\",");
+			result_json.append("\"calDate\":\""+obj[3]+"\",");
+			
+			if(configFile.getOthers().getProductionUnit()==0){
+				result_json.append("\"liquidWeightProduction\":\""+obj[4]+"\",");
+				result_json.append("\"oilWeightProduction\":\""+obj[5]+"\",");
+			}else{
+				result_json.append("\"liquidVolumetricProduction\":\""+obj[4]+"\",");
+				result_json.append("\"oilVolumetricProduction\":\""+obj[5]+"\",");
+			}
+			
+			result_json.append("\"pumpEff\":\""+obj[6]+"\",");
+			result_json.append("\"systemEfficiency\":\""+obj[7]+"\",");
+			result_json.append("\"todayKWattH\":\""+obj[8]+"\"},");
+		}
+		if(result_json.toString().endsWith(",")){
+			result_json = result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]}");
+		String json=result_json.toString().replaceAll("null", "");
+		return json;
 	}
 	
 	public BaseDao getDao() {

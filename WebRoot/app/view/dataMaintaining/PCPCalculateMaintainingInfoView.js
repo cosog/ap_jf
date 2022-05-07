@@ -206,6 +206,7 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
     		},'->',{
                 xtype: 'button',
                 text: '修改数据计算',
+                id:'PCPCalculateMaintainingUpdateDataBtn',
                 pressed: true,
                 iconCls: 'edit',
                 handler: function (v, o) {
@@ -301,19 +302,54 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
             	layout: "fit"
             },{
             	region: 'center',
-            	title: '转速计产',
-				layout: "fit",
-				id:'PCPRPMCalculateMaintainingPanel',
-				border: false,
-				bbar: bbar,
-				html:'<div class=PCPCalculateMaintainingContainer" style="width:100%;height:100%;"><div class="con" id="PCPCalculateMaintainingDiv_id"></div></div>',
-				listeners: {
-                    resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                    	if(pcpRPMCalculateMaintainingHandsontableHelper!=null && pcpRPMCalculateMaintainingHandsontableHelper.hot!=undefined){
-                    		pcpRPMCalculateMaintainingHandsontableHelper.hot.refreshDimensions();
-                    	}
+            	xtype: 'tabpanel',
+        		id:"PCPCalculateMaintainingTabPanel",
+        		activeTab: 0,
+        		border: false,
+        		tabPosition: 'bottom',
+        		items: [{
+        			title: '单条记录',
+    				layout: "fit",
+    				id:'PCPCalculateMaintainingPanel',
+    				border: false,
+    				bbar: bbar,
+    				html:'<div class=PCPCalculateMaintainingContainer" style="width:100%;height:100%;"><div class="con" id="PCPCalculateMaintainingDiv_id"></div></div>',
+    				listeners: {
+                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                        	if(pcpRPMCalculateMaintainingHandsontableHelper!=null && pcpRPMCalculateMaintainingHandsontableHelper.hot!=undefined){
+                        		pcpRPMCalculateMaintainingHandsontableHelper.hot.refreshDimensions();
+                        	}
+                        }
                     }
-                }
+        		},{
+        			title: '记录汇总',
+    				layout: "fit",
+    				id:'PCPTotalCalculateMaintainingPanel',
+    				border: false,
+    				html:'<div class=PCPTotalCalculateMaintainingContainer" style="width:100%;height:100%;"><div class="con" id="PCPTotalCalculateMaintainingDiv_id"></div></div>',
+    				listeners: {
+                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+//                        	if(pcpTotalCalculateMaintainingHandsontableHelper!=null && pcpTotalCalculateMaintainingHandsontableHelper.hot!=undefined){
+//                        		pcpTotalCalculateMaintainingHandsontableHelper.hot.refreshDimensions();
+//                        	}
+                        }
+                    }
+        		}],
+        		listeners: {
+    				tabchange: function (tabPanel, newCard,oldCard, obj) {
+    					if(newCard.id=="PCPCalculateMaintainingPanel"){
+    						Ext.getCmp("PCPCalculateMaintainingUpdateDataBtn").show();
+    						Ext.getCmp("PCPCalculateMaintainingLinkedDataBtn").show();
+    						Ext.getCmp("PCPCalculateMaintainingExportDataBtn").show();
+    						Ext.getCmp("PCPCalculateMaintainingCalculateSignComBox_Id").show();
+    					}else if(newCard.id=="PCPTotalCalculateMaintainingPanel"){
+    						Ext.getCmp("PCPCalculateMaintainingUpdateDataBtn").hide();
+    						Ext.getCmp("PCPCalculateMaintainingLinkedDataBtn").hide();
+    						Ext.getCmp("PCPCalculateMaintainingExportDataBtn").hide();
+    						Ext.getCmp("PCPCalculateMaintainingCalculateSignComBox_Id").hide();
+    					}
+    				}
+    			}
             }]
         });
         me.callParent(arguments);

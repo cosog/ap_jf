@@ -21,6 +21,7 @@ import org.hibernate.engine.jdbc.SerializableClobProxy;
 import org.springframework.stereotype.Service;
 
 import com.cosog.model.calculate.CommResponseData;
+import com.cosog.model.calculate.PCPCalculateRequestData;
 import com.cosog.model.calculate.RPCCalculateRequestData;
 import com.cosog.model.calculate.RPCProductionData;
 import com.cosog.model.calculate.TimeEffResponseData;
@@ -226,6 +227,30 @@ public class CalculateDataService<T> extends BaseService<T> {
 	        calculateRequestData.getFESDiagram().setI(I);
 	        
 	        calculateRequestData.getProduction().setLevelCorrectValue(StringManagerUtils.stringToFloat(object[8]+""));
+	        
+	        result=gson.toJson(calculateRequestData);
+		}catch(Exception e){
+			e.printStackTrace();
+			return "";
+		}
+		return result;
+	}
+	
+	public String getObjectToRPMCalculateRequestData(Object[] object) throws SQLException, IOException, ParseException{
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		String result="";
+		try{
+			String productionData=object[3].toString();
+			type = new TypeToken<PCPCalculateRequestData>() {}.getType();
+			PCPCalculateRequestData calculateRequestData=gson.fromJson(productionData, type);
+			if(calculateRequestData==null){
+				calculateRequestData=new PCPCalculateRequestData();
+				calculateRequestData.init();
+			}
+			calculateRequestData.setWellName(object[0]+"");
+			calculateRequestData.setAcqTime(object[1]+"");
+			calculateRequestData.setRPM(StringManagerUtils.stringToFloat(object[2]+""));
 	        
 	        result=gson.toJson(calculateRequestData);
 		}catch(Exception e){

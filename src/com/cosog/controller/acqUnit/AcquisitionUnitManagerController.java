@@ -250,9 +250,6 @@ public class AcquisitionUnitManagerController extends BaseController {
 				modbusProtocolConfig.getProtocol().add(protocol);
 			}
 			StringManagerUtils.writeFile(path,StringManagerUtils.jsonStringFormat(gson.toJson(modbusProtocolConfig)));
-//			equipmentDriveMap.put("modbusProtocolConfig", modbusProtocolConfig);
-//			EquipmentDriverServerTask.initProtocolConfig(name,"update");
-//			this.acquisitionGroupManagerService.doAcquisitionGroupAdd(acquisitionGroup);
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
 		} catch (Exception e) {
@@ -541,13 +538,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 						acquisitionGroupItem.setGroupId(Integer.parseInt(groupId));
 						log.debug("groupCode==" + groupCode);
 						acquisitionGroupItem.setItemName(itemName);
-//						acquisitionGroupItem.setSort(StringManagerUtils.isNumber(module_[3])?StringManagerUtils.stringTransferInteger(module_[3]):null);
-						acquisitionGroupItem.setBitIndex(bitIndex>=0?bitIndex:null);
-//						acquisitionGroupItem.setShowLevel(StringManagerUtils.isNumber(module_[4])?StringManagerUtils.stringTransferInteger(module_[4]):null);
-//						acquisitionGroupItem.setRealtimeCurve((StringManagerUtils.isNumber(module_[5]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[5]):null);
-//						acquisitionGroupItem.setRealtimeCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[6])?module_[6]:"");
-//						acquisitionGroupItem.setHistoryCurve((StringManagerUtils.isNumber(module_[7]) && !"开关量".equalsIgnoreCase(resolutionMode))?StringManagerUtils.stringTransferInteger(module_[7]):null);
-//						acquisitionGroupItem.setHistoryCurveColor((!"开关量".equalsIgnoreCase(resolutionMode))&&StringManagerUtils.isColor16("#"+module_[8])?module_[8]:"");
+//						acquisitionGroupItem.setBitIndex(bitIndex>=0?bitIndex:null);
 						acquisitionGroupItem.setMatrix(module_[4]);
 						this.acquisitionUnitItemManagerService.grantAcquisitionItemsPermission(acquisitionGroupItem);
 					}
@@ -1633,8 +1624,6 @@ public class AcquisitionUnitManagerController extends BaseController {
 		log.warn("jh json is ==" + json);
 		pw.flush();
 		pw.close();
-//		EquipmentDriverServerTask beeTechDriverServerTast=EquipmentDriverServerTask.getInstance();
-//		beeTechDriverServerTast.updateWellConfif(wellHandsontableChangedData);
 		return null;
 	}
 	
@@ -1750,8 +1739,6 @@ public class AcquisitionUnitManagerController extends BaseController {
 		log.warn("jh json is ==" + json);
 		pw.flush();
 		pw.close();
-//		EquipmentDriverServerTask beeTechDriverServerTast=EquipmentDriverServerTask.getInstance();
-//		beeTechDriverServerTast.updateWellConfif(wellHandsontableChangedData);
 		return null;
 	}
 	
