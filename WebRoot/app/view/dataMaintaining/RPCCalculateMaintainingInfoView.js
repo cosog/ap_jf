@@ -207,6 +207,7 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
     		},'->',{
                 xtype: 'button',
                 text: '修改数据计算',
+                id:'RPCCalculateMaintainingUpdateDataBtn',
                 pressed: true,
                 iconCls: 'edit',
                 handler: function (v, o) {
@@ -302,19 +303,54 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
             	layout: "fit"
             },{
             	region: 'center',
-            	title: '功图计算',
-				layout: "fit",
-				id:'PumpingUnitCalculateManagerPanel',
-				border: false,
-				bbar: bbar,
-				html:'<div class=RPCCalculateMaintainingContainer" style="width:100%;height:100%;"><div class="con" id="RPCCalculateMaintainingDiv_id"></div></div>',
-				listeners: {
-                    resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                    	if(rpcFESDiagramCalculateMaintainingHandsontableHelper!=null && rpcFESDiagramCalculateMaintainingHandsontableHelper.hot!=undefined){
-                    		rpcFESDiagramCalculateMaintainingHandsontableHelper.hot.refreshDimensions();
-                    	}
+            	xtype: 'tabpanel',
+        		id:"RPCCalculateMaintainingTabPanel",
+        		activeTab: 0,
+        		border: false,
+        		tabPosition: 'bottom',
+        		items: [{
+        			title: '单条记录',
+    				layout: "fit",
+    				id:'RPCCalculateMaintainingPanel',
+    				border: false,
+    				bbar: bbar,
+    				html:'<div class=RPCCalculateMaintainingContainer" style="width:100%;height:100%;"><div class="con" id="RPCCalculateMaintainingDiv_id"></div></div>',
+    				listeners: {
+                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                        	if(rpcFESDiagramCalculateMaintainingHandsontableHelper!=null && rpcFESDiagramCalculateMaintainingHandsontableHelper.hot!=undefined){
+                        		rpcFESDiagramCalculateMaintainingHandsontableHelper.hot.refreshDimensions();
+                        	}
+                        }
                     }
-                }
+        		},{
+        			title: '记录汇总',
+    				layout: "fit",
+    				id:'RPCTotalCalculateMaintainingPanel',
+    				border: false,
+    				html:'<div class=RPCTotalCalculateMaintainingContainer" style="width:100%;height:100%;"><div class="con" id="RPCTotalCalculateMaintainingDiv_id"></div></div>',
+    				listeners: {
+                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+//                        	if(rpcTotalCalculateMaintainingHandsontableHelper!=null && rpcTotalCalculateMaintainingHandsontableHelper.hot!=undefined){
+//                        		rpcTotalCalculateMaintainingHandsontableHelper.hot.refreshDimensions();
+//                        	}
+                        }
+                    }
+        		}],
+        		listeners: {
+    				tabchange: function (tabPanel, newCard,oldCard, obj) {
+    					if(newCard.id=="RPCCalculateMaintainingPanel"){
+    						Ext.getCmp("RPCCalculateMaintainingUpdateDataBtn").show();
+    						Ext.getCmp("RPCCalculateMaintainingLinkedDataBtn").show();
+    						Ext.getCmp("RPCCalculateMaintainingExportDataBtn").show();
+    						Ext.getCmp("RPCCalculateMaintainingCalculateSignComBox_Id").show();
+    					}else if(newCard.id=="RPCTotalCalculateMaintainingPanel"){
+    						Ext.getCmp("RPCCalculateMaintainingUpdateDataBtn").hide();
+    						Ext.getCmp("RPCCalculateMaintainingLinkedDataBtn").hide();
+    						Ext.getCmp("RPCCalculateMaintainingExportDataBtn").hide();
+    						Ext.getCmp("RPCCalculateMaintainingCalculateSignComBox_Id").hide();
+    					}
+    				}
+    			}
             }]
         });
         me.callParent(arguments);

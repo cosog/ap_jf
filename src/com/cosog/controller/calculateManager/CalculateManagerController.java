@@ -188,6 +188,8 @@ public class CalculateManagerController extends BaseController {
 			CalculateManagerHandsontableChangedData calculateManagerHandsontableChangedData=gson.fromJson(data, type);
 			if("0".equals(deviceType)){
 				this.calculateManagerService.saveReCalculateData(calculateManagerHandsontableChangedData);
+			}else if("1".equals(deviceType)){
+				this.calculateManagerService.saveRPMReCalculateData(calculateManagerHandsontableChangedData);
 			}
 			json ="{success:true}";
 		}else if("5".equals(calculateType)){
@@ -463,6 +465,8 @@ public class CalculateManagerController extends BaseController {
 		String fileName="请求数据-"+wellName+"-"+acqTime+".json";
 		if("1".equals(calculateType)){
 			fileName="请求数据-"+wellName+"-"+acqTime+".json";
+		}if("2".equals(calculateType)){
+			fileName="转速计产请求数据-"+wellName+"-"+acqTime+".json";
 		}else if("5".equals(calculateType)){
 			fileName="反演请求数据-"+wellName+"-"+acqTime+".json";
 		}
@@ -484,6 +488,61 @@ public class CalculateManagerController extends BaseController {
             e.printStackTrace();
         }
 		StringManagerUtils.deleteFile(path);
+		return null;
+	}
+	
+	@RequestMapping("/getTotalCalculateResultData")
+	public String getTotalCalculateResultData() throws Exception {
+		orgId = ParamUtils.getParameter(request, "orgId");
+		wellName = ParamUtils.getParameter(request, "wellName");
+		
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
+		String startDate = ParamUtils.getParameter(request, "startDate");
+		String endDate = ParamUtils.getParameter(request, "endDate");
+		String calculateType = ParamUtils.getParameter(request, "calculateType");
+		this.pager = new Page("pagerForm", request);
+		User user=null;
+		if (!StringManagerUtils.isNotNull(orgId)) {
+			HttpSession session=request.getSession();
+			user = (User) session.getAttribute("userLogin");
+			if (user != null) {
+				orgId = "" + user.getUserorgids();
+			}
+		}
+		String tableName="tbl_rpcdailycalculationdata";
+		if(StringManagerUtils.stringToInteger(deviceType)!=0){
+			tableName="tbl_pcpdailycalculationdata";
+		}
+		if(!StringManagerUtils.isNotNull(endDate)){
+			String sql = " select to_char(max(t.caldate),'yyyy-mm-dd') from "+tableName+" t";
+			List list = this.service.reportDateJssj(sql);
+			if (list.size() > 0 &&list.get(0)!=null&&!list.get(0).toString().equals("null")) {
+				endDate = list.get(0).toString();
+			} else {
+				endDate = StringManagerUtils.getCurrentTime();
+			}
+		}
+		
+		if(!StringManagerUtils.isNotNull(startDate)){
+			startDate=StringManagerUtils.addDay(StringManagerUtils.stringToDate(endDate),0);
+		}
+//		startDate=StringManagerUtils.addDay(StringManagerUtils.stringToDate(endDate),-120);
+		pager.setStart_date(startDate);
+		pager.setEnd_date(endDate);
+		
+		String json = calculateManagerService.getTotalCalculateResultData(orgId, wellName, pager,deviceType,startDate,endDate,calculateType);
+		response.setContentType("application/json;charset=utf-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw;
+		try {
+			pw = response.getWriter();
+			pw.print(json);
+			pw.flush();
+			pw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
