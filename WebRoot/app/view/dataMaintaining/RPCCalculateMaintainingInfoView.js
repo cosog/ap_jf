@@ -6,11 +6,8 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
     border: false,
     initComponent: function () {
         var me = this;
-//        var RPCCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
-//        var RPCCalculateMaintainingWellListStore=Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
         var bbar = new Ext.toolbar.Paging({
         	id:'RPCFESDiagramCalculateMaintainingBbar',
-//            store: RPCCalculateMaintainingDataStore,
             pageSize: defaultPageSize,
             displayInfo: true,
             displayMsg: '当前 {0}~{1}条  共 {2} 条',
@@ -84,8 +81,34 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                         },
                         select: function (combo, record, index) {
                         	calculateSignComb.clearValue();
-                        	Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar").getStore().loadPage(1);
-                        	Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id").getStore().load();
+                			var activeId = Ext.getCmp("RPCCalculateMaintainingTabPanel").getActiveTab().id;
+                			if(activeId=="RPCCalculateMaintainingPanel"){
+                				var gridPanel = Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id");
+                				if (isNotVal(gridPanel)) {
+                					gridPanel.getStore().load();
+                				}else{
+                					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
+                				}
+                				
+                				var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
+                				if (isNotVal(bbar)) {
+                					if(bbar.getStore().isEmptyStore){
+                						var RPCCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+                						bbar.setStore(RPCCalculateMaintainingDataStore);
+                					}else{
+                						bbar.getStore().loadPage(1);
+                					}
+                				}else{
+                					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+                				}
+                			}else if(activeId=="RPCCalculateMaintainingPanel"){
+                				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
+                	            if (isNotVal(gridPanel)) {
+                	            	gridPanel.getStore().loadPage(1);
+                	            }else{
+                	            	Ext.create("AP.store.dataMaintaining.RPCTotalCalculateMaintainingDataStore");
+                	            }
+                			}
                         }
                     }
                 });
@@ -152,8 +175,24 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                     		calculateSignComb.getStore().load(); // 加载井下拉框的store
                         },
                         select: function (combo, record, index) {
-                        	Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar").getStore().loadPage(1);
-                        	Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id").getStore().load();;
+                        	var gridPanel = Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id");
+            				if (isNotVal(gridPanel)) {
+            					gridPanel.getStore().load();
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
+            				}
+            				
+            				var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
+            				if (isNotVal(bbar)) {
+            					if(bbar.getStore().isEmptyStore){
+            						var RPCCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+            						bbar.setStore(RPCCalculateMaintainingDataStore);
+            					}else{
+            						bbar.getStore().loadPage(1);
+            					}
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+            				}
                         }
                     }
         });
@@ -173,8 +212,34 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                 listeners: {
                 	select: function (combo, record, index) {
                 		calculateSignComb.clearValue();
-                		Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar").getStore().loadPage(1);
-                		Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id").getStore().load();;
+                		var activeId = Ext.getCmp("RPCCalculateMaintainingTabPanel").getActiveTab().id;
+            			if(activeId=="RPCCalculateMaintainingPanel"){
+            				var gridPanel = Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id");
+            				if (isNotVal(gridPanel)) {
+            					gridPanel.getStore().load();
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
+            				}
+            				
+            				var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
+            				if (isNotVal(bbar)) {
+            					if(bbar.getStore().isEmptyStore){
+            						var RPCCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+            						bbar.setStore(RPCCalculateMaintainingDataStore);
+            					}else{
+            						bbar.getStore().loadPage(1);
+            					}
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+            				}
+            			}else if(activeId=="RPCCalculateMaintainingPanel"){
+            				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
+            	            if (isNotVal(gridPanel)) {
+            	            	gridPanel.getStore().loadPage(1);
+            	            }else{
+            	            	Ext.create("AP.store.dataMaintaining.RPCTotalCalculateMaintainingDataStore");
+            	            }
+            			}
                     }
                 }
             },{
@@ -189,8 +254,34 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                 listeners: {
                 	select: function (combo, record, index) {
                 		calculateSignComb.clearValue();
-                		Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar").getStore().loadPage(1);
-                		Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id").getStore().load();;
+                		var activeId = Ext.getCmp("RPCCalculateMaintainingTabPanel").getActiveTab().id;
+            			if(activeId=="RPCCalculateMaintainingPanel"){
+            				var gridPanel = Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id");
+            				if (isNotVal(gridPanel)) {
+            					gridPanel.getStore().load();
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
+            				}
+            				
+            				var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
+            				if (isNotVal(bbar)) {
+            					if(bbar.getStore().isEmptyStore){
+            						var RPCCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+            						bbar.setStore(RPCCalculateMaintainingDataStore);
+            					}else{
+            						bbar.getStore().loadPage(1);
+            					}
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+            				}
+            			}else if(activeId=="RPCCalculateMaintainingPanel"){
+            				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
+            	            if (isNotVal(gridPanel)) {
+            	            	gridPanel.getStore().loadPage(1);
+            	            }else{
+            	            	Ext.create("AP.store.dataMaintaining.RPCTotalCalculateMaintainingDataStore");
+            	            }
+            			}
                     }
                 }
             },"-",calculateSignComb,'-',{
@@ -200,8 +291,34 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                 pressed: true,
                 hidden:false,
                 handler: function (v, o) {
-                	Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar").getStore().loadPage(1);
-                	Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id").getStore().load();;
+                	var activeId = Ext.getCmp("RPCCalculateMaintainingTabPanel").getActiveTab().id;
+        			if(activeId=="RPCCalculateMaintainingPanel"){
+        				var gridPanel = Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id");
+        				if (isNotVal(gridPanel)) {
+        					gridPanel.getStore().load();
+        				}else{
+        					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
+        				}
+        				
+        				var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
+        				if (isNotVal(bbar)) {
+        					if(bbar.getStore().isEmptyStore){
+        						var RPCCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+        						bbar.setStore(RPCCalculateMaintainingDataStore);
+        					}else{
+        						bbar.getStore().loadPage(1);
+        					}
+        				}else{
+        					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+        				}
+        			}else if(activeId=="RPCCalculateMaintainingPanel"){
+        				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
+        	            if (isNotVal(gridPanel)) {
+        	            	gridPanel.getStore().loadPage(1);
+        	            }else{
+        	            	Ext.create("AP.store.dataMaintaining.RPCTotalCalculateMaintainingDataStore");
+        	            }
+        			}
                 }
             
     		},'->',{
@@ -326,15 +443,7 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
         			title: '记录汇总',
     				layout: "fit",
     				id:'RPCTotalCalculateMaintainingPanel',
-    				border: false,
-    				html:'<div class=RPCTotalCalculateMaintainingContainer" style="width:100%;height:100%;"><div class="con" id="RPCTotalCalculateMaintainingDiv_id"></div></div>',
-    				listeners: {
-                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-//                        	if(rpcTotalCalculateMaintainingHandsontableHelper!=null && rpcTotalCalculateMaintainingHandsontableHelper.hot!=undefined){
-//                        		rpcTotalCalculateMaintainingHandsontableHelper.hot.refreshDimensions();
-//                        	}
-                        }
-                    }
+    				border: false
         		}],
         		listeners: {
     				tabchange: function (tabPanel, newCard,oldCard, obj) {
@@ -348,6 +457,13 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
     						Ext.getCmp("RPCCalculateMaintainingLinkedDataBtn").hide();
     						Ext.getCmp("RPCCalculateMaintainingExportDataBtn").hide();
     						Ext.getCmp("RPCCalculateMaintainingCalculateSignComBox_Id").hide();
+    						
+    						var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
+    			            if (isNotVal(gridPanel)) {
+    			            	gridPanel.getStore().loadPage(1);
+    			            }else{
+    			            	Ext.create("AP.store.dataMaintaining.RPCTotalCalculateMaintainingDataStore");
+    			            }
     					}
     				}
     			}
@@ -631,44 +747,4 @@ var RPCFESDiagramCalculateMaintainingHandsontableHelper = {
 	        
 	        return rpcFESDiagramCalculateMaintainingHandsontableHelper;
 	    }
-};
-
-function createCalculateManagerWellListColumn(columnInfo) {
-    var myArr = columnInfo;
-
-    var myColumns = "[";
-    for (var i = 0; i < myArr.length; i++) {
-        var attr = myArr[i];
-        var width_ = "";
-        var lock_ = "";
-        var hidden_ = "";
-        if (attr.hidden == true) {
-            hidden_ = ",hidden:true";
-        }
-        if (isNotVal(attr.lock)) {
-            //lock_ = ",locked:" + attr.lock;
-        }
-        if (isNotVal(attr.width)) {
-            width_ = ",width:" + attr.width;
-        }
-        myColumns += "{text:'" + attr.header + "',lockable:true,align:'center' "+width_;
-        if (attr.dataIndex == 'id') {
-            myColumns += ",xtype: 'rownumberer',sortable : false,locked:false";
-        }else if (attr.dataIndex.toUpperCase()=='commStatusName'.toUpperCase()) {
-            myColumns += ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceCommStatusColor(value,o,p,e);}";
-        }else if (attr.dataIndex.toUpperCase()=='slave'.toUpperCase()) {
-            myColumns += ",sortable : false,locked:true,dataIndex:'" + attr.dataIndex + "',renderer:function(value){return \"<span data-qtip=\"+(value==undefined?\"\":value)+\">\"+(value==undefined?\"\":value)+\"</span>\";}";
-        } else if (attr.dataIndex.toUpperCase() == 'acqTime'.toUpperCase()) {
-            myColumns += ",sortable : false,locked:false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceTimeFormat(value,o,p,e);}";
-        } else {
-            myColumns += hidden_ + lock_ + ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value){return \"<span data-qtip=\"+(value==undefined?\"\":value)+\">\"+(value==undefined?\"\":value)+\"</span>\";}";
-            //        	myColumns += hidden_ + lock_ + width_ + ",sortable : false,dataIndex:'" + attr.dataIndex + "'";
-        }
-        myColumns += "}";
-        if (i < myArr.length - 1) {
-            myColumns += ",";
-        }
-    }
-    myColumns += "]";
-    return myColumns;
 };

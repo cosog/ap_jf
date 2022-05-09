@@ -546,6 +546,30 @@ public class CalculateManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/reTotalCalculate")
+	public String reTotalCalculate() throws Exception {
+		
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
+		String recaCalculateDate = ParamUtils.getParameter(request, "recaCalculateDate");
+		
+		
+		String json = calculateManagerService.reTotalCalculate(deviceType,recaCalculateDate);
+		response.setContentType("application/json;charset=utf-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw;
+		try {
+			pw = response.getWriter();
+			pw.print(json);
+			pw.flush();
+			pw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
 
 	public int getPage() {
 		return page;

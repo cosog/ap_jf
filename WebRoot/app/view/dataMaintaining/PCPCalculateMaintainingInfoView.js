@@ -6,11 +6,8 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
     border: false,
     initComponent: function () {
         var me = this;
-//        var PCPCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
-//        var PCPCalculateMaintainingWellListStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
         var bbar = new Ext.toolbar.Paging({
         	id:'PCPFESDiagramCalculateMaintainingBbar',
-//            store: PCPCalculateMaintainingDataStore,
             pageSize: defaultPageSize,
             displayInfo: true,
             displayMsg: '当前 {0}~{1}条  共 {2} 条',
@@ -83,8 +80,33 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
                         },
                         select: function (combo, record, index) {
                         	calculateSignComb.clearValue();
-                        	Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar").getStore().loadPage(1);
-                        	Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id").getStore().load();
+                			var activeId = Ext.getCmp("PCPCalculateMaintainingTabPanel").getActiveTab().id;
+                			if(activeId=="PCPCalculateMaintainingPanel"){
+                				var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
+                				if (isNotVal(gridPanel)) {
+                					gridPanel.getStore().load();
+                				}else{
+                					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
+                				}
+                				var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
+                				if (isNotVal(bbar)) {
+                					if(bbar.getStore().isEmptyStore){
+                						var PCPCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+                						bbar.setStore(PCPCalculateMaintainingDataStore);
+                					}else{
+                						bbar.getStore().loadPage(1);
+                					}
+                				}else{
+                					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+                				}
+                			}else if(activeId=="PCPTotalCalculateMaintainingPanel"){
+                				var gridPanel = Ext.getCmp("PCPTotalCalculateMaintainingDataGridPanel_Id");
+                	            if (isNotVal(gridPanel)) {
+                	            	gridPanel.getStore().loadPage(1);
+                	            }else{
+                	            	Ext.create("AP.store.dataMaintaining.PCPTotalCalculateMaintainingDataStore");
+                	            }
+                			}
                         }
                     }
                 });
@@ -151,8 +173,23 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
                     		calculateSignComb.getStore().load(); // 加载井下拉框的store
                         },
                         select: function (combo, record, index) {
-                        	Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar").getStore().loadPage(1);
-                        	Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id").getStore().load();
+                        	var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
+            				if (isNotVal(gridPanel)) {
+            					gridPanel.getStore().load();
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
+            				}
+            				var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
+            				if (isNotVal(bbar)) {
+            					if(bbar.getStore().isEmptyStore){
+            						var PCPCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+            						bbar.setStore(PCPCalculateMaintainingDataStore);
+            					}else{
+            						bbar.getStore().loadPage(1);
+            					}
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+            				}
                         }
                     }
         });
@@ -172,8 +209,33 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
                 listeners: {
                 	select: function (combo, record, index) {
                 		calculateSignComb.clearValue();
-                		Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar").getStore().loadPage(1);
-                		Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id").getStore().load();
+                		var activeId = Ext.getCmp("PCPCalculateMaintainingTabPanel").getActiveTab().id;
+            			if(activeId=="PCPCalculateMaintainingPanel"){
+            				var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
+            				if (isNotVal(gridPanel)) {
+            					gridPanel.getStore().load();
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
+            				}
+            				var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
+            				if (isNotVal(bbar)) {
+            					if(bbar.getStore().isEmptyStore){
+            						var PCPCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+            						bbar.setStore(PCPCalculateMaintainingDataStore);
+            					}else{
+            						bbar.getStore().loadPage(1);
+            					}
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+            				}
+            			}else if(activeId=="PCPTotalCalculateMaintainingPanel"){
+            				var gridPanel = Ext.getCmp("PCPTotalCalculateMaintainingDataGridPanel_Id");
+            	            if (isNotVal(gridPanel)) {
+            	            	gridPanel.getStore().loadPage(1);
+            	            }else{
+            	            	Ext.create("AP.store.dataMaintaining.PCPTotalCalculateMaintainingDataStore");
+            	            }
+            			}
                     }
                 }
             },{
@@ -188,8 +250,33 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
                 listeners: {
                 	select: function (combo, record, index) {
                 		calculateSignComb.clearValue();
-                		Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar").getStore().loadPage(1);
-                		Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id").getStore().load();
+                		var activeId = Ext.getCmp("PCPCalculateMaintainingTabPanel").getActiveTab().id;
+            			if(activeId=="PCPCalculateMaintainingPanel"){
+            				var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
+            				if (isNotVal(gridPanel)) {
+            					gridPanel.getStore().load();
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
+            				}
+            				var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
+            				if (isNotVal(bbar)) {
+            					if(bbar.getStore().isEmptyStore){
+            						var PCPCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+            						bbar.setStore(PCPCalculateMaintainingDataStore);
+            					}else{
+            						bbar.getStore().loadPage(1);
+            					}
+            				}else{
+            					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+            				}
+            			}else if(activeId=="PCPTotalCalculateMaintainingPanel"){
+            				var gridPanel = Ext.getCmp("PCPTotalCalculateMaintainingDataGridPanel_Id");
+            	            if (isNotVal(gridPanel)) {
+            	            	gridPanel.getStore().loadPage(1);
+            	            }else{
+            	            	Ext.create("AP.store.dataMaintaining.PCPTotalCalculateMaintainingDataStore");
+            	            }
+            			}
                     }
                 }
             },"-",calculateSignComb,'-',{
@@ -199,8 +286,33 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
                 pressed: true,
                 hidden:false,
                 handler: function (v, o) {
-                	Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar").getStore().loadPage(1);
-                	Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id").getStore().load();
+                	var activeId = Ext.getCmp("PCPCalculateMaintainingTabPanel").getActiveTab().id;
+        			if(activeId=="PCPCalculateMaintainingPanel"){
+        				var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
+        				if (isNotVal(gridPanel)) {
+        					gridPanel.getStore().load();
+        				}else{
+        					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
+        				}
+        				var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
+        				if (isNotVal(bbar)) {
+        					if(bbar.getStore().isEmptyStore){
+        						var PCPCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+        						bbar.setStore(PCPCalculateMaintainingDataStore);
+        					}else{
+        						bbar.getStore().loadPage(1);
+        					}
+        				}else{
+        					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+        				}
+        			}else if(activeId=="PCPTotalCalculateMaintainingPanel"){
+        				var gridPanel = Ext.getCmp("PCPTotalCalculateMaintainingDataGridPanel_Id");
+        	            if (isNotVal(gridPanel)) {
+        	            	gridPanel.getStore().loadPage(1);
+        	            }else{
+        	            	Ext.create("AP.store.dataMaintaining.PCPTotalCalculateMaintainingDataStore");
+        	            }
+        			}
                 }
             
     		},'->',{
@@ -347,6 +459,13 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
     						Ext.getCmp("PCPCalculateMaintainingLinkedDataBtn").hide();
     						Ext.getCmp("PCPCalculateMaintainingExportDataBtn").hide();
     						Ext.getCmp("PCPCalculateMaintainingCalculateSignComBox_Id").hide();
+    						
+    						var gridPanel = Ext.getCmp("PCPTotalCalculateMaintainingDataGridPanel_Id");
+    			            if (isNotVal(gridPanel)) {
+    			            	gridPanel.getStore().loadPage(1);
+    			            }else{
+    			            	Ext.create("AP.store.dataMaintaining.PCPTotalCalculateMaintainingDataStore");
+    			            }
     					}
     				}
     			}
@@ -632,44 +751,4 @@ var PCPRPMCalculateMaintainingHandsontableHelper = {
 	        
 	        return pcpRPMCalculateMaintainingHandsontableHelper;
 	    }
-};
-
-function createCalculateManagerWellListColumn(columnInfo) {
-    var myArr = columnInfo;
-
-    var myColumns = "[";
-    for (var i = 0; i < myArr.length; i++) {
-        var attr = myArr[i];
-        var width_ = "";
-        var lock_ = "";
-        var hidden_ = "";
-        if (attr.hidden == true) {
-            hidden_ = ",hidden:true";
-        }
-        if (isNotVal(attr.lock)) {
-            //lock_ = ",locked:" + attr.lock;
-        }
-        if (isNotVal(attr.width)) {
-            width_ = ",width:" + attr.width;
-        }
-        myColumns += "{text:'" + attr.header + "',lockable:true,align:'center' "+width_;
-        if (attr.dataIndex == 'id') {
-            myColumns += ",xtype: 'rownumberer',sortable : false,locked:false";
-        }else if (attr.dataIndex.toUpperCase()=='commStatusName'.toUpperCase()) {
-            myColumns += ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceCommStatusColor(value,o,p,e);}";
-        }else if (attr.dataIndex.toUpperCase()=='slave'.toUpperCase()) {
-            myColumns += ",sortable : false,locked:true,dataIndex:'" + attr.dataIndex + "',renderer:function(value){return \"<span data-qtip=\"+(value==undefined?\"\":value)+\">\"+(value==undefined?\"\":value)+\"</span>\";}";
-        } else if (attr.dataIndex.toUpperCase() == 'acqTime'.toUpperCase()) {
-            myColumns += ",sortable : false,locked:false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceTimeFormat(value,o,p,e);}";
-        } else {
-            myColumns += hidden_ + lock_ + ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value){return \"<span data-qtip=\"+(value==undefined?\"\":value)+\">\"+(value==undefined?\"\":value)+\"</span>\";}";
-            //        	myColumns += hidden_ + lock_ + width_ + ",sortable : false,dataIndex:'" + attr.dataIndex + "'";
-        }
-        myColumns += "}";
-        if (i < myArr.length - 1) {
-            myColumns += ",";
-        }
-    }
-    myColumns += "]";
-    return myColumns;
 };
