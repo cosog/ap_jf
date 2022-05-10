@@ -101,7 +101,7 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                 				}else{
                 					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
                 				}
-                			}else if(activeId=="RPCCalculateMaintainingPanel"){
+                			}else if(activeId=="RPCTotalCalculateMaintainingPanel"){
                 				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
                 	            if (isNotVal(gridPanel)) {
                 	            	gridPanel.getStore().loadPage(1);
@@ -232,7 +232,7 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
             				}else{
             					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
             				}
-            			}else if(activeId=="RPCCalculateMaintainingPanel"){
+            			}else if(activeId=="RPCTotalCalculateMaintainingPanel"){
             				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
             	            if (isNotVal(gridPanel)) {
             	            	gridPanel.getStore().loadPage(1);
@@ -274,7 +274,7 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
             				}else{
             					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
             				}
-            			}else if(activeId=="RPCCalculateMaintainingPanel"){
+            			}else if(activeId=="RPCTotalCalculateMaintainingPanel"){
             				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
             	            if (isNotVal(gridPanel)) {
             	            	gridPanel.getStore().loadPage(1);
@@ -311,7 +311,7 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
         				}else{
         					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
         				}
-        			}else if(activeId=="RPCCalculateMaintainingPanel"){
+        			}else if(activeId=="RPCTotalCalculateMaintainingPanel"){
         				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
         	            if (isNotVal(gridPanel)) {
         	            	gridPanel.getStore().loadPage(1);
@@ -407,8 +407,44 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                 		Ext.MessageBox.alert("信息","未选择记录");
                 	}
                 }
-            }
-            ],
+            },{
+                xtype: 'button',
+                text: '重新汇总',
+                id:'RPCCalculateMaintainingReTotalBtn',
+                pressed: true,
+                hidden:true,
+                iconCls: 'edit',
+                handler: function (v, o) {
+                	ReTotalFESDiagramData();
+                }
+            },"-",{
+                xtype: 'button',
+                text: '导出请求数据',
+                pressed: true,
+                hidden: true,
+                iconCls: 'export',
+                id:'RPCTotalCalculateMaintainingExportDataBtn',
+                handler: function (v, o) {
+                	var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
+                    var selectionModel = gridPanel.getSelectionModel();
+                    var _record = selectionModel.getSelection();
+                    if (_record.length>0) {
+                    	var recordId=_record[0].data.id;
+                    	var wellId=_record[0].data.wellId;
+                    	var wellName=_record[0].data.wellName;
+                    	var calDate=_record[0].data.calDate;
+                		var deviceType=0;
+                		var url=context + '/calculateManagerController/exportTotalCalculateRequestData?recordId='+recordId
+                		+'&wellId='+wellId
+                		+'&wellName='+URLencode(URLencode(wellName))
+                		+'&calDate='+calDate
+                		+'&deviceType='+deviceType;
+                    	document.location.href = url;
+                    }else{
+                    	Ext.MessageBox.alert("信息","未选择记录");
+                    }
+                }
+            }],
         	items: [{
         		region: 'west',
             	width: '25%',
@@ -452,12 +488,15 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
     						Ext.getCmp("RPCCalculateMaintainingLinkedDataBtn").show();
     						Ext.getCmp("RPCCalculateMaintainingExportDataBtn").show();
     						Ext.getCmp("RPCCalculateMaintainingCalculateSignComBox_Id").show();
+    						Ext.getCmp("RPCCalculateMaintainingReTotalBtn").hide();
+    						Ext.getCmp("RPCTotalCalculateMaintainingExportDataBtn").hide();
     					}else if(newCard.id=="RPCTotalCalculateMaintainingPanel"){
     						Ext.getCmp("RPCCalculateMaintainingUpdateDataBtn").hide();
     						Ext.getCmp("RPCCalculateMaintainingLinkedDataBtn").hide();
     						Ext.getCmp("RPCCalculateMaintainingExportDataBtn").hide();
     						Ext.getCmp("RPCCalculateMaintainingCalculateSignComBox_Id").hide();
-    						
+    						Ext.getCmp("RPCCalculateMaintainingReTotalBtn").show();
+    						Ext.getCmp("RPCTotalCalculateMaintainingExportDataBtn").show();
     						var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
     			            if (isNotVal(gridPanel)) {
     			            	gridPanel.getStore().loadPage(1);
@@ -748,3 +787,35 @@ var RPCFESDiagramCalculateMaintainingHandsontableHelper = {
 	        return rpcFESDiagramCalculateMaintainingHandsontableHelper;
 	    }
 };
+
+function ReTotalFESDiagramData(){
+	var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
+    var selectionModel = gridPanel.getSelectionModel();
+    var _record = selectionModel.getSelection();
+    if (_record.length>0) {
+    	var reCalculateData='';
+    	Ext.Array.each(_record, function (name, index, countriesItSelf) {
+    		reCalculateData+=_record[index].data.id+","+_record[index].data.wellId+","+_record[index].data.wellName+","+_record[index].data.calDate+";"
+    	});
+    	reCalculateData = reCalculateData.substring(0, reCalculateData.length - 1);
+    	Ext.getCmp("RPCTotalCalculateMaintainingPanel").el.mask('重新计算中，请稍后...').show();
+    	Ext.Ajax.request({
+    		method:'POST',
+    		url:context + '/calculateManagerController/reTotalCalculate',
+    		success:function(response) {
+    			Ext.getCmp("RPCTotalCalculateMaintainingPanel").getEl().unmask();
+    			Ext.MessageBox.alert("信息","重新计算完成。");
+                Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id").getStore().loadPage(1);
+    		},
+    		failure:function(){
+    			Ext.MessageBox.alert("信息","请求失败");
+    		},
+    		params: {
+    			deviceType: 0,
+    			reCalculateDate: reCalculateData
+            }
+    	}); 
+    }else {
+        Ext.Msg.alert(cosog.string.deleteCommand, cosog.string.checkOne);
+    }
+}

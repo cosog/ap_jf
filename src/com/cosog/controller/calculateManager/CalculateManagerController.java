@@ -548,12 +548,9 @@ public class CalculateManagerController extends BaseController {
 	
 	@RequestMapping("/reTotalCalculate")
 	public String reTotalCalculate() throws Exception {
-		
 		String deviceType = ParamUtils.getParameter(request, "deviceType");
-		String recaCalculateDate = ParamUtils.getParameter(request, "recaCalculateDate");
-		
-		
-		String json = calculateManagerService.reTotalCalculate(deviceType,recaCalculateDate);
+		String reCalculateDate = ParamUtils.getParameter(request, "reCalculateDate");
+		String json = calculateManagerService.reTotalCalculate(deviceType,reCalculateDate);
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw;
@@ -569,7 +566,37 @@ public class CalculateManagerController extends BaseController {
 		return null;
 	}
 	
-	
+	@RequestMapping("/exportTotalCalculateRequestData")
+	public String exportTotalCalculateRequestData() throws Exception{
+		StringManagerUtils stringManagerUtils=new StringManagerUtils();
+		
+		String recordId=ParamUtils.getParameter(request, "recordId");
+		String wellName = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "wellName"),"utf-8");
+		String wellId=ParamUtils.getParameter(request, "wellId");
+		String calDate=ParamUtils.getParameter(request, "calDate");
+		String deviceType=ParamUtils.getParameter(request, "deviceType");
+		String json=calculateManagerService.exportTotalCalculateRequestData(deviceType,recordId,wellId,wellName,calDate);
+		String fileName="汇总请求数据-"+wellName+"-"+calDate+".json";
+		String path=stringManagerUtils.getFilePath(fileName,"download/");
+		File file=StringManagerUtils.createJsonFile(json, path);
+		try {
+        	response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setHeader("content-disposition", "attachment;filename="+URLEncoder.encode(fileName, "UTF-8"));
+            InputStream in = new FileInputStream(file);
+            int len = 0;
+            byte[] buffer = new byte[1024];
+            OutputStream out = response.getOutputStream();
+            while ((len = in.read(buffer)) > 0) {
+                out.write(buffer,0,len);
+            }
+            in.close();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+		StringManagerUtils.deleteFile(path);
+		return null;
+	}
 
 	public int getPage() {
 		return page;

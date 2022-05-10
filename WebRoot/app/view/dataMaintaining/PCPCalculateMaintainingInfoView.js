@@ -401,8 +401,44 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
                 		Ext.MessageBox.alert("信息","未选择记录");
                 	}
                 }
-            }
-            ],
+            },{
+                xtype: 'button',
+                text: '重新汇总',
+                id:'PCPCalculateMaintainingReTotalBtn',
+                pressed: true,
+                hidden:true,
+                iconCls: 'edit',
+                handler: function (v, o) {
+                	ReTotalRPMData();
+                }
+            },"-",{
+                xtype: 'button',
+                text: '导出请求数据',
+                pressed: true,
+                hidden: true,
+                iconCls: 'export',
+                id:'PCPTotalCalculateMaintainingExportDataBtn',
+                handler: function (v, o) {
+                	var gridPanel = Ext.getCmp("PCPTotalCalculateMaintainingDataGridPanel_Id");
+                    var selectionModel = gridPanel.getSelectionModel();
+                    var _record = selectionModel.getSelection();
+                    if (_record.length>0) {
+                    	var recordId=_record[0].data.id;
+                    	var wellId=_record[0].data.wellId;
+                    	var wellName=_record[0].data.wellName;
+                    	var calDate=_record[0].data.calDate;
+                		var deviceType=1;
+                		var url=context + '/calculateManagerController/exportTotalCalculateRequestData?recordId='+recordId
+                		+'&wellId='+wellId
+                		+'&wellName='+URLencode(URLencode(wellName))
+                		+'&calDate='+calDate
+                		+'&deviceType='+deviceType;
+                    	document.location.href = url;
+                    }else{
+                    	Ext.MessageBox.alert("信息","未选择记录");
+                    }
+                }
+            }],
         	items: [{
         		region: 'west',
             	width: '25%',
@@ -454,12 +490,15 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
     						Ext.getCmp("PCPCalculateMaintainingLinkedDataBtn").show();
     						Ext.getCmp("PCPCalculateMaintainingExportDataBtn").show();
     						Ext.getCmp("PCPCalculateMaintainingCalculateSignComBox_Id").show();
+    						Ext.getCmp("PCPCalculateMaintainingReTotalBtn").hide();
+    						Ext.getCmp("PCPTotalCalculateMaintainingExportDataBtn").hide();
     					}else if(newCard.id=="PCPTotalCalculateMaintainingPanel"){
     						Ext.getCmp("PCPCalculateMaintainingUpdateDataBtn").hide();
     						Ext.getCmp("PCPCalculateMaintainingLinkedDataBtn").hide();
     						Ext.getCmp("PCPCalculateMaintainingExportDataBtn").hide();
     						Ext.getCmp("PCPCalculateMaintainingCalculateSignComBox_Id").hide();
-    						
+    						Ext.getCmp("PCPCalculateMaintainingReTotalBtn").show();
+    						Ext.getCmp("PCPTotalCalculateMaintainingExportDataBtn").show();
     						var gridPanel = Ext.getCmp("PCPTotalCalculateMaintainingDataGridPanel_Id");
     			            if (isNotVal(gridPanel)) {
     			            	gridPanel.getStore().loadPage(1);
@@ -752,3 +791,35 @@ var PCPRPMCalculateMaintainingHandsontableHelper = {
 	        return pcpRPMCalculateMaintainingHandsontableHelper;
 	    }
 };
+
+function ReTotalRPMData(){
+	var gridPanel = Ext.getCmp("PCPTotalCalculateMaintainingDataGridPanel_Id");
+    var selectionModel = gridPanel.getSelectionModel();
+    var _record = selectionModel.getSelection();
+    if (_record.length>0) {
+    	var reCalculateData='';
+    	Ext.Array.each(_record, function (name, index, countriesItSelf) {
+    		reCalculateData+=_record[index].data.id+","+_record[index].data.wellId+","+_record[index].data.wellName+","+_record[index].data.calDate+";"
+    	});
+    	reCalculateData = reCalculateData.substring(0, reCalculateData.length - 1);
+    	Ext.getCmp("PCPTotalCalculateMaintainingPanel").el.mask('重新计算中，请稍后...').show();
+    	Ext.Ajax.request({
+    		method:'POST',
+    		url:context + '/calculateManagerController/reTotalCalculate',
+    		success:function(response) {
+    			Ext.getCmp("PCPTotalCalculateMaintainingPanel").getEl().unmask();
+    			Ext.MessageBox.alert("信息","重新计算完成。");
+                Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id").getStore().loadPage(1);
+    		},
+    		failure:function(){
+    			Ext.MessageBox.alert("信息","请求失败");
+    		},
+    		params: {
+    			deviceType: 1,
+    			reCalculateDate: reCalculateData
+            }
+    	}); 
+    }else {
+        Ext.Msg.alert(cosog.string.deleteCommand, cosog.string.checkOne);
+    }
+}

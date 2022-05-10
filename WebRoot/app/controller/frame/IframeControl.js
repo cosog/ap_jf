@@ -508,7 +508,7 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 				}else{
 					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
 				}
-			}else if(secondActiveId=="RPCCalculateMaintainingPanel"){
+			}else if(secondActiveId=="RPCTotalCalculateMaintainingPanel"){
 				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
 	            if (isNotVal(gridPanel)) {
 	            	gridPanel.getStore().loadPage(1);

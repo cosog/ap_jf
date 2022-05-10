@@ -51,7 +51,7 @@ Ext.define('AP.store.dataMaintaining.RPCTotalCalculateMaintainingDataStore', {
                     columnLines: true,
                     layout: "fit",
                     stripeRows: true,
-                    forceFit: true,
+                    forceFit: false,
                     selModel:{
                     	selType:'checkboxmodel',
                     	showHeaderCheckbox:false,
@@ -59,7 +59,7 @@ Ext.define('AP.store.dataMaintaining.RPCTotalCalculateMaintainingDataStore', {
                     },
                     viewConfig: {
                         emptyText: "<div class='con_div_' id='div_dataactiveid'><" + cosog.string.nodata + "></div>",
-                        forceFit: true
+                        forceFit: false
                     },
                     bbar: bbar,
                     store: store,
@@ -76,7 +76,7 @@ Ext.define('AP.store.dataMaintaining.RPCTotalCalculateMaintainingDataStore', {
                 var panel = Ext.getCmp("RPCTotalCalculateMaintainingPanel");
                 panel.add(gridPanel);
             }
-            
+            gridPanel.getSelectionModel().deselectAll(true);
         },
         beforeload: function (store, options) {
         	var orgId = Ext.getCmp('leftOrg_Id').getValue();
