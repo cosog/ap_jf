@@ -203,7 +203,12 @@ public class HistoryQueryController extends BaseController  {
 		}
 		pager.setStart_date(startDate);
 		pager.setEnd_date(endDate);
-		json = historyQueryService.getDeviceHistoryData(orgId,deviceId,deviceName,deviceType,pager);
+		if(StringManagerUtils.stringToInteger(deviceType)==0){
+			json = historyQueryService.getDeviceHistoryData(orgId,deviceId,deviceName,deviceType,pager);
+		}else{
+			json = historyQueryService.getPCPDeviceHistoryData(orgId,deviceId,deviceName,deviceType,pager);
+		}
+		
 		//HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("application/json;charset="
 				+ Constants.ENCODING_UTF8);
@@ -270,7 +275,12 @@ public class HistoryQueryController extends BaseController  {
 		pager.setStart_date(startDate);
 		pager.setEnd_date(endDate);
 		
-		json = historyQueryService.getDeviceHistoryExportData(orgId,deviceId,deviceName,deviceType,pager);
+		if(StringManagerUtils.stringToInteger(deviceType)==0){
+			json = historyQueryService.getDeviceHistoryExportData(orgId,deviceId,deviceName,deviceType,pager);
+		}else{
+			json = historyQueryService.getPCPDeviceHistoryExportData(orgId,deviceId,deviceName,deviceType,pager);
+		}
+		
 		this.service.exportGridPanelData(response,fileName,title, heads, fields,json);
 		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");

@@ -44,6 +44,8 @@ import com.cosog.websocket.config.WebSocketByJavax;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import redis.clients.jedis.Jedis;
+
 @Component("ResourceMonitoringTask")  
 public class ResourceMonitoringTask {
 	private static Connection conn = null;
@@ -65,15 +67,15 @@ public class ResourceMonitoringTask {
 		String adAllOfflineUrl=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/allDeviceOffline";
 		String adStatusUrl=Config.getInstance().configFile.getDriverConfig().getProbe().getApp();
 		
+		String acStatusUrl=Config.getInstance().configFile.getAgileCalculate().getProbe().getApp()[0];
+		
 		int deviceAmount=getDeviceAmount();
 		
-		String acRunStatus="停止";
-		int acRunStatusValue=0;
+		int acRunStatus=0;
 		String acVersion="";
 		int acLicense=0;
 		
-		String adRunStatus="停止";
-		int adRunStatusValue=0;
+		int adRunStatus=0;
 		String adVersion="";
 		int adLicense=0;
 		boolean adLicenseSign=false;
@@ -87,16 +89,40 @@ public class ResourceMonitoringTask {
 		int memUsedPercentAlarmLevel=0;
 		
 		TableSpaceInfo tableSpaceInfo= getTableSpaceInfo();
+		
+		int jedisStatus=0;
+		Jedis jedis=null;
+		try{
+			jedis = new Jedis();
+			jedisStatus=1;
+		}catch(Exception e){
+			jedisStatus=0;
+		}
+		if(jedis!=null && jedis.isConnected() ){
+			jedis.disconnect();
+			jedis.close();
+		}
+		
+		
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
+		
+		//ac状态检测
+		String acStatusProbeResponseDataStr=StringManagerUtils.sendPostMethod(acStatusUrl, "","utf-8");
+		type = new TypeToken<AppRunStatusProbeResonanceData>() {}.getType();
+		AppRunStatusProbeResonanceData acStatusProbeResonanceData=gson.fromJson(acStatusProbeResponseDataStr, type);
+		if(acStatusProbeResonanceData!=null){
+			acRunStatus=1;
+			acVersion=acStatusProbeResonanceData.getVer();
+			acLicense=acStatusProbeResonanceData.getLicenseNumber();
+		}
 		
 		//ad状态检测
 		String adStatusProbeResponseDataStr=StringManagerUtils.sendPostMethod(adStatusUrl, "","utf-8");
 		type = new TypeToken<AppRunStatusProbeResonanceData>() {}.getType();
 		AppRunStatusProbeResonanceData adStatusProbeResonanceData=gson.fromJson(adStatusProbeResponseDataStr, type);
 		if(adStatusProbeResonanceData!=null){
-			adRunStatus="运行";
-			adRunStatusValue=1;
+			adRunStatus=1;
 			adVersion=adStatusProbeResonanceData.getVer();
 			adLicense=adStatusProbeResonanceData.getLicenseNumber();
 			if(adLicense>0&&deviceAmount>adLicense){
@@ -139,15 +165,16 @@ public class ResourceMonitoringTask {
 		
 		conn=OracleJdbcUtis.getConnection();
 		if(conn!=null){
-			cs = conn.prepareCall("{call prd_save_resourcemonitoring(?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call prd_save_resourcemonitoring(?,?,?,?,?,?,?,?,?)}");
 			cs.setString(1, StringManagerUtils.getCurrentTime("yyyy-MM-dd HH:mm:ss"));
-			cs.setInt(2, acRunStatusValue);
+			cs.setInt(2, acRunStatus);
 			cs.setString(3, acVersion);
-			cs.setInt(4, adRunStatusValue);
+			cs.setInt(4, adRunStatus);
 			cs.setString(5, adVersion);
 			cs.setString(6, cpuUsedPercentValue);
 			cs.setString(7, memUsedPercentValue);
 			cs.setFloat(8, tableSpaceInfo.getUsedPercent());
+			cs.setInt(9, jedisStatus);
 			cs.executeUpdate();
 			if(cs!=null){
 				cs.close();
@@ -161,8 +188,8 @@ public class ResourceMonitoringTask {
 		
 		String sendData="{"
 				+ "\"functionCode\":\"ResourceMonitoringData\","
-				+ "\"appRunStatus\":\""+adRunStatus+"\","
-				+ "\"appVersion\":\""+adVersion+"\","
+				+ "\"acRunStatus\":\""+acRunStatus+"\","
+				+ "\"acVersion\":\""+acVersion+"\","
 				+ "\"cpuUsedPercent\":\""+cpuUsedPercent+"\","
 				+ "\"cpuUsedPercentAlarmLevel\":"+cpuUsedPercentAlarmLevel+","
 				+ "\"memUsedPercent\":\""+memUsedPercent+"\","
@@ -174,7 +201,8 @@ public class ResourceMonitoringTask {
 				+ "\"tableSpaceUsedPercentAlarmLevel\":"+tableSpaceInfo.getAlarmLevel()+","
 				+ "\"adLicenseSign\":"+adLicenseSign+","
 				+ "\"deviceAmount\":"+deviceAmount+","
-				+ "\"adLicense\":"+adLicense+""
+				+ "\"adLicense\":"+adLicense+","
+				+ "\"jedisStatus\":\""+jedisStatus+"\""
 				+ "}";
 		try {
 			infoHandler().sendMessageToBy("ApWebSocketClient", sendData);

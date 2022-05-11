@@ -1039,7 +1039,7 @@ public class DriverAPIController extends BaseController{
 				
 				//进行功图计算
 				WorkType workType=null;
-				int rpcWorkTypeAlarmLevel=0;
+//				int rpcWorkTypeAlarmLevel=0;
 				if(StringManagerUtils.isNotNull(rpcCalculateRequestData.getFESDiagram().getAcqTime())
 						&& rpcCalculateRequestData.getFESDiagram().getS().size()>0
 						&& rpcCalculateRequestData.getFESDiagram().getF().size()>0){
@@ -1064,14 +1064,7 @@ public class DriverAPIController extends BaseController{
 						rpcDeviceInfo.getRPCCalculateList().add(rpcCalculateResponseData);
 					}
 				}
-				if(workType!=null){
-					for(int i=0;alarmInstanceOwnItem!=null&&i<alarmInstanceOwnItem.getItemList().size();i++){
-						if(alarmInstanceOwnItem.getItemList().get(i).getType()==4&&workType.getResultName().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(i).getItemName())){
-							rpcWorkTypeAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
-							break;
-						}
-					}
-				}
+				
 				
 				List<ProtocolItemResolutionData> calItemResolutionDataList=getFESDiagramCalItemData(rpcCalculateRequestData,rpcCalculateResponseData);
 				
@@ -1241,8 +1234,8 @@ public class DriverAPIController extends BaseController{
 						if(workType!=null){
 							for(int k=0;alarmInstanceOwnItem!=null&&k<alarmInstanceOwnItem.getItemList().size();k++){
 								if(alarmInstanceOwnItem.getItemList().get(k).getType()==4&&workType.getResultName().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemName())){
-									rpcWorkTypeAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
-									if(rpcWorkTypeAlarmLevel>0){
+									alarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
+									if(alarmLevel>0){
 										acquisitionItemInfo.setAlarmInfo("工况报警:"+workType.getResultName());
 										acquisitionItemInfo.setAlarmType(4);
 										acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());

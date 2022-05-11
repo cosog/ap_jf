@@ -303,7 +303,9 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 		var activeId = tabPanel.getActiveTab().id;
 		if(activeId=="RPCRealTimeMonitoringInfoPanel_Id"){
 			var statTabActiveId = Ext.getCmp("RPCRealTimeMonitoringStatTabPanel").getActiveTab().id;
-			if(statTabActiveId=="RPCRealTimeMonitoringStatGraphPanel_Id"){
+			if(statTabActiveId=="RPCRealTimeMonitoringFESdiagramResultStatGraphPanel_Id"){
+				loadAndInitFESdiagramResultStat(true);
+			}else if(statTabActiveId=="RPCRealTimeMonitoringStatGraphPanel_Id"){
 				loadAndInitCommStatusStat(true);
 			}else if(statTabActiveId=="RPCRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
 				loadAndInitDeviceTypeStat(true);

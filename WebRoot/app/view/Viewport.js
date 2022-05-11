@@ -506,12 +506,21 @@ function websocketOnMessage(evt) {
 				Ext.getCmp("tableSpaceSizeProbeLabel_id").setText("表空间:"+data.tableSpaceUsedPercent);
 			}
 			
-			if(data.adRunStatus=="运行"){
+			if(data.jedisStatus==1){
+				Ext.getCmp("jedisRunStatusProbeLabel_id").setIconCls("dtgreen");
+			}else{
+				Ext.getCmp("jedisRunStatusProbeLabel_id").setIconCls("dtyellow");
+			}
+			Ext.getCmp("jedisRunStatusProbeLabel_id").setText("实时库");
+			
+			if(data.adRunStatus==1){
 				Ext.getCmp("adRunStatusProbeLabel_id").setIconCls("dtgreen");
+				Ext.getCmp("adRunStatusProbeLabel_id").setText("驱动 v"+data.adVersion);
 			}else{
 				Ext.getCmp("adRunStatusProbeLabel_id").setIconCls("dtyellow");
+				Ext.getCmp("adRunStatusProbeLabel_id").setText("驱动");
 			}
-			Ext.getCmp("adRunStatusProbeLabel_id").setText("驱动 v"+data.adVersion);
+			
 			
 			if(data.adLicenseSign){
 				Ext.getCmp("adLicenseStatusProbeLabel_id").setText("<font color=#DC2828 >License超限:"+data.deviceAmount+"/"+data.adLicense+"</font>");
@@ -519,6 +528,14 @@ function websocketOnMessage(evt) {
 			}else{
 				Ext.getCmp("adLicenseStatusProbeLabel_id").setText("");
 				Ext.getCmp("adLicenseStatusProbeLabel_id").hide();
+			}
+			
+			if(data.acRunStatus==1){
+				Ext.getCmp("acRunStatusProbeLabel_id").setIconCls("dtgreen");
+				Ext.getCmp("acRunStatusProbeLabel_id").setText("ac v"+data.acVersion);
+			}else{
+				Ext.getCmp("acRunStatusProbeLabel_id").setIconCls("dtyellow");
+				Ext.getCmp("acRunStatusProbeLabel_id").setText("ac");
 			}
 		}
 	}

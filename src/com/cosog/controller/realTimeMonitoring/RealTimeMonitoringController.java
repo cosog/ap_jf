@@ -98,6 +98,32 @@ public class RealTimeMonitoringController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/getRealTimeMonitoringFESDiagramResultStatData")
+	public String getRealTimeMonitoringFESDiagramResultStatData() throws Exception {
+		String json = "";
+		orgId = ParamUtils.getParameter(request, "orgId");
+		deviceType = ParamUtils.getParameter(request, "deviceType");
+		commStatusStatValue = ParamUtils.getParameter(request, "commStatusStatValue");
+		deviceTypeStatValue = ParamUtils.getParameter(request, "deviceTypeStatValue");
+		this.pager = new Page("pagerForm", request);
+		User user=null;
+		if (!StringManagerUtils.isNotNull(orgId)) {
+			HttpSession session=request.getSession();
+			user = (User) session.getAttribute("userLogin");
+			if (user != null) {
+				orgId = "" + user.getUserorgids();
+			}
+		}
+		json = realTimeMonitoringService.getRealTimeMonitoringFESDiagramResultStatData(orgId,deviceType,commStatusStatValue,deviceTypeStatValue);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	@RequestMapping("/getRealTimeMonitoringCommStatusStatData")
 	public String getRealTimeMonitoringCommStatusStatData() throws Exception {
 		String json = "";
@@ -192,7 +218,12 @@ public class RealTimeMonitoringController extends BaseController {
 				orgId = "" + user.getUserorgids();
 			}
 		}
-		json = realTimeMonitoringService.getDeviceRealTimeOverview(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue,pager);
+		if(StringManagerUtils.stringToInteger(deviceType)==0){
+			json = realTimeMonitoringService.getDeviceRealTimeOverview(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue,pager);
+		}else{
+			json = realTimeMonitoringService.getPCPDeviceRealTimeOverview(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue,pager);
+		}
+		
 		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
@@ -233,7 +264,12 @@ public class RealTimeMonitoringController extends BaseController {
 				orgId = "" + user.getUserorgids();
 			}
 		}
-		json = realTimeMonitoringService.getDeviceRealTimeOverviewExportData(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue);
+		if(StringManagerUtils.stringToInteger(deviceType)==0){
+			json = realTimeMonitoringService.getDeviceRealTimeOverviewExportData(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue);
+		}else{
+			json = realTimeMonitoringService.getPCPDeviceRealTimeOverviewExportData(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue);
+		}
+		
 		
 		
 		this.service.exportGridPanelData(response,fileName,title, heads, fields,json);

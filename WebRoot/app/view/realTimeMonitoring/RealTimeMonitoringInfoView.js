@@ -61,6 +61,20 @@ Ext.define("AP.view.realTimeMonitoring.RealTimeMonitoringInfoView", {
                         }
                 	},{
                 		xtype: 'button',
+                        id:"jedisRunStatusProbeLabel_id",
+                        text: '实时库:',
+//                        width: 100,
+                        handler: function (v, o) {
+                        	Ext.getCmp('ResourceMonitoringCurveItem_Id').setValue("实时数据库运行状态");
+                            Ext.getCmp('ResourceMonitoringCurveItemCode_Id').setValue("jedisStatus");
+                            var itemCode= Ext.getCmp('ResourceMonitoringCurveItemCode_Id').getValue();
+                        	var ResourceProbeHistoryCurveWindow=Ext.create("AP.view.realTimeMonitoring.ResourceProbeHistoryCurveWindow", {
+            				    html:'<div id="ResourceProbeHistoryCurve_'+itemCode+'_DivId" style="width:100%;height:100%;"></div>'
+                        	});
+                        	ResourceProbeHistoryCurveWindow.show();
+                        }
+                	},{
+                		xtype: 'button',
                         id:"adRunStatusProbeLabel_id",
                         text: '驱动:',
 //                        width: 100,
@@ -79,6 +93,20 @@ Ext.define("AP.view.realTimeMonitoring.RealTimeMonitoringInfoView", {
                         text: 'License超限:',
                         hidden: true,
                         handler: function (v, o) {}
+                	},{
+                		xtype: 'button',
+                        id:"acRunStatusProbeLabel_id",
+                        text: 'ac:',
+//                        width: 100,
+                        handler: function (v, o) {
+                        	Ext.getCmp('ResourceMonitoringCurveItem_Id').setValue("ac运行状态");
+                            Ext.getCmp('ResourceMonitoringCurveItemCode_Id').setValue("acRunStatus");
+                            var itemCode= Ext.getCmp('ResourceMonitoringCurveItemCode_Id').getValue();
+                        	var ResourceProbeHistoryCurveWindow=Ext.create("AP.view.realTimeMonitoring.ResourceProbeHistoryCurveWindow", {
+            				    html:'<div id="ResourceProbeHistoryCurve_'+itemCode+'_DivId" style="width:100%;height:100%;"></div>'
+                        	});
+                        	ResourceProbeHistoryCurveWindow.show();
+                        }
                 	},{
                         id: 'ResourceMonitoringCurveItem_Id',
                         xtype: 'textfield',
@@ -109,7 +137,9 @@ Ext.define("AP.view.realTimeMonitoring.RealTimeMonitoringInfoView", {
         					Ext.getCmp("bottomTab_Id").setValue(newCard.id); 
         					if(newCard.id=="RPCRealTimeMonitoringInfoPanel_Id"){
         						var statTabActiveId = Ext.getCmp("RPCRealTimeMonitoringStatTabPanel").getActiveTab().id;
-        						if(statTabActiveId=="RPCRealTimeMonitoringStatGraphPanel_Id"){
+        						if(statTabActiveId=="RPCRealTimeMonitoringFESdiagramResultStatGraphPanel_Id"){
+        							loadAndInitFESdiagramResultStat(true);
+        						}else if(statTabActiveId=="RPCRealTimeMonitoringStatGraphPanel_Id"){
         							loadAndInitCommStatusStat(true);
         						}else if(newCard.id=="RPCRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
         							loadAndInitDeviceTypeStat(true);
@@ -215,12 +245,15 @@ function createRealTimeMonitoringColumn(columnInfo) {
         else if (attr.dataIndex.toUpperCase()=='commStatusName'.toUpperCase()) {
             myColumns += ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceCommStatusColor(value,o,p,e);}";
         }
-        else if (attr.dataIndex.toUpperCase()=='runStatusName'.toUpperCase()) {
-            myColumns += ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceRunStatusColor(value,o,p,e);}";
-        }
+//        else if (attr.dataIndex.toUpperCase()=='runStatusName'.toUpperCase()) {
+//            myColumns += ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceRunStatusColor(value,o,p,e);}";
+//        }
         else if (attr.dataIndex.toUpperCase() == 'acqTime'.toUpperCase()) {
             myColumns += ",sortable : false,locked:false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceTimeFormat(value,o,p,e);}";
         } 
+        else if (attr.dataIndex.toUpperCase()=='resultName'.toUpperCase()) {
+            myColumns += ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceResultStatusColor(value,o,p,e);}";
+        }
         else {
 //            myColumns += hidden_ + lock_ + ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value){return \"<span data-qtip=\"+(value==undefined?\"\":value)+\">\"+(value==undefined?\"\":value)+\"</span>\";}";
             myColumns += ",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceRealtimeMonitoringDataColor(value,o,p,e);}";
@@ -514,6 +547,152 @@ function gotoDeviceHistory(deviceName,deviceType){
 		}
 	}
 }
+
+function loadAndInitFESdiagramResultStat(all){
+	var orgId = Ext.getCmp('leftOrg_Id').getValue();
+	var deviceType=0;
+	var deviceTypeStatValue='';
+	var deviceTypeStatValue='';
+	deviceType=0;
+	if(all){
+		Ext.getCmp("RPCRealTimeMonitoringStatSelectFESdiagramResult_Id").setValue('');
+		Ext.getCmp("RPCRealTimeMonitoringStatSelectCommStatus_Id").setValue('');
+		Ext.getCmp("RPCRealTimeMonitoringStatSelectDeviceType_Id").setValue('');
+		commStatusStatValue='';
+		deviceTypeStatValue='';
+	}else{
+		deviceTypeStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectDeviceType_Id").getValue();
+		commStatusStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectCommStatus_Id").getValue();
+	}
+	
+	Ext.Ajax.request({
+		method:'POST',
+		url:context + '/realTimeMonitoringController/getRealTimeMonitoringFESDiagramResultStatData',
+		success:function(response) {
+			var result =  Ext.JSON.decode(response.responseText);
+			Ext.getCmp("AlarmShowStyle_Id").setValue(JSON.stringify(result.AlarmShowStyle));
+			initRealTimeMonitoringFESDiagramResultStatPieOrColChat(result);
+		},
+		failure:function(){
+			Ext.MessageBox.alert("错误","与后台联系的时候出了问题");
+		},
+		params: {
+			orgId:orgId,
+			deviceType:deviceType,
+			commStatusStatValue:commStatusStatValue,
+			deviceTypeStatValue:deviceTypeStatValue
+        }
+	});
+}
+
+function initRealTimeMonitoringFESDiagramResultStatPieOrColChat(get_rawData) {
+	var divid="RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieDiv_Id";
+	
+	var title="工况";
+	var datalist=get_rawData.totalRoot;
+	
+	var pieDataStr="[";
+	for(var i=0;i<datalist.length;i++){
+		pieDataStr+="['"+datalist[i].item+"',"+datalist[i].count+"],";
+	}
+	
+	if(stringEndWith(pieDataStr,",")){
+		pieDataStr = pieDataStr.substring(0, pieDataStr.length - 1);
+	}
+	pieDataStr+="]";
+	var pieData = Ext.JSON.decode(pieDataStr);
+	
+	var alarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue());
+	var colors=[];
+//	colors.push('#'+alarmShowStyle.Comm.online.BackgroundColor);
+//	colors.push('#'+alarmShowStyle.Comm.offline.BackgroundColor);
+	
+	ShowRealTimeMonitoringFESDiagramResultStatPieOrColChat(title,divid, "设备数占", pieData,colors);
+};
+
+function ShowRealTimeMonitoringFESDiagramResultStatPieOrColChat(title,divid, name, data,colors) {
+	Highcharts.chart(divid, {
+		chart : {
+			plotBackgroundColor : null,
+			plotBorderWidth : null,
+			plotShadow : false
+		},
+		credits : {
+			enabled : false
+		},
+		title : {
+			text : title
+		},
+//		colors : colors,
+		tooltip : {
+			pointFormat : '设备数: <b>{point.y}</b> 占: <b>{point.percentage:.1f}%</b>'
+		},
+		legend : {
+			align : 'center',
+			verticalAlign : 'bottom',
+			layout : 'horizontal' //vertical 竖直 horizontal-水平
+		},
+		plotOptions : {
+			pie : {
+				allowPointSelect : true,
+				cursor : 'pointer',
+				dataLabels : {
+					enabled : true,
+					color : '#000000',
+					connectorColor : '#000000',
+					format : '<b>{point.name}</b>: {point.y}台'
+				},
+				events: {
+					click: function(e) {
+//						var statSelectCommStatusId="RPCRealTimeMonitoringStatSelectCommStatus_Id";
+//						var deviceListComb_Id="RealTimeMonitoringRPCDeviceListComb_Id";
+//						var gridPanel_Id="RPCRealTimeMonitoringListGridPanel_Id";
+//						var store="AP.store.realTimeMonitoring.RPCRealTimeMonitoringWellListStore";
+//						var activeId = Ext.getCmp("RealTimeMonitoringTabPanel").getActiveTab().id;
+//						if(activeId=="RPCRealTimeMonitoringInfoPanel_Id"){
+//							statSelectCommStatusId="RPCRealTimeMonitoringStatSelectCommStatus_Id";
+//							deviceListComb_Id="RealTimeMonitoringRPCDeviceListComb_Id";
+//							gridPanel_Id="RPCRealTimeMonitoringListGridPanel_Id";
+//							store="AP.store.realTimeMonitoring.RPCRealTimeMonitoringWellListStore";
+//						}else if(activeId=="PCPRealTimeMonitoringInfoPanel_Id"){
+//							statSelectCommStatusId="PCPRealTimeMonitoringStatSelectCommStatus_Id";
+//							deviceListComb_Id="RealTimeMonitoringPCPDeviceListComb_Id";
+//							gridPanel_Id="PCPRealTimeMonitoringListGridPanel_Id";
+//							store="AP.store.realTimeMonitoring.PCPRealTimeMonitoringWellListStore";
+//						}
+//						
+//						if(!e.point.selected){//如果没被选中,则本次是选中
+//							Ext.getCmp(statSelectCommStatusId).setValue(e.point.name);
+//						}else{//取消选中
+//							Ext.getCmp(statSelectCommStatusId).setValue('');
+//						}
+//						
+//						Ext.getCmp(deviceListComb_Id).setValue('');
+//						Ext.getCmp(deviceListComb_Id).setRawValue('');
+//						var gridPanel = Ext.getCmp(gridPanel_Id);
+//						if (isNotVal(gridPanel)) {
+//							gridPanel.getSelectionModel().deselectAll(true);
+//							gridPanel.getStore().load();
+//						}else{
+//							Ext.create(store);
+//						}
+					}
+				},
+				showInLegend : true
+			}
+		},
+		exporting:{ 
+            enabled:true,    
+            filename:'class-booking-chart',    
+            url:context + '/exportHighcharsPicController/export'
+		},
+		series : [{
+					type : 'pie',
+					name : name,
+					data : data
+				}]
+		});
+};
 
 
 function loadAndInitCommStatusStat(all){
