@@ -91,6 +91,11 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             value: -1,
                             hidden: true
                          },{
+                        	id: 'RPCRealTimeMonitoringStatSelectFESdiagramResult_Id',
+                        	xtype: 'textfield',
+                            value: '',
+                            hidden: true
+                         },{
                         	id: 'RPCRealTimeMonitoringStatSelectCommStatus_Id',
                         	xtype: 'textfield',
                             value: '',
@@ -113,6 +118,7 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                              handler: function (v, o) {
                             	 var orgId = Ext.getCmp('leftOrg_Id').getValue();
                             	 var deviceName=Ext.getCmp('RealTimeMonitoringRPCDeviceListComb_Id').getValue();
+                            	 var FESdiagramResultStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectFESdiagramResult_Id").getValue();
                             	 var commStatusStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectCommStatus_Id").getValue();
                              	 var deviceTypeStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectDeviceType_Id").getValue();
                             	 var deviceType=0;
@@ -146,6 +152,27 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                         header: false,
                 		tabPosition: 'top',
                 		items: [{
+                			title:'工况',
+                			layout: 'fit',
+                        	id:'RPCRealTimeMonitoringFESdiagramResultStatGraphPanel_Id',
+                        	html: '<div id="RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
+                        	listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if ($("#RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieDiv_Id").highcharts() != undefined) {
+                                        $("#RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieDiv_Id").highcharts().setSize($("#RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieDiv_Id").offsetWidth, $("#RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieDiv_Id").offsetHeight,true);
+                                    }else{
+                                    	var toolTip=Ext.getCmp("RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieToolTip_Id");
+                                    	if(!isNotVal(toolTip)){
+                                    		Ext.create('Ext.tip.ToolTip', {
+                                                id:'RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieToolTip_Id',
+                                        		target: 'RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieDiv_Id',
+                                                html: '点击饼图不同区域或标签，查看相应统计数据'
+                                            });
+                                    	}
+                                    }
+                                }
+                            }
+                		},{
                 			title:'通信状态',
                 			layout: 'fit',
                         	id:'RPCRealTimeMonitoringStatGraphPanel_Id',
@@ -190,7 +217,9 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                 		}],
                 		listeners: {
             				tabchange: function (tabPanel, newCard,oldCard, obj) {
-            					if(newCard.id=="RPCRealTimeMonitoringStatGraphPanel_Id"){
+            					if(newCard.id=="RPCRealTimeMonitoringFESdiagramResultStatGraphPanel_Id"){
+            						loadAndInitFESdiagramResultStat(true);
+            					}else if(newCard.id=="RPCRealTimeMonitoringStatGraphPanel_Id"){
             						loadAndInitCommStatusStat(true);
             					}else if(newCard.id=="RPCRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
             						loadAndInitDeviceTypeStat(true);
