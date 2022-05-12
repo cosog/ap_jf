@@ -32,9 +32,13 @@ Ext.define("AP.view.historyQuery.HistoryQueryInfoView", {
         					Ext.getCmp("bottomTab_Id").setValue(newCard.id); 
         					if(newCard.id=="RPCHistoryQueryInfoPanel_Id"){
         						var statTabActiveId = Ext.getCmp("RPCHistoryQueryStatTabPanel").getActiveTab().id;
-        						if(statTabActiveId=="RPCHistoryQueryStatGraphPanel_Id"){
+        						if(statTabActiveId=="RPCHistoryQueryFESdiagramResultStatGraphPanel_Id"){
+            						loadAndInitHistoryQueryFESdiagramResultStat(true);
+            					}else if(statTabActiveId=="RPCHistoryQueryStatGraphPanel_Id"){
         							loadAndInitHistoryQueryCommStatusStat(true);
-        						}else if(newCard.id=="RPCHistoryQueryDeviceTypeStatGraphPanel_Id"){
+        						}else if(statTabActiveId=="RPCHistoryQueryRunStatusStatGraphPanel_Id"){
+            						loadAndInitHistoryQueryRunStatusStat(true);
+            					}else if(newCard.id=="RPCHistoryQueryDeviceTypeStatGraphPanel_Id"){
         							loadAndInitHistoryQueryDeviceTypeStat(true);
         						}
 //        						Ext.getCmp('HistoryQueryRPCDeviceListComb_Id').setValue('');
@@ -49,7 +53,9 @@ Ext.define("AP.view.historyQuery.HistoryQueryInfoView", {
         						var statTabActiveId = Ext.getCmp("PCPHistoryQueryStatTabPanel").getActiveTab().id;
         						if(statTabActiveId=="PCPHistoryQueryStatGraphPanel_Id"){
         							loadAndInitHistoryQueryCommStatusStat(true);
-        						}else if(newCard.id=="PCPHistoryQueryDeviceTypeStatGraphPanel_Id"){
+        						}else if(statTabActiveId=="PCPHistoryQueryRunStatusStatGraphPanel_Id"){
+            						loadAndInitHistoryQueryRunStatusStat(true);
+            					}else if(newCard.id=="PCPHistoryQueryDeviceTypeStatGraphPanel_Id"){
         							loadAndInitHistoryQueryDeviceTypeStat(true);
         						}
 //        						Ext.getCmp('HistoryQueryPCPDeviceListComb_Id').setValue('');
@@ -172,7 +178,7 @@ function createHistoryQueryColumn(columnInfo) {
     return myColumns;
 };
 
-function exportHistoryQueryDeviceListExcel(orgId,deviceType,deviceName,commStatusStatValue,deviceTypeStatValue,fileName,title,columnStr) {
+function exportHistoryQueryDeviceListExcel(orgId,deviceType,deviceName,FESdiagramResultStatValue,commStatusStatValue,runStatusStatValue,deviceTypeStatValue,fileName,title,columnStr) {
     var url = context + '/historyQueryController/exportHistoryQueryDeviceListExcel';
     var fields = "";
     var heads = "";
@@ -210,7 +216,9 @@ function exportHistoryQueryDeviceListExcel(orgId,deviceType,deviceName,commStatu
     + "&orgId=" + orgId 
     + "&deviceType=" + deviceType 
     + "&deviceName=" + URLencode(URLencode(deviceName))
+    + "&FESdiagramResultStatValue=" + URLencode(URLencode(FESdiagramResultStatValue))
     + "&commStatusStatValue=" + URLencode(URLencode(commStatusStatValue))
+    + "&runStatusStatValue=" + URLencode(URLencode(runStatusStatValue))
     + "&deviceTypeStatValue=" + URLencode(URLencode(deviceTypeStatValue))
     + "&fileName=" + URLencode(URLencode(fileName)) 
     + "&title=" + URLencode(URLencode(title));
@@ -545,7 +553,9 @@ function loadAndInitHistoryQueryCommStatusStat(all){
 	if(activeId=="RPCHistoryQueryInfoPanel_Id"){
 		deviceType=0;
 		if(all){
+			Ext.getCmp("RPCHistoryQueryStatSelectFESdiagramResult_Id").setValue('');
 			Ext.getCmp("RPCHistoryQueryStatSelectCommStatus_Id").setValue('');
+			Ext.getCmp("RPCHistoryQueryStatSelectRunStatus_Id").setValue('');
 			Ext.getCmp("RPCHistoryQueryStatSelectDeviceType_Id").setValue('');
 			deviceTypeStatValue='';
 		}else{
@@ -555,6 +565,7 @@ function loadAndInitHistoryQueryCommStatusStat(all){
 		deviceType=1;
 		if(all){
 			Ext.getCmp("PCPHistoryQueryStatSelectCommStatus_Id").setValue('');
+			Ext.getCmp("PCPHistoryQueryStatSelectRunStatus_Id").setValue('');
 			Ext.getCmp("PCPHistoryQueryStatSelectDeviceType_Id").setValue('');
 			deviceTypeStatValue='';
 		}else{
@@ -564,7 +575,7 @@ function loadAndInitHistoryQueryCommStatusStat(all){
 	
 	Ext.Ajax.request({
 		method:'POST',
-		url:context + '/historyQueryController/getHistoryQueryCommStatusStatData',
+		url:context + '/realTimeMonitoringController/getRealTimeMonitoringCommStatusStatData',
 		success:function(response) {
 			var result =  Ext.JSON.decode(response.responseText);
 			Ext.getCmp("AlarmShowStyle_Id").setValue(JSON.stringify(result.AlarmShowStyle));
@@ -575,8 +586,7 @@ function loadAndInitHistoryQueryCommStatusStat(all){
 		},
 		params: {
 			orgId:orgId,
-			deviceType:deviceType,
-			deviceTypeStatValue:deviceTypeStatValue
+			deviceType:deviceType
         }
 	});
 }
@@ -697,6 +707,309 @@ function ShowHistoryQueryStatPieOrColChat(title,divid, name, data,colors) {
 		});
 };
 
+function loadAndInitHistoryQueryRunStatusStat(all){
+	var orgId = Ext.getCmp('leftOrg_Id').getValue();
+	var deviceType=0;
+	var deviceTypeStatValue='';
+	var activeId = Ext.getCmp("HistoryQueryTabPanel").getActiveTab().id;
+	if(activeId=="RPCHistoryQueryInfoPanel_Id"){
+		deviceType=0;
+		if(all){
+			Ext.getCmp("RPCHistoryQueryStatSelectFESdiagramResult_Id").setValue('');
+			Ext.getCmp("RPCHistoryQueryStatSelectCommStatus_Id").setValue('');
+			Ext.getCmp("RPCHistoryQueryStatSelectRunStatus_Id").setValue('');
+			Ext.getCmp("RPCHistoryQueryStatSelectDeviceType_Id").setValue('');
+			deviceTypeStatValue='';
+		}else{
+			deviceTypeStatValue=Ext.getCmp("RPCHistoryQueryStatSelectDeviceType_Id").getValue();
+		}
+	}else if(activeId=="PCPHistoryQueryInfoPanel_Id"){
+		deviceType=1;
+		if(all){
+			Ext.getCmp("PCPHistoryQueryStatSelectCommStatus_Id").setValue('');
+			Ext.getCmp("PCPHistoryQueryStatSelectRunStatus_Id").setValue('');
+			Ext.getCmp("PCPHistoryQueryStatSelectDeviceType_Id").setValue('');
+			deviceTypeStatValue='';
+		}else{
+			deviceTypeStatValue=Ext.getCmp("PCPHistoryQueryStatSelectDeviceType_Id").getValue();
+		}
+	}
+	
+	Ext.Ajax.request({
+		method:'POST',
+		url:context + '/realTimeMonitoringController/getRealTimeMonitoringRunStatusStatData',
+		success:function(response) {
+			var result =  Ext.JSON.decode(response.responseText);
+			Ext.getCmp("AlarmShowStyle_Id").setValue(JSON.stringify(result.AlarmShowStyle));
+			initHistoryQueryRunStatusStatPieOrColChat(result);
+		},
+		failure:function(){
+			Ext.MessageBox.alert("错误","与后台联系的时候出了问题");
+		},
+		params: {
+			orgId:orgId,
+			deviceType:deviceType
+        }
+	});
+}
+
+function initHistoryQueryRunStatusStatPieOrColChat(get_rawData) {
+	var divid="RPCHistoryQueryRunStatusStatGraphPanelPieDiv_Id";
+	var activeId = Ext.getCmp("HistoryQueryTabPanel").getActiveTab().id;
+	if(activeId=="RPCHistoryQueryInfoPanel_Id"){
+		divid="RPCHistoryQueryRunStatusStatGraphPanelPieDiv_Id";
+	}else if(activeId=="PCPHistoryQueryInfoPanel_Id"){
+		divid="PCPHistoryQueryRunStatusStatGraphPanelPieDiv_Id";
+	}
+	var title="运行状态";
+	var datalist=get_rawData.totalRoot;
+	var colors=[];
+	var alarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue());
+	var pieDataStr="[";
+	for(var i=0;i<datalist.length;i++){
+		if(datalist[i].itemCode!='all'){
+			if(datalist[i].count>0){
+				pieDataStr+="['"+datalist[i].item+"',"+datalist[i].count+"],";
+				if(datalist[i].itemCode=='run'){
+					colors.push('#'+alarmShowStyle.Comm.online.BackgroundColor);
+				}else if(datalist[i].itemCode=='stop'){
+					colors.push('#'+alarmShowStyle.Comm.offline.BackgroundColor);
+				}else if(datalist[i].itemCode=='offline'){
+					colors.push('#767272');
+				}
+			}
+		}
+	}
+	
+	if(stringEndWith(pieDataStr,",")){
+		pieDataStr = pieDataStr.substring(0, pieDataStr.length - 1);
+	}
+	pieDataStr+="]";
+	var pieData = Ext.JSON.decode(pieDataStr);
+	
+	var alarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue());
+	
+	ShowHistoryQueryRunStatusStatPieOrColChat(title,divid, "设备数占", pieData,colors);
+};
+
+function ShowHistoryQueryRunStatusStatPieOrColChat(title,divid, name, data,colors) {
+	Highcharts.chart(divid, {
+		chart : {
+			plotBackgroundColor : null,
+			plotBorderWidth : null,
+			plotShadow : false
+		},
+		credits : {
+			enabled : false
+		},
+		title : {
+			text : title
+		},
+		colors : colors,
+		tooltip : {
+			pointFormat : '设备数: <b>{point.y}</b> 占: <b>{point.percentage:.1f}%</b>'
+		},
+		legend : {
+			align : 'center',
+			verticalAlign : 'bottom',
+			layout : 'horizontal' //vertical 竖直 horizontal-水平
+		},
+		plotOptions : {
+			pie : {
+				allowPointSelect : true,
+				cursor : 'pointer',
+				dataLabels : {
+					enabled : true,
+					color : '#000000',
+					connectorColor : '#000000',
+					format : '<b>{point.name}</b>: {point.y}台'
+				},
+				events: {
+					click: function(e) {
+						var statSelectRunStatusId="RPCHistoryQueryStatSelectRunStatus_Id";
+						var deviceListComb_Id="HistoryQueryRPCDeviceListComb_Id";
+						var gridPanel_Id="RPCHistoryQueryDeviceListGridPanel_Id";
+						var store="AP.store.realTimeMonitoring.RPCHistoryQueryWellListStore";
+						var activeId = Ext.getCmp("HistoryQueryTabPanel").getActiveTab().id;
+						if(activeId=="RPCHistoryQueryInfoPanel_Id"){
+							statSelectRunStatusId="RPCHistoryQueryStatSelectRunStatus_Id";
+							deviceListComb_Id="HistoryQueryRPCDeviceListComb_Id";
+							gridPanel_Id="RPCHistoryQueryDeviceListGridPanel_Id";
+							store="AP.store.historyQuery.RPCHistoryQueryWellListStore";
+						}else if(activeId=="PCPHistoryQueryInfoPanel_Id"){
+							statSelectRunStatusId="PCPHistoryQueryStatSelectRunStatus_Id";
+							deviceListComb_Id="HistoryQueryPCPDeviceListComb_Id";
+							gridPanel_Id="PCPHistoryQueryDeviceListGridPanel_Id";
+							store="AP.store.historyQuery.PCPHistoryQueryWellListStore";
+						}
+						
+						if(!e.point.selected){//如果没被选中,则本次是选中
+							Ext.getCmp(statSelectRunStatusId).setValue(e.point.name);
+						}else{//取消选中
+							Ext.getCmp(statSelectRunStatusId).setValue('');
+						}
+						
+						Ext.getCmp(deviceListComb_Id).setValue('');
+						Ext.getCmp(deviceListComb_Id).setRawValue('');
+						var gridPanel = Ext.getCmp(gridPanel_Id);
+						if (isNotVal(gridPanel)) {
+							gridPanel.getSelectionModel().deselectAll(true);
+							gridPanel.getStore().load();
+						}else{
+							Ext.create(store);
+						}
+					}
+				},
+				showInLegend : true
+			}
+		},
+		exporting:{ 
+            enabled:true,    
+            filename:'class-booking-chart',    
+            url:context + '/exportHighcharsPicController/export'
+		},
+		series : [{
+					type : 'pie',
+					name : name,
+					data : data
+				}]
+		});
+};
+
+function loadAndInitHistoryQueryFESdiagramResultStat(all){
+	var orgId = Ext.getCmp('leftOrg_Id').getValue();
+	var deviceType=0;
+	var deviceTypeStatValue='';
+	var deviceTypeStatValue='';
+	deviceType=0;
+	if(all){
+		Ext.getCmp("RPCHistoryQueryStatSelectFESdiagramResult_Id").setValue('');
+		Ext.getCmp("RPCHistoryQueryStatSelectCommStatus_Id").setValue('');
+		Ext.getCmp("RPCHistoryQueryStatSelectRunStatus_Id").setValue('');
+		Ext.getCmp("RPCHistoryQueryStatSelectDeviceType_Id").setValue('');
+		commStatusStatValue='';
+		deviceTypeStatValue='';
+	}else{
+		deviceTypeStatValue=Ext.getCmp("RPCHistoryQueryStatSelectDeviceType_Id").getValue();
+		commStatusStatValue=Ext.getCmp("RPCHistoryQueryStatSelectCommStatus_Id").getValue();
+	}
+	
+	Ext.Ajax.request({
+		method:'POST',
+		url:context + '/realTimeMonitoringController/getRealTimeMonitoringFESDiagramResultStatData',
+		success:function(response) {
+			var result =  Ext.JSON.decode(response.responseText);
+			Ext.getCmp("AlarmShowStyle_Id").setValue(JSON.stringify(result.AlarmShowStyle));
+			initHistoryQueryFESDiagramResultStatPieOrColChat(result);
+		},
+		failure:function(){
+			Ext.MessageBox.alert("错误","与后台联系的时候出了问题");
+		},
+		params: {
+			orgId:orgId,
+			deviceType:deviceType
+        }
+	});
+}
+
+function initHistoryQueryFESDiagramResultStatPieOrColChat(get_rawData) {
+	var divid="RPCHistoryQueryFESdiagramResultStatGraphPanelPieDiv_Id";
+	
+	var title="工况";
+	var datalist=get_rawData.totalRoot;
+	
+	var pieDataStr="[";
+	for(var i=0;i<datalist.length;i++){
+		pieDataStr+="['"+datalist[i].item+"',"+datalist[i].count+"],";
+	}
+	
+	if(stringEndWith(pieDataStr,",")){
+		pieDataStr = pieDataStr.substring(0, pieDataStr.length - 1);
+	}
+	pieDataStr+="]";
+	var pieData = Ext.JSON.decode(pieDataStr);
+	
+	var alarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue());
+	var colors=[];
+//	colors.push('#'+alarmShowStyle.Comm.online.BackgroundColor);
+//	colors.push('#'+alarmShowStyle.Comm.offline.BackgroundColor);
+	
+	ShowHistoryQueryFESDiagramResultStatPieOrColChat(title,divid, "设备数占", pieData,colors);
+};
+
+function ShowHistoryQueryFESDiagramResultStatPieOrColChat(title,divid, name, data,colors) {
+	Highcharts.chart(divid, {
+		chart : {
+			plotBackgroundColor : null,
+			plotBorderWidth : null,
+			plotShadow : false
+		},
+		credits : {
+			enabled : false
+		},
+		title : {
+			text : title
+		},
+//		colors : colors,
+		tooltip : {
+			pointFormat : '设备数: <b>{point.y}</b> 占: <b>{point.percentage:.1f}%</b>'
+		},
+		legend : {
+			align : 'center',
+			verticalAlign : 'bottom',
+			layout : 'horizontal' //vertical 竖直 horizontal-水平
+		},
+		plotOptions : {
+			pie : {
+				allowPointSelect : true,
+				cursor : 'pointer',
+				dataLabels : {
+					enabled : true,
+					color : '#000000',
+					connectorColor : '#000000',
+					format : '<b>{point.name}</b>: {point.y}台'
+				},
+				events: {
+					click: function(e) {
+						var statSelectFESdiagramResultId="RPCHistoryQueryStatSelectFESdiagramResult_Id";
+						var deviceListComb_Id="HistoryQueryRPCDeviceListComb_Id";
+						var gridPanel_Id="RPCHistoryQueryDeviceListGridPanel_Id";
+						var store="AP.store.realTimeMonitoring.RPCHistoryQueryWellListStore";
+						
+						
+						if(!e.point.selected){//如果没被选中,则本次是选中
+							Ext.getCmp(statSelectFESdiagramResultId).setValue(e.point.name);
+						}else{//取消选中
+							Ext.getCmp(statSelectFESdiagramResultId).setValue('');
+						}
+						
+						Ext.getCmp(deviceListComb_Id).setValue('');
+						Ext.getCmp(deviceListComb_Id).setRawValue('');
+						var gridPanel = Ext.getCmp(gridPanel_Id);
+						if (isNotVal(gridPanel)) {
+							gridPanel.getSelectionModel().deselectAll(true);
+							gridPanel.getStore().load();
+						}else{
+							Ext.create(store);
+						}
+					}
+				},
+				showInLegend : true
+			}
+		},
+		exporting:{ 
+            enabled:true,    
+            filename:'class-booking-chart',    
+            url:context + '/exportHighcharsPicController/export'
+		},
+		series : [{
+					type : 'pie',
+					name : name,
+					data : data
+				}]
+		});
+};
+
 function loadAndInitHistoryQueryDeviceTypeStat(all){
 	var orgId = Ext.getCmp('leftOrg_Id').getValue();
 	var deviceType=0;
@@ -724,7 +1037,7 @@ function loadAndInitHistoryQueryDeviceTypeStat(all){
 	}
 	Ext.Ajax.request({
 		method:'POST',
-		url:context + '/historyQueryController/getHistoryQueryDeviceTypeStatData',
+		url:context + '/realTimeMonitoringController/getRealTimeMonitoringDeviceTypeStatData',
 		success:function(response) {
 			var result =  Ext.JSON.decode(response.responseText);
 			Ext.getCmp("AlarmShowStyle_Id").setValue(JSON.stringify(result.AlarmShowStyle));
@@ -735,8 +1048,7 @@ function loadAndInitHistoryQueryDeviceTypeStat(all){
 		},
 		params: {
 			orgId:orgId,
-			deviceType:deviceType,
-			commStatusStatValue:commStatusStatValue
+			deviceType:deviceType
         }
 	});
 };

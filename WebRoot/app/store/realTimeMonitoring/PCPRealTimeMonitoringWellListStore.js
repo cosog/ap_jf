@@ -94,12 +94,14 @@ Ext.define('AP.store.realTimeMonitoring.PCPRealTimeMonitoringWellListStore', {
         	var orgId = Ext.getCmp('leftOrg_Id').getValue();
         	var deviceName=Ext.getCmp('RealTimeMonitoringPCPDeviceListComb_Id').getValue();
         	var commStatusStatValue=Ext.getCmp("PCPRealTimeMonitoringStatSelectCommStatus_Id").getValue();
+        	var runStatusStatValue=Ext.getCmp("PCPRealTimeMonitoringStatSelectRunStatus_Id").getValue();
         	var deviceTypeStatValue=Ext.getCmp("PCPRealTimeMonitoringStatSelectDeviceType_Id").getValue();
             var new_params = {
                     orgId: orgId,
                     deviceType:1,
                     deviceName:deviceName,
                     commStatusStatValue:commStatusStatValue,
+                    runStatusStatValue:runStatusStatValue,
                     deviceTypeStatValue:deviceTypeStatValue
                 };
             Ext.apply(store.proxy.extraParams, new_params);

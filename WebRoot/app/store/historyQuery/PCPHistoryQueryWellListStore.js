@@ -85,12 +85,14 @@ Ext.define('AP.store.historyQuery.PCPHistoryQueryWellListStore', {
         	var orgId = Ext.getCmp('leftOrg_Id').getValue();
         	var deviceName=Ext.getCmp('HistoryQueryPCPDeviceListComb_Id').getValue();
         	var commStatusStatValue=Ext.getCmp("PCPHistoryQueryStatSelectCommStatus_Id").getValue();
+        	var runStatusStatValue=Ext.getCmp("PCPHistoryQueryStatSelectRunStatus_Id").getValue();
 			var deviceTypeStatValue=Ext.getCmp("PCPHistoryQueryStatSelectDeviceType_Id").getValue();
             var new_params = {
                     orgId: orgId,
                     deviceType:1,
                     deviceName:deviceName,
                     commStatusStatValue:commStatusStatValue,
+                    runStatusStatValue:runStatusStatValue,
                     deviceTypeStatValue:deviceTypeStatValue
                 };
             Ext.apply(store.proxy.extraParams, new_params);

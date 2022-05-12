@@ -191,6 +191,11 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			if(!jedis.exists("RPCDeviceInfo".getBytes())){
 				MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
 			}
+			
+			if(!jedis.exists("RPCWorkType".getBytes())){
+				MemoryDataManagerTask.loadRPCWorkType();
+			}
+			
 			deviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
 		}catch(Exception e){
 			e.printStackTrace();
@@ -208,7 +213,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
 		
 		int totalCount=0;
-		if(jedis==null || 1==1){
+		if(jedis==null){
 			String tableName="tbl_rpcacqdata_latest";
 			String deviceTableName="viw_rpcdevice";
 			
@@ -241,23 +246,42 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			result_json.append("]");
 		}else{
 			if(deviceInfoByteList!=null){
+				Map<Integer,Integer> totalMap=new TreeMap<Integer,Integer>();
 				for(int i=0;i<deviceInfoByteList.size();i++){
 					Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
 					if (obj instanceof RPCDeviceInfo) {
 						RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)obj;
 						if(StringManagerUtils.stringToArrExistNum(orgId, rpcDeviceInfo.getOrgId())){
-//							rpcDeviceInfo.getre
-//							
-//							commStatus=rpcDeviceInfo.getCommStatus();
-//							if(commStatus==1){
-//								online+=1;
-//							}else{
-//								offline+=1;;
-//							}
+							int count=1;
+							int resultCode=rpcDeviceInfo.getResultCode()==null?0:rpcDeviceInfo.getResultCode();
+							if(totalMap.containsKey(resultCode)){
+								count=totalMap.get(resultCode)+1;
+							}
+							totalMap.put(resultCode, count);
 						}
 					}
-				
 				}
+				
+				int index=1;
+				result_json.append("\"totalCount\":"+totalMap.size()+",");
+				result_json.append("\"totalRoot\":[");
+				for(Integer key:totalMap.keySet()){
+					String item="无数据";
+					if(jedis.hexists("RPCWorkType".getBytes(), (key+"").getBytes())){
+						WorkType workType=(WorkType) SerializeObjectUnils.unserizlize(jedis.hget("RPCWorkType".getBytes(), (key+"").getBytes()));
+						item=workType.getResultName();
+					}
+					result_json.append("{\"id\":"+index+",");
+					result_json.append("\"item\":\""+item+"\",");
+					result_json.append("\"itemCode\":\""+key+"\",");
+					result_json.append("\"count\":"+totalMap.get(key)+"},");
+					index++;
+				}
+				
+				if(result_json.toString().endsWith(",")){
+					result_json.deleteCharAt(result_json.length() - 1);
+				}
+				result_json.append("]");
 			}
 		}
 		
@@ -378,6 +402,145 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		result_json.append("\"count\":"+online+"},");
 		
 		result_json.append("{\"id\":3,");
+		result_json.append("\"item\":\"离线\",");
+		result_json.append("\"itemCode\":\"offline\",");
+		result_json.append("\"count\":"+offline+"}");
+		result_json.append("]");
+		result_json.append(",\"AlarmShowStyle\":"+new Gson().toJson(alarmShowStyle));
+		result_json.append("}");
+		return result_json.toString().replaceAll("\"null\"", "\"\"");
+	}
+	
+	public String getRealTimeMonitoringRunStatusStatData(String orgId,String deviceType,String deviceTypeStatValue) throws IOException, SQLException{
+		StringBuffer result_json = new StringBuffer();
+		Jedis jedis = null;
+		AlarmShowStyle alarmShowStyle=null;
+		List<byte[]> deviceInfoByteList=null;
+		try{
+			jedis = new Jedis();
+			if(!jedis.exists("AlarmShowStyle".getBytes())){
+				MemoryDataManagerTask.initAlarmStyle();
+			}
+			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
+			
+			if(StringManagerUtils.stringToInteger(deviceType) ==0){
+				if(!jedis.exists("RPCDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+				}
+				deviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
+			}else{
+				if(!jedis.exists("PCPDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+				}
+				deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
+		}
+		
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"item\",children:[] },"
+				+ "{ \"header\":\"变量\",\"dataIndex\":\"count\",children:[] }"
+				+ "]";
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalCount\":4,");
+		int total=0,run=0,stop=0,offline=0;
+		if(jedis==null){
+			String tableName="tbl_rpcacqdata_latest";
+			String deviceTableName="viw_rpcdevice";
+			if(StringManagerUtils.stringToInteger(deviceType)!=0){
+				tableName="tbl_pcpacqdata_latest";
+				deviceTableName="viw_pcpdevice";
+			}
+			
+			String sql="select decode(t2.commstatus,0,-1,t2.runstatus) as runstatus,count(1) from "+deviceTableName+" t "
+					+ " left outer join "+tableName+" t2 on  t2.wellid=t.id "
+					+ " where t.orgid in("+orgId+") ";
+			if(StringManagerUtils.isNotNull(deviceTypeStatValue)){
+				sql+=" and t.devicetypename='"+deviceTypeStatValue+"'";
+			}
+			sql+=" group by t2.commstatus,t2.runstatus";
+			
+			List<?> list = this.findCallSql(sql);
+			for(int i=0;i<list.size();i++){
+				Object[] obj=(Object[]) list.get(i);
+				if(StringManagerUtils.stringToInteger(obj[0]+"")==1){
+					run=StringManagerUtils.stringToInteger(obj[1]+"");
+				}else if(StringManagerUtils.stringToInteger(obj[0]+"")==0){
+					stop=StringManagerUtils.stringToInteger(obj[1]+"");
+				}else{
+					offline=StringManagerUtils.stringToInteger(obj[1]+"");
+				}
+			}
+		}else{
+			if(deviceInfoByteList!=null){
+				for(int i=0;i<deviceInfoByteList.size();i++){
+					int commStatus=0;
+					int runStatus=0;
+					if(StringManagerUtils.stringToInteger(deviceType) ==0){
+						Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+						if (obj instanceof RPCDeviceInfo) {
+							RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)obj;
+							if(StringManagerUtils.stringToArrExistNum(orgId, rpcDeviceInfo.getOrgId())){
+								commStatus=rpcDeviceInfo.getCommStatus();
+								runStatus=rpcDeviceInfo.getRunStatus();
+								if(commStatus==1){
+									if(runStatus==1){
+										run+=1;
+									}else{
+										stop+=1;;
+									}
+								}else{
+									offline+=1;;
+								}
+							}
+						}
+					}else{
+						Object obj = SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+						if (obj instanceof PCPDeviceInfo) {
+							PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)obj;
+							if(StringManagerUtils.stringToArrExistNum(orgId, pcpDeviceInfo.getOrgId())){
+								commStatus=pcpDeviceInfo.getCommStatus();
+								runStatus=pcpDeviceInfo.getRunStatus();
+								if(commStatus==1){
+									if(runStatus==1){
+										run+=1;
+									}else{
+										stop+=1;;
+									}
+								}else{
+									offline+=1;;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		total=run+stop+offline;
+		result_json.append("\"totalRoot\":[");
+		result_json.append("{\"id\":1,");
+		result_json.append("\"item\":\"全部\",");
+		result_json.append("\"itemCode\":\"all\",");
+		result_json.append("\"count\":"+total+"},");
+		
+		result_json.append("{\"id\":2,");
+		result_json.append("\"item\":\"运行\",");
+		result_json.append("\"itemCode\":\"run\",");
+		result_json.append("\"count\":"+run+"},");
+		
+		result_json.append("{\"id\":3,");
+		result_json.append("\"item\":\"停抽\",");
+		result_json.append("\"itemCode\":\"stop\",");
+		result_json.append("\"count\":"+stop+"},");
+		
+		result_json.append("{\"id\":4,");
 		result_json.append("\"item\":\"离线\",");
 		result_json.append("\"itemCode\":\"offline\",");
 		result_json.append("\"count\":"+offline+"}");
@@ -543,7 +706,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		return result_json.toString().replaceAll("\"null\"", "\"\"");
 	}
 	
-	public String getDeviceRealTimeOverview(String orgId,String deviceName,String deviceType,String commStatusStatValue,String deviceTypeStatValue,Page pager) throws IOException, SQLException{
+	public String getDeviceRealTimeOverview(String orgId,String deviceName,String deviceType,String FESdiagramResultStatValue,String commStatusStatValue,String runStatusStatValue,String deviceTypeStatValue,Page pager) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
 		ConfigFile configFile=Config.getInstance().configFile;
 		int dataSaveMode=configFile.getOthers().getDataSaveMode();
@@ -638,8 +801,14 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		if(StringManagerUtils.isNotNull(deviceName)){
 			sql+=" and t.wellName='"+deviceName+"'";
 		}
+		if(StringManagerUtils.isNotNull(FESdiagramResultStatValue)){
+			sql+=" and decode(t2.resultcode,null,'无数据',t3.resultName)='"+FESdiagramResultStatValue+"'";
+		}
 		if(StringManagerUtils.isNotNull(commStatusStatValue)){
 			sql+=" and decode(t2.commstatus,1,'在线','离线')='"+commStatusStatValue+"'";
+		}
+		if(StringManagerUtils.isNotNull(runStatusStatValue)){
+			sql+=" and decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线')='"+runStatusStatValue+"'";
 		}
 		if(StringManagerUtils.isNotNull(deviceTypeStatValue)){
 			sql+=" and c1.itemname='"+deviceTypeStatValue+"'";
@@ -798,7 +967,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		return result_json.toString().replaceAll("\"null\"", "\"\"");
 	}
 	
-	public String getDeviceRealTimeOverviewExportData(String orgId,String deviceName,String deviceType,String commStatusStatValue,String deviceTypeStatValue) throws IOException, SQLException{
+	public String getDeviceRealTimeOverviewExportData(String orgId,String deviceName,String deviceType,String FESdiagramResultStatValue,String commStatusStatValue,String runStatusStatValue,String deviceTypeStatValue,Page pager) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
 		ConfigFile configFile=Config.getInstance().configFile;
 		int dataSaveMode=configFile.getOthers().getDataSaveMode();
@@ -864,6 +1033,9 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				+ " where  t.orgid in ("+orgId+") ";
 		if(StringManagerUtils.isNotNull(deviceName)){
 			sql+=" and t.wellName='"+deviceName+"'";
+		}
+		if(StringManagerUtils.isNotNull(FESdiagramResultStatValue)){
+			sql+=" and decode(t2.resultcode,null,'无数据',t3.resultName)='"+FESdiagramResultStatValue+"'";
 		}
 		if(StringManagerUtils.isNotNull(commStatusStatValue)){
 			sql+=" and decode(t2.commstatus,1,'在线','离线')='"+commStatusStatValue+"'";
@@ -947,7 +1119,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		return result_json.toString().replaceAll("\"null\"", "\"\"");
 	}
 	
-	public String getPCPDeviceRealTimeOverview(String orgId,String deviceName,String deviceType,String commStatusStatValue,String deviceTypeStatValue,Page pager) throws IOException, SQLException{
+	public String getPCPDeviceRealTimeOverview(String orgId,String deviceName,String deviceType,String commStatusStatValue,String runStatusStatValue,String deviceTypeStatValue,Page pager) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
 		ConfigFile configFile=Config.getInstance().configFile;
 		int dataSaveMode=configFile.getOthers().getDataSaveMode();
@@ -1037,6 +1209,9 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		}
 		if(StringManagerUtils.isNotNull(commStatusStatValue)){
 			sql+=" and decode(t2.commstatus,1,'在线','离线')='"+commStatusStatValue+"'";
+		}
+		if(StringManagerUtils.isNotNull(runStatusStatValue)){
+			sql+=" and decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线')='"+runStatusStatValue+"'";
 		}
 		if(StringManagerUtils.isNotNull(deviceTypeStatValue)){
 			sql+=" and c1.itemname='"+deviceTypeStatValue+"'";
@@ -1191,7 +1366,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		return result_json.toString().replaceAll("\"null\"", "\"\"");
 	}
 	
-	public String getPCPDeviceRealTimeOverviewExportData(String orgId,String deviceName,String deviceType,String commStatusStatValue,String deviceTypeStatValue) throws IOException, SQLException{
+	public String getPCPDeviceRealTimeOverviewExportData(String orgId,String deviceName,String deviceType,String commStatusStatValue,String runStatusStatValue,String deviceTypeStatValue,Page pager) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
 		ConfigFile configFile=Config.getInstance().configFile;
 		int dataSaveMode=configFile.getOthers().getDataSaveMode();
@@ -1257,6 +1432,9 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		}
 		if(StringManagerUtils.isNotNull(commStatusStatValue)){
 			sql+=" and decode(t2.commstatus,1,'在线','离线')='"+commStatusStatValue+"'";
+		}
+		if(StringManagerUtils.isNotNull(runStatusStatValue)){
+			sql+=" and decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线')='"+runStatusStatValue+"'";
 		}
 		if(StringManagerUtils.isNotNull(deviceTypeStatValue)){
 			sql+=" and c1.itemname='"+deviceTypeStatValue+"'";

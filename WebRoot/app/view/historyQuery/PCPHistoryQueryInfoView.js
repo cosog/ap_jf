@@ -94,6 +94,11 @@ Ext.define("AP.view.historyQuery.PCPHistoryQueryInfoView", {
                             value: '',
                             hidden: true
                         },{
+                            id: 'PCPHistoryQueryStatSelectRunStatus_Id',
+                            xtype: 'textfield',
+                            value: '',
+                            hidden: true
+                        },{
                             id: 'PCPHistoryQueryStatSelectDeviceType_Id',
                             xtype: 'textfield',
                             value: '',
@@ -117,12 +122,13 @@ Ext.define("AP.view.historyQuery.PCPHistoryQueryInfoView", {
                             	var orgId = Ext.getCmp('leftOrg_Id').getValue();
                             	var deviceName=Ext.getCmp('HistoryQueryPCPDeviceListComb_Id').getValue();
                             	var commStatusStatValue=Ext.getCmp("PCPHistoryQueryStatSelectCommStatus_Id").getValue();
+                            	var runStatusStatValue=Ext.getCmp("PCPHistoryQueryStatSelectRunStatus_Id").getValue();
                     			var deviceTypeStatValue=Ext.getCmp("PCPHistoryQueryStatSelectDeviceType_Id").getValue();
                            	 	var deviceType=1;
                            	 	var fileName='螺杆泵历史数据设备列表';
                            	 	var title='螺杆泵历史数据设备列表';
                            	 	var columnStr=Ext.getCmp("PCPHistoryQueryWellListColumnStr_Id").getValue();
-                           	 	exportHistoryQueryDeviceListExcel(orgId,deviceType,deviceName,commStatusStatValue,deviceTypeStatValue,fileName,title,columnStr);
+                           	 	exportHistoryQueryDeviceListExcel(orgId,deviceType,deviceName,'',commStatusStatValue,runStatusStatValue,deviceTypeStatValue,fileName,title,columnStr);
                             }
                         }]
                     },{
@@ -157,8 +163,30 @@ Ext.define("AP.view.historyQuery.PCPHistoryQueryInfoView", {
                                 }
                             }
                 		},{
+                			title:'运行状态',
+                			layout: 'fit',
+                        	id:'PCPHistoryQueryRunStatusStatGraphPanel_Id',
+                        	html: '<div id="PCPHistoryQueryRunStatusStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
+                        	listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if ($("#PCPHistoryQueryRunStatusStatGraphPanelPieDiv_Id").highcharts() != undefined) {
+                                        $("#PCPHistoryQueryRunStatusStatGraphPanelPieDiv_Id").highcharts().setSize($("#PCPHistoryQueryRunStatusStatGraphPanelPieDiv_Id").offsetWidth, $("#PCPHistoryQueryRunStatusStatGraphPanelPieDiv_Id").offsetHeight,true);
+                                    }else{
+                                    	var toolTip=Ext.getCmp("PCPHistoryQueryRunStatusStatGraphPanelPieToolTip_Id");
+                                    	if(!isNotVal(toolTip)){
+                                    		Ext.create('Ext.tip.ToolTip', {
+                                                id:'PCPHistoryQueryRunStatusStatGraphPanelPieToolTip_Id',
+                                        		target: 'PCPHistoryQueryRunStatusStatGraphPanelPieDiv_Id',
+                                                html: '点击饼图不同区域或标签，查看相应统计数据'
+                                            });
+                                    	}
+                                    }
+                                }
+                            }
+                		},{
                 			title:'设备类型',
                 			layout: 'fit',
+                			hidden: true,
                         	id:'PCPHistoryQueryDeviceTypeStatGraphPanel_Id',
                         	html: '<div id="PCPHistoryQueryDeviceTypeStatPieDiv_Id" style="width:100%;height:100%;"></div>',
                         	listeners: {
@@ -182,6 +210,8 @@ Ext.define("AP.view.historyQuery.PCPHistoryQueryInfoView", {
             				tabchange: function (tabPanel, newCard,oldCard, obj) {
             					if(newCard.id=="PCPHistoryQueryStatGraphPanel_Id"){
             						loadAndInitHistoryQueryCommStatusStat(true);
+            					}else if(newCard.id=="PCPHistoryQueryRunStatusStatGraphPanel_Id"){
+            						loadAndInitHistoryQueryRunStatusStat(true);
             					}else if(newCard.id=="PCPHistoryQueryDeviceTypeStatGraphPanel_Id"){
             						loadAndInitHistoryQueryDeviceTypeStat(true);
             					}

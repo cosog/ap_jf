@@ -101,6 +101,11 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             value: '',
                             hidden: true
                          },{
+                        	id: 'RPCRealTimeMonitoringStatSelectRunStatus_Id',
+                        	xtype: 'textfield',
+                            value: '',
+                            hidden: true
+                         },{
                         	id: 'RPCRealTimeMonitoringStatSelectDeviceType_Id',
                         	xtype: 'textfield',
                             value: '',
@@ -119,13 +124,14 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                             	 var orgId = Ext.getCmp('leftOrg_Id').getValue();
                             	 var deviceName=Ext.getCmp('RealTimeMonitoringRPCDeviceListComb_Id').getValue();
                             	 var FESdiagramResultStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectFESdiagramResult_Id").getValue();
-                            	 var commStatusStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectCommStatus_Id").getValue();
+                             	 var commStatusStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectCommStatus_Id").getValue();
+                             	 var runStatusStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectRunStatus_Id").getValue();
                              	 var deviceTypeStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectDeviceType_Id").getValue();
                             	 var deviceType=0;
                             	 var fileName='抽油机实时监控数据';
                             	 var title='抽油机实时监控数据';
                             	 var columnStr=Ext.getCmp("RPCRealTimeMonitoringColumnStr_Id").getValue();
-                            	 exportRealTimeMonitoringDataExcel(orgId,deviceType,deviceName,commStatusStatValue,deviceTypeStatValue,fileName,title,columnStr);
+                            	 exportRealTimeMonitoringDataExcel(orgId,deviceType,deviceName,FESdiagramResultStatValue,commStatusStatValue,runStatusStatValue,deviceTypeStatValue,fileName,title,columnStr);
                              }
                          }, '->', {
                          	xtype: 'button',
@@ -194,8 +200,30 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                                 }
                             }
                 		},{
+                			title:'运行状态',
+                			layout: 'fit',
+                        	id:'RPCRealTimeMonitoringRunStatusStatGraphPanel_Id',
+                        	html: '<div id="RPCRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
+                        	listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if ($("#RPCRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id").highcharts() != undefined) {
+                                        $("#RPCRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id").highcharts().setSize($("#RPCRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id").offsetWidth, $("#RPCRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id").offsetHeight,true);
+                                    }else{
+                                    	var toolTip=Ext.getCmp("RPCRealTimeMonitoringRunStatusStatGraphPanelPieToolTip_Id");
+                                    	if(!isNotVal(toolTip)){
+                                    		Ext.create('Ext.tip.ToolTip', {
+                                                id:'RPCRealTimeMonitoringRunStatusStatGraphPanelPieToolTip_Id',
+                                        		target: 'RPCRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id',
+                                                html: '点击饼图不同区域或标签，查看相应统计数据'
+                                            });
+                                    	}
+                                    }
+                                }
+                            }
+                		},{
                 			title:'设备类型',
                 			layout: 'fit',
+                			hidden: true,
                         	id:'RPCRealTimeMonitoringDeviceTypeStatGraphPanel_Id',
                         	html: '<div id="RPCRealTimeMonitoringDeviceTypeStatPieDiv_Id" style="width:100%;height:100%;"></div>',
                         	listeners: {
@@ -221,6 +249,8 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
             						loadAndInitFESdiagramResultStat(true);
             					}else if(newCard.id=="RPCRealTimeMonitoringStatGraphPanel_Id"){
             						loadAndInitCommStatusStat(true);
+            					}else if(newCard.id=="RPCRealTimeMonitoringRunStatusStatGraphPanel_Id"){
+            						loadAndInitRunStatusStat(true);
             					}else if(newCard.id=="RPCRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
             						loadAndInitDeviceTypeStat(true);
             					}

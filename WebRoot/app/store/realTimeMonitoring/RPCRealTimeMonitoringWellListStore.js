@@ -95,13 +95,17 @@ Ext.define('AP.store.realTimeMonitoring.RPCRealTimeMonitoringWellListStore', {
         beforeload: function (store, options) {
         	var orgId = Ext.getCmp('leftOrg_Id').getValue();
         	var deviceName=Ext.getCmp('RealTimeMonitoringRPCDeviceListComb_Id').getValue();
+        	var FESdiagramResultStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectFESdiagramResult_Id").getValue();
         	var commStatusStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectCommStatus_Id").getValue();
+        	var runStatusStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectRunStatus_Id").getValue();
         	var deviceTypeStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectDeviceType_Id").getValue();
             var new_params = {
                     orgId: orgId,
                     deviceType:0,
                     deviceName:deviceName,
+                    FESdiagramResultStatValue:FESdiagramResultStatValue,
                     commStatusStatValue:commStatusStatValue,
+                    runStatusStatValue:runStatusStatValue,
                     deviceTypeStatValue:deviceTypeStatValue
                 };
             Ext.apply(store.proxy.extraParams, new_params);
