@@ -62,7 +62,7 @@ Ext.define("AP.view.realTimeMonitoring.RealTimeMonitoringInfoView", {
                 	},{
                 		xtype: 'button',
                         id:"jedisRunStatusProbeLabel_id",
-                        text: '实时库:',
+                        text: 'redis',
 //                        width: 100,
                         handler: function (v, o) {
                         	Ext.getCmp('ResourceMonitoringCurveItem_Id').setValue("实时数据库运行状态");
@@ -76,7 +76,7 @@ Ext.define("AP.view.realTimeMonitoring.RealTimeMonitoringInfoView", {
                 	},{
                 		xtype: 'button',
                         id:"adRunStatusProbeLabel_id",
-                        text: '驱动:',
+                        text: 'ad',
 //                        width: 100,
                         handler: function (v, o) {
                         	Ext.getCmp('ResourceMonitoringCurveItem_Id').setValue("驱动运行状态");
@@ -96,7 +96,7 @@ Ext.define("AP.view.realTimeMonitoring.RealTimeMonitoringInfoView", {
                 	},{
                 		xtype: 'button',
                         id:"acRunStatusProbeLabel_id",
-                        text: 'ac:',
+                        text: 'ac',
 //                        width: 100,
                         handler: function (v, o) {
                         	Ext.getCmp('ResourceMonitoringCurveItem_Id').setValue("ac运行状态");
@@ -141,7 +141,9 @@ Ext.define("AP.view.realTimeMonitoring.RealTimeMonitoringInfoView", {
         							loadAndInitFESdiagramResultStat(true);
         						}else if(statTabActiveId=="RPCRealTimeMonitoringStatGraphPanel_Id"){
         							loadAndInitCommStatusStat(true);
-        						}else if(newCard.id=="RPCRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
+        						}else if(statTabActiveId=="RPCRealTimeMonitoringRunStatusStatGraphPanel_Id"){
+            						loadAndInitRunStatusStat(true);
+            					}else if(statTabActiveId=="RPCRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
         							loadAndInitDeviceTypeStat(true);
         						}
         						Ext.getCmp('RealTimeMonitoringRPCDeviceListComb_Id').setValue('');
@@ -157,7 +159,9 @@ Ext.define("AP.view.realTimeMonitoring.RealTimeMonitoringInfoView", {
         						var statTabActiveId = Ext.getCmp("PCPRealTimeMonitoringStatTabPanel").getActiveTab().id;
         						if(statTabActiveId=="PCPRealTimeMonitoringStatGraphPanel_Id"){
         							loadAndInitCommStatusStat(true);
-        						}else if(newCard.id=="PCPRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
+        						}else if(statTabActiveId=="PCPRealTimeMonitoringRunStatusStatGraphPanel_Id"){
+            						loadAndInitRunStatusStat(true);
+            					}else if(statTabActiveId=="PCPRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
         							loadAndInitDeviceTypeStat(true);
         						}
         						Ext.getCmp('RealTimeMonitoringPCPDeviceListComb_Id').setValue('');
@@ -447,7 +451,7 @@ function initResourceProbeHistoryCurveChartFn(series, tickInterval, divId, title
 };
 
 
-function exportRealTimeMonitoringDataExcel(orgId,deviceType,deviceName,commStatusStatValue,deviceTypeStatValue,fileName,title,columnStr) {
+function exportRealTimeMonitoringDataExcel(orgId,deviceType,deviceName,FESdiagramResultStatValue,commStatusStatValue,runStatusStatValue,deviceTypeStatValue,fileName,title,columnStr) {
     var url = context + '/realTimeMonitoringController/exportDeviceRealTimeOverviewDataExcel';
     var fields = "";
     var heads = "";
@@ -486,7 +490,9 @@ function exportRealTimeMonitoringDataExcel(orgId,deviceType,deviceName,commStatu
     + "&orgId=" + orgId 
     + "&deviceType=" + deviceType 
     + "&deviceName=" + URLencode(URLencode(deviceName))
+    + "&FESdiagramResultStatValue=" + URLencode(URLencode(FESdiagramResultStatValue))
     + "&commStatusStatValue=" + URLencode(URLencode(commStatusStatValue))
+    + "&runStatusStatValue=" + URLencode(URLencode(runStatusStatValue))
     + "&deviceTypeStatValue=" + URLencode(URLencode(deviceTypeStatValue))
     + "&fileName=" + URLencode(URLencode(fileName)) 
     + "&title=" + URLencode(URLencode(title));
@@ -557,6 +563,7 @@ function loadAndInitFESdiagramResultStat(all){
 	if(all){
 		Ext.getCmp("RPCRealTimeMonitoringStatSelectFESdiagramResult_Id").setValue('');
 		Ext.getCmp("RPCRealTimeMonitoringStatSelectCommStatus_Id").setValue('');
+		Ext.getCmp("RPCRealTimeMonitoringStatSelectRunStatus_Id").setValue('');
 		Ext.getCmp("RPCRealTimeMonitoringStatSelectDeviceType_Id").setValue('');
 		commStatusStatValue='';
 		deviceTypeStatValue='';
@@ -644,38 +651,27 @@ function ShowRealTimeMonitoringFESDiagramResultStatPieOrColChat(title,divid, nam
 				},
 				events: {
 					click: function(e) {
-//						var statSelectCommStatusId="RPCRealTimeMonitoringStatSelectCommStatus_Id";
-//						var deviceListComb_Id="RealTimeMonitoringRPCDeviceListComb_Id";
-//						var gridPanel_Id="RPCRealTimeMonitoringListGridPanel_Id";
-//						var store="AP.store.realTimeMonitoring.RPCRealTimeMonitoringWellListStore";
-//						var activeId = Ext.getCmp("RealTimeMonitoringTabPanel").getActiveTab().id;
-//						if(activeId=="RPCRealTimeMonitoringInfoPanel_Id"){
-//							statSelectCommStatusId="RPCRealTimeMonitoringStatSelectCommStatus_Id";
-//							deviceListComb_Id="RealTimeMonitoringRPCDeviceListComb_Id";
-//							gridPanel_Id="RPCRealTimeMonitoringListGridPanel_Id";
-//							store="AP.store.realTimeMonitoring.RPCRealTimeMonitoringWellListStore";
-//						}else if(activeId=="PCPRealTimeMonitoringInfoPanel_Id"){
-//							statSelectCommStatusId="PCPRealTimeMonitoringStatSelectCommStatus_Id";
-//							deviceListComb_Id="RealTimeMonitoringPCPDeviceListComb_Id";
-//							gridPanel_Id="PCPRealTimeMonitoringListGridPanel_Id";
-//							store="AP.store.realTimeMonitoring.PCPRealTimeMonitoringWellListStore";
-//						}
-//						
-//						if(!e.point.selected){//如果没被选中,则本次是选中
-//							Ext.getCmp(statSelectCommStatusId).setValue(e.point.name);
-//						}else{//取消选中
-//							Ext.getCmp(statSelectCommStatusId).setValue('');
-//						}
-//						
-//						Ext.getCmp(deviceListComb_Id).setValue('');
-//						Ext.getCmp(deviceListComb_Id).setRawValue('');
-//						var gridPanel = Ext.getCmp(gridPanel_Id);
-//						if (isNotVal(gridPanel)) {
-//							gridPanel.getSelectionModel().deselectAll(true);
-//							gridPanel.getStore().load();
-//						}else{
-//							Ext.create(store);
-//						}
+						var statSelectFESdiagramResultId="RPCRealTimeMonitoringStatSelectFESdiagramResult_Id";
+						var deviceListComb_Id="RealTimeMonitoringRPCDeviceListComb_Id";
+						var gridPanel_Id="RPCRealTimeMonitoringListGridPanel_Id";
+						var store="AP.store.realTimeMonitoring.RPCRealTimeMonitoringWellListStore";
+						
+						
+						if(!e.point.selected){//如果没被选中,则本次是选中
+							Ext.getCmp(statSelectFESdiagramResultId).setValue(e.point.name);
+						}else{//取消选中
+							Ext.getCmp(statSelectFESdiagramResultId).setValue('');
+						}
+						
+						Ext.getCmp(deviceListComb_Id).setValue('');
+						Ext.getCmp(deviceListComb_Id).setRawValue('');
+						var gridPanel = Ext.getCmp(gridPanel_Id);
+						if (isNotVal(gridPanel)) {
+							gridPanel.getSelectionModel().deselectAll(true);
+							gridPanel.getStore().load();
+						}else{
+							Ext.create(store);
+						}
 					}
 				},
 				showInLegend : true
@@ -703,7 +699,9 @@ function loadAndInitCommStatusStat(all){
 	if(activeId=="RPCRealTimeMonitoringInfoPanel_Id"){
 		deviceType=0;
 		if(all){
+			Ext.getCmp("RPCRealTimeMonitoringStatSelectFESdiagramResult_Id").setValue('');
 			Ext.getCmp("RPCRealTimeMonitoringStatSelectCommStatus_Id").setValue('');
+			Ext.getCmp("RPCRealTimeMonitoringStatSelectRunStatus_Id").setValue('');
 			Ext.getCmp("RPCRealTimeMonitoringStatSelectDeviceType_Id").setValue('');
 			deviceTypeStatValue='';
 		}else{
@@ -858,6 +856,174 @@ function ShowRealTimeMonitoringStatPieOrColChat(title,divid, name, data,colors) 
 		});
 };
 
+function loadAndInitRunStatusStat(all){
+	var orgId = Ext.getCmp('leftOrg_Id').getValue();
+	var deviceType=0;
+	var deviceTypeStatValue='';
+	var activeId = Ext.getCmp("RealTimeMonitoringTabPanel").getActiveTab().id;
+	if(activeId=="RPCRealTimeMonitoringInfoPanel_Id"){
+		deviceType=0;
+		if(all){
+			Ext.getCmp("RPCRealTimeMonitoringStatSelectFESdiagramResult_Id").setValue('');
+			Ext.getCmp("RPCRealTimeMonitoringStatSelectCommStatus_Id").setValue('');
+			Ext.getCmp("RPCRealTimeMonitoringStatSelectRunStatus_Id").setValue('');
+			Ext.getCmp("RPCRealTimeMonitoringStatSelectDeviceType_Id").setValue('');
+		}else{
+			deviceTypeStatValue=Ext.getCmp("RPCRealTimeMonitoringStatSelectDeviceType_Id").getValue();
+		}
+	}else if(activeId=="PCPRealTimeMonitoringInfoPanel_Id"){
+		deviceType=1;
+		if(all){
+			Ext.getCmp("PCPRealTimeMonitoringStatSelectCommStatus_Id").setValue('');
+			Ext.getCmp("PCPRealTimeMonitoringStatSelectRunStatus_Id").setValue('');
+			Ext.getCmp("PCPRealTimeMonitoringStatSelectDeviceType_Id").setValue('');
+			deviceTypeStatValue='';
+		}else{
+			deviceTypeStatValue=Ext.getCmp("PCPRealTimeMonitoringStatSelectDeviceType_Id").getValue();
+		}
+	}
+	
+	Ext.Ajax.request({
+		method:'POST',
+		url:context + '/realTimeMonitoringController/getRealTimeMonitoringRunStatusStatData',
+		success:function(response) {
+			var result =  Ext.JSON.decode(response.responseText);
+			Ext.getCmp("AlarmShowStyle_Id").setValue(JSON.stringify(result.AlarmShowStyle));
+			initRealTimeMonitoringRunStatusStatPieOrColChat(result);
+		},
+		failure:function(){
+			Ext.MessageBox.alert("错误","与后台联系的时候出了问题");
+		},
+		params: {
+			orgId:orgId,
+			deviceType:deviceType
+        }
+	});
+}
+
+
+function initRealTimeMonitoringRunStatusStatPieOrColChat(get_rawData) {
+	var divid="RPCRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id";
+	var tabPanel = Ext.getCmp("RealTimeMonitoringTabPanel");
+	var activeId = tabPanel.getActiveTab().id;
+	if(activeId=="RPCRealTimeMonitoringInfoPanel_Id"){
+		divid="RPCRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id";
+	}else if(activeId=="PCPRealTimeMonitoringInfoPanel_Id"){
+		divid="PCPRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id";
+	}
+	var title="运行状态";
+	var datalist=get_rawData.totalRoot;
+	var colors=[];
+	var alarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue());
+	var pieDataStr="[";
+	for(var i=0;i<datalist.length;i++){
+		if(datalist[i].itemCode!='all'){
+			if(datalist[i].count>0){
+				pieDataStr+="['"+datalist[i].item+"',"+datalist[i].count+"],";
+				if(datalist[i].itemCode=='run'){
+					colors.push('#'+alarmShowStyle.Comm.online.BackgroundColor);
+				}else if(datalist[i].itemCode=='stop'){
+					colors.push('#'+alarmShowStyle.Comm.offline.BackgroundColor);
+				}else if(datalist[i].itemCode=='offline'){
+					colors.push('#767272');
+				}
+			}
+		}
+	}
+	
+	if(stringEndWith(pieDataStr,",")){
+		pieDataStr = pieDataStr.substring(0, pieDataStr.length - 1);
+	}
+	pieDataStr+="]";
+	var pieData = Ext.JSON.decode(pieDataStr);
+	ShowRealTimeMonitoringRunStatusStatPieOrColChat(title,divid, "设备数占", pieData,colors);
+	
+};
+
+function ShowRealTimeMonitoringRunStatusStatPieOrColChat(title,divid, name, data,colors) {
+	Highcharts.chart(divid, {
+		chart : {
+			plotBackgroundColor : null,
+			plotBorderWidth : null,
+			plotShadow : false
+		},
+		credits : {
+			enabled : false
+		},
+		title : {
+			text : title
+		},
+		colors : colors,
+		tooltip : {
+			pointFormat : '设备数: <b>{point.y}</b> 占: <b>{point.percentage:.1f}%</b>'
+		},
+		legend : {
+			align : 'center',
+			verticalAlign : 'bottom',
+			layout : 'horizontal' //vertical 竖直 horizontal-水平
+		},
+		plotOptions : {
+			pie : {
+				allowPointSelect : true,
+				cursor : 'pointer',
+				dataLabels : {
+					enabled : true,
+					color : '#000000',
+					connectorColor : '#000000',
+					format : '<b>{point.name}</b>: {point.y}台'
+				},
+				events: {
+					click: function(e) {
+						var statSelectRunStatusId="RPCRealTimeMonitoringStatSelectRunStatus_Id";
+						var deviceListComb_Id="RealTimeMonitoringRPCDeviceListComb_Id";
+						var gridPanel_Id="RPCRealTimeMonitoringListGridPanel_Id";
+						var store="AP.store.realTimeMonitoring.RPCRealTimeMonitoringWellListStore";
+						var activeId = Ext.getCmp("RealTimeMonitoringTabPanel").getActiveTab().id;
+						if(activeId=="RPCRealTimeMonitoringInfoPanel_Id"){
+							statSelectRunStatusId="RPCRealTimeMonitoringStatSelectRunStatus_Id";
+							deviceListComb_Id="RealTimeMonitoringRPCDeviceListComb_Id";
+							gridPanel_Id="RPCRealTimeMonitoringListGridPanel_Id";
+							store="AP.store.realTimeMonitoring.RPCRealTimeMonitoringWellListStore";
+						}else if(activeId=="PCPRealTimeMonitoringInfoPanel_Id"){
+							statSelectRunStatusId="PCPRealTimeMonitoringStatSelectRunStatus_Id";
+							deviceListComb_Id="RealTimeMonitoringPCPDeviceListComb_Id";
+							gridPanel_Id="PCPRealTimeMonitoringListGridPanel_Id";
+							store="AP.store.realTimeMonitoring.PCPRealTimeMonitoringWellListStore";
+						}
+						
+						if(!e.point.selected){//如果没被选中,则本次是选中
+							Ext.getCmp(statSelectRunStatusId).setValue(e.point.name);
+						}else{//取消选中
+							Ext.getCmp(statSelectRunStatusId).setValue('');
+						}
+						
+						Ext.getCmp(deviceListComb_Id).setValue('');
+						Ext.getCmp(deviceListComb_Id).setRawValue('');
+						var gridPanel = Ext.getCmp(gridPanel_Id);
+						if (isNotVal(gridPanel)) {
+							gridPanel.getSelectionModel().deselectAll(true);
+							gridPanel.getStore().load();
+						}else{
+							Ext.create(store);
+						}
+					}
+				},
+				showInLegend : true
+			}
+		},
+		exporting:{ 
+            enabled:true,    
+            filename:'class-booking-chart',    
+            url:context + '/exportHighcharsPicController/export'
+		},
+		series : [{
+					type : 'pie',
+					name : name,
+					data : data
+				}]
+		});
+};
+
 function loadAndInitDeviceTypeStat(all){
 	var orgId = Ext.getCmp('leftOrg_Id').getValue();
 	var deviceType=0;
@@ -867,7 +1033,9 @@ function loadAndInitDeviceTypeStat(all){
 	if(activeId=="RPCRealTimeMonitoringInfoPanel_Id"){
 		deviceType=0;
 		if(all){
+			Ext.getCmp("RPCRealTimeMonitoringStatSelectFESdiagramResult_Id").setValue('');
 			Ext.getCmp("RPCRealTimeMonitoringStatSelectCommStatus_Id").setValue('');
+			Ext.getCmp("RPCRealTimeMonitoringStatSelectRunStatus_Id").setValue('');
 			Ext.getCmp("RPCRealTimeMonitoringStatSelectDeviceType_Id").setValue('');
 			commStatusStatValue='';
 		}else{

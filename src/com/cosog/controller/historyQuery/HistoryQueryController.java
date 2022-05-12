@@ -42,8 +42,10 @@ public class HistoryQueryController extends BaseController  {
 	private String limit;
 	private String msg = "";
 	private String deviceType;
-	private String deviceTypeStatValue;
+	private String FESdiagramResultStatValue;
 	private String commStatusStatValue;
+	private String runStatusStatValue;
+	private String deviceTypeStatValue;
 	private String page;
 	private String orgId;
 	private String startDate;
@@ -106,7 +108,9 @@ public class HistoryQueryController extends BaseController  {
 		orgId = ParamUtils.getParameter(request, "orgId");
 		String deviceName = ParamUtils.getParameter(request, "deviceName");
 		deviceType = ParamUtils.getParameter(request, "deviceType");
+		FESdiagramResultStatValue = ParamUtils.getParameter(request, "FESdiagramResultStatValue");
 		commStatusStatValue = ParamUtils.getParameter(request, "commStatusStatValue");
+		runStatusStatValue = ParamUtils.getParameter(request, "runStatusStatValue");
 		deviceTypeStatValue = ParamUtils.getParameter(request, "deviceTypeStatValue");
 		this.pager = new Page("pagerForm", request);
 		User user=null;
@@ -117,7 +121,7 @@ public class HistoryQueryController extends BaseController  {
 				orgId = "" + user.getUserorgids();
 			}
 		}
-		json = historyQueryService.getHistoryQueryDeviceList(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue,pager);
+		json = historyQueryService.getHistoryQueryDeviceList(orgId,deviceName,deviceType,FESdiagramResultStatValue,commStatusStatValue,runStatusStatValue,deviceTypeStatValue,pager);
 		//HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("application/json;charset="
 				+ Constants.ENCODING_UTF8);
@@ -135,7 +139,9 @@ public class HistoryQueryController extends BaseController  {
 		orgId = ParamUtils.getParameter(request, "orgId");
 		String deviceName = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "deviceName"),"utf-8");
 		deviceType = ParamUtils.getParameter(request, "deviceType");
+		FESdiagramResultStatValue = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "FESdiagramResultStatValue"),"utf-8");
 		commStatusStatValue = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "commStatusStatValue"),"utf-8");
+		runStatusStatValue = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "runStatusStatValue"),"utf-8");
 		deviceTypeStatValue = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "deviceTypeStatValue"),"utf-8");
 		
 		String heads = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "heads"),"utf-8");
@@ -153,7 +159,7 @@ public class HistoryQueryController extends BaseController  {
 			}
 		}
 		
-		json = historyQueryService.getHistoryQueryDeviceListExportData(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue,pager);
+		json = historyQueryService.getHistoryQueryDeviceListExportData(orgId,deviceName,deviceType,FESdiagramResultStatValue,commStatusStatValue,runStatusStatValue,deviceTypeStatValue,pager);
 		this.service.exportGridPanelData(response,fileName,title, heads, fields,json);
 		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
@@ -549,5 +555,21 @@ public class HistoryQueryController extends BaseController  {
 
 	public void setCommStatusStatValue(String commStatusStatValue) {
 		this.commStatusStatValue = commStatusStatValue;
+	}
+
+	public String getFESdiagramResultStatValue() {
+		return FESdiagramResultStatValue;
+	}
+
+	public void setFESdiagramResultStatValue(String fESdiagramResultStatValue) {
+		FESdiagramResultStatValue = fESdiagramResultStatValue;
+	}
+
+	public String getRunStatusStatValue() {
+		return runStatusStatValue;
+	}
+
+	public void setRunStatusStatValue(String runStatusStatValue) {
+		this.runStatusStatValue = runStatusStatValue;
 	}
 }

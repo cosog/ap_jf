@@ -66,8 +66,10 @@ public class RealTimeMonitoringController extends BaseController {
 	private String msg = "";
 	private String deviceName;
 	private String deviceType;
-	private String deviceTypeStatValue;
+	private String FESdiagramResultStatValue;
 	private String commStatusStatValue;
+	private String runStatusStatValue;
+	private String deviceTypeStatValue;
 	private String page;
 	private String orgId;
 	private int totals;
@@ -149,6 +151,31 @@ public class RealTimeMonitoringController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/getRealTimeMonitoringRunStatusStatData")
+	public String getRealTimeMonitoringRunStatusStatData() throws Exception {
+		String json = "";
+		orgId = ParamUtils.getParameter(request, "orgId");
+		deviceType = ParamUtils.getParameter(request, "deviceType");
+		deviceTypeStatValue = ParamUtils.getParameter(request, "deviceTypeStatValue");
+		this.pager = new Page("pagerForm", request);
+		User user=null;
+		if (!StringManagerUtils.isNotNull(orgId)) {
+			HttpSession session=request.getSession();
+			user = (User) session.getAttribute("userLogin");
+			if (user != null) {
+				orgId = "" + user.getUserorgids();
+			}
+		}
+		json = realTimeMonitoringService.getRealTimeMonitoringRunStatusStatData(orgId,deviceType,deviceTypeStatValue);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	@RequestMapping("/getRealTimeMonitoringDeviceTypeStatData")
 	public String getRealTimeMonitoringDeviceTypeStatData() throws Exception {
 		String json = "";
@@ -207,7 +234,9 @@ public class RealTimeMonitoringController extends BaseController {
 		orgId = ParamUtils.getParameter(request, "orgId");
 		deviceName = ParamUtils.getParameter(request, "deviceName");
 		deviceType = ParamUtils.getParameter(request, "deviceType");
+		FESdiagramResultStatValue = ParamUtils.getParameter(request, "FESdiagramResultStatValue");
 		commStatusStatValue = ParamUtils.getParameter(request, "commStatusStatValue");
+		runStatusStatValue = ParamUtils.getParameter(request, "runStatusStatValue");
 		deviceTypeStatValue = ParamUtils.getParameter(request, "deviceTypeStatValue");
 		this.pager = new Page("pagerForm", request);
 		User user=null;
@@ -219,9 +248,9 @@ public class RealTimeMonitoringController extends BaseController {
 			}
 		}
 		if(StringManagerUtils.stringToInteger(deviceType)==0){
-			json = realTimeMonitoringService.getDeviceRealTimeOverview(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue,pager);
+			json = realTimeMonitoringService.getDeviceRealTimeOverview(orgId,deviceName,deviceType,FESdiagramResultStatValue,commStatusStatValue,runStatusStatValue,deviceTypeStatValue,pager);
 		}else{
-			json = realTimeMonitoringService.getPCPDeviceRealTimeOverview(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue,pager);
+			json = realTimeMonitoringService.getPCPDeviceRealTimeOverview(orgId,deviceName,deviceType,commStatusStatValue,runStatusStatValue,deviceTypeStatValue,pager);
 		}
 		
 		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
@@ -239,7 +268,9 @@ public class RealTimeMonitoringController extends BaseController {
 		orgId = ParamUtils.getParameter(request, "orgId");
 		deviceName = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "deviceName"),"utf-8");
 		deviceType = ParamUtils.getParameter(request, "deviceType");
+		FESdiagramResultStatValue = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "FESdiagramResultStatValue"),"utf-8");
 		commStatusStatValue = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "commStatusStatValue"),"utf-8");
+		runStatusStatValue = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "runStatusStatValue"),"utf-8");
 		deviceTypeStatValue = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "deviceTypeStatValue"),"utf-8");
 		
 		String heads = java.net.URLDecoder.decode(ParamUtils.getParameter(request, "heads"),"utf-8");
@@ -265,9 +296,9 @@ public class RealTimeMonitoringController extends BaseController {
 			}
 		}
 		if(StringManagerUtils.stringToInteger(deviceType)==0){
-			json = realTimeMonitoringService.getDeviceRealTimeOverviewExportData(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue);
+			json = realTimeMonitoringService.getDeviceRealTimeOverviewExportData(orgId,deviceName,deviceType,FESdiagramResultStatValue,commStatusStatValue,runStatusStatValue,deviceTypeStatValue,pager);
 		}else{
-			json = realTimeMonitoringService.getPCPDeviceRealTimeOverviewExportData(orgId,deviceName,deviceType,commStatusStatValue,deviceTypeStatValue);
+			json = realTimeMonitoringService.getPCPDeviceRealTimeOverviewExportData(orgId,deviceName,deviceType,commStatusStatValue,runStatusStatValue,deviceTypeStatValue,pager);
 		}
 		
 		
@@ -725,5 +756,29 @@ public class RealTimeMonitoringController extends BaseController {
 
 	public void setDeviceTypeStatValue(String deviceTypeStatValue) {
 		this.deviceTypeStatValue = deviceTypeStatValue;
+	}
+
+	public String getFESdiagramResultStatValue() {
+		return FESdiagramResultStatValue;
+	}
+
+	public void setFESdiagramResultStatValue(String fESdiagramResultStatValue) {
+		FESdiagramResultStatValue = fESdiagramResultStatValue;
+	}
+
+	public String getCommStatusStatValue() {
+		return commStatusStatValue;
+	}
+
+	public void setCommStatusStatValue(String commStatusStatValue) {
+		this.commStatusStatValue = commStatusStatValue;
+	}
+
+	public String getRunStatusStatValue() {
+		return runStatusStatValue;
+	}
+
+	public void setRunStatusStatValue(String runStatusStatValue) {
+		this.runStatusStatValue = runStatusStatValue;
 	}
 }

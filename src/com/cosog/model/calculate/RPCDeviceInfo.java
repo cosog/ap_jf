@@ -76,6 +76,10 @@ public class RPCDeviceInfo implements Serializable {
 	
 	private float todayKWattH;
 	
+	private Integer resultCode;
+	
+	private Integer resultStatus;
+	
 	private List<RPCCalculateResponseData> RPCCalculateList;
 
 	public Integer getId() {
@@ -431,6 +435,22 @@ public class RPCDeviceInfo implements Serializable {
 
 	public void setRPCCalculateList(List<RPCCalculateResponseData> rPCCalculateList) {
 		RPCCalculateList = rPCCalculateList;
+	}
+
+	public Integer getResultCode() {
+		return resultCode;
+	}
+
+	public void setResultCode(Integer resultCode) {
+		this.resultCode = resultCode;
+	}
+
+	public Integer getResultStatus() {
+		return resultStatus;
+	}
+
+	public void setResultStatus(Integer resultStatus) {
+		this.resultStatus = resultStatus;
 	}
 
 }

@@ -89,7 +89,17 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                             value: -1,
                             hidden: true
                         },{
+                        	id: 'RPCHistoryQueryStatSelectFESdiagramResult_Id',
+                        	xtype: 'textfield',
+                            value: '',
+                            hidden: true
+                         },{
                             id: 'RPCHistoryQueryStatSelectCommStatus_Id',
+                            xtype: 'textfield',
+                            value: '',
+                            hidden: true
+                        },{
+                            id: 'RPCHistoryQueryStatSelectRunStatus_Id',
                             xtype: 'textfield',
                             value: '',
                             hidden: true
@@ -117,13 +127,15 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                             handler: function (v, o) {
                             	var orgId = Ext.getCmp('leftOrg_Id').getValue();
                             	var deviceName=Ext.getCmp('HistoryQueryRPCDeviceListComb_Id').getValue();
+                            	var FESdiagramResultStatValue=Ext.getCmp("RPCHistoryQueryStatSelectFESdiagramResult_Id").getValue();
                             	var commStatusStatValue=Ext.getCmp("RPCHistoryQueryStatSelectCommStatus_Id").getValue();
+                            	var runStatusStatValue=Ext.getCmp("RPCHistoryQueryStatSelectRunStatus_Id").getValue();
                     			var deviceTypeStatValue=Ext.getCmp("RPCHistoryQueryStatSelectDeviceType_Id").getValue();
                            	 	var deviceType=0;
                            	 	var fileName='抽油机历史数据设备列表';
                            	 	var title='抽油机历史数据设备列表';
                            	 	var columnStr=Ext.getCmp("RPCHistoryQueryWellListColumnStr_Id").getValue();
-                           	 	exportHistoryQueryDeviceListExcel(orgId,deviceType,deviceName,commStatusStatValue,deviceTypeStatValue,fileName,title,columnStr);
+                           	 	exportHistoryQueryDeviceListExcel(orgId,deviceType,deviceName,FESdiagramResultStatValue,commStatusStatValue,runStatusStatValue,deviceTypeStatValue,fileName,title,columnStr);
                             }
                         }]
                     },{
@@ -137,6 +149,27 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                         header: false,
                 		tabPosition: 'top',
                 		items: [{
+                			title:'工况',
+                			layout: 'fit',
+                        	id:'RPCHistoryQueryFESdiagramResultStatGraphPanel_Id',
+                        	html: '<div id="RPCHistoryQueryFESdiagramResultStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
+                        	listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if ($("#RPCHistoryQueryFESdiagramResultStatGraphPanelPieDiv_Id").highcharts() != undefined) {
+                                        $("#RPCHistoryQueryFESdiagramResultStatGraphPanelPieDiv_Id").highcharts().setSize($("#RPCHistoryQueryFESdiagramResultStatGraphPanelPieDiv_Id").offsetWidth, $("#RPCHistoryQueryFESdiagramResultStatGraphPanelPieDiv_Id").offsetHeight,true);
+                                    }else{
+                                    	var toolTip=Ext.getCmp("RPCHistoryQueryFESdiagramResultStatGraphPanelPieToolTip_Id");
+                                    	if(!isNotVal(toolTip)){
+                                    		Ext.create('Ext.tip.ToolTip', {
+                                                id:'RPCHistoryQueryFESdiagramResultStatGraphPanelPieToolTip_Id',
+                                        		target: 'RPCHistoryQueryFESdiagramResultStatGraphPanelPieDiv_Id',
+                                                html: '点击饼图不同区域或标签，查看相应统计数据'
+                                            });
+                                    	}
+                                    }
+                                }
+                            }
+                		},{
                 			title:'通信状态',
                 			layout: 'fit',
                         	id:'RPCHistoryQueryStatGraphPanel_Id',
@@ -158,8 +191,30 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                                 }
                             }
                 		},{
+                			title:'运行状态',
+                			layout: 'fit',
+                        	id:'RPCHistoryQueryRunStatusStatGraphPanel_Id',
+                        	html: '<div id="RPCHistoryQueryRunStatusStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
+                        	listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if ($("#RPCHistoryQueryRunStatusStatGraphPanelPieDiv_Id").highcharts() != undefined) {
+                                        $("#RPCHistoryQueryRunStatusStatGraphPanelPieDiv_Id").highcharts().setSize($("#RPCHistoryQueryRunStatusStatGraphPanelPieDiv_Id").offsetWidth, $("#RPCHistoryQueryRunStatusStatGraphPanelPieDiv_Id").offsetHeight,true);
+                                    }else{
+                                    	var toolTip=Ext.getCmp("RPCHistoryQueryRunStatusStatGraphPanelPieToolTip_Id");
+                                    	if(!isNotVal(toolTip)){
+                                    		Ext.create('Ext.tip.ToolTip', {
+                                                id:'RPCHistoryQueryRunStatusStatGraphPanelPieToolTip_Id',
+                                        		target: 'RPCHistoryQueryRunStatusStatGraphPanelPieDiv_Id',
+                                                html: '点击饼图不同区域或标签，查看相应统计数据'
+                                            });
+                                    	}
+                                    }
+                                }
+                            }
+                		},{
                 			title:'设备类型',
                 			layout: 'fit',
+                			hidden:true,
                         	id:'RPCHistoryQueryDeviceTypeStatGraphPanel_Id',
                         	html: '<div id="RPCHistoryQueryDeviceTypeStatPieDiv_Id" style="width:100%;height:100%;"></div>',
                         	listeners: {
@@ -181,8 +236,12 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                 		}],
                 		listeners: {
             				tabchange: function (tabPanel, newCard,oldCard, obj) {
-            					if(newCard.id=="RPCHistoryQueryStatGraphPanel_Id"){
+            					if(newCard.id=="RPCHistoryQueryFESdiagramResultStatGraphPanel_Id"){
+            						loadAndInitHistoryQueryFESdiagramResultStat(true);
+            					}else if(newCard.id=="RPCHistoryQueryStatGraphPanel_Id"){
             						loadAndInitHistoryQueryCommStatusStat(true);
+            					}else if(newCard.id=="RPCHistoryQueryRunStatusStatGraphPanel_Id"){
+            						loadAndInitHistoryQueryRunStatusStat(true);
             					}else if(newCard.id=="RPCHistoryQueryDeviceTypeStatGraphPanel_Id"){
             						loadAndInitHistoryQueryDeviceTypeStat(true);
             					}

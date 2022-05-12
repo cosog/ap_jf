@@ -511,14 +511,14 @@ function websocketOnMessage(evt) {
 			}else{
 				Ext.getCmp("jedisRunStatusProbeLabel_id").setIconCls("dtyellow");
 			}
-			Ext.getCmp("jedisRunStatusProbeLabel_id").setText("实时库");
+			Ext.getCmp("jedisRunStatusProbeLabel_id").setText("redis");
 			
 			if(data.adRunStatus==1){
 				Ext.getCmp("adRunStatusProbeLabel_id").setIconCls("dtgreen");
-				Ext.getCmp("adRunStatusProbeLabel_id").setText("驱动 v"+data.adVersion);
+				Ext.getCmp("adRunStatusProbeLabel_id").setText("ad v"+data.adVersion);
 			}else{
 				Ext.getCmp("adRunStatusProbeLabel_id").setIconCls("dtyellow");
-				Ext.getCmp("adRunStatusProbeLabel_id").setText("驱动");
+				Ext.getCmp("adRunStatusProbeLabel_id").setText("ad");
 			}
 			
 			

@@ -681,7 +681,7 @@ public class DriverAPIController extends BaseController{
 			}
 			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
 			
-			if(!jedis.exists("RPCWorkType".getBytes())){
+			if(!jedis.exists("".getBytes())){
 				MemoryDataManagerTask.loadRPCWorkType();
 			}
 			
@@ -1013,7 +1013,6 @@ public class DriverAPIController extends BaseController{
 				
 				//判断是否采集了电量，如采集则进行电量计算
 				if(isAcqEnergy){
-					
 					String energyRequest="{"
 							+ "\"AKString\":\"\","
 							+ "\"WellName\":\""+rpcDeviceInfo.getWellName()+"\",";
@@ -1069,6 +1068,15 @@ public class DriverAPIController extends BaseController{
 				List<ProtocolItemResolutionData> calItemResolutionDataList=getFESDiagramCalItemData(rpcCalculateRequestData,rpcCalculateResponseData);
 				
 				//更新内存数据
+				//功图
+				if(rpcCalculateResponseData!=null){
+					rpcDeviceInfo.setResultStatus(rpcCalculateResponseData.getCalculationStatus().getResultStatus());
+					rpcDeviceInfo.setResultCode(rpcCalculateResponseData.getCalculationStatus().getResultCode());
+				}else{
+					rpcDeviceInfo.setResultStatus(0);
+					rpcDeviceInfo.setResultCode(0);
+				}
+				//通信
 				rpcDeviceInfo.setAcqTime(acqTime);
 				rpcDeviceInfo.setCommStatus(1);
 				if(commResponseData!=null&&commResponseData.getResultStatus()==1){

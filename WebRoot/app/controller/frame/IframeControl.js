@@ -307,6 +307,8 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 				loadAndInitFESdiagramResultStat(true);
 			}else if(statTabActiveId=="RPCRealTimeMonitoringStatGraphPanel_Id"){
 				loadAndInitCommStatusStat(true);
+			}else if(statTabActiveId=="RPCRealTimeMonitoringRunStatusStatGraphPanel_Id"){
+				loadAndInitRunStatusStat(true);
 			}else if(statTabActiveId=="RPCRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
 				loadAndInitDeviceTypeStat(true);
 			}
@@ -323,6 +325,8 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 			var statTabActiveId = Ext.getCmp("PCPRealTimeMonitoringStatTabPanel").getActiveTab().id;
 			if(statTabActiveId=="PCPRealTimeMonitoringStatGraphPanel_Id"){
 				loadAndInitCommStatusStat(true);
+			}else if(statTabActiveId=="PCPRealTimeMonitoringRunStatusStatGraphPanel_Id"){
+				loadAndInitRunStatusStat(true);
 			}else if(statTabActiveId=="PCPRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
 				loadAndInitDeviceTypeStat(true);
 			}
@@ -341,8 +345,12 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 		var activeId = Ext.getCmp("HistoryQueryTabPanel").getActiveTab().id;
 		if(activeId=="RPCHistoryQueryInfoPanel_Id"){
 			var statTabActiveId = Ext.getCmp("RPCHistoryQueryStatTabPanel").getActiveTab().id;
-			if(statTabActiveId=="RPCHistoryQueryStatGraphPanel_Id"){
+			if(statTabActiveId=="RPCHistoryQueryFESdiagramResultStatGraphPanel_Id"){
+				loadAndInitHistoryQueryFESdiagramResultStat(true);
+			}else if(statTabActiveId=="RPCHistoryQueryStatGraphPanel_Id"){
 				loadAndInitHistoryQueryCommStatusStat(true);
+			}else if(statTabActiveId=="RPCHistoryQueryRunStatusStatGraphPanel_Id"){
+				loadAndInitHistoryQueryRunStatusStat(true);
 			}else if(statTabActiveId=="RPCHistoryQueryDeviceTypeStatGraphPanel_Id"){
 				loadAndInitHistoryQueryDeviceTypeStat(true);
 			}
@@ -363,6 +371,8 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 			var statTabActiveId = Ext.getCmp("PCPHistoryQueryStatTabPanel").getActiveTab().id;
 			if(statTabActiveId=="PCPHistoryQueryStatGraphPanel_Id"){
 				loadAndInitHistoryQueryCommStatusStat(true);
+			}else if(statTabActiveId=="PCPHistoryQueryRunStatusStatGraphPanel_Id"){
+				loadAndInitHistoryQueryRunStatusStat(true);
 			}else if(statTabActiveId=="PCPHistoryQueryDeviceTypeStatGraphPanel_Id"){
 				loadAndInitHistoryQueryDeviceTypeStat(true);
 			}

@@ -203,7 +203,8 @@ public class MemoryDataManagerTask {
 					+ "to_char(t2.acqtime,'yyyy-mm-dd hh24:mi:ss'),"
 					+ "t2.commstatus,t2.commtime,t2.commtimeefficiency,t2.commrange,"
 					+ "t2.runstatus,t2.runtime,t2.runtimeefficiency,t2.runrange,"
-					+ "t2.totalkwatth,t2.todaykwatth "
+					+ "t2.totalkwatth,t2.todaykwatth,"
+					+ " t2.resultstatus,decode(t2.resultcode,null,0,t2.resultcode) as resultcode"
 					+ " from viw_rpcdevice t"
 					+ " left outer join tbl_rpcacqdata_latest t2 on t2.wellid=t.id ";
 			if(StringManagerUtils.isNotNull(wells)){
@@ -212,8 +213,8 @@ public class MemoryDataManagerTask {
 				}else{
 					sql+=" and t.wellName in("+wells+")";
 				}
-				
 			}
+			sql+=" order by t.sortNum,t.wellName";
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
@@ -300,6 +301,9 @@ public class MemoryDataManagerTask {
 				
 				rpcDeviceInfo.setTotalKWattH(rs.getFloat(42));
 				rpcDeviceInfo.setTodayKWattH(rs.getFloat(43));
+				
+				rpcDeviceInfo.setResultStatus(rs.getInt(44));
+				rpcDeviceInfo.setResultCode(rs.getInt(45));
 				
 				rpcDeviceInfo.setAcquisitionItemInfoList(new ArrayList<AcquisitionItemInfo>());
 				String key=rpcDeviceInfo.getId()+"";

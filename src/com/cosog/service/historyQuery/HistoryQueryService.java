@@ -230,7 +230,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		return result_json.toString().replaceAll("\"null\"", "\"\"");
 	}
 	
-	public String getHistoryQueryDeviceList(String orgId,String deviceName,String deviceType,String commStatusStatValue,String deviceTypeStatValue,Page pager) throws IOException, SQLException{
+	public String getHistoryQueryDeviceList(String orgId,String deviceName,String deviceType,String FESdiagramResultStatValue,String commStatusStatValue,String runStatusStatValue,String deviceTypeStatValue,Page pager) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
 		Jedis jedis = null;
 		AlarmShowStyle alarmShowStyle=null;
@@ -240,6 +240,18 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				MemoryDataManagerTask.initAlarmStyle();
 			}
 			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
+			if(StringManagerUtils.stringToInteger(deviceType)==0){
+				if(!jedis.exists("RPCDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+				}
+			}else if(StringManagerUtils.stringToInteger(deviceType)==1){
+				if(!jedis.exists("PCPDeviceInfo".getBytes())){
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+				}
+			}
+			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -263,22 +275,26 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		
 		String sql="select t.id,t.wellname,t2.commstatus,"
 				+ "decode(t2.commstatus,1,'在线','离线') as commStatusName,"
-				+ "decode(t5.alarmsign,0,0,null,0,t5.alarmlevel) as commAlarmLevel,"
 				+ "to_char(t2.acqtime,'yyyy-mm-dd hh24:mi:ss'),c1.itemname as devicetypename ";
-		
-		
 		sql+= " from "+deviceTableName+" t "
 				+ " left outer join "+tableName+" t2 on t2.wellid=t.id"
-				+ " left outer join tbl_protocolalarminstance t3 on t.alarminstancecode=t3.code"
-				+ " left outer join tbl_alarm_unit_conf t4 on t3.alarmunitid=t4.id"
-				+ " left outer join tbl_alarm_item2unit_conf t5 on t4.id=t5.unitid and t5.type=3  and  decode(t2.commstatus,1,'在线','离线')=t5.itemname"
-				+ " left outer join tbl_code c1 on c1.itemcode='DEVICETYPE' and t.devicetype=c1.itemvalue "
-				+ " where  t.orgid in ("+orgId+") ";
+				+ " left outer join tbl_code c1 on c1.itemcode='DEVICETYPE' and t.devicetype=c1.itemvalue ";
+		if(StringManagerUtils.stringToInteger(deviceType)==0){
+			sql+=" left outer join tbl_rpc_worktype t3 on t2.resultcode=t3.resultcode";
+		}
+		
+		sql+= " where  t.orgid in ("+orgId+") ";
 		if(StringManagerUtils.isNotNull(deviceName)){
 			sql+=" and t.wellName='"+deviceName+"'";
 		}
+		if(StringManagerUtils.stringToInteger(deviceType)==0&&StringManagerUtils.isNotNull(FESdiagramResultStatValue)){
+			sql+=" and decode(t2.resultcode,null,'无数据',t3.resultName)='"+FESdiagramResultStatValue+"'";
+		}
 		if(StringManagerUtils.isNotNull(commStatusStatValue)){
 			sql+=" and decode(t2.commstatus,1,'在线','离线')='"+commStatusStatValue+"'";
+		}
+		if(StringManagerUtils.isNotNull(runStatusStatValue)){
+			sql+=" and decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线')='"+runStatusStatValue+"'";
 		}
 		if(StringManagerUtils.isNotNull(deviceTypeStatValue)){
 			sql+=" and c1.itemname='"+deviceTypeStatValue+"'";
@@ -297,13 +313,41 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		result_json.append("\"totalRoot\":[");
 		for(int i=0;i<list.size();i++){
 			Object[] obj=(Object[]) list.get(i);
+			String deviceId=obj[0]+"";
+			String alarmInstanceCode="";
+			int commAlarmLevel=0;
+			if(StringManagerUtils.stringToInteger(deviceType)==0){
+				if(jedis!=null&&jedis.hexists("RPCDeviceInfo".getBytes(), deviceId.getBytes())){
+					RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget("RPCDeviceInfo".getBytes(), deviceId.getBytes()));
+					alarmInstanceCode=rpcDeviceInfo.getAlarmInstanceCode();
+				}
+			}else if(StringManagerUtils.stringToInteger(deviceType)==1){
+				if(jedis!=null&&jedis.hexists("PCPDeviceInfo".getBytes(), deviceId.getBytes())){
+					PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget("PCPDeviceInfo".getBytes(), deviceId.getBytes()));
+					alarmInstanceCode=pcpDeviceInfo.getAlarmInstanceCode();
+				}
+			}
+			
+			if(StringManagerUtils.isNotNull(alarmInstanceCode)){
+				AlarmInstanceOwnItem alarmInstanceOwnItem=null;
+				if(jedis!=null&&jedis.hexists("AlarmInstanceOwnItem".getBytes(), alarmInstanceCode.getBytes())){
+					alarmInstanceOwnItem=(AlarmInstanceOwnItem) SerializeObjectUnils.unserizlize(jedis.hget("AlarmInstanceOwnItem".getBytes(), alarmInstanceCode.getBytes()));
+					for(int j=0;j<alarmInstanceOwnItem.itemList.size();j++){
+						if(alarmInstanceOwnItem.getItemList().get(j).getType()==3 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(obj[3]+"")){
+							commAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
+							break;
+						}
+					}
+				}
+			}
+			
 			result_json.append("{\"id\":"+obj[0]+",");
 			result_json.append("\"wellName\":\""+obj[1]+"\",");
 			result_json.append("\"commStatus\":"+obj[2]+",");
 			result_json.append("\"commStatusName\":\""+obj[3]+"\",");
-			result_json.append("\"commAlarmLevel\":"+obj[4]+",");
-			result_json.append("\"acqTime\":\""+obj[5]+"\",");
-			result_json.append("\"deviceTypeName\":\""+obj[6]+"\"},");
+			result_json.append("\"commAlarmLevel\":"+commAlarmLevel+",");
+			result_json.append("\"acqTime\":\""+obj[4]+"\",");
+			result_json.append("\"deviceTypeName\":\""+obj[5]+"\"},");
 		}
 		if(result_json.toString().endsWith(",")){
 			result_json.deleteCharAt(result_json.length() - 1);
@@ -313,7 +357,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		return result_json.toString().replaceAll("\"null\"", "\"\"");
 	}
 	
-	public String getHistoryQueryDeviceListExportData(String orgId,String deviceName,String deviceType,String commStatusStatValue,String deviceTypeStatValue,Page pager) throws IOException, SQLException{
+	public String getHistoryQueryDeviceListExportData(String orgId,String deviceName,String deviceType,String FESdiagramResultStatValue,String commStatusStatValue,String runStatusStatValue,String deviceTypeStatValue,Page pager) throws IOException, SQLException{
 		StringBuffer result_json = new StringBuffer();
 		Jedis jedis = null;
 		AlarmShowStyle alarmShowStyle=null;
@@ -337,24 +381,28 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			deviceTableName="tbl_pcpdevice";
 		}
 		
-		String sql="select t2.id,t.wellname,t2.commstatus,"
+		String sql="select t.id,t.wellname,t2.commstatus,"
 				+ "decode(t2.commstatus,1,'在线','离线') as commStatusName,"
-				+ "decode(t5.alarmsign,0,0,null,0,t5.alarmlevel) as commAlarmLevel,"
 				+ "to_char(t2.acqtime,'yyyy-mm-dd hh24:mi:ss'),c1.itemname as devicetypename ";
-		
-		
 		sql+= " from "+deviceTableName+" t "
 				+ " left outer join "+tableName+" t2 on t2.wellid=t.id"
-				+ " left outer join tbl_protocolalarminstance t3 on t.alarminstancecode=t3.code"
-				+ " left outer join tbl_alarm_unit_conf t4 on t3.alarmunitid=t4.id"
-				+ " left outer join tbl_alarm_item2unit_conf t5 on t4.id=t5.unitid and t5.type=3  and  decode(t2.commstatus,1,'在线','离线')=t5.itemname"
-				+ " left outer join tbl_code c1 on c1.itemcode='DEVICETYPE' and t.devicetype=c1.itemvalue "
-				+ " where  t.orgid in ("+orgId+") ";
+				+ " left outer join tbl_code c1 on c1.itemcode='DEVICETYPE' and t.devicetype=c1.itemvalue ";
+		if(StringManagerUtils.stringToInteger(deviceType)==0){
+			sql+=" left outer join tbl_rpc_worktype t3 on t2.resultcode=t3.resultcode";
+		}
+		
+		sql+= " where  t.orgid in ("+orgId+") ";
 		if(StringManagerUtils.isNotNull(deviceName)){
 			sql+=" and t.wellName='"+deviceName+"'";
 		}
+		if(StringManagerUtils.stringToInteger(deviceType)==0&&StringManagerUtils.isNotNull(FESdiagramResultStatValue)){
+			sql+=" and decode(t2.resultcode,null,'无数据',t3.resultName)='"+FESdiagramResultStatValue+"'";
+		}
 		if(StringManagerUtils.isNotNull(commStatusStatValue)){
 			sql+=" and decode(t2.commstatus,1,'在线','离线')='"+commStatusStatValue+"'";
+		}
+		if(StringManagerUtils.isNotNull(runStatusStatValue)){
+			sql+=" and decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线')='"+runStatusStatValue+"'";
 		}
 		if(StringManagerUtils.isNotNull(deviceTypeStatValue)){
 			sql+=" and c1.itemname='"+deviceTypeStatValue+"'";
@@ -373,9 +421,8 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"wellName\":\""+obj[1]+"\",");
 			result_json.append("\"commStatus\":"+obj[2]+",");
 			result_json.append("\"commStatusName\":\""+obj[3]+"\",");
-			result_json.append("\"commAlarmLevel\":"+obj[4]+",");
-			result_json.append("\"acqTime\":\""+obj[5]+"\",");
-			result_json.append("\"deviceTypeName\":\""+obj[6]+"\"},");
+			result_json.append("\"acqTime\":\""+obj[4]+"\",");
+			result_json.append("\"deviceTypeName\":\""+obj[5]+"\"},");
 		}
 		if(result_json.toString().endsWith(",")){
 			result_json.deleteCharAt(result_json.length() - 1);

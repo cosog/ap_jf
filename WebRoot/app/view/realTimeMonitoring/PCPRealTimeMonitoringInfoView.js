@@ -96,6 +96,11 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                             value: '',
                             hidden: true
                          },{
+                        	id: 'PCPRealTimeMonitoringStatSelectRunStatus_Id',
+                        	xtype: 'textfield',
+                            value: '',
+                            hidden: true
+                         },{
                         	id: 'PCPRealTimeMonitoringStatSelectDeviceType_Id',
                         	xtype: 'textfield',
                             value: '',
@@ -114,12 +119,13 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                             	 var orgId = Ext.getCmp('leftOrg_Id').getValue();
                             	 var deviceName=Ext.getCmp('RealTimeMonitoringPCPDeviceListComb_Id').getValue();
                             	 var commStatusStatValue=Ext.getCmp("PCPRealTimeMonitoringStatSelectCommStatus_Id").getValue();
+                             	 var runStatusStatValue=Ext.getCmp("PCPRealTimeMonitoringStatSelectRunStatus_Id").getValue();
                              	 var deviceTypeStatValue=Ext.getCmp("PCPRealTimeMonitoringStatSelectDeviceType_Id").getValue();
                             	 var deviceType=1;
                             	 var fileName='螺杆泵实时监控数据';
                             	 var title='螺杆泵实时监控数据';
                             	 var columnStr=Ext.getCmp("PCPRealTimeMonitoringColumnStr_Id").getValue();
-                            	 exportRealTimeMonitoringDataExcel(orgId,deviceType,deviceName,commStatusStatValue,deviceTypeStatValue,fileName,title,columnStr);
+                            	 exportRealTimeMonitoringDataExcel(orgId,deviceType,deviceName,'',commStatusStatValue,runStatusStatValue,deviceTypeStatValue,fileName,title,columnStr);
                              }
                          }, '->', {
                          	xtype: 'button',
@@ -163,8 +169,30 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                                 }
                             }
                 		},{
+                			title:'运行状态',
+                			layout: 'fit',
+                        	id:'PCPRealTimeMonitoringRunStatusStatGraphPanel_Id',
+                        	html: '<div id="PCPRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
+                        	listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if ($("#PCPRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id").highcharts() != undefined) {
+                                        $("#PCPRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id").highcharts().setSize($("#PCPRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id").offsetWidth, $("#PCPRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id").offsetHeight,true);
+                                    }else{
+                                    	var toolTip=Ext.getCmp("PCPRealTimeMonitoringRunStatusStatGraphPanelPieToolTip_Id");
+                                    	if(!isNotVal(toolTip)){
+                                    		Ext.create('Ext.tip.ToolTip', {
+                                                id:'PCPRealTimeMonitoringRunStatusStatGraphPanelPieToolTip_Id',
+                                        		target: 'PCPRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id',
+                                                html: '点击饼图不同区域或标签，查看相应统计数据'
+                                            });
+                                    	}
+                                    }
+                                }
+                            }
+                		},{
                 			title:'设备类型',
                 			layout: 'fit',
+                			hidden: true,
                         	id:'PCPRealTimeMonitoringDeviceTypeStatGraphPanel_Id',
                         	html: '<div id="PCPRealTimeMonitoringDeviceTypeStatPieDiv_Id" style="width:100%;height:100%;"></div>',
                         	listeners: {
@@ -184,6 +212,8 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
             				tabchange: function (tabPanel, newCard,oldCard, obj) {
             					if(newCard.id=="PCPRealTimeMonitoringStatGraphPanel_Id"){
             						loadAndInitCommStatusStat(true);
+            					}else if(newCard.id=="PCPRealTimeMonitoringRunStatusStatGraphPanel_Id"){
+            						loadAndInitRunStatusStat(true);
             					}else if(newCard.id=="PCPRealTimeMonitoringDeviceTypeStatGraphPanel_Id"){
             						loadAndInitDeviceTypeStat(true);
             					}
