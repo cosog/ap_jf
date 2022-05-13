@@ -915,7 +915,7 @@ function loadAndInitHistoryQueryFESdiagramResultStat(all){
 function initHistoryQueryFESDiagramResultStatPieOrColChat(get_rawData) {
 	var divid="RPCHistoryQueryFESdiagramResultStatGraphPanelPieDiv_Id";
 	
-	var title="工况";
+	var title="工况诊断";
 	var datalist=get_rawData.totalRoot;
 	
 	var pieDataStr="[";

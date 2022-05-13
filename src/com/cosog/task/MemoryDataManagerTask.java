@@ -799,7 +799,7 @@ public class MemoryDataManagerTask {
 		try {
 			jedis = new Jedis();
 			//有序集合
-			jedis.zadd("rpcCalItemList".getBytes(),1, SerializeObjectUnils.serialize(new CalItem("工况","ResultCode","")));
+			jedis.zadd("rpcCalItemList".getBytes(),1, SerializeObjectUnils.serialize(new CalItem("工况","ResultName","")));
 			jedis.zadd("rpcCalItemList".getBytes(),2, SerializeObjectUnils.serialize(new CalItem("最大载荷","FMax","kN")));
 			jedis.zadd("rpcCalItemList".getBytes(),3, SerializeObjectUnils.serialize(new CalItem("最小载荷","FMin","kN")));
 			jedis.zadd("rpcCalItemList".getBytes(),4, SerializeObjectUnils.serialize(new CalItem("充满系数","FullnessCoefficient","")));

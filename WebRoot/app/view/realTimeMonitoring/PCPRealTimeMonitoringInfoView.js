@@ -152,23 +152,6 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                         header: false,
                 		tabPosition: 'top',
                 		items: [{
-                			title:'通信状态',
-                			layout: 'fit',
-                        	id:'PCPRealTimeMonitoringStatGraphPanel_Id',
-                        	html: '<div id="PCPRealTimeMonitoringStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
-                        	listeners: {
-                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                                	if ($("#PCPRealTimeMonitoringStatGraphPanelPieDiv_Id").highcharts() != undefined) {
-                                        $("#PCPRealTimeMonitoringStatGraphPanelPieDiv_Id").highcharts().setSize($("#PCPRealTimeMonitoringStatGraphPanelPieDiv_Id").offsetWidth, $("#PCPRealTimeMonitoringStatGraphPanelPieDiv_Id").offsetHeight,true);
-                                    }else{
-                                    	Ext.create('Ext.tip.ToolTip', {
-                                            target: 'PCPRealTimeMonitoringStatGraphPanelPieDiv_Id',
-                                            html: '点击饼图不同区域或标签，查看相应统计数据'
-                                        });
-                                    }
-                                }
-                            }
-                		},{
                 			title:'运行状态',
                 			layout: 'fit',
                         	id:'PCPRealTimeMonitoringRunStatusStatGraphPanel_Id',
@@ -186,6 +169,23 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                                                 html: '点击饼图不同区域或标签，查看相应统计数据'
                                             });
                                     	}
+                                    }
+                                }
+                            }
+                		},{
+                			title:'通信状态',
+                			layout: 'fit',
+                        	id:'PCPRealTimeMonitoringStatGraphPanel_Id',
+                        	html: '<div id="PCPRealTimeMonitoringStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
+                        	listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if ($("#PCPRealTimeMonitoringStatGraphPanelPieDiv_Id").highcharts() != undefined) {
+                                        $("#PCPRealTimeMonitoringStatGraphPanelPieDiv_Id").highcharts().setSize($("#PCPRealTimeMonitoringStatGraphPanelPieDiv_Id").offsetWidth, $("#PCPRealTimeMonitoringStatGraphPanelPieDiv_Id").offsetHeight,true);
+                                    }else{
+                                    	Ext.create('Ext.tip.ToolTip', {
+                                            target: 'PCPRealTimeMonitoringStatGraphPanelPieDiv_Id',
+                                            html: '点击饼图不同区域或标签，查看相应统计数据'
+                                        });
                                     }
                                 }
                             }
@@ -331,6 +331,13 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                         header: false,
                 		tabPosition: 'top',
                 		items: [{
+                			title:'设备控制',
+                			id: 'PCPRealTimeMonitoringRightControlPanel',
+                            border: false,
+                            layout: 'fit',
+                            autoScroll: true,
+                            scrollable: true
+                		},{
                 			title:'设备信息',
                 			layout: 'border',
                 			items:[{
@@ -352,13 +359,6 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                                 autoScroll: true,
                                 scrollable: true
                 			}]
-                		},{
-                			title:'设备控制',
-                			id: 'PCPRealTimeMonitoringRightControlPanel',
-                            border: false,
-                            layout: 'fit',
-                            autoScroll: true,
-                            scrollable: true
                 		}]
                     }],
                     listeners: {

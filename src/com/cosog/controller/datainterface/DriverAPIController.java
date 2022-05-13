@@ -114,26 +114,6 @@ public class DriverAPIController extends BaseController{
 		Jedis jedis=null;
 		String functionCode="adExitAndDeviceOffline";
 		String time=StringManagerUtils.getCurrentTime("yyyy-MM-dd HH:mm:ss");
-//		String updateRPCRealData="update tbl_rpcacqdata_latest t "
-//				+ "set t.acqTime=to_date('"+time+"','yyyy-mm-dd hh24:mi:ss'), t.CommStatus=0 "
-//				+ "where t.CommStatus=1";
-//		String updateRPCHistData="update tbl_rpcacqdata_hist t "
-//				+ " set t.acqTime=to_date('"+time+"','yyyy-mm-dd hh24:mi:ss'), t.CommStatus=0"
-//				+ " where t.CommStatus=1 and t.acqtime=( select max(t2.acqtime) from tbl_rpcacqdata_hist t2 where t2.wellid=t.wellid ) ";
-//		
-//		String updatePCPRealData="update tbl_pcpacqdata_latest t "
-//				+ "set t.acqTime=to_date('"+time+"','yyyy-mm-dd hh24:mi:ss'), t.CommStatus=0 "
-//				+ "where t.CommStatus=1";
-//		String updatePCPHistData="update tbl_pcpacqdata_hist t "
-//				+ " set t.acqTime=to_date('"+time+"','yyyy-mm-dd hh24:mi:ss'), t.CommStatus=0"
-//				+ " where t.CommStatus=1 and t.acqtime=( select max(t2.acqtime) from tbl_pcpacqdata_hist t2 where t2.wellid=t.wellid ) ";
-//		
-//		int result=commonDataService.getBaseDao().updateOrDeleteBySql(updateRPCRealData);
-//		result=commonDataService.getBaseDao().updateOrDeleteBySql(updateRPCHistData);
-//		
-//		result=commonDataService.getBaseDao().updateOrDeleteBySql(updatePCPRealData);
-//		result=commonDataService.getBaseDao().updateOrDeleteBySql(updatePCPHistData);
-		
 		try{
 			jedis = new Jedis();
 			if(!jedis.exists("RPCDeviceInfo".getBytes())){
@@ -1153,6 +1133,16 @@ public class DriverAPIController extends BaseController{
 				//排序
 				Collections.sort(protocolItemResolutionDataList);
 				//报警判断
+				int commAlarmLevel=0,resultAlarmLevel=0;
+				if(alarmInstanceOwnItem!=null){
+					for(int i=0;i<alarmInstanceOwnItem.itemList.size();i++){
+						if(alarmInstanceOwnItem.getItemList().get(i).getType()==3 && alarmInstanceOwnItem.getItemList().get(i).getItemName().equalsIgnoreCase("在线")){
+							commAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
+						}else if(workType!=null&&alarmInstanceOwnItem.getItemList().get(i).getType()==4 && alarmInstanceOwnItem.getItemList().get(i).getItemCode().equalsIgnoreCase(workType.getResultCode()+"")){
+							resultAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
+						}
+					}
+				}
 				for(int i=0;i<protocolItemResolutionDataList.size();i++){
 					int alarmLevel=0;
 					AcquisitionItemInfo acquisitionItemInfo=new AcquisitionItemInfo();
@@ -1238,10 +1228,11 @@ public class DriverAPIController extends BaseController{
 					acquisitionItemInfo.setDataType(calItemResolutionDataList.get(i).getColumnDataType());
 					acquisitionItemInfo.setResolutionMode(calItemResolutionDataList.get(i).getResolutionMode());
 					acquisitionItemInfo.setBitIndex(calItemResolutionDataList.get(i).getBitIndex());
-					if("resultCode".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn())){
+					if("resultCode".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn())||"resultName".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn())){
 						if(workType!=null){
+							acquisitionItemInfo.setValue(workType.getResultName());
 							for(int k=0;alarmInstanceOwnItem!=null&&k<alarmInstanceOwnItem.getItemList().size();k++){
-								if(alarmInstanceOwnItem.getItemList().get(k).getType()==4&&workType.getResultName().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemName())){
+								if(alarmInstanceOwnItem.getItemList().get(k).getType()==4&&workType.getResultCode()==StringManagerUtils.stringToInteger(alarmInstanceOwnItem.getItemList().get(k).getItemCode())){
 									alarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
 									if(alarmLevel>0){
 										acquisitionItemInfo.setAlarmInfo("工况报警:"+workType.getResultName());
@@ -1434,6 +1425,8 @@ public class DriverAPIController extends BaseController{
 							columns+= "]";
 							
 							webSocketSendData.append("{ \"success\":true,\"functionCode\":\""+functionCode+"\",\"wellName\":\""+rpcDeviceInfo.getWellName()+"\",\"acqTime\":\""+acqTime+"\",\"columns\":"+columns+",");
+							webSocketSendData.append("\"commAlarmLevel\":"+commAlarmLevel+",");
+							webSocketSendData.append("\"resultAlarmLevel\":"+resultAlarmLevel+",");
 							webSocketSendData.append("\"totalRoot\":[");
 							info_json.append("[");
 							webSocketSendData.append("{\"name1\":\""+rpcDeviceInfo.getWellName()+":"+acqTime+" 在线\"},");
@@ -1535,6 +1528,7 @@ public class DriverAPIController extends BaseController{
 							webSocketSendData.append(",\"wellBoreChartsData\":"+wellBoreChartsData);
 							webSocketSendData.append(",\"surfaceChartsData\":"+surfaceChartsData);
 							webSocketSendData.append(",\"AlarmShowStyle\":"+new Gson().toJson(alarmShowStyle)+"}");
+							System.out.println(webSocketSendData.toString());
 							infoHandler().sendMessageToUser(websocketClientUser, webSocketSendData.toString());
 						}
 					}
@@ -1995,6 +1989,15 @@ public class DriverAPIController extends BaseController{
 				//排序
 				Collections.sort(protocolItemResolutionDataList);
 				//报警判断
+				int commAlarmLevel=0;
+				if(alarmInstanceOwnItem!=null){
+					for(int i=0;i<alarmInstanceOwnItem.itemList.size();i++){
+						if(alarmInstanceOwnItem.getItemList().get(i).getType()==3 && alarmInstanceOwnItem.getItemList().get(i).getItemName().equalsIgnoreCase("在线")){
+							commAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
+							break;
+						}
+					}
+				}
 				for(int i=0;i<protocolItemResolutionDataList.size();i++){
 					int alarmLevel=0;
 					AcquisitionItemInfo acquisitionItemInfo=new AcquisitionItemInfo();
@@ -2154,6 +2157,7 @@ public class DriverAPIController extends BaseController{
 							columns+= "]";
 							
 							webSocketSendData.append("{ \"success\":true,\"functionCode\":\""+functionCode+"\",\"wellName\":\""+pcpDeviceInfo.getWellName()+"\",\"acqTime\":\""+acqTime+"\",\"columns\":"+columns+",");
+							webSocketSendData.append("\"commAlarmLevel\":"+commAlarmLevel+",");
 							webSocketSendData.append("\"totalRoot\":[");
 							info_json.append("[");
 							webSocketSendData.append("{\"name1\":\""+pcpDeviceInfo.getWellName()+":"+acqTime+" 在线\"},");
@@ -2172,10 +2176,6 @@ public class DriverAPIController extends BaseController{
 										}
 									}
 								}
-								
-								
-								
-								
 							}
 							
 							//排序
@@ -2277,7 +2277,7 @@ public class DriverAPIController extends BaseController{
 		FESDiagramCalItemList.add(new ProtocolItemResolutionData("冲次","冲次",calculateRequestData.getFESDiagram().getSPM()+"",calculateRequestData.getFESDiagram().getSPM()+"","","spm","","","","1/min",1));
 		if(calculateResponseData!=null&&calculateResponseData.getCalculationStatus().getResultStatus()==1){
 			//工况
-			FESDiagramCalItemList.add(new ProtocolItemResolutionData("工况","工况",calculateResponseData.getCalculationStatus().getResultCode()+"",calculateResponseData.getCalculationStatus().getResultCode()+"","","resultCode","","","","",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("工况","工况",calculateResponseData.getCalculationStatus().getResultCode()+"",calculateResponseData.getCalculationStatus().getResultCode()+"","","resultName","","","","",1));
 			//最大最小载荷
 			String FMax="",FMin="";
 			if(calculateResponseData.getFESDiagram().getFMax()!=null&&calculateResponseData.getFESDiagram().getFMax().size()>0){
@@ -2442,8 +2442,8 @@ public class DriverAPIController extends BaseController{
 			FESDiagramCalItemList.add(new ProtocolItemResolutionData("光杆功率","光杆功率","","","","POLISHRODPOWER","","","","kW",1));
 			FESDiagramCalItemList.add(new ProtocolItemResolutionData("水功率","水功率","","","","WATERPOWER","","","","kW",1));
 			
-			FESDiagramCalItemList.add(new ProtocolItemResolutionData("地面效率","地面效率","","","","WATERPOWER","","","","小数",1));
-			FESDiagramCalItemList.add(new ProtocolItemResolutionData("井下效率","井下效率","","","","SURFACESYSTEMEFFICIENCY","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("地面效率","地面效率","","","","SURFACESYSTEMEFFICIENCY","","","","小数",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("井下效率","井下效率","","","","WELLDOWNSYSTEMEFFICIENCY","","","","小数",1));
 			FESDiagramCalItemList.add(new ProtocolItemResolutionData("系统效率","系统效率","","","","SYSTEMEFFICIENCY","","","","小数",1));
 			
 			FESDiagramCalItemList.add(new ProtocolItemResolutionData("吨液百米耗电量","吨液百米耗电量","","","","ENERGYPER100MLIFT","","","","kW· h/100m· t",1));

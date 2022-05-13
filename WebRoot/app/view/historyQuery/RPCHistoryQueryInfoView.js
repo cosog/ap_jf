@@ -149,7 +149,7 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                         header: false,
                 		tabPosition: 'top',
                 		items: [{
-                			title:'工况',
+                			title:'工况诊断',
                 			layout: 'fit',
                         	id:'RPCHistoryQueryFESdiagramResultStatGraphPanel_Id',
                         	html: '<div id="RPCHistoryQueryFESdiagramResultStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
@@ -163,27 +163,6 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                                     		Ext.create('Ext.tip.ToolTip', {
                                                 id:'RPCHistoryQueryFESdiagramResultStatGraphPanelPieToolTip_Id',
                                         		target: 'RPCHistoryQueryFESdiagramResultStatGraphPanelPieDiv_Id',
-                                                html: '点击饼图不同区域或标签，查看相应统计数据'
-                                            });
-                                    	}
-                                    }
-                                }
-                            }
-                		},{
-                			title:'通信状态',
-                			layout: 'fit',
-                        	id:'RPCHistoryQueryStatGraphPanel_Id',
-                        	html: '<div id="RPCHistoryQueryStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
-                        	listeners: {
-                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                                	if ($("#RPCHistoryQueryStatGraphPanelPieDiv_Id").highcharts() != undefined) {
-                                        $("#RPCHistoryQueryStatGraphPanelPieDiv_Id").highcharts().setSize($("#RPCHistoryQueryStatGraphPanelPieDiv_Id").offsetWidth, $("#RPCHistoryQueryStatGraphPanelPieDiv_Id").offsetHeight,true);
-                                    }else{
-                                    	var toolTip=Ext.getCmp("RPCHistoryQueryStatGraphPanelPieToolTip_Id");
-                                    	if(!isNotVal(toolTip)){
-                                    		Ext.create('Ext.tip.ToolTip', {
-                                                id:'RPCHistoryQueryStatGraphPanelPieToolTip_Id',
-                                        		target: 'RPCHistoryQueryStatGraphPanelPieDiv_Id',
                                                 html: '点击饼图不同区域或标签，查看相应统计数据'
                                             });
                                     	}
@@ -205,6 +184,27 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                                     		Ext.create('Ext.tip.ToolTip', {
                                                 id:'RPCHistoryQueryRunStatusStatGraphPanelPieToolTip_Id',
                                         		target: 'RPCHistoryQueryRunStatusStatGraphPanelPieDiv_Id',
+                                                html: '点击饼图不同区域或标签，查看相应统计数据'
+                                            });
+                                    	}
+                                    }
+                                }
+                            }
+                		},{
+                			title:'通信状态',
+                			layout: 'fit',
+                        	id:'RPCHistoryQueryStatGraphPanel_Id',
+                        	html: '<div id="RPCHistoryQueryStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
+                        	listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if ($("#RPCHistoryQueryStatGraphPanelPieDiv_Id").highcharts() != undefined) {
+                                        $("#RPCHistoryQueryStatGraphPanelPieDiv_Id").highcharts().setSize($("#RPCHistoryQueryStatGraphPanelPieDiv_Id").offsetWidth, $("#RPCHistoryQueryStatGraphPanelPieDiv_Id").offsetHeight,true);
+                                    }else{
+                                    	var toolTip=Ext.getCmp("RPCHistoryQueryStatGraphPanelPieToolTip_Id");
+                                    	if(!isNotVal(toolTip)){
+                                    		Ext.create('Ext.tip.ToolTip', {
+                                                id:'RPCHistoryQueryStatGraphPanelPieToolTip_Id',
+                                        		target: 'RPCHistoryQueryStatGraphPanelPieDiv_Id',
                                                 html: '点击饼图不同区域或标签，查看相应统计数据'
                                             });
                                     	}
@@ -892,7 +892,7 @@ function createRPCHistoryQueryDiagramOverlayTableColumn(columnInfo) {
         }
         myColumns += "{text:'" + attr.header + "',lockable:true,align:'center' "+ width_ ;
         if (attr.dataIndex.toUpperCase() == 'resultName'.toUpperCase()) {
-            myColumns +=",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceColor(value,o,p,e);}";
+            myColumns +=",sortable : false,dataIndex:'" + attr.dataIndex + "',renderer:function(value,o,p,e){return adviceResultStatusColor(value,o,p,e);}";
         }else if (attr.dataIndex == 'id') {
             myColumns +=",xtype: 'rownumberer',sortable : false,locked:true";
         } else if (attr.dataIndex.toUpperCase()=='wellName'.toUpperCase()) {
