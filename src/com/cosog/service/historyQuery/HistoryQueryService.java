@@ -526,16 +526,20 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		
 		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
 		String columns = ddic.getTableHeader();
-		String prodCol="liquidWeightProduction,liquidWeightProduction_L";
+		String prodCol="liquidWeightProduction,oilWeightProduction,waterWeightProduction,liquidWeightProduction_L,";
 		if(productionUnit!=0){
-			prodCol="liquidVolumetricProduction,liquidVolumetricProduction_L";
+			prodCol="liquidVolumetricProduction,oilVolumetricProduction,waterVolumetricProduction,liquidVolumetricProduction_L,";
 		}
 		String sql="select t2.id,t.wellname,t2.commstatus,"
 				+ "decode(t2.commstatus,1,'在线','离线') as commStatusName,"
 				+ "to_char(t2.acqtime,'yyyy-mm-dd hh24:mi:ss') as acqtime,"
 				+ "t2.runstatus,decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线') as runStatusName,"
 				+ "t2.resultcode,decode(t2.resultcode,null,'无数据',t3.resultName) as resultName,"
-				+ prodCol;
+				+ prodCol+""
+				+ "FMax,FMin,fullnessCoefficient,"
+				+ "averageWatt,polishrodPower,waterPower,"
+				+ "surfaceSystemEfficiency*100,welldownSystemEfficiency*100,systemEfficiency*100,energyper100mlift,pumpEff*100,"
+				+ "iDegreeBalance,wattDegreeBalance,deltaradius*100";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -580,7 +584,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				for(int j=0;j<alarmInstanceOwnItem.itemList.size();j++){
 					if(alarmInstanceOwnItem.getItemList().get(j).getType()==3 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(obj[3]+"")){
 						commAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
-					}else if(alarmInstanceOwnItem.getItemList().get(j).getType()==4 && alarmInstanceOwnItem.getItemList().get(j).getItemCode().equalsIgnoreCase(obj[8]+"")){
+					}else if(alarmInstanceOwnItem.getItemList().get(j).getType()==4 && alarmInstanceOwnItem.getItemList().get(j).getItemCode().equalsIgnoreCase(obj[7]+"")){
 						resultAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
 					}
 				}
@@ -600,11 +604,31 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"resultAlarmLevel\":"+resultAlarmLevel+",");
 			result_json.append("\""+prodCol.split(",")[0]+"\":\""+obj[9]+"\",");
 			result_json.append("\""+prodCol.split(",")[1]+"\":\""+obj[10]+"\",");
+			result_json.append("\""+prodCol.split(",")[2]+"\":\""+obj[11]+"\",");
+			result_json.append("\""+prodCol.split(",")[3]+"\":\""+obj[12]+"\",");
+			
+			result_json.append("\"FMax\":\""+obj[13]+"\",");
+			result_json.append("\"FMin\":\""+obj[14]+"\",");
+			result_json.append("\"fullnessCoefficient\":\""+obj[15]+"\",");
+			
+			result_json.append("\"averageWatt\":\""+obj[16]+"\",");
+			result_json.append("\"polishrodPower\":\""+obj[17]+"\",");
+			result_json.append("\"waterPower\":\""+obj[18]+"\",");
+			
+			result_json.append("\"surfaceSystemEfficiency\":\""+obj[19]+"\",");
+			result_json.append("\"welldownSystemEfficiency\":\""+obj[20]+"\",");
+			result_json.append("\"systemEfficiency\":\""+obj[21]+"\",");
+			result_json.append("\"energyper100mlift\":\""+obj[22]+"\",");
+			result_json.append("\"pumpEff\":\""+obj[23]+"\",");
+			
+			result_json.append("\"iDegreeBalance\":\""+obj[24]+"\",");
+			result_json.append("\"wattDegreeBalance\":\""+obj[25]+"\",");
+			result_json.append("\"deltaradius\":\""+obj[26]+"\",");
 			result_json.append("\"details\":\"\",");
 			
 			alarmInfo.append("[");
 			for(int j=0;j<ddicColumnsList.size();j++){
-				String rawValue=obj[11+j]+"";
+				String rawValue=obj[27+j]+"";
 				String value=rawValue;
 				ModbusProtocolConfig.Items item=null;
 				if(protocol!=null){
@@ -753,16 +777,20 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			}
 		}
 		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
-		String prodCol="liquidWeightProduction,liquidWeightProduction_L";
+		String prodCol="liquidWeightProduction,oilWeightProduction,waterWeightProduction,liquidWeightProduction_L,";
 		if(productionUnit!=0){
-			prodCol="liquidVolumetricProduction,liquidVolumetricProduction_L";
+			prodCol="liquidVolumetricProduction,oilVolumetricProduction,waterVolumetricProduction,liquidVolumetricProduction_L,";
 		}
 		String sql="select t2.id,t.wellname,t2.commstatus,"
 				+ "decode(t2.commstatus,1,'在线','离线') as commStatusName,"
 				+ "to_char(t2.acqtime,'yyyy-mm-dd hh24:mi:ss') as acqtime,"
 				+ "t2.runstatus,decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线') as runStatusName,"
 				+ "t2.resultcode,decode(t2.resultcode,null,'无数据',t3.resultName) as resultName,"
-				+ prodCol;
+				+ prodCol+""
+				+ "FMax,FMin,fullnessCoefficient,"
+				+ "averageWatt,polishrodPower,waterPower,"
+				+ "surfaceSystemEfficiency*100,welldownSystemEfficiency*100,systemEfficiency*100,energyper100mlift,pumpEff*100,"
+				+ "iDegreeBalance,wattDegreeBalance,deltaradius*100";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -802,10 +830,30 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"resultName\":\""+obj[8]+"\",");
 			result_json.append("\""+prodCol.split(",")[0]+"\":\""+obj[9]+"\",");
 			result_json.append("\""+prodCol.split(",")[1]+"\":\""+obj[10]+"\",");
+			result_json.append("\""+prodCol.split(",")[2]+"\":\""+obj[11]+"\",");
+			result_json.append("\""+prodCol.split(",")[3]+"\":\""+obj[12]+"\",");
+			
+			result_json.append("\"FMax\":\""+obj[13]+"\",");
+			result_json.append("\"FMin\":\""+obj[14]+"\",");
+			result_json.append("\"fullnessCoefficient\":\""+obj[15]+"\",");
+			
+			result_json.append("\"averageWatt\":\""+obj[16]+"\",");
+			result_json.append("\"polishrodPower\":\""+obj[17]+"\",");
+			result_json.append("\"waterPower\":\""+obj[18]+"\",");
+			
+			result_json.append("\"surfaceSystemEfficiency\":\""+obj[19]+"\",");
+			result_json.append("\"welldownSystemEfficiency\":\""+obj[20]+"\",");
+			result_json.append("\"systemEfficiency\":\""+obj[21]+"\",");
+			result_json.append("\"energyper100mlift\":\""+obj[22]+"\",");
+			result_json.append("\"pumpEff\":\""+obj[23]+"\",");
+			
+			result_json.append("\"iDegreeBalance\":\""+obj[24]+"\",");
+			result_json.append("\"wattDegreeBalance\":\""+obj[25]+"\",");
+			result_json.append("\"deltaradius\":\""+obj[26]+"\",");
 			result_json.append("\"details\":\"\",");
 			
 			for(int j=0;j<ddicColumnsList.size();j++){
-				String rawValue=obj[11+j]+"";
+				String rawValue=obj[27+j]+"";
 				String value=rawValue;
 				if(protocol!=null){
 					for(int k=0;k<protocol.getItems().size();k++){
@@ -928,15 +976,17 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		
 		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
 		String columns = ddic.getTableHeader();
-		String prodCol="liquidWeightProduction,liquidWeightProduction_L";
+		String prodCol="liquidWeightProduction,oilWeightProduction,waterWeightProduction,liquidWeightProduction_L,";
 		if(productionUnit!=0){
-			prodCol="liquidVolumetricProduction,liquidVolumetricProduction_L";
+			prodCol="liquidVolumetricProduction,oilVolumetricProduction,waterVolumetricProduction,liquidVolumetricProduction_L,";
 		}
 		String sql="select t2.id,t.wellname,t2.commstatus,"
 				+ "decode(t2.commstatus,1,'在线','离线') as commStatusName,"
 				+ "to_char(t2.acqtime,'yyyy-mm-dd hh24:mi:ss') as acqtime,"
 				+ "t2.runstatus,decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线') as runStatusName,"
-				+ prodCol;
+				+ prodCol+""
+				+ "averageWatt,waterPower,"
+				+ "systemEfficiency*100,energyper100mlift,pumpEff*100";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -995,11 +1045,20 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"runStatusName\":\""+obj[6]+"\",");
 			result_json.append("\""+prodCol.split(",")[0]+"\":\""+obj[7]+"\",");
 			result_json.append("\""+prodCol.split(",")[1]+"\":\""+obj[8]+"\",");
+			result_json.append("\""+prodCol.split(",")[2]+"\":\""+obj[9]+"\",");
+			result_json.append("\""+prodCol.split(",")[3]+"\":\""+obj[10]+"\",");
+			
+			result_json.append("\"averageWatt\":\""+obj[11]+"\",");
+			result_json.append("\"waterPower\":\""+obj[12]+"\",");
+			
+			result_json.append("\"systemEfficiency\":\""+obj[13]+"\",");
+			result_json.append("\"energyper100mlift\":\""+obj[14]+"\",");
+			result_json.append("\"pumpEff\":\""+obj[15]+"\",");
 			result_json.append("\"details\":\"\",");
 			
 			alarmInfo.append("[");
 			for(int j=0;j<ddicColumnsList.size();j++){
-				String rawValue=obj[9+j]+"";
+				String rawValue=obj[16+j]+"";
 				String value=rawValue;
 				ModbusProtocolConfig.Items item=null;
 				if(protocol!=null){
@@ -1142,15 +1201,17 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			}
 		}
 		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId(ddicName);
-		String prodCol="liquidWeightProduction,liquidWeightProduction_L";
+		String prodCol="liquidWeightProduction,oilWeightProduction,waterWeightProduction,liquidWeightProduction_L,";
 		if(productionUnit!=0){
-			prodCol="liquidVolumetricProduction,liquidVolumetricProduction_L";
+			prodCol="liquidVolumetricProduction,oilVolumetricProduction,waterVolumetricProduction,liquidVolumetricProduction_L,";
 		}
 		String sql="select t2.id,t.wellname,t2.commstatus,"
 				+ "decode(t2.commstatus,1,'在线','离线') as commStatusName,"
 				+ "to_char(t2.acqtime,'yyyy-mm-dd hh24:mi:ss') as acqtime,"
 				+ "t2.runstatus,decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线') as runStatusName,"
-				+ prodCol;
+				+ prodCol+""
+				+ "averageWatt,waterPower,"
+				+ "systemEfficiency*100,energyper100mlift,pumpEff*100";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -1187,10 +1248,19 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"runStatusName\":\""+obj[6]+"\",");
 			result_json.append("\""+prodCol.split(",")[0]+"\":\""+obj[7]+"\",");
 			result_json.append("\""+prodCol.split(",")[1]+"\":\""+obj[8]+"\",");
+			result_json.append("\""+prodCol.split(",")[2]+"\":\""+obj[9]+"\",");
+			result_json.append("\""+prodCol.split(",")[3]+"\":\""+obj[10]+"\",");
+			
+			result_json.append("\"averageWatt\":\""+obj[11]+"\",");
+			result_json.append("\"waterPower\":\""+obj[12]+"\",");
+			
+			result_json.append("\"systemEfficiency\":\""+obj[13]+"\",");
+			result_json.append("\"energyper100mlift\":\""+obj[14]+"\",");
+			result_json.append("\"pumpEff\":\""+obj[15]+"\",");
 			result_json.append("\"details\":\"\",");
 			
 			for(int j=0;j<ddicColumnsList.size();j++){
-				String rawValue=obj[9+j]+"";
+				String rawValue=obj[16+j]+"";
 				String value=rawValue;
 				if(protocol!=null){
 					for(int k=0;k<protocol.getItems().size();k++){
@@ -1394,7 +1464,11 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				}
 
 				for(int i=0;i<calItemList.size();i++){
-					sql+=",t2."+calItemList.get(i).getCode();
+					String column=calItemList.get(i).getCode();
+					if("resultName".equalsIgnoreCase(calItemList.get(i).getCode())){
+						column="resultCode";
+					}
+					sql+=",t2."+column;
 				}
 				sql+= " from "+deviceTableName+" t "
 						+ " left outer join "+tableName+" t2 on t2.wellid=t.id"
@@ -1420,7 +1494,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 							if(column.equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(l).getItemCode())){
 								sort=displayInstanceOwnItem.getItemList().get(l).getSort();
 								//如果是工况
-								if("resultCode".equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(l).getItemCode())){
+								if("resultCode".equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(l).getItemCode()) || "resultName".equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(l).getItemCode())){
 									if(jedis.hexists("RPCWorkType".getBytes(), value.getBytes())){
 										workType=(WorkType) SerializeObjectUnils.unserizlize(jedis.hget("RPCWorkType".getBytes(), value.getBytes()));
 									}
@@ -1631,7 +1705,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 											}else if(alarmType==3){//通信报警
 												
 											}else if(alarmType==4){//工况报警
-												if("resultCode".equalsIgnoreCase(finalProtocolItemResolutionDataList.get(index).getColumn())){
+												if("resultCode".equalsIgnoreCase(finalProtocolItemResolutionDataList.get(index).getColumn()) || "resultName".equalsIgnoreCase(finalProtocolItemResolutionDataList.get(index).getColumn())){
 													if(alarmInstanceOwnItem.getItemList().get(l).getItemCode().equalsIgnoreCase(finalProtocolItemResolutionDataList.get(index).getRawValue())){
 														alarmLevel=alarmInstanceOwnItem.getItemList().get(l).getAlarmLevel();
 													}
@@ -2188,7 +2262,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				String resultCode=obj[3]+"";
 				if(alarmInstanceOwnItem!=null){
 					for(int j=0;j<alarmInstanceOwnItem.getItemList().size();j++){
-						if(alarmInstanceOwnItem.getItemList().get(j).getType()==4 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(resultCode)){
+						if(alarmInstanceOwnItem.getItemList().get(j).getType()==4 && alarmInstanceOwnItem.getItemList().get(j).getItemCode().equalsIgnoreCase(resultCode)){
 							resultAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
 							break;
 						}

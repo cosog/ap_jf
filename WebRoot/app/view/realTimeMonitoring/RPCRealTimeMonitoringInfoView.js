@@ -158,7 +158,7 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                         header: false,
                 		tabPosition: 'top',
                 		items: [{
-                			title:'工况',
+                			title:'工况诊断',
                 			layout: 'fit',
                         	id:'RPCRealTimeMonitoringFESdiagramResultStatGraphPanel_Id',
                         	html: '<div id="RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
@@ -172,27 +172,6 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                                     		Ext.create('Ext.tip.ToolTip', {
                                                 id:'RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieToolTip_Id',
                                         		target: 'RPCRealTimeMonitoringFESdiagramResultStatGraphPanelPieDiv_Id',
-                                                html: '点击饼图不同区域或标签，查看相应统计数据'
-                                            });
-                                    	}
-                                    }
-                                }
-                            }
-                		},{
-                			title:'通信状态',
-                			layout: 'fit',
-                        	id:'RPCRealTimeMonitoringStatGraphPanel_Id',
-                        	html: '<div id="RPCRealTimeMonitoringStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
-                        	listeners: {
-                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                                	if ($("#RPCRealTimeMonitoringStatGraphPanelPieDiv_Id").highcharts() != undefined) {
-                                        $("#RPCRealTimeMonitoringStatGraphPanelPieDiv_Id").highcharts().setSize($("#RPCRealTimeMonitoringStatGraphPanelPieDiv_Id").offsetWidth, $("#RPCRealTimeMonitoringStatGraphPanelPieDiv_Id").offsetHeight,true);
-                                    }else{
-                                    	var toolTip=Ext.getCmp("RPCRealTimeMonitoringStatGraphPanelPieToolTip_Id");
-                                    	if(!isNotVal(toolTip)){
-                                    		Ext.create('Ext.tip.ToolTip', {
-                                                id:'RPCRealTimeMonitoringStatGraphPanelPieToolTip_Id',
-                                        		target: 'RPCRealTimeMonitoringStatGraphPanelPieDiv_Id',
                                                 html: '点击饼图不同区域或标签，查看相应统计数据'
                                             });
                                     	}
@@ -214,6 +193,27 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                                     		Ext.create('Ext.tip.ToolTip', {
                                                 id:'RPCRealTimeMonitoringRunStatusStatGraphPanelPieToolTip_Id',
                                         		target: 'RPCRealTimeMonitoringRunStatusStatGraphPanelPieDiv_Id',
+                                                html: '点击饼图不同区域或标签，查看相应统计数据'
+                                            });
+                                    	}
+                                    }
+                                }
+                            }
+                		},{
+                			title:'通信状态',
+                			layout: 'fit',
+                        	id:'RPCRealTimeMonitoringStatGraphPanel_Id',
+                        	html: '<div id="RPCRealTimeMonitoringStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
+                        	listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if ($("#RPCRealTimeMonitoringStatGraphPanelPieDiv_Id").highcharts() != undefined) {
+                                        $("#RPCRealTimeMonitoringStatGraphPanelPieDiv_Id").highcharts().setSize($("#RPCRealTimeMonitoringStatGraphPanelPieDiv_Id").offsetWidth, $("#RPCRealTimeMonitoringStatGraphPanelPieDiv_Id").offsetHeight,true);
+                                    }else{
+                                    	var toolTip=Ext.getCmp("RPCRealTimeMonitoringStatGraphPanelPieToolTip_Id");
+                                    	if(!isNotVal(toolTip)){
+                                    		Ext.create('Ext.tip.ToolTip', {
+                                                id:'RPCRealTimeMonitoringStatGraphPanelPieToolTip_Id',
+                                        		target: 'RPCRealTimeMonitoringStatGraphPanelPieDiv_Id',
                                                 html: '点击饼图不同区域或标签，查看相应统计数据'
                                             });
                                     	}
@@ -569,6 +569,13 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                         header: false,
                 		tabPosition: 'top',
                 		items: [{
+                			title:'设备控制',
+                			id: 'RPCRealTimeMonitoringRightControlPanel',
+                            border: false,
+                            layout: 'fit',
+                            autoScroll: true,
+                            scrollable: true
+                		},{
                 			title:'设备信息',
                 			layout: 'border',
                 			items:[{
@@ -590,13 +597,6 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                                 autoScroll: true,
                                 scrollable: true
                 			}]
-                		},{
-                			title:'设备控制',
-                			id: 'RPCRealTimeMonitoringRightControlPanel',
-                            border: false,
-                            layout: 'fit',
-                            autoScroll: true,
-                            scrollable: true
                 		}]
                     }],
                     listeners: {

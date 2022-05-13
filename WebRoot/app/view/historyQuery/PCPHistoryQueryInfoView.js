@@ -142,27 +142,6 @@ Ext.define("AP.view.historyQuery.PCPHistoryQueryInfoView", {
                         header: false,
                 		tabPosition: 'top',
                 		items: [{
-                			title:'通信状态',
-                			layout: 'fit',
-                        	id:'PCPHistoryQueryStatGraphPanel_Id',
-                        	html: '<div id="PCPHistoryQueryStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
-                        	listeners: {
-                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                                	if ($("#PCPHistoryQueryStatGraphPanelPieDiv_Id").highcharts() != undefined) {
-                                        $("#PCPHistoryQueryStatGraphPanelPieDiv_Id").highcharts().setSize($("#PCPHistoryQueryStatGraphPanelPieDiv_Id").offsetWidth, $("#PCPHistoryQueryStatGraphPanelPieDiv_Id").offsetHeight,true);
-                                    }else{
-                                    	var toolTip=Ext.getCmp("PCPHistoryQueryStatGraphPanelPieToolTip_Id");
-                                    	if(!isNotVal(toolTip)){
-                                    		Ext.create('Ext.tip.ToolTip', {
-                                                id:'PCPHistoryQueryStatGraphPanelPieToolTip_Id',
-                                        		target: 'PCPHistoryQueryStatGraphPanelPieDiv_Id',
-                                                html: '点击饼图不同区域或标签，查看相应统计数据'
-                                            });
-                                    	}
-                                    }
-                                }
-                            }
-                		},{
                 			title:'运行状态',
                 			layout: 'fit',
                         	id:'PCPHistoryQueryRunStatusStatGraphPanel_Id',
@@ -177,6 +156,27 @@ Ext.define("AP.view.historyQuery.PCPHistoryQueryInfoView", {
                                     		Ext.create('Ext.tip.ToolTip', {
                                                 id:'PCPHistoryQueryRunStatusStatGraphPanelPieToolTip_Id',
                                         		target: 'PCPHistoryQueryRunStatusStatGraphPanelPieDiv_Id',
+                                                html: '点击饼图不同区域或标签，查看相应统计数据'
+                                            });
+                                    	}
+                                    }
+                                }
+                            }
+                		},{
+                			title:'通信状态',
+                			layout: 'fit',
+                        	id:'PCPHistoryQueryStatGraphPanel_Id',
+                        	html: '<div id="PCPHistoryQueryStatGraphPanelPieDiv_Id" style="width:100%;height:100%;"></div>',
+                        	listeners: {
+                                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                	if ($("#PCPHistoryQueryStatGraphPanelPieDiv_Id").highcharts() != undefined) {
+                                        $("#PCPHistoryQueryStatGraphPanelPieDiv_Id").highcharts().setSize($("#PCPHistoryQueryStatGraphPanelPieDiv_Id").offsetWidth, $("#PCPHistoryQueryStatGraphPanelPieDiv_Id").offsetHeight,true);
+                                    }else{
+                                    	var toolTip=Ext.getCmp("PCPHistoryQueryStatGraphPanelPieToolTip_Id");
+                                    	if(!isNotVal(toolTip)){
+                                    		Ext.create('Ext.tip.ToolTip', {
+                                                id:'PCPHistoryQueryStatGraphPanelPieToolTip_Id',
+                                        		target: 'PCPHistoryQueryStatGraphPanelPieDiv_Id',
                                                 html: '点击饼图不同区域或标签，查看相应统计数据'
                                             });
                                     	}
