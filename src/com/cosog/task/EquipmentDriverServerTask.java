@@ -56,7 +56,7 @@ public class EquipmentDriverServerTask {
 	}
 	
 	@SuppressWarnings({ "static-access", "unused" })
-	@Scheduled(fixedRate = 1000*60*60*24*365*100)
+//	@Scheduled(fixedRate = 1000*60*60*24*365*100)
 	public void driveServerTast() throws SQLException, ParseException,InterruptedException, IOException{
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
@@ -102,7 +102,7 @@ public class EquipmentDriverServerTask {
 	
 //		StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
 			
-			Thread.sleep(1000*60*1);
+			Thread.sleep(1000*60*10);
 		}
 		
 		

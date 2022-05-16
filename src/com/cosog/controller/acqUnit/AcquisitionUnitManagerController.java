@@ -937,6 +937,22 @@ public class AcquisitionUnitManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/getModbusProtocolCalNumAlarmItemsConfigData")
+	public String getModbusProtocolCalNumAlarmItemsConfigData() throws Exception {
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String code = ParamUtils.getParameter(request, "code");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getModbusProtocolCalNumAlarmItemsConfigData(deviceType,classes,code);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	@RequestMapping("/getModbusProtocolEnumAlarmItemsConfigData")
 	public String getModbusProtocolEnumAlarmItemsConfigData() throws Exception {
 		String protocolName = ParamUtils.getParameter(request, "protocolName");
@@ -1465,14 +1481,15 @@ public class AcquisitionUnitManagerController extends BaseController {
 						Iterator<Items> it = modbusProtocolConfig.getProtocol().get(i).getItems().iterator();
 						while(it.hasNext()){
 							boolean isDel=true;
+							Items item=(Items)it.next();
 							for(int k=0;k<modbusDriverSaveData.getDataConfig().size();k++){
-								if(((Items)it.next()).getTitle().equalsIgnoreCase(modbusDriverSaveData.getDataConfig().get(k).getTitle())){
+								if(item.getTitle().equalsIgnoreCase(modbusDriverSaveData.getDataConfig().get(k).getTitle())){
 									isDel=false;
 									break;
 								}
 							}
 							if(isDel){
-								delItemList.add(((Items)it.next()).getTitle());
+								delItemList.add(item.getTitle());
 								it.remove();
 							}
 						}

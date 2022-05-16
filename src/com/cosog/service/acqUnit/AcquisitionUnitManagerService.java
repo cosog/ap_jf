@@ -229,7 +229,6 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
-//				+ "{ \"header\":\"名称\",\"dataIndex\":\"name\",width:120 ,children:[] },"
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
 				+ "{ \"header\":\"地址\",\"dataIndex\":\"addr\",width:80 ,children:[] },"
 				+ "{ \"header\":\"数量\",\"dataIndex\":\"quantity\",width:80 ,children:[] },"
@@ -540,6 +539,110 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		}
 		result_json.append("]");
 		result_json.append("}");
+		return result_json.toString();
+	}
+	
+	public String getModbusProtocolCalNumAlarmItemsConfigData(String deviceType,String classes,String code){
+		StringBuffer result_json = new StringBuffer();
+		
+		Jedis jedis=null;
+		Set<byte[]>calItemSet=null;
+		try{
+			jedis = new Jedis();
+			if(StringManagerUtils.stringToInteger(deviceType)==0){
+				if(!jedis.exists("rpcCalItemList".getBytes())){
+					MemoryDataManagerTask.loadRPCCalculateItem();
+				}
+				calItemSet= jedis.zrange("rpcCalItemList".getBytes(), 0, -1);
+			}else{
+				if(!jedis.exists("pcpCalItemList".getBytes())){
+					MemoryDataManagerTask.loadRPCCalculateItem();
+				}
+				calItemSet= jedis.zrange("pcpCalItemList".getBytes(), 0, -1);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"上限\",\"dataIndex\":\"upperLimit\",width:80 ,children:[] },"
+				+ "{ \"header\":\"下限\",\"dataIndex\":\"lowerLimit\",width:80 ,children:[] },"
+				+ "{ \"header\":\"回差\",\"dataIndex\":\"hystersis\",width:80 ,children:[] },"
+				+ "{ \"header\":\"延时(s)\",\"dataIndex\":\"delay\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警级别\",\"dataIndex\":\"alarmLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警使能\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送短信\",\"dataIndex\":\"isSendMessage\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送邮件\",\"dataIndex\":\"isSendMail\",width:80 ,children:[] }"
+				+ "]";
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		if(calItemSet!=null){
+			List<String> itemsList=new ArrayList<String>();
+			List<?> list=null;
+			if("3".equalsIgnoreCase(classes)){
+				String sql="select t.itemname,t.itemcode,t.upperlimit,t.lowerlimit,t.hystersis,t.delay,"
+						+ " t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') as alarmsign,"
+						+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+						+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_code t3  "
+						+ " where t.type=5 and t.unitid=t2.id and upper(t3.itemcode)=upper('BJJB') and t.alarmlevel=t3.itemvalue and t2.unit_code='"+code+"' "
+						+ " order by t.id";
+				list=this.findCallSql(sql);
+				for(int i=0;i<list.size();i++){
+					Object[] obj = (Object[]) list.get(i);
+					itemsList.add(obj[1]+"");
+				}
+			}
+			
+			int index=1;
+			for(byte[] rpcCalItemByteArr:calItemSet){
+				CalItem calItem=(CalItem) SerializeObjectUnils.unserizlize(rpcCalItemByteArr);
+				if(calItem.getDataType()==2){
+					String upperLimit="",lowerLimit="",hystersis="",delay="",alarmLevel="",alarmSign="",isSendMessage="",isSendMail="";
+					boolean checked=false;
+					for(int k=0;k<itemsList.size();k++){
+						Object[] obj = (Object[]) list.get(k);
+						if(calItem.getCode().equalsIgnoreCase(itemsList.get(k))){
+							checked=true;
+							upperLimit=obj[2]+"";
+							lowerLimit=obj[3]+"";
+							hystersis=obj[4]+"";
+							delay=obj[5]+"";
+							alarmLevel=obj[6]+"";
+							alarmSign=obj[7]+"";
+							isSendMessage=obj[8]+"";
+							isSendMail=obj[9]+"";
+							break;
+						}
+					}
+					result_json.append("{\"checked\":"+checked+","
+							+ "\"id\":"+(index)+","
+							+ "\"title\":\""+calItem.getName()+"\","
+							+ "\"code\":\""+calItem.getCode()+"\","
+							+ "\"upperLimit\":\""+upperLimit+"\","
+							+ "\"lowerLimit\":\""+lowerLimit+"\","
+							+ "\"hystersis\":\""+hystersis+"\","
+							+ "\"delay\":\""+delay+"\","
+							+ "\"alarmLevel\":\""+alarmLevel+"\","
+							+ "\"alarmSign\":\""+alarmSign+"\","
+							+ "\"isSendMessage\":\""+isSendMessage+"\","
+							+ "\"isSendMail\":\""+isSendMail+"\""
+							+ "},");
+					index++;
+				}
+			}
+		}
+		
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
+		}
 		return result_json.toString();
 	}
 	
@@ -2453,7 +2556,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 					rpcTree_json.append("{\"classes\":1,");
 					rpcTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
 					rpcTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
-					rpcTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
+					rpcTree_json.append("\"deviceType\":"+0+",");
 					rpcTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
 					rpcTree_json.append("\"iconCls\": \"protocol\",");
 					rpcTree_json.append("\"expanded\": true,");
@@ -2463,6 +2566,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 						if(modbusProtocolConfig.getProtocol().get(i).getName().equalsIgnoreCase(unitObj[unitObj.length-1]+"")){
 							rpcTree_json.append("{\"classes\":3,");
 							rpcTree_json.append("\"id\":"+unitObj[0]+",");
+							rpcTree_json.append("\"deviceType\":"+0+",");
 							rpcTree_json.append("\"code\":\""+unitObj[1]+"\",");
 							rpcTree_json.append("\"text\":\""+unitObj[2]+"\",");
 							rpcTree_json.append("\"remark\":\""+unitObj[3]+"\",");
@@ -2480,7 +2584,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 					pcpTree_json.append("{\"classes\":1,");
 					pcpTree_json.append("\"text\":\""+modbusProtocolConfig.getProtocol().get(i).getName()+"\",");
 					pcpTree_json.append("\"code\":\""+modbusProtocolConfig.getProtocol().get(i).getCode()+"\",");
-					pcpTree_json.append("\"deviceType\":"+modbusProtocolConfig.getProtocol().get(i).getDeviceType()+",");
+					pcpTree_json.append("\"deviceType\":"+1+",");
 					pcpTree_json.append("\"sort\":\""+modbusProtocolConfig.getProtocol().get(i).getSort()+"\",");
 					pcpTree_json.append("\"iconCls\": \"protocol\",");
 					pcpTree_json.append("\"expanded\": true,");
@@ -2490,6 +2594,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 						if(modbusProtocolConfig.getProtocol().get(i).getName().equalsIgnoreCase(unitObj[unitObj.length-1]+"")){
 							pcpTree_json.append("{\"classes\":3,");
 							pcpTree_json.append("\"id\":"+unitObj[0]+",");
+							pcpTree_json.append("\"deviceType\":"+1+",");
 							pcpTree_json.append("\"code\":\""+unitObj[1]+"\",");
 							pcpTree_json.append("\"text\":\""+unitObj[2]+"\",");
 							pcpTree_json.append("\"remark\":\""+unitObj[3]+"\",");
@@ -2518,8 +2623,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		
 		result_json.append("[");
 		
-		result_json.append("{\"classes\":0,\"text\":\"抽油机\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
-		result_json.append("{\"classes\":0,\"text\":\"螺杆泵\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
+		result_json.append("{\"classes\":0,\"deviceType\": 0,\"text\":\"抽油机\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
+		result_json.append("{\"classes\":0,\"deviceType\": 1,\"text\":\"螺杆泵\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
 		result_json.append("]");
 		return result_json.toString().replaceAll("null", "");
 	}

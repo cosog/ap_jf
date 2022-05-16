@@ -106,6 +106,12 @@ Ext.define('AP.view.acquisitionUnit.ProtocolConfigInfoView', {
     					}
     					protocolAlarmUnitConfigNumItemsHandsontableHelper=null;
     				}
+    				if(protocolAlarmUnitConfigCalNumItemsHandsontableHelper!=null){
+    					if(protocolAlarmUnitConfigCalNumItemsHandsontableHelper.hot!=undefined){
+    						protocolAlarmUnitConfigCalNumItemsHandsontableHelper.hot.destroy();
+    					}
+    					protocolAlarmUnitConfigCalNumItemsHandsontableHelper=null;
+    				}
     				if(protocolAlarmUnitConfigSwitchItemsHandsontableHelper!=null){
     					if(protocolAlarmUnitConfigSwitchItemsHandsontableHelper.hot!=undefined){
     						protocolAlarmUnitConfigSwitchItemsHandsontableHelper.hot.destroy();
@@ -129,6 +135,12 @@ Ext.define('AP.view.acquisitionUnit.ProtocolConfigInfoView', {
     						protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.hot.destroy();
     					}
     					protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper=null;
+    				}
+    				if(protocolAlarmUnitConfigRunStatusItemsHandsontableHelper!=null){
+    					if(protocolAlarmUnitConfigRunStatusItemsHandsontableHelper.hot!=undefined){
+    						protocolAlarmUnitConfigRunStatusItemsHandsontableHelper.hot.destroy();
+    					}
+    					protocolAlarmUnitConfigRunStatusItemsHandsontableHelper=null;
     				}
     				
     				//采控实例HandsontableHelper资源
