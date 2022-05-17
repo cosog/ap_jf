@@ -1262,6 +1262,7 @@ public class StringManagerUtils {
         		"UPPERLOADLINEOFEXACT",
         		"LOWERLOADLINE",
         		"PUMPFSDIAGRAM",
+        		"SUBMERGENCE",
         		"THEORETICALPRODUCTION",
         		"LIQUIDVOLUMETRICPRODUCTION",
         		"OILVOLUMETRICPRODUCTION",
