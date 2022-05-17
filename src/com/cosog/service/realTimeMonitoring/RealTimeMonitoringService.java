@@ -778,8 +778,11 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				+ prodCol+""
 				+ "FMax,FMin,fullnessCoefficient,"
 				+ "averageWatt,polishrodPower,waterPower,"
-				+ "surfaceSystemEfficiency*100,welldownSystemEfficiency*100,systemEfficiency*100,energyper100mlift,pumpEff*100,"
-				+ "iDegreeBalance,wattDegreeBalance,deltaradius*100";
+				+ "surfaceSystemEfficiency*100 as surfaceSystemEfficiency,"
+				+ "welldownSystemEfficiency*100 as welldownSystemEfficiency,"
+				+ "systemEfficiency*100 as systemEfficiency,energyper100mlift,"
+				+ "pumpEff*100 as pumpEff,"
+				+ "iDegreeBalance,wattDegreeBalance,deltaradius*100 as deltaradius";
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
 			if(dataSaveMode==0){
@@ -858,11 +861,13 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				}
 			}
 			
-			int commAlarmLevel=0,resultAlarmLevel=0;
+			int commAlarmLevel=0,resultAlarmLevel=0,runAlarmLevel=0;
 			if(alarmInstanceOwnItem!=null){
 				for(int j=0;j<alarmInstanceOwnItem.itemList.size();j++){
 					if(alarmInstanceOwnItem.getItemList().get(j).getType()==3 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(obj[3]+"")){
 						commAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
+					}else if(alarmInstanceOwnItem.getItemList().get(j).getType()==6 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(obj[7]+"")){
+						runAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
 					}else if(alarmInstanceOwnItem.getItemList().get(j).getType()==4 && alarmInstanceOwnItem.getItemList().get(j).getItemCode().equalsIgnoreCase(obj[8]+"")){
 						resultAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
 					}
@@ -878,6 +883,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			result_json.append("\"deviceTypeName\":\""+obj[5]+"\",");
 			result_json.append("\"runStatus\":"+obj[6]+",");
 			result_json.append("\"runStatusName\":\""+obj[7]+"\",");
+			result_json.append("\"runAlarmLevel\":"+runAlarmLevel+",");
 			result_json.append("\"resultCode\":\""+obj[8]+"\",");
 			result_json.append("\"resultName\":\""+obj[9]+"\",");
 			result_json.append("\"resultAlarmLevel\":"+resultAlarmLevel+",");
@@ -905,6 +911,35 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			result_json.append("\"deltaradius\":\""+obj[27]+"\",");
 			
 			alarmInfo.append("[");
+			
+			//计算项报警判断
+			if(alarmInstanceOwnItem!=null){
+				for(int j=0;j<ddicColumns.length;j++){
+					String column=ddicColumns[j].trim();
+					String[] attr = column.split(" as ");
+					if (attr.length > 1) {
+						column=attr[attr.length-1];
+					}else{
+						if(column.indexOf(".") > 0){
+							column = column.substring(column.indexOf(".") + 1);
+						}
+					}
+					for(int k=0;k<alarmInstanceOwnItem.getItemList().size();k++){
+						if(alarmInstanceOwnItem.getItemList().get(k).getType()==5&&column.equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemCode())){
+							alarmInfo.append("{\"item\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemCode()+"\","
+									+ "\"itemName\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemName()+"\","
+									+ "\"itemAddr\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemAddr()+"\","
+									+ "\"alarmType\":\""+alarmInstanceOwnItem.getItemList().get(k).getType()+"\","
+									+ "\"upperLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+"\","
+									+ "\"lowerLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()+"\","
+									+ "\"hystersis\":\""+alarmInstanceOwnItem.getItemList().get(k).getHystersis()+"\","
+									+" \"alarmLevel\":"+alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel()+"},");
+							break;
+						}
+					}
+				}
+			}
+			
 			for(int j=0;j<ddicColumnsList.size();j++){
 				String rawValue=obj[28+j]+"";
 				String value=rawValue;
@@ -1233,7 +1268,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				+ "t2.runstatus,decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线') as runStatusName,"
 				+ prodCol+""
 				+ "averageWatt,waterPower,"
-				+ "systemEfficiency*100,energyper100mlift,pumpEff*100";
+				+ "systemEfficiency*100 as systemEfficiency,energyper100mlift,pumpEff*100 as pumpEff";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -1309,12 +1344,13 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				}
 			}
 			
-			int commAlarmLevel=0;
+			int commAlarmLevel=0,runAlarmLevel=0;
 			if(alarmInstanceOwnItem!=null){
 				for(int j=0;j<alarmInstanceOwnItem.itemList.size();j++){
 					if(alarmInstanceOwnItem.getItemList().get(j).getType()==3 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(obj[3]+"")){
 						commAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
-						break;
+					}else if(alarmInstanceOwnItem.getItemList().get(j).getType()==6 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(obj[7]+"")){
+						runAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
 					}
 				}
 			}
@@ -1328,6 +1364,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			result_json.append("\"deviceTypeName\":\""+obj[5]+"\",");
 			result_json.append("\"runStatus\":"+obj[6]+",");
 			result_json.append("\"runStatusName\":\""+obj[7]+"\",");
+			result_json.append("\"runAlarmLevel\":"+runAlarmLevel+",");
 			result_json.append("\""+prodCol.split(",")[0]+"\":\""+obj[8]+"\",");
 			result_json.append("\""+prodCol.split(",")[1]+"\":\""+obj[9]+"\",");
 			result_json.append("\""+prodCol.split(",")[2]+"\":\""+obj[10]+"\",");
@@ -1339,7 +1376,36 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			result_json.append("\"systemEfficiency\":\""+obj[14]+"\",");
 			result_json.append("\"energyper100mlift\":\""+obj[15]+"\",");
 			result_json.append("\"pumpEff\":\""+obj[16]+"\",");
+			
 			alarmInfo.append("[");
+			
+			//计算项报警判断
+			if(alarmInstanceOwnItem!=null){
+				for(int j=0;j<ddicColumns.length;j++){
+					String column=ddicColumns[j].trim();
+					String[] attr = column.split(" as ");
+					if (attr.length > 1) {
+						column=attr[attr.length-1];
+					}else{
+						if(column.indexOf(".") > 0){
+							column = column.substring(column.indexOf(".") + 1);
+						}
+					}
+					for(int k=0;k<alarmInstanceOwnItem.getItemList().size();k++){
+						if(alarmInstanceOwnItem.getItemList().get(k).getType()==5&&column.equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemCode())){
+							alarmInfo.append("{\"item\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemCode()+"\","
+									+ "\"itemName\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemName()+"\","
+									+ "\"itemAddr\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemAddr()+"\","
+									+ "\"alarmType\":\""+alarmInstanceOwnItem.getItemList().get(k).getType()+"\","
+									+ "\"upperLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+"\","
+									+ "\"lowerLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()+"\","
+									+ "\"hystersis\":\""+alarmInstanceOwnItem.getItemList().get(k).getHystersis()+"\","
+									+" \"alarmLevel\":"+alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel()+"},");
+							break;
+						}
+					}
+				}
+			}
 			for(int j=0;j<ddicColumnsList.size();j++){
 				String rawValue=obj[17+j]+"";
 				String value=rawValue;
@@ -1996,6 +2062,15 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 													if(alarmInstanceOwnItem.getItemList().get(l).getItemCode().equalsIgnoreCase(finalProtocolItemResolutionDataList.get(index).getRawValue())){
 														alarmLevel=alarmInstanceOwnItem.getItemList().get(l).getAlarmLevel();
 													}
+												}
+											}else if(alarmType==5){//计算数据报警
+												if(finalProtocolItemResolutionDataList.get(index).getColumn().equals(alarmInstanceOwnItem.getItemList().get(l).getItemCode())){
+													if((StringManagerUtils.stringToFloat(rawValue)>upperLimit+hystersis)
+															||(StringManagerUtils.stringToFloat(rawValue)<lowerLimit-hystersis)
+															){
+														alarmLevel=alarmInstanceOwnItem.getItemList().get(l).getAlarmLevel();
+													}
+													break;
 												}
 											}
 										}

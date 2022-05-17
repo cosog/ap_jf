@@ -538,8 +538,9 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				+ prodCol+""
 				+ "FMax,FMin,fullnessCoefficient,"
 				+ "averageWatt,polishrodPower,waterPower,"
-				+ "surfaceSystemEfficiency*100,welldownSystemEfficiency*100,systemEfficiency*100,energyper100mlift,pumpEff*100,"
-				+ "iDegreeBalance,wattDegreeBalance,deltaradius*100";
+				+ "surfaceSystemEfficiency*100 as surfaceSystemEfficiency,welldownSystemEfficiency*100 as welldownSystemEfficiency,"
+				+ "systemEfficiency*100 as systemEfficiency,energyper100mlift,pumpEff*100 as pumpEff,"
+				+ "iDegreeBalance,wattDegreeBalance,deltaradius*100 as deltaradius";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -579,11 +580,13 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			Object[] obj=(Object[]) list.get(i);
 			StringBuffer alarmInfo = new StringBuffer();
 			
-			int commAlarmLevel=0,resultAlarmLevel=0;
+			int commAlarmLevel=0,resultAlarmLevel=0,runAlarmLevel=0;
 			if(alarmInstanceOwnItem!=null){
 				for(int j=0;j<alarmInstanceOwnItem.itemList.size();j++){
 					if(alarmInstanceOwnItem.getItemList().get(j).getType()==3 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(obj[3]+"")){
 						commAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
+					}else if(alarmInstanceOwnItem.getItemList().get(j).getType()==6 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(obj[6]+"")){
+						runAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
 					}else if(alarmInstanceOwnItem.getItemList().get(j).getType()==4 && alarmInstanceOwnItem.getItemList().get(j).getItemCode().equalsIgnoreCase(obj[7]+"")){
 						resultAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
 					}
@@ -599,6 +602,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"acqTime\":\""+obj[4]+"\",");
 			result_json.append("\"runStatus\":"+obj[5]+",");
 			result_json.append("\"runStatusName\":\""+obj[6]+"\",");
+			result_json.append("\"runAlarmLevel\":"+runAlarmLevel+",");
 			result_json.append("\"resultCode\":\""+obj[7]+"\",");
 			result_json.append("\"resultName\":\""+obj[8]+"\",");
 			result_json.append("\"resultAlarmLevel\":"+resultAlarmLevel+",");
@@ -627,6 +631,34 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"details\":\"\",");
 			
 			alarmInfo.append("[");
+			//计算项报警判断
+			if(alarmInstanceOwnItem!=null){
+				for(int j=0;j<ddicColumns.length;j++){
+					String column=ddicColumns[j].trim();
+					String[] attr = column.split(" as ");
+					if (attr.length > 1) {
+						column=attr[attr.length-1];
+					}else{
+						if(column.indexOf(".") > 0){
+							column = column.substring(column.indexOf(".") + 1);
+						}
+					}
+					for(int k=0;k<alarmInstanceOwnItem.getItemList().size();k++){
+						if(alarmInstanceOwnItem.getItemList().get(k).getType()==5&&column.equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemCode())){
+							alarmInfo.append("{\"item\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemCode()+"\","
+									+ "\"itemName\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemName()+"\","
+									+ "\"itemAddr\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemAddr()+"\","
+									+ "\"alarmType\":\""+alarmInstanceOwnItem.getItemList().get(k).getType()+"\","
+									+ "\"upperLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+"\","
+									+ "\"lowerLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()+"\","
+									+ "\"hystersis\":\""+alarmInstanceOwnItem.getItemList().get(k).getHystersis()+"\","
+									+" \"alarmLevel\":"+alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel()+"},");
+							break;
+						}
+					}
+				}
+			}
+			
 			for(int j=0;j<ddicColumnsList.size();j++){
 				String rawValue=obj[27+j]+"";
 				String value=rawValue;
@@ -654,25 +686,36 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 					for(int k=0;k<alarmInstanceOwnItem.getItemList().size();k++){
 						int alarmType=alarmInstanceOwnItem.getItemList().get(k).getType();
 						if(alarmType<=2&&item.getTitle().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemName()) && item.getAddr()==alarmInstanceOwnItem.getItemList().get(k).getItemAddr()){
-							if(alarmType==2 && StringManagerUtils.isNotNull(rawValue)){//数据量报警
-								float hystersis=alarmInstanceOwnItem.getItemList().get(k).getHystersis();
-								if((StringManagerUtils.stringToFloat(rawValue)>alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+hystersis)
-										||(StringManagerUtils.stringToFloat(rawValue)<alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()-hystersis)
-										){
-									int alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel();
-									if(alarmLevel>0){
-										alarmInfo.append("{\"item\":\""+ddicColumnsList.get(j).replaceAll(" ", "")+"\",\"alarmLevel\":"+alarmLevel+"},");
-									}
-								}
+							if(alarmType==2){//数据量报警
+								alarmInfo.append("{\"item\":\""+ddicColumnsList.get(j).replaceAll(" ", "")+"\","
+										+ "\"itemName\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemName()+"\","
+										+ "\"itemAddr\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemAddr()+"\","
+										+ "\"alarmType\":\""+alarmType+"\","
+										+ "\"upperLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+"\","
+										+ "\"lowerLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()+"\","
+										+ "\"hystersis\":\""+alarmInstanceOwnItem.getItemList().get(k).getHystersis()+"\","
+										+" \"alarmLevel\":"+alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel()+"},");
 								break;
 							}else if(alarmType==1){//枚举量报警
-								if(StringManagerUtils.stringToInteger(rawValue)==alarmInstanceOwnItem.getItemList().get(k).getValue()){
-									int alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel();
-									if(alarmLevel>0){
-										alarmInfo.append("{\"item\":\""+ddicColumnsList.get(j).replaceAll(" ", "")+"\",\"alarmLevel\":"+alarmLevel+"},");
+								String alarmValueMeaning="";
+								if(item.getMeaning()!=null && item.getMeaning().size()>0){
+									for(int l=0;l<item.getMeaning().size();l++){
+										if(alarmInstanceOwnItem.getItemList().get(k).getValue()==item.getMeaning().get(l).getValue()){
+											alarmValueMeaning=item.getMeaning().get(l).getMeaning();
+											break;
+										}
 									}
 								}
+									
+								alarmInfo.append("{\"item\":\""+ddicColumnsList.get(j).replaceAll(" ", "")+"\","
+										+ "\"itemName\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemName()+"\","
+										+ "\"itemAddr\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemAddr()+"\","
+										+ "\"alarmType\":\""+alarmType+"\","
+										+ "\"alarmValue\":\""+alarmInstanceOwnItem.getItemList().get(k).getValue()+"\","
+										+ "\"alarmValueMeaning\":\""+alarmValueMeaning+"\","
+										+ "\"alarmLevel\":"+alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel()+"},");
 							}else if(alarmType==0){//开关量报警
+								
 							}
 							
 						}
@@ -986,7 +1029,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				+ "t2.runstatus,decode(t2.commstatus,1,decode(t2.runstatus,1,'运行','停抽'),'离线') as runStatusName,"
 				+ prodCol+""
 				+ "averageWatt,waterPower,"
-				+ "systemEfficiency*100,energyper100mlift,pumpEff*100";
+				+ "systemEfficiency*100 as systemEfficiency,energyper100mlift,pumpEff*100 as pumpEff";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -1024,12 +1067,13 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			Object[] obj=(Object[]) list.get(i);
 			StringBuffer alarmInfo = new StringBuffer();
 			
-			int commAlarmLevel=0;
+			int commAlarmLevel=0,runAlarmLevel=0;
 			if(alarmInstanceOwnItem!=null){
 				for(int j=0;j<alarmInstanceOwnItem.itemList.size();j++){
 					if(alarmInstanceOwnItem.getItemList().get(j).getType()==3 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(obj[3]+"")){
 						commAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
-						break;
+					}else if(alarmInstanceOwnItem.getItemList().get(j).getType()==6 && alarmInstanceOwnItem.getItemList().get(j).getItemName().equalsIgnoreCase(obj[6]+"")){
+						runAlarmLevel=alarmInstanceOwnItem.getItemList().get(j).getAlarmLevel();
 					}
 				}
 			}
@@ -1043,6 +1087,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"acqTime\":\""+obj[4]+"\",");
 			result_json.append("\"runStatus\":"+obj[5]+",");
 			result_json.append("\"runStatusName\":\""+obj[6]+"\",");
+			result_json.append("\"runAlarmLevel\":"+runAlarmLevel+",");
 			result_json.append("\""+prodCol.split(",")[0]+"\":\""+obj[7]+"\",");
 			result_json.append("\""+prodCol.split(",")[1]+"\":\""+obj[8]+"\",");
 			result_json.append("\""+prodCol.split(",")[2]+"\":\""+obj[9]+"\",");
@@ -1057,6 +1102,34 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"details\":\"\",");
 			
 			alarmInfo.append("[");
+			//计算项报警判断
+			if(alarmInstanceOwnItem!=null){
+				for(int j=0;j<ddicColumns.length;j++){
+					String column=ddicColumns[j].trim();
+					String[] attr = column.split(" as ");
+					if (attr.length > 1) {
+						column=attr[attr.length-1];
+					}else{
+						if(column.indexOf(".") > 0){
+							column = column.substring(column.indexOf(".") + 1);
+						}
+					}
+					for(int k=0;k<alarmInstanceOwnItem.getItemList().size();k++){
+						if(alarmInstanceOwnItem.getItemList().get(k).getType()==5&&column.equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemCode())){
+							alarmInfo.append("{\"item\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemCode()+"\","
+									+ "\"itemName\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemName()+"\","
+									+ "\"itemAddr\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemAddr()+"\","
+									+ "\"alarmType\":\""+alarmInstanceOwnItem.getItemList().get(k).getType()+"\","
+									+ "\"upperLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+"\","
+									+ "\"lowerLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()+"\","
+									+ "\"hystersis\":\""+alarmInstanceOwnItem.getItemList().get(k).getHystersis()+"\","
+									+" \"alarmLevel\":"+alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel()+"},");
+							break;
+						}
+					}
+				}
+			}
+			
 			for(int j=0;j<ddicColumnsList.size();j++){
 				String rawValue=obj[16+j]+"";
 				String value=rawValue;
@@ -1084,25 +1157,36 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 					for(int k=0;k<alarmInstanceOwnItem.getItemList().size();k++){
 						int alarmType=alarmInstanceOwnItem.getItemList().get(k).getType();
 						if(alarmType<=2&&item.getTitle().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemName()) && item.getAddr()==alarmInstanceOwnItem.getItemList().get(k).getItemAddr()){
-							if(alarmType==2 && StringManagerUtils.isNotNull(rawValue)){//数据量报警
-								float hystersis=alarmInstanceOwnItem.getItemList().get(k).getHystersis();
-								if((StringManagerUtils.stringToFloat(rawValue)>alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+hystersis)
-										||(StringManagerUtils.stringToFloat(rawValue)<alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()-hystersis)
-										){
-									int alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel();
-									if(alarmLevel>0){
-										alarmInfo.append("{\"item\":\""+ddicColumnsList.get(j).replaceAll(" ", "")+"\",\"alarmLevel\":"+alarmLevel+"},");
-									}
-								}
+							if(alarmType==2){//数据量报警
+								alarmInfo.append("{\"item\":\""+ddicColumnsList.get(j).replaceAll(" ", "")+"\","
+										+ "\"itemName\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemName()+"\","
+										+ "\"itemAddr\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemAddr()+"\","
+										+ "\"alarmType\":\""+alarmType+"\","
+										+ "\"upperLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+"\","
+										+ "\"lowerLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()+"\","
+										+ "\"hystersis\":\""+alarmInstanceOwnItem.getItemList().get(k).getHystersis()+"\","
+										+" \"alarmLevel\":"+alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel()+"},");
 								break;
 							}else if(alarmType==1){//枚举量报警
-								if(StringManagerUtils.stringToInteger(rawValue)==alarmInstanceOwnItem.getItemList().get(k).getValue()){
-									int alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel();
-									if(alarmLevel>0){
-										alarmInfo.append("{\"item\":\""+ddicColumnsList.get(j).replaceAll(" ", "")+"\",\"alarmLevel\":"+alarmLevel+"},");
+								String alarmValueMeaning="";
+								if(item.getMeaning()!=null && item.getMeaning().size()>0){
+									for(int l=0;l<item.getMeaning().size();l++){
+										if(alarmInstanceOwnItem.getItemList().get(k).getValue()==item.getMeaning().get(l).getValue()){
+											alarmValueMeaning=item.getMeaning().get(l).getMeaning();
+											break;
+										}
 									}
 								}
+									
+								alarmInfo.append("{\"item\":\""+ddicColumnsList.get(j).replaceAll(" ", "")+"\","
+										+ "\"itemName\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemName()+"\","
+										+ "\"itemAddr\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemAddr()+"\","
+										+ "\"alarmType\":\""+alarmType+"\","
+										+ "\"alarmValue\":\""+alarmInstanceOwnItem.getItemList().get(k).getValue()+"\","
+										+ "\"alarmValueMeaning\":\""+alarmValueMeaning+"\","
+										+ "\"alarmLevel\":"+alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel()+"},");
 							}else if(alarmType==0){//开关量报警
+								
 							}
 							
 						}
@@ -1710,6 +1794,15 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 														alarmLevel=alarmInstanceOwnItem.getItemList().get(l).getAlarmLevel();
 													}
 												}
+											}else if(alarmType==5){//计算数据报警
+												if(finalProtocolItemResolutionDataList.get(index).getColumn().equals(alarmInstanceOwnItem.getItemList().get(l).getItemCode())){
+													if((StringManagerUtils.stringToFloat(rawValue)>upperLimit+hystersis)
+															||(StringManagerUtils.stringToFloat(rawValue)<lowerLimit-hystersis)
+															){
+														alarmLevel=alarmInstanceOwnItem.getItemList().get(l).getAlarmLevel();
+													}
+													break;
+												}
 											}
 										}
 									}
@@ -2253,10 +2346,12 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		List<?> list=this.findCallSql(sql);
 		ddic  = dataitemsInfoService.findTableSqlWhereByListFaceId("FESDiagramOverlay");
 		String columns = ddic.getTableHeader();
+		String[] ddicColumns=ddic.getSql().split(",");
 		dynSbf.append("{\"success\":true,\"totalCount\":" + list.size() + ",\"wellName\":\""+deviceName+"\",\"start_date\":\""+pager.getStart_date()+"\",\"end_date\":\""+pager.getEnd_date()+"\",\"columns\":"+columns+",\"totalRoot\":[");
 		if (list.size() > 0) {
 			for (int i = 0; i < list.size(); i++) {
 				Object[] obj = (Object[]) list.get(i);
+				StringBuffer alarmInfo = new StringBuffer();
 				String positionCurveData="",loadCurveData="",powerCurveData="",currentCurveData="";
 				int resultAlarmLevel=0;
 				String resultCode=obj[3]+"";
@@ -2309,8 +2404,44 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				dynSbf.append("\"positionCurveData\":\"" + positionCurveData + "\",");
 				dynSbf.append("\"loadCurveData\":\"" + loadCurveData + "\",");
 				dynSbf.append("\"powerCurveData\":\"" + powerCurveData + "\",");
-				dynSbf.append("\"currentCurveData\":\"" + currentCurveData + "\"},");
+				dynSbf.append("\"currentCurveData\":\"" + currentCurveData + "\",");
+				
+				//计算项报警判断
+				alarmInfo.append("[");
+				if(alarmInstanceOwnItem!=null){
+					for(int j=0;j<ddicColumns.length;j++){
+						String column=ddicColumns[j].trim();
+						String[] attr = column.split(" as ");
+						if (attr.length > 1) {
+							column=attr[attr.length-1];
+						}else{
+							if(column.indexOf(".") > 0){
+								column = column.substring(column.indexOf(".") + 1);
+							}
+						}
+						for(int k=0;k<alarmInstanceOwnItem.getItemList().size();k++){
+							if(alarmInstanceOwnItem.getItemList().get(k).getType()==5&&column.equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemCode())){
+								alarmInfo.append("{\"item\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemCode()+"\","
+										+ "\"itemName\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemName()+"\","
+										+ "\"itemAddr\":\""+alarmInstanceOwnItem.getItemList().get(k).getItemAddr()+"\","
+										+ "\"alarmType\":\""+alarmInstanceOwnItem.getItemList().get(k).getType()+"\","
+										+ "\"upperLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+"\","
+										+ "\"lowerLimit\":\""+alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()+"\","
+										+ "\"hystersis\":\""+alarmInstanceOwnItem.getItemList().get(k).getHystersis()+"\","
+										+" \"alarmLevel\":"+alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel()+"},");
+								break;
+							}
+						}
+					}
+				}
+				if(alarmInfo.toString().endsWith(",")){
+					alarmInfo.deleteCharAt(alarmInfo.length() - 1);
+				}
+				alarmInfo.append("]");
+				dynSbf.append("\"alarmInfo\":"+alarmInfo+"");
+				dynSbf.append("},");
 			}
+			
 			if(dynSbf.toString().endsWith(",")){
 				dynSbf.deleteCharAt(dynSbf.length() - 1);
 			}

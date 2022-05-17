@@ -17,10 +17,12 @@ import com.cosog.utils.Config;
 import com.cosog.utils.ConfigFile;
 import com.cosog.utils.DataModelMap;
 import com.cosog.utils.Page;
+import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
 import com.google.gson.Gson;
 
 import net.sf.json.JSONObject;
+import redis.clients.jedis.Jedis;
 
 /**
  * <p>
@@ -107,14 +109,25 @@ public class AlarmSetManagerService<T> extends BaseService<T> {
 	
 	@SuppressWarnings("unchecked")
 	public String getAlarmLevelColor(){
-		Map<String, Object> dataModelMap = DataModelMap.getMapObject();
-		AlarmShowStyle alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
-		String json="[]";
-		if(alarmShowStyle==null){
-			MemoryDataManagerTask.initAlarmStyle();
-			alarmShowStyle=(AlarmShowStyle) dataModelMap.get("AlarmShowStyle");
+		Jedis jedis = null;
+		AlarmShowStyle alarmShowStyle=null;
+		try{
+			jedis = new Jedis();
+			if(!jedis.exists("AlarmShowStyle".getBytes())){
+				MemoryDataManagerTask.initAlarmStyle();
+			}
+			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
+		}catch(Exception e){
+			e.printStackTrace();
 		}
-		json=new Gson().toJson(alarmShowStyle);
+		String json="{}";
+		if(alarmShowStyle!=null){
+			json=new Gson().toJson(alarmShowStyle);
+		}
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
+		}
 		return json;
 	}
 	

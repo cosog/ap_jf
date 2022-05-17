@@ -1463,7 +1463,7 @@ color16ToRgba = function(sColor,Opacity){
 	 	var commStatus=p.data.commStatus;
 	 	var tipval=val;
 	 	var alarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue());
-	 	var alarmLevel=p.data.commAlarmLevel;
+	 	var alarmLevel=p.data.commAlarmLevel==undefined?0:p.data.commAlarmLevel;
 	 	var backgroundColor='#FFFFFF';
 	 	var color='#000000';
 	 	var opacity=1;
@@ -1490,7 +1490,7 @@ color16ToRgba = function(sColor,Opacity){
 	 	var commStatus=p.data.commStatus;
 	 	var runStatus=p.data.runStatus;
 	 	var tipval=val;
-	 	var alarmLevel=p.data.runAlarmLevel;
+	 	var alarmLevel=p.data.runAlarmLevel==undefined?0:p.data.runAlarmLevel;
 	 	var alarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue());
 		if (commStatus == 0) {
 //			o.css='pendingColor';
@@ -1529,7 +1529,7 @@ color16ToRgba = function(sColor,Opacity){
  adviceResultStatusColor = function(val,o,p,e) {
 	 	var tipval=val;
 	 	var alarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue());
-	 	var alarmLevel=p.data.resultAlarmLevel;
+	 	var alarmLevel=p.data.resultAlarmLevel==undefined?0:p.data.resultAlarmLevel;
 	 	var backgroundColor='#FFFFFF';
 	 	var color='#000000';
 	 	var opacity=1;
@@ -1616,7 +1616,7 @@ color16ToRgba = function(sColor,Opacity){
 	    if (isNotVal(alarmInfo) && alarmInfo.length > 0) {
 	        for (var i = 0; i < alarmInfo.length; i++) {
 	            if (column.toUpperCase() == alarmInfo[i].item.toUpperCase()) {
-	                if(alarmInfo[i].alarmType==2){//数据量报警
+	                if(alarmInfo[i].alarmType==2 || alarmInfo[i].alarmType==5){//数据量报警
 	                	if(val!=undefined){
 	                		var backgroundColor = '#FFFFFF';
 	    	                var color = '#000000';

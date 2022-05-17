@@ -1009,6 +1009,22 @@ public class AcquisitionUnitManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/getModbusProtocolRunStatusAlarmItemsConfigData")
+	public String getModbusProtocolRunStatusAlarmItemsConfigData() throws Exception {
+		String protocolName = ParamUtils.getParameter(request, "protocolName");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String code = ParamUtils.getParameter(request, "code");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getModbusProtocolRunStatusAlarmItemsConfigData(protocolName,classes,code);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	@RequestMapping("/getProtocolDisplayUnitAcqItemsConfigData")
 	public String getProtocolDisplayUnitAcqItemsConfigData() throws Exception {
 		String protocolName = ParamUtils.getParameter(request, "protocolName");
@@ -1855,24 +1871,22 @@ public class AcquisitionUnitManagerController extends BaseController {
 								alarmUnitItem.setItemName(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getItemName());
 								alarmUnitItem.setItemCode(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getItemCode());
 								alarmUnitItem.setItemAddr(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getItemAddr());
-								alarmUnitItem.setType(modbusProtocolAlarmUnitSaveData.getResolutionMode());
+								alarmUnitItem.setType(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getType());
 								
-								if(modbusProtocolAlarmUnitSaveData.getResolutionMode()==0){
-									alarmUnitItem.setBitIndex(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getBitIndex());
-									alarmUnitItem.setValue(StringManagerUtils.stringToFloat(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getValue()));
-								}else if(modbusProtocolAlarmUnitSaveData.getResolutionMode()==1){
-									alarmUnitItem.setValue(StringManagerUtils.stringToFloat(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getValue()));
-								}else if(modbusProtocolAlarmUnitSaveData.getResolutionMode()==2){
-									if(StringManagerUtils.isNotNull(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getUpperLimit())){
-										alarmUnitItem.setUpperLimit(StringManagerUtils.stringToFloat(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getUpperLimit()));
-									}
-									if(StringManagerUtils.isNotNull(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getLowerLimit())){
-										alarmUnitItem.setLowerLimit(StringManagerUtils.stringToFloat(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getLowerLimit()));
-									}
-									if(StringManagerUtils.isNotNull(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getHystersis())){
-										alarmUnitItem.setHystersis(StringManagerUtils.stringToFloat(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getHystersis()));
-									}
+								alarmUnitItem.setBitIndex(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getBitIndex());
+								alarmUnitItem.setValue(StringManagerUtils.stringToFloat(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getValue()));
+								alarmUnitItem.setValue(StringManagerUtils.stringToFloat(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getValue()));
+								
+								if(StringManagerUtils.isNotNull(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getUpperLimit())){
+									alarmUnitItem.setUpperLimit(StringManagerUtils.stringToFloat(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getUpperLimit()));
 								}
+								if(StringManagerUtils.isNotNull(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getLowerLimit())){
+									alarmUnitItem.setLowerLimit(StringManagerUtils.stringToFloat(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getLowerLimit()));
+								}
+								if(StringManagerUtils.isNotNull(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getHystersis())){
+									alarmUnitItem.setHystersis(StringManagerUtils.stringToFloat(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getHystersis()));
+								}
+								
 								if(StringManagerUtils.isNotNull(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getDelay())){
 									alarmUnitItem.setDelay(StringManagerUtils.stringToInteger(modbusProtocolAlarmUnitSaveData.getAlarmItems().get(i).getDelay()));
 								}

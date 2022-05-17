@@ -56,7 +56,7 @@ public class EquipmentDriverServerTask {
 	}
 	
 	@SuppressWarnings({ "static-access", "unused" })
-//	@Scheduled(fixedRate = 1000*60*60*24*365*100)
+	@Scheduled(fixedRate = 1000*60*60*24*365*100)
 	public void driveServerTast() throws SQLException, ParseException,InterruptedException, IOException{
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
@@ -627,7 +627,7 @@ public class EquipmentDriverServerTask {
 		List<Integer> dataDictionaryItemsSortList=new ArrayList<Integer>();
 		String sql="select t1.dataitemid,t1.cname,t1.ename,t1.sorts "
 				+ " from tbl_dist_item t1 where t1.sysdataid=(select t2.sysdataid from tbl_dist_name t2 where t2.sysdataid='"+dataDictionaryId+"') "
-				+ " and UPPER(t1.cname) not in('序号','井名','通信状态','采集时间','设备类型')  "
+//				+ " and UPPER(t1.cname) not in('序号','井名','通信状态','采集时间','设备类型')  "
 				+ " order by t1.sorts";
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
@@ -641,10 +641,12 @@ public class EquipmentDriverServerTask {
 			rs=pstmt.executeQuery();
 			int maxSortNum=1;
 			while(rs.next()){
-				dataDictionaryItemsId.add(rs.getString(1));
-				dataDictionaryItemsName.add(rs.getString(2));
-				dataDictionaryItems.add(rs.getString(3));
-				dataDictionaryItemsSortList.add(rs.getInt(4));
+				if((!StringManagerUtils.databaseColumnFiter(rs.getString(3))) && rs.getString(3).toUpperCase().startsWith("C_")){
+					dataDictionaryItemsId.add(rs.getString(1));
+					dataDictionaryItemsName.add(rs.getString(2));
+					dataDictionaryItems.add(rs.getString(3));
+					dataDictionaryItemsSortList.add(rs.getInt(4));
+				}
 			}
 			
 			//删除协议中不存在的字典项

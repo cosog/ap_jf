@@ -556,7 +556,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				calItemSet= jedis.zrange("rpcCalItemList".getBytes(), 0, -1);
 			}else{
 				if(!jedis.exists("pcpCalItemList".getBytes())){
-					MemoryDataManagerTask.loadRPCCalculateItem();
+					MemoryDataManagerTask.loadPCPCalculateItem();
 				}
 				calItemSet= jedis.zrange("pcpCalItemList".getBytes(), 0, -1);
 			}
@@ -567,6 +567,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"单位\",\"dataIndex\":\"unit\",width:120 ,children:[] },"
 				+ "{ \"header\":\"上限\",\"dataIndex\":\"upperLimit\",width:80 ,children:[] },"
 				+ "{ \"header\":\"下限\",\"dataIndex\":\"lowerLimit\",width:80 ,children:[] },"
 				+ "{ \"header\":\"回差\",\"dataIndex\":\"hystersis\",width:80 ,children:[] },"
@@ -619,6 +620,7 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 					result_json.append("{\"checked\":"+checked+","
 							+ "\"id\":"+(index)+","
 							+ "\"title\":\""+calItem.getName()+"\","
+							+ "\"unit\":\""+calItem.getUnit()+"\","
 							+ "\"code\":\""+calItem.getCode()+"\","
 							+ "\"upperLimit\":\""+upperLimit+"\","
 							+ "\"lowerLimit\":\""+lowerLimit+"\","
@@ -853,6 +855,12 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		for(int i=0;i<commStatusItemsList.size();i++){
 			boolean checked=false;
 			String delay="",alarmLevel="",alarmSign="",isSendMessage="",isSendMail="";
+			String itemCode="online";
+			int value=1;
+			if("离线".equals(commStatusItemsList.get(i))){
+				itemCode="offline";
+				value=0;
+			}
 			if(StringManagerUtils.existOrNot(itemsList,commStatusItemsList.get(i),false)){
 				for(int j=0;j<list.size();j++){
 					Object[] obj = (Object[]) list.get(j);
@@ -870,6 +878,87 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 			result_json.append("{\"checked\":"+checked+","
 					+ "\"id\":"+(i+1)+","
 					+ "\"title\":\""+commStatusItemsList.get(i)+"\","
+					+ "\"code\":\""+itemCode+"\","
+					+ "\"value\":\""+value+"\","
+					+ "\"delay\":\""+delay+"\","
+					+ "\"alarmLevel\":\""+alarmLevel+"\","
+					+ "\"alarmSign\":\""+alarmSign+"\","
+					+ "\"isSendMessage\":\""+isSendMessage+"\","
+					+ "\"isSendMail\":\""+isSendMail+"\""
+					+ "},");
+		}
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		return result_json.toString();
+	}
+	
+	public String getModbusProtocolRunStatusAlarmItemsConfigData(String protocolName,String classes,String code){
+		StringBuffer result_json = new StringBuffer();
+		String columns = "["
+				+ "{ \"header\":\"\",\"dataIndex\":\"checked\",width:20 ,children:[] },"
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"延时(s)\",\"dataIndex\":\"delay\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警级别\",\"dataIndex\":\"alarmLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警使能\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送短信\",\"dataIndex\":\"isSendMessage\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送邮件\",\"dataIndex\":\"isSendMail\",width:80 ,children:[] }"
+				+ "]";
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		
+		List<String> itemsList=new ArrayList<String>();
+		List<String> runStatusItemsList=new ArrayList<String>();
+		runStatusItemsList.add("运行");
+		runStatusItemsList.add("停抽");
+		List<?> list=null;
+		if("3".equalsIgnoreCase(classes)){
+			String sql="select t.itemname,t.itemcode,t.delay,"
+					+ " t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') as alarmsign,"
+					+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_code t3  "
+					+ " where t.type=6 and t.unitid=t2.id and upper(t3.itemcode)=upper('BJJB') and t.alarmlevel=t3.itemvalue and t2.unit_code='"+code+"' "
+					+ " order by t.id";
+			list=this.findCallSql(sql);
+			for(int i=0;i<list.size();i++){
+				Object[] obj = (Object[]) list.get(i);
+				itemsList.add(obj[0]+"");
+			}
+		}
+		
+		
+		for(int i=0;i<runStatusItemsList.size();i++){
+			boolean checked=false;
+			String delay="",alarmLevel="",alarmSign="",isSendMessage="",isSendMail="";
+			String itemCode="run";
+			int value=1;
+			if("停抽".equals(runStatusItemsList.get(i))){
+				itemCode="stop";
+				value=0;
+			}
+			
+			if(StringManagerUtils.existOrNot(itemsList,runStatusItemsList.get(i),false)){
+				for(int j=0;j<list.size();j++){
+					Object[] obj = (Object[]) list.get(j);
+					if(runStatusItemsList.get(i).equalsIgnoreCase(obj[0]+"")){
+						checked=true;
+						delay=obj[2]+"";
+						alarmLevel=obj[3]+"";
+						alarmSign=obj[4]+"";
+						isSendMessage=obj[5]+"";
+						isSendMail=obj[6]+"";
+						break;
+					}
+				}
+			}
+			result_json.append("{\"checked\":"+checked+","
+					+ "\"id\":"+(i+1)+","
+					+ "\"title\":\""+runStatusItemsList.get(i)+"\","
+					+ "\"code\":\""+itemCode+"\","
+					+ "\"value\":\""+value+"\","
 					+ "\"delay\":\""+delay+"\","
 					+ "\"alarmLevel\":\""+alarmLevel+"\","
 					+ "\"alarmSign\":\""+alarmSign+"\","
@@ -3325,6 +3414,9 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 	
 	public void deleteCurrentAlarmUnitOwnItems(ModbusProtocolAlarmUnitSaveData modbusProtocolAlarmUnitSaveData) throws Exception {
 		String hql = "DELETE AlarmUnitItem u where u.unitId ="+modbusProtocolAlarmUnitSaveData.getId()+" and u.type="+modbusProtocolAlarmUnitSaveData.getResolutionMode();
+		if(modbusProtocolAlarmUnitSaveData.getResolutionMode()==2){
+			hql = "DELETE AlarmUnitItem u where u.unitId ="+modbusProtocolAlarmUnitSaveData.getId()+" and u.type in(2,5)";
+		}
 		if(modbusProtocolAlarmUnitSaveData.getResolutionMode()==0 || modbusProtocolAlarmUnitSaveData.getResolutionMode()==1 &&StringManagerUtils.isNotNull(modbusProtocolAlarmUnitSaveData.getAlarmItemName())){
 			hql+=" and u.itemName='"+modbusProtocolAlarmUnitSaveData.getAlarmItemName()+"' and u.itemAddr="+modbusProtocolAlarmUnitSaveData.getAlarmItemAddr();
 		}
