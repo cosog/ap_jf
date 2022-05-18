@@ -87,7 +87,7 @@ Ext.define('AP.store.alarmQuery.PCPSwitchingValueAlarmOverviewStore', {
                     deviceName:deviceName,
                     alarmLevel:alarmLevel,
                     isSendMessage:isSendMessage,
-                    alarmType:3
+                    alarmType:0
                 };
             Ext.apply(store.proxy.extraParams, new_params);
         },

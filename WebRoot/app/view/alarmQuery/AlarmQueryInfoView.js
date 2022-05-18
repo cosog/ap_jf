@@ -33,7 +33,21 @@ Ext.define("AP.view.alarmQuery.AlarmQueryInfoView", {
         					if(newCard.id=="RPCAlarmQueryPanel_Id"){
         						var secondTabPanel = Ext.getCmp("RPCAlarmQueryTabPanel");
         						var secondActiveId = secondTabPanel.getActiveTab().id;
-        						if(secondActiveId=="RPCCommunicationAlarmInfoPanel_Id"){
+        						if(secondActiveId=="RPCFESDiagramResultAlarmInfoPanel_Id"){
+        							var gridPanel = Ext.getCmp("RPCFESDiagramResultAlarmOverviewGridPanel_Id");
+        							if (isNotVal(gridPanel)) {
+        								gridPanel.getStore().load();
+        							}else{
+        								Ext.create('AP.store.alarmQuery.RPCFESDiagramResultAlarmOverviewStore');
+        							}
+        						}else if(secondActiveId=="RPCRunStatusAlarmInfoPanel_Id"){
+        							var gridPanel = Ext.getCmp("RPCRunStatusAlarmOverviewGridPanel_Id");
+        							if (isNotVal(gridPanel)) {
+        								gridPanel.getStore().load();
+        							}else{
+        								Ext.create('AP.store.alarmQuery.RPCRunStatusAlarmOverviewStore');
+        							}
+        						}else if(secondActiveId=="RPCCommunicationAlarmInfoPanel_Id"){
         							var gridPanel = Ext.getCmp("RPCCommunicationAlarmOverviewGridPanel_Id");
         							if (isNotVal(gridPanel)) {
         								gridPanel.getStore().load();
@@ -65,7 +79,14 @@ Ext.define("AP.view.alarmQuery.AlarmQueryInfoView", {
         					}else if(newCard.id=="PCPAlarmQueryPanel_Id"){
         						var secondTabPanel = Ext.getCmp("PCPAlarmQueryTabPanel");
         						var secondActiveId = secondTabPanel.getActiveTab().id;
-        						if(secondActiveId=="PCPCommunicationAlarmInfoPanel_Id"){
+        						if(secondActiveId=="PCPRunStatusAlarmInfoPanel_Id"){
+            						var gridPanel = Ext.getCmp("PCPRunStatusAlarmOverviewGridPanel_Id");
+            						if (isNotVal(gridPanel)) {
+            							gridPanel.getStore().load();
+            						}else{
+            							Ext.create('AP.store.alarmQuery.PCPRunStatusAlarmOverviewStore');
+            						}
+            					}else if(secondActiveId=="PCPCommunicationAlarmInfoPanel_Id"){
         							var gridPanel = Ext.getCmp("PCPCommunicationAlarmOverviewGridPanel_Id");
         							if (isNotVal(gridPanel)) {
         								gridPanel.getStore().load();

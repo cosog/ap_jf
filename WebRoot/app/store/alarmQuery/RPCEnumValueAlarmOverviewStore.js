@@ -87,7 +87,7 @@ Ext.define('AP.store.alarmQuery.RPCEnumValueAlarmOverviewStore', {
                     deviceName:deviceName,
                     alarmLevel:alarmLevel,
                     isSendMessage:isSendMessage,
-                    alarmType:2
+                    alarmType:1
                 };
             Ext.apply(store.proxy.extraParams, new_params);
         },

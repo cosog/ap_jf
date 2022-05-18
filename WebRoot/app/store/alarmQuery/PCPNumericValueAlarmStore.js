@@ -95,7 +95,7 @@ Ext.define('AP.store.alarmQuery.PCPNumericValueAlarmStore', {
                     isSendMessage:isSendMessage,
                     startDate:getDateAndTime(startDate,startTime_Hour,startTime_Minute,startTime_Second),
                     endDate:getDateAndTime(endDate,endTime_Hour,endTime_Minute,endTime_Second),
-                    alarmType:1
+                    alarmType:2
                 };
             Ext.apply(store.proxy.extraParams, new_params);
         },

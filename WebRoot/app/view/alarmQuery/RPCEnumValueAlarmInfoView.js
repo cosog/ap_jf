@@ -349,7 +349,7 @@ Ext.define('AP.view.alarmQuery.RPCEnumValueAlarmInfoView', {
                 	var deviceName=Ext.getCmp('RPCEnumValueAlarmDeviceListComb_Id').getValue();
                 	var alarmLevel=Ext.getCmp('RPCEnumValueAlarmLevelComb_Id').getValue();
                 	var isSendMessage=Ext.getCmp('RPCEnumValueAlarmIsSendMessageComb_Id').getValue();
-               	 	var alarmType=2;
+               	 	var alarmType=1;
                	 	
                	 	var fileName='抽油机枚举量报警设备列表';
                	 	var title='抽油机枚举量报警设备列表';
@@ -413,7 +413,7 @@ Ext.define('AP.view.alarmQuery.RPCEnumValueAlarmInfoView', {
                 	var isSendMessage=Ext.getCmp('RPCEnumValueAlarmIsSendMessageComb_Id').getValue();
                 	var startDate=Ext.getCmp('RPCEnumValueAlarmQueryStartDate_Id').rawValue;
                     var endDate=Ext.getCmp('RPCEnumValueAlarmQueryEndDate_Id').rawValue;
-               	 	var alarmType=2;
+               	 	var alarmType=1;
                	 	
                	 	var fileName='抽油机'+deviceName+'枚举量报警数据';
                	 	var title='抽油机'+deviceName+'枚举量报警数据';

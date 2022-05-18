@@ -30,12 +30,14 @@ public class AlarmQueryService<T> extends BaseService<T>  {
 	
 	public String getAlarmData(String orgId,String deviceType,String deviceId,String deviceName,String alarmType,String alarmLevel,String isSendMessage,Page pager) throws IOException, SQLException{
 		String ddicName="commStatusAlarm";
-		if(StringManagerUtils.stringToInteger(alarmType)==1){
-			ddicName="numericValueAlarm";
-		}else if(StringManagerUtils.stringToInteger(alarmType)==2){
-			ddicName="enumValueAlarm";
-		}else if(StringManagerUtils.stringToInteger(alarmType)==3){
+		if(StringManagerUtils.stringToInteger(alarmType)==0){
 			ddicName="switchingValueAlarm";
+		}else if(StringManagerUtils.stringToInteger(alarmType)==1){
+			ddicName="enumValueAlarm";
+		}else if(StringManagerUtils.stringToInteger(alarmType)==2){
+			ddicName="numericValueAlarm";
+		}else if(StringManagerUtils.stringToInteger(alarmType)==3){
+			ddicName="commStatusAlarm";
 		}
 		
 		String tableName="viw_rpcalarminfo_hist";
@@ -52,7 +54,11 @@ public class AlarmQueryService<T> extends BaseService<T>  {
 			sql+=" and t.wellid="+deviceId;
 		}
 		if(StringManagerUtils.isNotNull(alarmType)){
-			sql+=" and t.alarmType="+alarmType;
+			if(StringManagerUtils.stringToInteger(alarmType)==2){
+				sql+=" and t.alarmType=2 or t.alarmType=5";
+			}else {
+				sql+=" and t.alarmType="+alarmType;
+			}
 		}
 		if(StringManagerUtils.isNotNull(alarmLevel)){
 			sql+=" and t.alarmLevel="+alarmLevel;
@@ -70,12 +76,14 @@ public class AlarmQueryService<T> extends BaseService<T>  {
 	
 	public String getAlarmExportData(String orgId,String deviceType,String deviceId,String deviceName,String alarmType,String alarmLevel,String isSendMessage,Page pager) throws IOException, SQLException{
 		String ddicName="commStatusAlarm";
-		if(StringManagerUtils.stringToInteger(alarmType)==1){
-			ddicName="numericValueAlarm";
-		}else if(StringManagerUtils.stringToInteger(alarmType)==2){
-			ddicName="enumValueAlarm";
-		}else if(StringManagerUtils.stringToInteger(alarmType)==3){
+		if(StringManagerUtils.stringToInteger(alarmType)==0){
 			ddicName="switchingValueAlarm";
+		}else if(StringManagerUtils.stringToInteger(alarmType)==1){
+			ddicName="enumValueAlarm";
+		}else if(StringManagerUtils.stringToInteger(alarmType)==2){
+			ddicName="numericValueAlarm";
+		}else if(StringManagerUtils.stringToInteger(alarmType)==3){
+			ddicName="commStatusAlarm";
 		}
 		String tableName="viw_rpcalarminfo_hist";
 		if(StringManagerUtils.stringToInteger(deviceType)==1){
@@ -90,7 +98,11 @@ public class AlarmQueryService<T> extends BaseService<T>  {
 			sql+=" and t.wellid="+deviceId;
 		}
 		if(StringManagerUtils.isNotNull(alarmType)){
-			sql+=" and t.alarmType="+alarmType;
+			if(StringManagerUtils.stringToInteger(alarmType)==2){
+				sql+=" and t.alarmType=2 or t.alarmType=5";
+			}else {
+				sql+=" and t.alarmType="+alarmType;
+			}
 		}
 		if(StringManagerUtils.isNotNull(alarmLevel)){
 			sql+=" and t.alarmLevel="+alarmLevel;
@@ -129,7 +141,13 @@ public class AlarmQueryService<T> extends BaseService<T>  {
 			sql+=" and t.isSendMessage="+isSendMessage+"";
 		}
 		sql+= " group by t.orgid,t.wellid,t.wellname,c1.itemname,t.alarmtype) v "
-				+ " where v.orgid in("+orgId+") and v.alarmtype="+alarmType;
+				+ " where v.orgid in("+orgId+") ";
+		
+		if(StringManagerUtils.stringToInteger(alarmType)==2){
+			sql+=" and v.alarmType=2 or v.alarmType=5";
+		}else {
+			sql+= " and v.alarmtype="+alarmType;
+		}
 		
 		if(StringManagerUtils.isNotNull(deviceName)){
 			sql+=" and v.wellName='"+deviceName+"'";
@@ -176,7 +194,13 @@ public class AlarmQueryService<T> extends BaseService<T>  {
 			sql+=" and t.isSendMessage="+isSendMessage+"";
 		}
 		sql+= " group by t.orgid,t.wellid,t.wellname,c1.itemname,t.alarmtype) v "
-				+ " where v.orgid in("+orgId+") and v.alarmtype="+alarmType;
+				+ " where v.orgid in("+orgId+") ";
+		
+		if(StringManagerUtils.stringToInteger(alarmType)==2){
+			sql+=" and v.alarmType=2 or v.alarmType=5";
+		}else {
+			sql+= " and v.alarmtype="+alarmType;
+		}
 		
 		if(StringManagerUtils.isNotNull(deviceName)){
 			sql+=" and v.wellName='"+deviceName+"'";

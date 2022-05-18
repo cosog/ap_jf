@@ -1,6 +1,6 @@
-Ext.define('AP.store.alarmQuery.RPCNumericValueAlarmStore', {
+Ext.define('AP.store.alarmQuery.RPCFESDiagramResultAlarmStore', {
     extend: 'Ext.data.Store',
-    alias: 'widget.RPCNumericValueAlarmStore',
+    alias: 'widget.RPCFESDiagramResultAlarmStore',
     fields: ['id','deviceType','deviceTypeName','wellName','createTime','user_id','loginIp','action','actionName','remark'],
     autoLoad: true,
     pageSize: 50,
@@ -23,8 +23,8 @@ Ext.define('AP.store.alarmQuery.RPCNumericValueAlarmStore', {
             var get_rawData = store.proxy.reader.rawData;
             var arrColumns = get_rawData.columns;
             var column = createAlarmQueryColumn(arrColumns);
-            Ext.getCmp("RPCNumericValueAlarmDetailsColumnStr_Id").setValue(column);
-            var gridPanel = Ext.getCmp("RPCNumericValueAlarmGridPanel_Id");
+            Ext.getCmp("RPCFESDiagramResultAlarmDetailsColumnStr_Id").setValue(column);
+            var gridPanel = Ext.getCmp("RPCFESDiagramResultAlarmGridPanel_Id");
             if (!isNotVal(gridPanel)) {
                 var newColumns = Ext.JSON.decode(column);
                 var bbar = new Ext.PagingToolbar({
@@ -34,7 +34,7 @@ Ext.define('AP.store.alarmQuery.RPCNumericValueAlarmStore', {
     	        });
                 
                 gridPanel = Ext.create('Ext.grid.Panel', {
-                    id: "RPCNumericValueAlarmGridPanel_Id",
+                    id: "RPCFESDiagramResultAlarmGridPanel_Id",
                     border: false,
                     autoLoad: true,
                     bbar: bbar,
@@ -52,40 +52,40 @@ Ext.define('AP.store.alarmQuery.RPCNumericValueAlarmStore', {
                     	select: function(grid, record, index, eOpts) {}
                     }
                 });
-                var panel = Ext.getCmp("RPCNumericValueAlarmDetailsPanel_Id");
+                var panel = Ext.getCmp("RPCFESDiagramResultAlarmDetailsPanel_Id");
                 panel.add(gridPanel);
             }
             
-            var startDate=Ext.getCmp('RPCNumericValueAlarmQueryStartDate_Id');
+            var startDate=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartDate_Id');
             if(startDate.rawValue==''||null==startDate.rawValue){
             	startDate.setValue(get_rawData.start_date.split(' ')[0]);
-            	Ext.getCmp('RPCNumericValueAlarmQueryStartTime_Hour_Id').setValue(get_rawData.start_date.split(' ')[1].split(':')[0]);
-            	Ext.getCmp('RPCNumericValueAlarmQueryStartTime_Minute_Id').setValue(get_rawData.start_date.split(' ')[1].split(':')[1]);
-            	Ext.getCmp('RPCNumericValueAlarmQueryStartTime_Second_Id').setValue(get_rawData.start_date.split(' ')[1].split(':')[2]);
+            	Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Hour_Id').setValue(get_rawData.start_date.split(' ')[1].split(':')[0]);
+            	Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Minute_Id').setValue(get_rawData.start_date.split(' ')[1].split(':')[1]);
+            	Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Second_Id').setValue(get_rawData.start_date.split(' ')[1].split(':')[2]);
             }
-            var endDate=Ext.getCmp('RPCNumericValueAlarmQueryEndDate_Id');
+            var endDate=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndDate_Id');
             if(endDate.rawValue==''||null==endDate.rawValue){
             	endDate.setValue(get_rawData.end_date.split(' ')[0]);
-            	Ext.getCmp('RPCNumericValueAlarmQueryEndTime_Hour_Id').setValue(get_rawData.end_date.split(' ')[1].split(':')[0]);
-            	Ext.getCmp('RPCNumericValueAlarmQueryEndTime_Minute_Id').setValue(get_rawData.end_date.split(' ')[1].split(':')[1]);
-            	Ext.getCmp('RPCNumericValueAlarmQueryEndTime_Second_Id').setValue(get_rawData.end_date.split(' ')[1].split(':')[2]);
+            	Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Hour_Id').setValue(get_rawData.end_date.split(' ')[1].split(':')[0]);
+            	Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Minute_Id').setValue(get_rawData.end_date.split(' ')[1].split(':')[1]);
+            	Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Second_Id').setValue(get_rawData.end_date.split(' ')[1].split(':')[2]);
             }
         },
         beforeload: function (store, options) {
         	var orgId = Ext.getCmp('leftOrg_Id').getValue();
         	var deviceType=0;
-        	var deviceId  = Ext.getCmp("RPCNumericValueAlarmOverviewGridPanel_Id").getSelectionModel().getSelection()[0].data.id;
-        	var deviceName  = Ext.getCmp("RPCNumericValueAlarmOverviewGridPanel_Id").getSelectionModel().getSelection()[0].data.wellName;
-        	var alarmLevel=Ext.getCmp('RPCNumericValueAlarmLevelComb_Id').getValue();
-        	var isSendMessage=Ext.getCmp('RPCNumericValueAlarmIsSendMessageComb_Id').getValue();
-        	var startDate=Ext.getCmp('RPCNumericValueAlarmQueryStartDate_Id').rawValue;
-        	var startTime_Hour=Ext.getCmp('RPCNumericValueAlarmQueryStartTime_Hour_Id').getValue();
-        	var startTime_Minute=Ext.getCmp('RPCNumericValueAlarmQueryStartTime_Minute_Id').getValue();
-        	var startTime_Second=Ext.getCmp('RPCNumericValueAlarmQueryStartTime_Second_Id').getValue();
-            var endDate=Ext.getCmp('RPCNumericValueAlarmQueryEndDate_Id').rawValue;
-            var endTime_Hour=Ext.getCmp('RPCNumericValueAlarmQueryEndTime_Hour_Id').getValue();
-        	var endTime_Minute=Ext.getCmp('RPCNumericValueAlarmQueryEndTime_Minute_Id').getValue();
-        	var endTime_Second=Ext.getCmp('RPCNumericValueAlarmQueryEndTime_Second_Id').getValue();
+        	var deviceId  = Ext.getCmp("RPCFESDiagramResultAlarmOverviewGridPanel_Id").getSelectionModel().getSelection()[0].data.id;
+        	var deviceName  = Ext.getCmp("RPCFESDiagramResultAlarmOverviewGridPanel_Id").getSelectionModel().getSelection()[0].data.wellName;
+        	var alarmLevel=Ext.getCmp('RPCFESDiagramResultAlarmLevelComb_Id').getValue();
+        	var isSendMessage=Ext.getCmp('RPCFESDiagramResultAlarmIsSendMessageComb_Id').getValue();
+        	var startDate=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartDate_Id').rawValue;
+        	var startTime_Hour=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Hour_Id').getValue();
+        	var startTime_Minute=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Minute_Id').getValue();
+        	var startTime_Second=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Second_Id').getValue();
+            var endDate=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndDate_Id').rawValue;
+            var endTime_Hour=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Hour_Id').getValue();
+        	var endTime_Minute=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Minute_Id').getValue();
+        	var endTime_Second=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Second_Id').getValue();
             var new_params = {
                     orgId: orgId,
                     deviceType:deviceType,
@@ -95,7 +95,7 @@ Ext.define('AP.store.alarmQuery.RPCNumericValueAlarmStore', {
                     isSendMessage:isSendMessage,
                     startDate:getDateAndTime(startDate,startTime_Hour,startTime_Minute,startTime_Second),
                     endDate:getDateAndTime(endDate,endTime_Hour,endTime_Minute,endTime_Second),
-                    alarmType:2
+                    alarmType:4
                 };
             Ext.apply(store.proxy.extraParams, new_params);
         },

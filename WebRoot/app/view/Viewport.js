@@ -219,6 +219,7 @@ function websocketOnMessage(evt) {
 								}
 							}
 							record.set("commAlarmLevel",data.commAlarmLevel);
+							record.set("runAlarmLevel",data.runAlarmLevel);
 							record.set("resultAlarmLevel",data.resultAlarmLevel);
 							record.commit();
 							break;
@@ -373,6 +374,7 @@ function websocketOnMessage(evt) {
 								}
 							}
 							record.set("commAlarmLevel",data.commAlarmLevel);
+							record.set("runAlarmLevel",data.runAlarmLevel);
 							record.commit();
 							break;
 						}

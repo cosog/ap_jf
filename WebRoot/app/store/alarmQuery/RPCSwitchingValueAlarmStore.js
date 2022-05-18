@@ -95,7 +95,7 @@ Ext.define('AP.store.alarmQuery.RPCSwitchingValueAlarmStore', {
                     isSendMessage:isSendMessage,
                     startDate:getDateAndTime(startDate,startTime_Hour,startTime_Minute,startTime_Second),
                     endDate:getDateAndTime(endDate,endTime_Hour,endTime_Minute,endTime_Second),
-                    alarmType:3
+                    alarmType:0
                 };
             Ext.apply(store.proxy.extraParams, new_params);
         },

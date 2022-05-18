@@ -349,7 +349,7 @@ Ext.define('AP.view.alarmQuery.RPCSwitchingValueAlarmInfoView', {
                 	var deviceName=Ext.getCmp('RPCSwitchingValueAlarmDeviceListComb_Id').getValue();
                 	var alarmLevel=Ext.getCmp('RPCSwitchingValueAlarmLevelComb_Id').getValue();
                 	var isSendMessage=Ext.getCmp('RPCSwitchingValueAlarmIsSendMessageComb_Id').getValue();
-               	 	var alarmType=3;
+               	 	var alarmType=0;
                	 	
                	 	var fileName='抽油机开关量报警设备列表';
                	 	var title='抽油机开关量报警设备列表';
@@ -409,7 +409,7 @@ Ext.define('AP.view.alarmQuery.RPCSwitchingValueAlarmInfoView', {
                 	var isSendMessage=Ext.getCmp('RPCSwitchingValueAlarmIsSendMessageComb_Id').getValue();
                 	var startDate=Ext.getCmp('RPCSwitchingValueAlarmQueryStartDate_Id').rawValue;
                     var endDate=Ext.getCmp('RPCSwitchingValueAlarmQueryEndDate_Id').rawValue;
-               	 	var alarmType=3;
+               	 	var alarmType=0;
                	 	
                	 	var fileName='抽油机'+deviceName+'开关量报警数据';
                	 	var title='抽油机'+deviceName+'开关量报警数据';

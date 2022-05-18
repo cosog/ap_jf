@@ -1,8 +1,8 @@
-Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
+Ext.define('AP.view.alarmQuery.RPCFESDiagramResultAlarmInfoView', {
     extend: 'Ext.panel.Panel',
-    alias: 'widget.RPCCommunicationAlarmInfoView',
+    alias: 'widget.RPCFESDiagramResultAlarmInfoView',
     layout: "fit",
-    id: "RPCCommunicationAlarmInfoView_Id",
+    id: "RPCFESDiagramResultAlarmInfoView_Id",
     border: false,
     //forceFit : true,
     initComponent: function () {
@@ -31,7 +31,7 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
             listeners: {
                 beforeload: function (store, options) {
                 	var leftOrg_Id = Ext.getCmp('leftOrg_Id').getValue();
-                    var wellName = Ext.getCmp('RPCCommunicationAlarmDeviceListComb_Id').getValue();
+                    var wellName = Ext.getCmp('RPCFESDiagramResultAlarmDeviceListComb_Id').getValue();
                     var new_params = {
                         orgId: leftOrg_Id,
                         deviceType: 0,
@@ -45,7 +45,7 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
         var deviceCombo = Ext.create(
                 'Ext.form.field.ComboBox', {
                     fieldLabel: '井名',
-                    id: "RPCCommunicationAlarmDeviceListComb_Id",
+                    id: "RPCFESDiagramResultAlarmDeviceListComb_Id",
                     labelWidth: 35,
                     width: 145,
                     labelAlign: 'left',
@@ -66,29 +66,56 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
                             deviceCombo.getStore().loadPage(1); // 加载井下拉框的store
                         },
                         select: function (combo, record, index) {
-                        	Ext.getCmp("RPCCommunicationAlarmOverviewGridPanel_Id").getStore().loadPage(1);
+                        	Ext.getCmp("RPCFESDiagramResultAlarmOverviewGridPanel_Id").getStore().loadPage(1);
                         }
                     }
                 });
     	Ext.apply(this, {
     		layout: 'border',
     		tbar: [{
-                id: 'RPCCommunicationAlarmOverviewColumnStr_Id',
+                id: 'RPCFESDiagramResultAlarmOverviewColumnStr_Id',
                 xtype: 'textfield',
                 value: '',
                 hidden: true
             },{
-                id: 'RPCCommunicationAlarmDetailsColumnStr_Id',
+                id: 'RPCFESDiagramResultAlarmDetailsColumnStr_Id',
                 xtype: 'textfield',
                 value: '',
                 hidden: true
             },deviceCombo,'-',{
             	xtype : "combobox",
+				fieldLabel : '报警级别',
+				id : 'RPCFESDiagramResultAlarmLevelComb_Id',
+				labelWidth: 55,
+                width: 135,
+                labelAlign: 'left',
+				triggerAction : 'all',
+				displayField: "boxval",
+                valueField: "boxkey",
+				selectOnFocus : true,
+			    forceSelection : true,
+			    value:'',
+			    allowBlank: false,
+				editable : false,
+				emptyText: cosog.string.all,
+                blankText: cosog.string.all,
+				store : new Ext.data.SimpleStore({
+							fields : ['boxkey', 'boxval'],
+							data : [['', '选择全部'],[100, '一级报警'],[200, '二级报警'],[300, '三级报警']]
+						}),
+				queryMode : 'local',
+				listeners : {
+					select:function(v,o){
+						Ext.getCmp("RPCFESDiagramResultAlarmOverviewGridPanel_Id").getStore().loadPage(1);
+					}
+				}
+            },'-',{
+            	xtype : "combobox",
 				fieldLabel : '是否发送短信',
-				id : 'RPCCommunicationAlarmIsSendMessageComb_Id',
-				hidden: true,
+				id : 'RPCFESDiagramResultAlarmIsSendMessageComb_Id',
+				hidden: false,
 				labelWidth: 80,
-                width: 190,
+                width: 160,
                 labelAlign: 'left',
 				triggerAction : 'all',
 				displayField: "boxval",
@@ -107,7 +134,7 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
 				queryMode : 'local',
 				listeners : {
 					select:function(v,o){
-						Ext.getCmp("RPCCommunicationAlarmOverviewGridPanel_Id").getStore().loadPage(1);
+						Ext.getCmp("RPCFESDiagramResultAlarmOverviewGridPanel_Id").getStore().loadPage(1);
 					}
 				}
             },'-',{
@@ -118,14 +145,14 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
                 width: 125,
                 format: 'Y-m-d ',
                 value: '',
-                id: 'RPCCommunicationAlarmQueryStartDate_Id',
+                id: 'RPCFESDiagramResultAlarmQueryStartDate_Id',
                 listeners: {
                 	select: function (combo, record, index) {
                     }
                 }
             },{
             	xtype: 'numberfield',
-            	id: 'RPCCommunicationAlarmQueryStartTime_Hour_Id',
+            	id: 'RPCFESDiagramResultAlarmQueryStartTime_Hour_Id',
                 fieldLabel: '时',
                 labelWidth: 15,
                 width: 60,
@@ -146,7 +173,7 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
                 }
             },{
             	xtype: 'numberfield',
-            	id: 'RPCCommunicationAlarmQueryStartTime_Minute_Id',
+            	id: 'RPCFESDiagramResultAlarmQueryStartTime_Minute_Id',
                 fieldLabel: '分',
                 labelWidth: 15,
                 width: 60,
@@ -167,7 +194,7 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
                 }
             },{
             	xtype: 'numberfield',
-            	id: 'RPCCommunicationAlarmQueryStartTime_Second_Id',
+            	id: 'RPCFESDiagramResultAlarmQueryStartTime_Second_Id',
                 fieldLabel: '秒',
                 labelWidth: 15,
                 width: 60,
@@ -194,14 +221,14 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
                 width: 110,
                 format: 'Y-m-d ',
                 value: '',
-                id: 'RPCCommunicationAlarmQueryEndDate_Id',
+                id: 'RPCFESDiagramResultAlarmQueryEndDate_Id',
                 listeners: {
                 	select: function (combo, record, index) {
                     }
                 }
             },{
             	xtype: 'numberfield',
-            	id: 'RPCCommunicationAlarmQueryEndTime_Hour_Id',
+            	id: 'RPCFESDiagramResultAlarmQueryEndTime_Hour_Id',
                 fieldLabel: '时',
                 labelWidth: 15,
                 width: 60,
@@ -222,7 +249,7 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
                 }
             },{
             	xtype: 'numberfield',
-            	id: 'RPCCommunicationAlarmQueryEndTime_Minute_Id',
+            	id: 'RPCFESDiagramResultAlarmQueryEndTime_Minute_Id',
                 fieldLabel: '分',
                 labelWidth: 15,
                 width: 60,
@@ -243,7 +270,7 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
                 }
             },{
             	xtype: 'numberfield',
-            	id: 'RPCCommunicationAlarmQueryEndTime_Second_Id',
+            	id: 'RPCFESDiagramResultAlarmQueryEndTime_Second_Id',
                 fieldLabel: '秒',
                 labelWidth: 15,
                 width: 60,
@@ -269,44 +296,44 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
                 handler: function () {
                 	var r = /^(2[0-3]|[0-1]?\d|\*|-|\/)$/;
                 	var r2 = /^[1-5]?\d([\/-][1-5]?\d)?$/;
-                	var startTime_Hour=Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Hour_Id').getValue();
+                	var startTime_Hour=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Hour_Id').getValue();
                 	if(!r.test(startTime_Hour)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>小时为0~23之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Hour_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Hour_Id').focus(true, 100);
                 		return;
                 	}
-                	var startTime_Minute=Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Minute_Id').getValue();
+                	var startTime_Minute=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Minute_Id').getValue();
                 	if(!r2.test(startTime_Minute)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>分钟为0~59之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Minute_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Minute_Id').focus(true, 100);
                 		return;
                 	}
-                	var startTime_Second=Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Second_Id').getValue();
+                	var startTime_Second=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Second_Id').getValue();
                 	if(!r2.test(startTime_Second)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>秒为0~59之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Second_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Second_Id').focus(true, 100);
                 		return;
                 	}
                 	
-                	var endTime_Hour=Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Hour_Id').getValue();
+                	var endTime_Hour=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Hour_Id').getValue();
                 	if(!r.test(endTime_Hour)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>小时为0~23之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Hour_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Hour_Id').focus(true, 100);
                 		return;
                 	}
-                	var endTime_Minute=Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Minute_Id').getValue();
+                	var endTime_Minute=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Minute_Id').getValue();
                 	if(!r2.test(endTime_Minute)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>分钟为0~59之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Minute_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Minute_Id').focus(true, 100);
                 		return;
                 	}
-                	var endTime_Second=Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Second_Id').getValue();
+                	var endTime_Second=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Second_Id').getValue();
                 	if(!r2.test(endTime_Second)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>秒为0~59之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Second_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Second_Id').focus(true, 100);
                 		return;
                 	}
-                	var gridPanel = Ext.getCmp("RPCCommunicationAlarmGridPanel_Id");
+                	var gridPanel = Ext.getCmp("RPCFESDiagramResultAlarmGridPanel_Id");
                 	if (isNotVal(gridPanel)) {
                 		gridPanel.getStore().loadPage(1);
                 	}
@@ -319,14 +346,14 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
                 handler: function (v, o) {
                 	var orgId = Ext.getCmp('leftOrg_Id').getValue();
                 	var deviceType=0;
-                	var deviceName=Ext.getCmp('RPCCommunicationAlarmDeviceListComb_Id').getValue();
-                	var isSendMessage=Ext.getCmp('RPCCommunicationAlarmIsSendMessageComb_Id').getValue();
-                	var alarmType=3;
-               	 	var alarmLevel='';
+                	var deviceName=Ext.getCmp('RPCFESDiagramResultAlarmDeviceListComb_Id').getValue();
+                	var alarmLevel=Ext.getCmp('RPCFESDiagramResultAlarmLevelComb_Id').getValue();
+                	var isSendMessage=Ext.getCmp('RPCFESDiagramResultAlarmIsSendMessageComb_Id').getValue();
+                	var alarmType=4;
                	 	
-               	 	var fileName='抽油机通信报警设备列表';
-               	 	var title='抽油机通信报警设备列表';
-               	 	var columnStr=Ext.getCmp("RPCCommunicationAlarmOverviewColumnStr_Id").getValue();
+               	 	var fileName='抽油机报警设备列表';
+               	 	var title='抽油机报警设备列表';
+               	 	var columnStr=Ext.getCmp("RPCFESDiagramResultAlarmOverviewColumnStr_Id").getValue();
                	 	exportAlarmOverviewDataExcel(orgId,deviceType,deviceName,alarmType,alarmLevel,isSendMessage,fileName,title,columnStr);
                 }
             },'-', {
@@ -337,70 +364,70 @@ Ext.define('AP.view.alarmQuery.RPCCommunicationAlarmInfoView', {
                 handler: function (v, o) {
                 	var r = /^(2[0-3]|[0-1]?\d|\*|-|\/)$/;
                 	var r2 = /^[1-5]?\d([\/-][1-5]?\d)?$/;
-                	var startTime_Hour=Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Hour_Id').getValue();
+                	var startTime_Hour=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Hour_Id').getValue();
                 	if(!r.test(startTime_Hour)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>小时为0~23之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Hour_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Hour_Id').focus(true, 100);
                 		return;
                 	}
-                	var startTime_Minute=Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Minute_Id').getValue();
+                	var startTime_Minute=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Minute_Id').getValue();
                 	if(!r2.test(startTime_Minute)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>分钟为0~59之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Minute_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Minute_Id').focus(true, 100);
                 		return;
                 	}
-                	var startTime_Second=Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Second_Id').getValue();
+                	var startTime_Second=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Second_Id').getValue();
                 	if(!r2.test(startTime_Second)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>秒为0~59之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryStartTime_Second_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryStartTime_Second_Id').focus(true, 100);
                 		return;
                 	}
                 	
-                	var endTime_Hour=Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Hour_Id').getValue();
+                	var endTime_Hour=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Hour_Id').getValue();
                 	if(!r.test(endTime_Hour)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>小时为0~23之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Hour_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Hour_Id').focus(true, 100);
                 		return;
                 	}
-                	var endTime_Minute=Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Minute_Id').getValue();
+                	var endTime_Minute=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Minute_Id').getValue();
                 	if(!r2.test(endTime_Minute)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>分钟为0~59之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Minute_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Minute_Id').focus(true, 100);
                 		return;
                 	}
-                	var endTime_Second=Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Second_Id').getValue();
+                	var endTime_Second=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Second_Id').getValue();
                 	if(!r2.test(endTime_Second)){
                 		Ext.Msg.alert('消息', "<font color=red>数值无效！</font>秒为0~59之间的整数。");
-                		Ext.getCmp('RPCCommunicationAlarmQueryEndTime_Second_Id').focus(true, 100);
+                		Ext.getCmp('RPCFESDiagramResultAlarmQueryEndTime_Second_Id').focus(true, 100);
                 		return;
                 	}
                 	var orgId = Ext.getCmp('leftOrg_Id').getValue();
                 	var deviceType=0;
-                	var deviceName=Ext.getCmp("RPCCommunicationAlarmOverviewGridPanel_Id").getSelectionModel().getSelection()[0].data.wellName;
-                	var deviceId=  Ext.getCmp("RPCCommunicationAlarmOverviewGridPanel_Id").getSelectionModel().getSelection()[0].data.id;
-                	var isSendMessage=Ext.getCmp('RPCCommunicationAlarmIsSendMessageComb_Id').getValue();
-                	var startDate=Ext.getCmp('RPCCommunicationAlarmQueryStartDate_Id').rawValue;
-                    var endDate=Ext.getCmp('RPCCommunicationAlarmQueryEndDate_Id').rawValue;
-               	 	var alarmType=3;
-               	 	var alarmLevel='';
+                	var deviceName=Ext.getCmp("RPCFESDiagramResultAlarmOverviewGridPanel_Id").getSelectionModel().getSelection()[0].data.wellName;
+                	var alarmLevel=Ext.getCmp('RPCFESDiagramResultAlarmLevelComb_Id').getValue();
+                	var deviceId=  Ext.getCmp("RPCFESDiagramResultAlarmOverviewGridPanel_Id").getSelectionModel().getSelection()[0].data.id;
+                	var isSendMessage=Ext.getCmp('RPCFESDiagramResultAlarmIsSendMessageComb_Id').getValue();
+                	var startDate=Ext.getCmp('RPCFESDiagramResultAlarmQueryStartDate_Id').rawValue;
+                    var endDate=Ext.getCmp('RPCFESDiagramResultAlarmQueryEndDate_Id').rawValue;
+               	 	var alarmType=4;
                	 	
-               	 	var fileName='抽油机'+deviceName+'通信报警数据';
-               	 	var title='抽油机'+deviceName+'通信报警数据';
-               	 	var columnStr=Ext.getCmp("RPCCommunicationAlarmDetailsColumnStr_Id").getValue();
+               	 	var fileName='抽油机'+deviceName+'工况报警数据';
+               	 	var title='抽油机'+deviceName+'工况报警数据';
+               	 	var columnStr=Ext.getCmp("RPCFESDiagramResultAlarmDetailsColumnStr_Id").getValue();
                	 	exportAlarmDataExcel(orgId,deviceType,deviceId,deviceName,getDateAndTime(startDate,startTime_Hour,startTime_Minute,startTime_Second),getDateAndTime(endDate,endTime_Hour,endTime_Minute,endTime_Second),alarmType,alarmLevel,isSendMessage,fileName,title,columnStr);
                 }
             }],
             items: [{
     			region: 'center',
     			title: '设备列表',
-    			id: 'RPCCommunicationAlarmOverviewPanel_Id',
+    			id: 'RPCFESDiagramResultAlarmOverviewPanel_Id',
     			autoScroll: true,
                 scrollable: true,
     			layout: 'fit'
     		},{
     			region: 'east',
     			title: '报警数据',
-    			id: 'RPCCommunicationAlarmDetailsPanel_Id',
+    			id: 'RPCFESDiagramResultAlarmDetailsPanel_Id',
                 width: '70%',
                 autoScroll: true,
                 split: true,

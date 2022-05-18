@@ -87,7 +87,7 @@ Ext.define('AP.store.alarmQuery.PCPNumericValueAlarmOverviewStore', {
                     deviceName:deviceName,
                     alarmLevel:alarmLevel,
                     isSendMessage:isSendMessage,
-                    alarmType:1
+                    alarmType:2
                 };
             Ext.apply(store.proxy.extraParams, new_params);
         },
