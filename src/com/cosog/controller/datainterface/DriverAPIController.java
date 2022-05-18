@@ -1,29 +1,12 @@
 package com.cosog.controller.datainterface;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import javax.servlet.ServletInputStream;
 
@@ -33,11 +16,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.socket.TextMessage;
 
 import com.cosog.controller.base.BaseController;
 import com.cosog.model.AlarmShowStyle;
-import com.cosog.model.CommStatus;
 import com.cosog.model.DataMapping;
 import com.cosog.model.WorkType;
 import com.cosog.model.calculate.AcqInstanceOwnItem;
@@ -52,31 +33,20 @@ import com.cosog.model.calculate.RPCCalculateRequestData;
 import com.cosog.model.calculate.RPCCalculateResponseData;
 import com.cosog.model.calculate.RPCDeviceInfo;
 import com.cosog.model.calculate.TimeEffResponseData;
-import com.cosog.model.calculate.TimeEffTotalResponseData;
 import com.cosog.model.calculate.TotalAnalysisResponseData;
-import com.cosog.model.calculate.TotalCalculateResponseData;
 import com.cosog.model.calculate.UserInfo;
-import com.cosog.model.calculate.WellAcquisitionData;
 import com.cosog.model.drive.AcqGroup;
 import com.cosog.model.drive.AcqOnline;
-import com.cosog.model.drive.AcquisitionGroupResolutionData;
 import com.cosog.model.drive.AcquisitionItemInfo;
 import com.cosog.model.drive.ModbusProtocolConfig;
-import com.cosog.model.drive.ModbusProtocolConfig.Items;
 import com.cosog.service.base.CommonDataService;
 import com.cosog.service.datainterface.CalculateDataService;
 import com.cosog.task.EquipmentDriverServerTask;
 import com.cosog.task.MemoryDataManagerTask;
-import com.cosog.task.MemoryDataManagerTask.CalItem;
 import com.cosog.utils.AcquisitionItemColumnsMap;
 import com.cosog.utils.AlarmInfoMap;
 import com.cosog.utils.CalculateUtils;
 import com.cosog.utils.Config;
-import com.cosog.utils.Constants;
-import com.cosog.utils.DataModelMap;
-import com.cosog.utils.EquipmentDriveMap;
-import com.cosog.utils.OracleJdbcUtis;
-import com.cosog.utils.ParamUtils;
 import com.cosog.utils.ProtocolItemResolutionData;
 import com.cosog.utils.SerializeObjectUnils;
 import com.cosog.utils.StringManagerUtils;
@@ -84,9 +54,6 @@ import com.cosog.websocket.config.WebSocketByJavax;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import jxl.DateCell;
-import jxl.Sheet;
-import jxl.Workbook;
 import redis.clients.jedis.Jedis;
 
 @Controller
@@ -491,7 +458,7 @@ public class DriverAPIController extends BaseController{
 							}
 						}
 						commAlarm="insert into "+alarmTableName+" (wellid,alarmtime,itemname,alarmtype,alarmvalue,alarminfo,alarmlevel)"
-								+ "values("+deviceId+",to_date('"+currentTime+"','yyyy-mm-dd hh24:mi:ss'),'通信状态',0,"+(acqOnline.getStatus()?1:0)+",'"+alarmInfo+"',"+commAlarmLevel+")";
+								+ "values("+deviceId+",to_date('"+currentTime+"','yyyy-mm-dd hh24:mi:ss'),'通信状态',3,"+(acqOnline.getStatus()?1:0)+",'"+alarmInfo+"',"+commAlarmLevel+")";
 						String alarmSMSContent="设备"+wellName+"于"+currentTime+"离线";
 						
 						String lastAlarmTime=alarmInfoMap.get(key);
@@ -1056,6 +1023,7 @@ public class DriverAPIController extends BaseController{
 				//通信
 				rpcDeviceInfo.setAcqTime(acqTime);
 				rpcDeviceInfo.setCommStatus(1);
+				calItemResolutionDataList.add(new ProtocolItemResolutionData("通信状态","通信状态","在线","1","","commStatusName","","","","",1));
 				if(commResponseData!=null&&commResponseData.getResultStatus()==1){
 					updateRealtimeData+=",t.commTimeEfficiency= "+commResponseData.getCurrent().getCommEfficiency().getEfficiency()
 							+ " ,t.commTime= "+commResponseData.getCurrent().getCommEfficiency().getTime();
@@ -1068,6 +1036,10 @@ public class DriverAPIController extends BaseController{
 					rpcDeviceInfo.setCommTime(commResponseData.getCurrent().getCommEfficiency().getTime());
 					rpcDeviceInfo.setCommEff(commResponseData.getCurrent().getCommEfficiency().getEfficiency());
 					rpcDeviceInfo.setCommRange(commResponseData.getCurrent().getCommEfficiency().getRangeString());
+					
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("通信时间","通信时间",commResponseData.getCurrent().getCommEfficiency().getTime()+"",commResponseData.getCurrent().getCommEfficiency().getTime()+"","","commTime","","","","",1));
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("通信时率","通信时率",commResponseData.getCurrent().getCommEfficiency().getEfficiency()+"",commResponseData.getCurrent().getCommEfficiency().getEfficiency()+"","","commtimeEfficiency","","","","",1));
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("通信区间","通信区间",commResponseData.getCurrent().getCommEfficiency().getRangeString(),commResponseData.getCurrent().getCommEfficiency().getRangeString(),"","commRange","","","","",1));
 				}
 				//如果进行了时率计算
 				if(isAcqRunStatus){
@@ -1077,6 +1049,8 @@ public class DriverAPIController extends BaseController{
 					updateTotalDataSql+=",t.runStatus= "+runStatus;
 					
 					rpcDeviceInfo.setRunStatus(runStatus);
+					
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("运行状态","运行状态",runStatus==1?"运行":"停抽",runStatus+"","","runStatusName","","","","",1));
 				}
 				if(timeEffResponseData!=null && timeEffResponseData.getResultStatus()==1){
 					updateRealtimeData+=",t.runTimeEfficiency= "+timeEffResponseData.getCurrent().getRunEfficiency().getEfficiency()
@@ -1089,6 +1063,10 @@ public class DriverAPIController extends BaseController{
 					rpcDeviceInfo.setRunTime(timeEffResponseData.getCurrent().getRunEfficiency().getTime());
 					rpcDeviceInfo.setRunEff(timeEffResponseData.getCurrent().getRunEfficiency().getEfficiency());
 					rpcDeviceInfo.setRunRange(timeEffResponseData.getCurrent().getRunEfficiency().getRangeString());
+					
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("运行时间","运行时间",timeEffResponseData.getCurrent().getRunEfficiency().getTime()+"",timeEffResponseData.getCurrent().getRunEfficiency().getTime()+"","","runTime","","","","",1));
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("运行时率","运行时率",timeEffResponseData.getCurrent().getRunEfficiency().getEfficiency()+"",timeEffResponseData.getCurrent().getRunEfficiency().getEfficiency()+"","","runtimeEfficiency","","","","",1));
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("运行区间","运行区间",timeEffResponseData.getCurrent().getRunEfficiency().getRangeString(),timeEffResponseData.getCurrent().getRunEfficiency().getRangeString(),"","runRange","","","","",1));
 				}
 				//如果进行了功耗计算
 				if(isAcqEnergy){
@@ -1098,6 +1076,7 @@ public class DriverAPIController extends BaseController{
 					updateTotalDataSql+=",t.totalKWattH= "+totalKWattH;
 					
 					rpcDeviceInfo.setTotalKWattH(totalKWattH);
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("累计用电量","累计用电量",totalKWattH+"",totalKWattH+"","","totalKWattH","","","","",1));
 				}
 				
 				if(energyCalculateResponseData!=null&&energyCalculateResponseData.getResultStatus()==1){
@@ -1107,6 +1086,7 @@ public class DriverAPIController extends BaseController{
 					updateTotalDataSql+=",t.todayKWattH="+energyCalculateResponseData.getCurrent().getToday().getKWattH();
 					
 					rpcDeviceInfo.setTodayKWattH(energyCalculateResponseData.getCurrent().getToday().getKWattH());
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("日用电量","日用电量",energyCalculateResponseData.getCurrent().getToday().getKWattH()+"",energyCalculateResponseData.getCurrent().getToday().getKWattH()+"","","todayKWattH","","","","",1));
 				}
 				
 				//同时进行了时率计算和功图计算，则进行功图汇总计算
@@ -1130,13 +1110,15 @@ public class DriverAPIController extends BaseController{
 				//排序
 				Collections.sort(protocolItemResolutionDataList);
 				//报警判断
-				int commAlarmLevel=0,resultAlarmLevel=0;
+				int commAlarmLevel=0,resultAlarmLevel=0,runAlarmLevel=0;
 				if(alarmInstanceOwnItem!=null){
 					for(int i=0;i<alarmInstanceOwnItem.itemList.size();i++){
 						if(alarmInstanceOwnItem.getItemList().get(i).getType()==3 && alarmInstanceOwnItem.getItemList().get(i).getItemName().equalsIgnoreCase("在线")){
 							commAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
 						}else if(workType!=null&&alarmInstanceOwnItem.getItemList().get(i).getType()==4 && alarmInstanceOwnItem.getItemList().get(i).getItemCode().equalsIgnoreCase(workType.getResultCode()+"")){
 							resultAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
+						}else if(isAcqRunStatus&&alarmInstanceOwnItem.getItemList().get(i).getType()==6 && alarmInstanceOwnItem.getItemList().get(i).getItemName().equalsIgnoreCase(runStatus==1?"运行":"停抽")){
+							runAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
 						}
 					}
 				}
@@ -1166,7 +1148,7 @@ public class DriverAPIController extends BaseController{
 									acquisitionItemInfo.setHystersis(hystersis);
 									acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(l).getUpperLimit());
 									acquisitionItemInfo.setAlarmInfo("高报");
-									acquisitionItemInfo.setAlarmType(1);
+									acquisitionItemInfo.setAlarmType(2);
 									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(l).getDelay());
 									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(l).getIsSendMessage());
 									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(l).getIsSendMail());
@@ -1176,7 +1158,7 @@ public class DriverAPIController extends BaseController{
 									acquisitionItemInfo.setHystersis(hystersis);
 									acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(l).getLowerLimit());
 									acquisitionItemInfo.setAlarmInfo("低报");
-									acquisitionItemInfo.setAlarmType(1);
+									acquisitionItemInfo.setAlarmType(2);
 									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(l).getDelay());
 									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(l).getIsSendMessage());
 									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(l).getIsSendMail());
@@ -1188,7 +1170,7 @@ public class DriverAPIController extends BaseController{
 										alarmLevel=alarmInstanceOwnItem.getItemList().get(l).getAlarmLevel();
 										acquisitionItemInfo.setAlarmLevel(alarmLevel);
 										acquisitionItemInfo.setAlarmInfo(acquisitionItemInfo.getValue());
-										acquisitionItemInfo.setAlarmType(3);
+										acquisitionItemInfo.setAlarmType(0);
 										acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(l).getDelay());
 										acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(l).getIsSendMessage());
 										acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(l).getIsSendMail());
@@ -1199,7 +1181,7 @@ public class DriverAPIController extends BaseController{
 									alarmLevel=alarmInstanceOwnItem.getItemList().get(l).getAlarmLevel();
 									acquisitionItemInfo.setAlarmLevel(alarmLevel);
 									acquisitionItemInfo.setAlarmInfo(acquisitionItemInfo.getValue());
-									acquisitionItemInfo.setAlarmType(2);
+									acquisitionItemInfo.setAlarmType(1);
 									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(l).getDelay());
 									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(l).getIsSendMessage());
 									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(l).getIsSendMail());
@@ -1253,7 +1235,7 @@ public class DriverAPIController extends BaseController{
 								acquisitionItemInfo.setHystersis(hystersis);
 								acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getUpperLimit());
 								acquisitionItemInfo.setAlarmInfo("高报");
-								acquisitionItemInfo.setAlarmType(1);
+								acquisitionItemInfo.setAlarmType(5);
 								acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
 								acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
 								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
@@ -1263,7 +1245,7 @@ public class DriverAPIController extends BaseController{
 								acquisitionItemInfo.setHystersis(hystersis);
 								acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getLowerLimit());
 								acquisitionItemInfo.setAlarmInfo("低报");
-								acquisitionItemInfo.setAlarmType(1);
+								acquisitionItemInfo.setAlarmType(5);
 								acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
 								acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
 								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
@@ -1451,6 +1433,7 @@ public class DriverAPIController extends BaseController{
 							
 							webSocketSendData.append("{ \"success\":true,\"functionCode\":\""+functionCode+"\",\"wellName\":\""+rpcDeviceInfo.getWellName()+"\",\"acqTime\":\""+acqTime+"\",\"columns\":"+columns+",");
 							webSocketSendData.append("\"commAlarmLevel\":"+commAlarmLevel+",");
+							webSocketSendData.append("\"runAlarmLevel\":"+runAlarmLevel+",");
 							webSocketSendData.append("\"resultAlarmLevel\":"+resultAlarmLevel+",");
 							webSocketSendData.append("\"totalRoot\":[");
 							info_json.append("[");
@@ -1470,10 +1453,6 @@ public class DriverAPIController extends BaseController{
 										}
 									}
 								}
-								
-								
-								
-								
 							}
 							
 							//排序
@@ -1919,8 +1898,6 @@ public class DriverAPIController extends BaseController{
 					type = new TypeToken<PCPCalculateResponseData>() {}.getType();
 					pcpCalculateResponseData=gson.fromJson(responseDataStr, type);
 					if(pcpCalculateResponseData!=null&&pcpCalculateResponseData.getCalculationStatus().getResultStatus()==1){
-						
-
 						//删除非当天采集的转速数据
 						Iterator<PCPCalculateResponseData> it = pcpDeviceInfo.getPCPCalculateList().iterator();
 						while(it.hasNext()){
@@ -1936,9 +1913,10 @@ public class DriverAPIController extends BaseController{
 				
 				List<ProtocolItemResolutionData> calItemResolutionDataList=getRPMCalItemData(pcpCalculateRequestData,pcpCalculateResponseData);
 				
-				//更新内存数据
+				//通信
 				pcpDeviceInfo.setAcqTime(acqTime);
 				pcpDeviceInfo.setCommStatus(1);
+				calItemResolutionDataList.add(new ProtocolItemResolutionData("通信状态","通信状态","在线","1","","commStatusName","","","","",1));
 				if(commResponseData!=null&&commResponseData.getResultStatus()==1){
 					updateRealtimeData+=",t.commTimeEfficiency= "+commResponseData.getCurrent().getCommEfficiency().getEfficiency()
 							+ " ,t.commTime= "+commResponseData.getCurrent().getCommEfficiency().getTime();
@@ -1951,6 +1929,10 @@ public class DriverAPIController extends BaseController{
 					pcpDeviceInfo.setCommTime(commResponseData.getCurrent().getCommEfficiency().getTime());
 					pcpDeviceInfo.setCommEff(commResponseData.getCurrent().getCommEfficiency().getEfficiency());
 					pcpDeviceInfo.setCommRange(commResponseData.getCurrent().getCommEfficiency().getRangeString());
+					
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("通信时间","通信时间",commResponseData.getCurrent().getCommEfficiency().getTime()+"",commResponseData.getCurrent().getCommEfficiency().getTime()+"","","commTime","","","","",1));
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("通信时率","通信时率",commResponseData.getCurrent().getCommEfficiency().getEfficiency()+"",commResponseData.getCurrent().getCommEfficiency().getEfficiency()+"","","commtimeEfficiency","","","","",1));
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("通信区间","通信区间",commResponseData.getCurrent().getCommEfficiency().getRangeString(),commResponseData.getCurrent().getCommEfficiency().getRangeString(),"","commRange","","","","",1));
 				}
 				//如果进行了时率计算
 				if(isAcqRunStatus){
@@ -1960,6 +1942,8 @@ public class DriverAPIController extends BaseController{
 					updateTotalDataSql+=",t.runStatus= "+runStatus;
 					
 					pcpDeviceInfo.setRunStatus(runStatus);
+					
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("运行状态","运行状态",runStatus==1?"运行":"停抽",runStatus+"","","runStatusName","","","","",1));
 				}
 				if(timeEffResponseData!=null && timeEffResponseData.getResultStatus()==1){
 					updateRealtimeData+=",t.runTimeEfficiency= "+timeEffResponseData.getCurrent().getRunEfficiency().getEfficiency()
@@ -1972,6 +1956,10 @@ public class DriverAPIController extends BaseController{
 					pcpDeviceInfo.setRunTime(timeEffResponseData.getCurrent().getRunEfficiency().getTime());
 					pcpDeviceInfo.setRunEff(timeEffResponseData.getCurrent().getRunEfficiency().getEfficiency());
 					pcpDeviceInfo.setRunRange(timeEffResponseData.getCurrent().getRunEfficiency().getRangeString());
+					
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("运行时间","运行时间",timeEffResponseData.getCurrent().getRunEfficiency().getTime()+"",timeEffResponseData.getCurrent().getRunEfficiency().getTime()+"","","runTime","","","","",1));
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("运行时率","运行时率",timeEffResponseData.getCurrent().getRunEfficiency().getEfficiency()+"",timeEffResponseData.getCurrent().getRunEfficiency().getEfficiency()+"","","runtimeEfficiency","","","","",1));
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("运行区间","运行区间",timeEffResponseData.getCurrent().getRunEfficiency().getRangeString(),timeEffResponseData.getCurrent().getRunEfficiency().getRangeString(),"","runRange","","","","",1));
 				}
 				//如果进行了功耗计算
 				if(isAcqEnergy){
@@ -1981,6 +1969,7 @@ public class DriverAPIController extends BaseController{
 					updateTotalDataSql+=",t.totalKWattH= "+totalKWattH;
 					
 					pcpDeviceInfo.setTotalKWattH(totalKWattH);
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("累计用电量","累计用电量",totalKWattH+"",totalKWattH+"","","totalKWattH","","","","",1));
 				}
 				
 				if(energyCalculateResponseData!=null&&energyCalculateResponseData.getResultStatus()==1){
@@ -1990,6 +1979,7 @@ public class DriverAPIController extends BaseController{
 					updateTotalDataSql+=",t.todayKWattH="+energyCalculateResponseData.getCurrent().getToday().getKWattH();
 					
 					pcpDeviceInfo.setTodayKWattH(energyCalculateResponseData.getCurrent().getToday().getKWattH());
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("日用电量","日用电量",energyCalculateResponseData.getCurrent().getToday().getKWattH()+"",energyCalculateResponseData.getCurrent().getToday().getKWattH()+"","","todayKWattH","","","","",1));
 				}
 				
 				//同时进行了时率计算和功图计算，则进行功图汇总计算
@@ -2013,12 +2003,13 @@ public class DriverAPIController extends BaseController{
 				//排序
 				Collections.sort(protocolItemResolutionDataList);
 				//报警判断
-				int commAlarmLevel=0;
+				int commAlarmLevel=0,runAlarmLevel=0;
 				if(alarmInstanceOwnItem!=null){
 					for(int i=0;i<alarmInstanceOwnItem.itemList.size();i++){
 						if(alarmInstanceOwnItem.getItemList().get(i).getType()==3 && alarmInstanceOwnItem.getItemList().get(i).getItemName().equalsIgnoreCase("在线")){
 							commAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
-							break;
+						}else if(isAcqRunStatus&&alarmInstanceOwnItem.getItemList().get(i).getType()==6 && alarmInstanceOwnItem.getItemList().get(i).getItemName().equalsIgnoreCase(runStatus==1?"运行":"停抽")){
+							runAlarmLevel=alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel();
 						}
 					}
 				}
@@ -2048,7 +2039,7 @@ public class DriverAPIController extends BaseController{
 									acquisitionItemInfo.setHystersis(hystersis);
 									acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(l).getUpperLimit());
 									acquisitionItemInfo.setAlarmInfo("高报");
-									acquisitionItemInfo.setAlarmType(1);
+									acquisitionItemInfo.setAlarmType(2);
 									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(l).getDelay());
 									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(l).getIsSendMessage());
 									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(l).getIsSendMail());
@@ -2058,7 +2049,7 @@ public class DriverAPIController extends BaseController{
 									acquisitionItemInfo.setHystersis(hystersis);
 									acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(l).getLowerLimit());
 									acquisitionItemInfo.setAlarmInfo("低报");
-									acquisitionItemInfo.setAlarmType(1);
+									acquisitionItemInfo.setAlarmType(2);
 									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(l).getDelay());
 									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(l).getIsSendMessage());
 									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(l).getIsSendMail());
@@ -2070,7 +2061,7 @@ public class DriverAPIController extends BaseController{
 										alarmLevel=alarmInstanceOwnItem.getItemList().get(l).getAlarmSign()>0?alarmInstanceOwnItem.getItemList().get(l).getAlarmLevel():0;
 										acquisitionItemInfo.setAlarmLevel(alarmLevel);
 										acquisitionItemInfo.setAlarmInfo(acquisitionItemInfo.getValue());
-										acquisitionItemInfo.setAlarmType(3);
+										acquisitionItemInfo.setAlarmType(0);
 										acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(l).getDelay());
 										acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(l).getIsSendMessage());
 										acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(l).getIsSendMail());
@@ -2081,7 +2072,7 @@ public class DriverAPIController extends BaseController{
 									alarmLevel=alarmInstanceOwnItem.getItemList().get(l).getAlarmSign()>0?alarmInstanceOwnItem.getItemList().get(l).getAlarmLevel():0;
 									acquisitionItemInfo.setAlarmLevel(alarmLevel);
 									acquisitionItemInfo.setAlarmInfo(acquisitionItemInfo.getValue());
-									acquisitionItemInfo.setAlarmType(2);
+									acquisitionItemInfo.setAlarmType(1);
 									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(l).getDelay());
 									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(l).getIsSendMessage());
 									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(l).getIsSendMail());
@@ -2111,6 +2102,35 @@ public class DriverAPIController extends BaseController{
 					acquisitionItemInfo.setUnit(calItemResolutionDataList.get(i).getUnit());
 					acquisitionItemInfo.setSort(calItemResolutionDataList.get(i).getSort());
 
+					for(int k=0;alarmInstanceOwnItem!=null&&k<alarmInstanceOwnItem.getItemList().size();k++){
+						if(alarmInstanceOwnItem.getItemList().get(k).getType()==5&&calItemResolutionDataList.get(i).getColumn().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemCode())){
+							float hystersis=alarmInstanceOwnItem.getItemList().get(k).getHystersis();
+							if(StringManagerUtils.isNotNull(alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+"") && StringManagerUtils.stringToFloat(acquisitionItemInfo.getRawValue())>alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+hystersis){
+								alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel();
+								acquisitionItemInfo.setAlarmLevel(alarmLevel);
+								acquisitionItemInfo.setHystersis(hystersis);
+								acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getUpperLimit());
+								acquisitionItemInfo.setAlarmInfo("高报");
+								acquisitionItemInfo.setAlarmType(5);
+								acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
+								acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
+								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+							}else if((StringManagerUtils.isNotNull(alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()+"") && StringManagerUtils.stringToFloat(acquisitionItemInfo.getRawValue())<alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()-hystersis)){
+								alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmSign()>0?alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel():0;
+								acquisitionItemInfo.setAlarmLevel(alarmLevel);
+								acquisitionItemInfo.setHystersis(hystersis);
+								acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getLowerLimit());
+								acquisitionItemInfo.setAlarmInfo("低报");
+								acquisitionItemInfo.setAlarmType(5);
+								acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
+								acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
+								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+							}
+							break;
+						}
+					}
+					
+					
 					if(acquisitionItemInfo.getAlarmLevel()>0){
 						alarm=true;
 					}
@@ -2182,6 +2202,7 @@ public class DriverAPIController extends BaseController{
 							
 							webSocketSendData.append("{ \"success\":true,\"functionCode\":\""+functionCode+"\",\"wellName\":\""+pcpDeviceInfo.getWellName()+"\",\"acqTime\":\""+acqTime+"\",\"columns\":"+columns+",");
 							webSocketSendData.append("\"commAlarmLevel\":"+commAlarmLevel+",");
+							webSocketSendData.append("\"runAlarmLevel\":"+runAlarmLevel+",");
 							webSocketSendData.append("\"totalRoot\":[");
 							info_json.append("[");
 							webSocketSendData.append("{\"name1\":\""+pcpDeviceInfo.getWellName()+":"+acqTime+" 在线\"},");

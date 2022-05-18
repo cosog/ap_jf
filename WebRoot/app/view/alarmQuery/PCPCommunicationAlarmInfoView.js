@@ -321,7 +321,7 @@ Ext.define('AP.view.alarmQuery.PCPCommunicationAlarmInfoView', {
                 	var deviceType=1;
                 	var deviceName=Ext.getCmp('PCPCommunicationAlarmDeviceListComb_Id').getValue();
                 	var isSendMessage=Ext.getCmp('PCPCommunicationAlarmIsSendMessageComb_Id').getValue();
-                	var alarmType=0;
+                	var alarmType=3;
                	 	var alarmLevel='';
                	 	
                	 	var fileName='螺杆泵通信报警设备列表';
@@ -381,7 +381,7 @@ Ext.define('AP.view.alarmQuery.PCPCommunicationAlarmInfoView', {
                 	var isSendMessage=Ext.getCmp('PCPCommunicationAlarmIsSendMessageComb_Id').getValue();
                 	var startDate=Ext.getCmp('PCPCommunicationAlarmQueryStartDate_Id').rawValue;
                     var endDate=Ext.getCmp('PCPCommunicationAlarmQueryEndDate_Id').rawValue;
-               	 	var alarmType=0;
+               	 	var alarmType=3;
                	 	var alarmLevel='';
                	 	
                	 	var fileName='螺杆泵'+deviceName+'通信报警数据';

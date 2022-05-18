@@ -349,7 +349,7 @@ Ext.define('AP.view.alarmQuery.PCPSwitchingValueAlarmInfoView', {
                 	var deviceName=Ext.getCmp('PCPSwitchingValueAlarmDeviceListComb_Id').getValue();
                 	var alarmLevel=Ext.getCmp('PCPSwitchingValueAlarmLevelComb_Id').getValue();
                 	var isSendMessage=Ext.getCmp('PCPSwitchingValueAlarmIsSendMessageComb_Id').getValue();
-               	 	var alarmType=3;
+               	 	var alarmType=0;
                	 	
                	 	var fileName='螺杆泵开关量报警设备列表';
                	 	var title='螺杆泵开关量报警设备列表';
@@ -409,7 +409,7 @@ Ext.define('AP.view.alarmQuery.PCPSwitchingValueAlarmInfoView', {
                 	var isSendMessage=Ext.getCmp('PCPSwitchingValueAlarmIsSendMessageComb_Id').getValue();
                 	var startDate=Ext.getCmp('PCPSwitchingValueAlarmQueryStartDate_Id').rawValue;
                     var endDate=Ext.getCmp('PCPSwitchingValueAlarmQueryEndDate_Id').rawValue;
-               	 	var alarmType=3;
+               	 	var alarmType=0;
                	 	
                	 	var fileName='螺杆泵'+deviceName+'开关量报警数据';
                	 	var title='螺杆泵'+deviceName+'开关量报警数据';

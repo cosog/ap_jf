@@ -349,7 +349,7 @@ Ext.define('AP.view.alarmQuery.PCPEnumValueAlarmInfoView', {
                 	var deviceName=Ext.getCmp('PCPEnumValueAlarmDeviceListComb_Id').getValue();
                 	var alarmLevel=Ext.getCmp('PCPEnumValueAlarmLevelComb_Id').getValue();
                 	var isSendMessage=Ext.getCmp('PCPEnumValueAlarmIsSendMessageComb_Id').getValue();
-               	 	var alarmType=2;
+               	 	var alarmType=1;
                	 	
                	 	var fileName='螺杆泵枚举量报警设备列表';
                	 	var title='螺杆泵枚举量报警设备列表';
@@ -409,7 +409,7 @@ Ext.define('AP.view.alarmQuery.PCPEnumValueAlarmInfoView', {
                 	var isSendMessage=Ext.getCmp('PCPEnumValueAlarmIsSendMessageComb_Id').getValue();
                 	var startDate=Ext.getCmp('PCPEnumValueAlarmQueryStartDate_Id').rawValue;
                     var endDate=Ext.getCmp('PCPEnumValueAlarmQueryEndDate_Id').rawValue;
-               	 	var alarmType=2;
+               	 	var alarmType=1;
                	 	
                	 	var fileName='螺杆泵'+deviceName+'枚举量报警数据';
                	 	var title='螺杆泵'+deviceName+'枚举量报警数据';

@@ -190,6 +190,12 @@ Ext.define('AP.view.acquisitionUnit.ProtocolConfigInfoView', {
     					}
     					protocolAlarmInstanceConfigNumItemsHandsontableHelper=null;
     				}
+    				if(protocolAlarmInstanceConfigCalNumItemsHandsontableHelper!=null){
+    					if(protocolAlarmInstanceConfigCalNumItemsHandsontableHelper.hot!=undefined){
+    						protocolAlarmInstanceConfigCalNumItemsHandsontableHelper.hot.destroy();
+    					}
+    					protocolAlarmInstanceConfigCalNumItemsHandsontableHelper=null;
+    				}
     				if(protocolAlarmInstanceConfigSwitchItemsHandsontableHelper!=null){
     					if(protocolAlarmInstanceConfigSwitchItemsHandsontableHelper.hot!=undefined){
     						protocolAlarmInstanceConfigSwitchItemsHandsontableHelper.hot.destroy();
@@ -201,6 +207,24 @@ Ext.define('AP.view.acquisitionUnit.ProtocolConfigInfoView', {
     						protocolAlarmInstanceConfigEnumItemsHandsontableHelper.hot.destroy();
     					}
     					protocolAlarmInstanceConfigEnumItemsHandsontableHelper=null;
+    				}
+    				if(protocolAlarmInstanceConfigFESDiagramResultItemsHandsontableHelper!=null){
+    					if(protocolAlarmInstanceConfigFESDiagramResultItemsHandsontableHelper.hot!=undefined){
+    						protocolAlarmInstanceConfigFESDiagramResultItemsHandsontableHelper.hot.destroy();
+    					}
+    					protocolAlarmInstanceConfigFESDiagramResultItemsHandsontableHelper=null;
+    				}
+    				if(protocolAlarmInstanceConfigRunStatusItemsHandsontableHelper!=null){
+    					if(protocolAlarmInstanceConfigRunStatusItemsHandsontableHelper.hot!=undefined){
+    						protocolAlarmInstanceConfigRunStatusItemsHandsontableHelper.hot.destroy();
+    					}
+    					protocolAlarmInstanceConfigRunStatusItemsHandsontableHelper=null;
+    				}
+    				if(protocolAlarmInstanceConfigCommStatusItemsHandsontableHelper!=null){
+    					if(protocolAlarmInstanceConfigCommStatusItemsHandsontableHelper.hot!=undefined){
+    						protocolAlarmInstanceConfigCommStatusItemsHandsontableHelper.hot.destroy();
+    					}
+    					protocolAlarmInstanceConfigCommStatusItemsHandsontableHelper=null;
     				}
     				if(protocolAlarmInstancePropertiesHandsontableHelper!=null){
     					if(protocolAlarmInstancePropertiesHandsontableHelper.hot!=undefined){

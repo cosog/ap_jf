@@ -431,7 +431,21 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 		if(activeId=="RPCAlarmQueryPanel_Id"){
 			var secondTabPanel = Ext.getCmp("RPCAlarmQueryTabPanel");
 			var secondActiveId = secondTabPanel.getActiveTab().id;
-			if(secondActiveId=="RPCCommunicationAlarmInfoPanel_Id"){
+			if(secondActiveId=="RPCFESDiagramResultAlarmInfoPanel_Id"){
+				var gridPanel = Ext.getCmp("RPCFESDiagramResultAlarmOverviewGridPanel_Id");
+				if (isNotVal(gridPanel)) {
+					gridPanel.getStore().load();
+				}else{
+					Ext.create('AP.store.alarmQuery.RPCFESDiagramResultAlarmOverviewStore');
+				}
+			}else if(secondActiveId=="RPCRunStatusAlarmInfoPanel_Id"){
+				var gridPanel = Ext.getCmp("RPCRunStatusAlarmOverviewGridPanel_Id");
+				if (isNotVal(gridPanel)) {
+					gridPanel.getStore().load();
+				}else{
+					Ext.create('AP.store.alarmQuery.RPCRunStatusAlarmOverviewStore');
+				}
+			}else if(secondActiveId=="RPCCommunicationAlarmInfoPanel_Id"){
 				var gridPanel = Ext.getCmp("RPCCommunicationAlarmOverviewGridPanel_Id");
 				if (isNotVal(gridPanel)) {
 					gridPanel.getStore().load();

@@ -1155,6 +1155,24 @@ public class AcquisitionUnitManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/getProtocolAlarmInstanceCalNumItemsConfigData")
+	public String getProtocolAlarmInstanceCalNumItemsConfigData() throws Exception {
+		String id = ParamUtils.getParameter(request, "id");
+		String deviceType = ParamUtils.getParameter(request, "deviceType");
+		String resolutionMode = ParamUtils.getParameter(request, "resolutionMode");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String code = ParamUtils.getParameter(request, "code");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getProtocolAlarmInstanceCalNumItemsConfigData(id,classes,resolutionMode,deviceType);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	@RequestMapping("/getProtocolAlarmInstanceSwitchItemsConfigData")
 	public String getProtocolAlarmInstanceSwitchItemsConfigData() throws Exception {
 		String id = ParamUtils.getParameter(request, "id");
@@ -1180,6 +1198,57 @@ public class AcquisitionUnitManagerController extends BaseController {
 		String code = ParamUtils.getParameter(request, "code");
 		String json = "";
 		json = acquisitionUnitItemManagerService.getProtocolAlarmInstanceEnumItemsConfigData(id,classes,resolutionMode);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/getProtocolAlarmInstanceFESDiagramResultItemsConfigData")
+	public String getProtocolAlarmInstanceFESDiagramResultItemsConfigData() throws Exception {
+		String id = ParamUtils.getParameter(request, "id");
+		String resolutionMode = ParamUtils.getParameter(request, "resolutionMode");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String code = ParamUtils.getParameter(request, "code");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getProtocolAlarmInstanceFESDiagramResultItemsConfigData(id,classes,resolutionMode);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/getProtocolAlarmInstanceRunStatusItemsConfigData")
+	public String getProtocolAlarmInstanceRunStatusItemsConfigData() throws Exception {
+		String id = ParamUtils.getParameter(request, "id");
+		String resolutionMode = ParamUtils.getParameter(request, "resolutionMode");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String code = ParamUtils.getParameter(request, "code");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getProtocolAlarmInstanceRunStatusItemsConfigData(id,classes,resolutionMode);
+		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/getProtocolAlarmInstanceCommStatusItemsConfigData")
+	public String getProtocolAlarmInstanceCommStatusItemsConfigData() throws Exception {
+		String id = ParamUtils.getParameter(request, "id");
+		String resolutionMode = ParamUtils.getParameter(request, "resolutionMode");
+		String classes = ParamUtils.getParameter(request, "classes");
+		String code = ParamUtils.getParameter(request, "code");
+		String json = "";
+		json = acquisitionUnitItemManagerService.getProtocolAlarmInstanceCommStatusItemsConfigData(id,classes,resolutionMode);
 		response.setContentType("application/json;charset="+ Constants.ENCODING_UTF8);
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();

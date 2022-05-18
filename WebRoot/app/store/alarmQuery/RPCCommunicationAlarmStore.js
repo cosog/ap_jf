@@ -93,7 +93,7 @@ Ext.define('AP.store.alarmQuery.RPCCommunicationAlarmStore', {
                     isSendMessage:isSendMessage,
                     startDate:getDateAndTime(startDate,startTime_Hour,startTime_Minute,startTime_Second),
                     endDate:getDateAndTime(endDate,endTime_Hour,endTime_Minute,endTime_Second),
-                    alarmType:0
+                    alarmType:3
                 };
             Ext.apply(store.proxy.extraParams, new_params);
         },

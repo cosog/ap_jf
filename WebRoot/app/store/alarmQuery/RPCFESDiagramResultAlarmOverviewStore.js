@@ -1,6 +1,6 @@
-Ext.define('AP.store.alarmQuery.RPCNumericValueAlarmOverviewStore', {
+Ext.define('AP.store.alarmQuery.RPCFESDiagramResultAlarmOverviewStore', {
     extend: 'Ext.data.Store',
-    alias: 'widget.rpcNumericValueAlarmOverviewStore',
+    alias: 'widget.rpcFESDiagramResultAlarmOverviewStore',
     fields: ['id','deviceType','deviceTypeName','wellName','alarmTime','user_id','loginIp','action','actionName','remark'],
     autoLoad: true,
     pageSize: 50,
@@ -23,8 +23,8 @@ Ext.define('AP.store.alarmQuery.RPCNumericValueAlarmOverviewStore', {
             var get_rawData = store.proxy.reader.rawData;
             var arrColumns = get_rawData.columns;
             var column = createAlarmOverviewQueryColumn(arrColumns);
-            Ext.getCmp("RPCNumericValueAlarmOverviewColumnStr_Id").setValue(column);
-            var gridPanel = Ext.getCmp("RPCNumericValueAlarmOverviewGridPanel_Id");
+            Ext.getCmp("RPCFESDiagramResultAlarmOverviewColumnStr_Id").setValue(column);
+            var gridPanel = Ext.getCmp("RPCFESDiagramResultAlarmOverviewGridPanel_Id");
             if (!isNotVal(gridPanel)) {
                 var newColumns = Ext.JSON.decode(column);
                 var bbar = new Ext.PagingToolbar({
@@ -35,7 +35,7 @@ Ext.define('AP.store.alarmQuery.RPCNumericValueAlarmOverviewStore', {
     	        });
                 
                 gridPanel = Ext.create('Ext.grid.Panel', {
-                    id: "RPCNumericValueAlarmOverviewGridPanel_Id",
+                    id: "RPCFESDiagramResultAlarmOverviewGridPanel_Id",
                     border: false,
 //                    autoLoad: true,
                     bbar: bbar,
@@ -49,18 +49,18 @@ Ext.define('AP.store.alarmQuery.RPCNumericValueAlarmOverviewStore', {
                     listeners: {
                     	selectionchange: function (view, selected, o) {
             				if(selected.length>0){
-            					var gridPanel = Ext.getCmp("RPCNumericValueAlarmGridPanel_Id");
+            					var gridPanel = Ext.getCmp("RPCFESDiagramResultAlarmGridPanel_Id");
                 				if (isNotVal(gridPanel)) {
                 					gridPanel.getStore().load();
                 				}else{
-                					Ext.create('AP.store.alarmQuery.RPCNumericValueAlarmStore');
+                					Ext.create('AP.store.alarmQuery.RPCFESDiagramResultAlarmStore');
                 				}
             				}
                     	},
                     	select: function(grid, record, index, eOpts) {}
                     }
                 });
-                var panel = Ext.getCmp("RPCNumericValueAlarmOverviewPanel_Id");
+                var panel = Ext.getCmp("RPCFESDiagramResultAlarmOverviewPanel_Id");
                 panel.add(gridPanel);
             }
             if(get_rawData.totalCount>0){
@@ -69,25 +69,25 @@ Ext.define('AP.store.alarmQuery.RPCNumericValueAlarmOverviewStore', {
             	}
             	gridPanel.getSelectionModel().select(0, true);
             }else{
-            	var gridPanel = Ext.getCmp("RPCNumericValueAlarmGridPanel_Id");
+            	var gridPanel = Ext.getCmp("RPCFESDiagramResultAlarmGridPanel_Id");
                 if (isNotVal(gridPanel)) {
-                	Ext.getCmp("RPCNumericValueAlarmDetailsPanel_Id").remove(gridPanel);
+                	Ext.getCmp("RPCFESDiagramResultAlarmDetailsPanel_Id").remove(gridPanel);
                 }
             }
         },
         beforeload: function (store, options) {
         	var orgId = Ext.getCmp('leftOrg_Id').getValue();
         	var deviceType=0;
-        	var deviceName=Ext.getCmp('RPCNumericValueAlarmDeviceListComb_Id').getValue();
-        	var alarmLevel=Ext.getCmp('RPCNumericValueAlarmLevelComb_Id').getValue();
-        	var isSendMessage=Ext.getCmp('RPCNumericValueAlarmIsSendMessageComb_Id').getValue();
+        	var deviceName=Ext.getCmp('RPCFESDiagramResultAlarmDeviceListComb_Id').getValue();
+        	var alarmLevel=Ext.getCmp('RPCFESDiagramResultAlarmLevelComb_Id').getValue();
+        	var isSendMessage=Ext.getCmp('RPCFESDiagramResultAlarmIsSendMessageComb_Id').getValue();
             var new_params = {
                     orgId: orgId,
                     deviceType:deviceType,
                     deviceName:deviceName,
                     alarmLevel:alarmLevel,
                     isSendMessage:isSendMessage,
-                    alarmType:2
+                    alarmType:4
                 };
             Ext.apply(store.proxy.extraParams, new_params);
         },

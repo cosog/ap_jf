@@ -563,7 +563,6 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
 		String columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
 				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
@@ -1952,14 +1951,17 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				+ "{ \"header\":\"回差\",\"dataIndex\":\"hystersis\",width:80 ,children:[] },"
 				+ "{ \"header\":\"延时(s)\",\"dataIndex\":\"delay\",width:80 ,children:[] },"
 				+ "{ \"header\":\"报警级别\",\"dataIndex\":\"alarmLevel\",width:80 ,children:[] },"
-				+ "{ \"header\":\"报警开关\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] }"
+				+ "{ \"header\":\"报警开关\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送短信\",\"dataIndex\":\"isSendMessage\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送邮件\",\"dataIndex\":\"isSendMail\",width:80 ,children:[] }"
 				+ "]";
 		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
 		result_json.append("\"totalRoot\":[");
 		List<Integer> itemAddrsList=new ArrayList<Integer>();
 		
 		String itemsSql="select t.id, t.itemname,t.itemcode,t.itemaddr,t.upperlimit,t.lowerlimit,t.hystersis,t.delay,"
-				+ "t4.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') "
+				+ "t4.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'), "
+				+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
 				+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3, tbl_code t4 "
 				+ " where t.unitid=t2.id and t2.id=t3.alarmunitid and upper(t4.itemcode)=upper('BJJB') and t.alarmlevel=t4.itemvalue "
 				+ " and t3.id="+id+" "
@@ -1968,7 +1970,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		
 		if("2".equals(classes)){
 			itemsSql="select t.id, t.itemname,t.itemcode,t.itemaddr,t.upperlimit,t.lowerlimit,t.hystersis,t.delay,"
-					+ "t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') "
+					+ "t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'), "
+					+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
 					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_code t3 "
 					+ " where t.unitid=t2.id and upper(t3.itemcode)=upper('BJJB') and t.alarmlevel=t3.itemvalue "
 					+ " and t2.id="+id+" "
@@ -1988,7 +1991,9 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 					+ "\"hystersis\":\""+obj[6]+"\","
 					+ "\"delay\":\""+obj[7]+"\","
 					+ "\"alarmLevel\":\""+obj[8]+"\","
-					+ "\"alarmSign\":\""+obj[9]+"\"},");
+					+ "\"alarmSign\":\""+obj[9]+"\","
+					+ "\"isSendMessage\":\""+obj[10]+"\","
+					+ "\"isSendMail\":\""+obj[11]+"\"},");
 		}
 		
 		if(result_json.toString().endsWith(",")){
@@ -1996,6 +2001,103 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		}
 		result_json.append("]");
 		result_json.append("}");
+		return result_json.toString().replaceAll("null", "");
+	}
+	
+	public String getProtocolAlarmInstanceCalNumItemsConfigData(String id,String classes,String resolutionMode,String deviceType){
+		StringBuffer result_json = new StringBuffer();
+		Gson gson = new Gson();
+		Jedis jedis=null;
+		Set<byte[]>calItemSet=null;
+		try{
+			jedis = new Jedis();
+			if(StringManagerUtils.stringToInteger(deviceType)==0){
+				if(!jedis.exists("rpcCalItemList".getBytes())){
+					MemoryDataManagerTask.loadRPCCalculateItem();
+				}
+				calItemSet= jedis.zrange("rpcCalItemList".getBytes(), 0, -1);
+			}else{
+				if(!jedis.exists("pcpCalItemList".getBytes())){
+					MemoryDataManagerTask.loadPCPCalculateItem();
+				}
+				calItemSet= jedis.zrange("pcpCalItemList".getBytes(), 0, -1);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"单位\",\"dataIndex\":\"addr\",width:80 ,children:[] },"
+				+ "{ \"header\":\"上限\",\"dataIndex\":\"upperLimit\",width:80 ,children:[] },"
+				+ "{ \"header\":\"下限\",\"dataIndex\":\"lowerLimit\",width:80 ,children:[] },"
+				+ "{ \"header\":\"回差\",\"dataIndex\":\"hystersis\",width:80 ,children:[] },"
+				+ "{ \"header\":\"延时(s)\",\"dataIndex\":\"delay\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警级别\",\"dataIndex\":\"alarmLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警开关\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送短信\",\"dataIndex\":\"isSendMessage\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送邮件\",\"dataIndex\":\"isSendMail\",width:80 ,children:[] }"
+				+ "]";
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		List<Integer> itemAddrsList=new ArrayList<Integer>();
+		
+		String itemsSql="select t.id, t.itemname,t.itemcode,t.upperlimit,t.lowerlimit,t.hystersis,t.delay,"
+				+ "t4.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'), "
+				+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+				+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3, tbl_code t4 "
+				+ " where t.unitid=t2.id and t2.id=t3.alarmunitid and upper(t4.itemcode)=upper('BJJB') and t.alarmlevel=t4.itemvalue "
+				+ " and t3.id="+id+" "
+				+ " and t.type="+resolutionMode
+				+ " order by t.id";
+		
+		if("2".equals(classes)){
+			itemsSql="select t.id, t.itemname,t.itemcode,t.upperlimit,t.lowerlimit,t.hystersis,t.delay,"
+					+ "t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'), "
+					+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_code t3 "
+					+ " where t.unitid=t2.id and upper(t3.itemcode)=upper('BJJB') and t.alarmlevel=t3.itemvalue "
+					+ " and t2.id="+id+" "
+					+ " and t.type="+resolutionMode
+					+ " order by t.id";
+		}
+		
+		List<?> list=this.findCallSql(itemsSql);
+		for(int i=0;i<list.size();i++){
+			Object[] obj = (Object[]) list.get(i);
+			String unit="";
+			if(calItemSet!=null){
+				for(byte[] rpcCalItemByteArr:calItemSet){
+					CalItem calItem=(CalItem) SerializeObjectUnils.unserizlize(rpcCalItemByteArr);
+					if(calItem.getDataType()==2&&(obj[2]+"").equalsIgnoreCase(calItem.getCode())){
+						unit=calItem.getUnit();
+						break;
+					}
+				}
+			}
+			result_json.append("{\"id\":"+(i+1)+","
+					+ "\"title\":\""+obj[1]+"\","
+					+ "\"code\":\""+obj[2]+"\","
+					+ "\"unit\":\""+unit+"\","
+					+ "\"upperLimit\":\""+obj[3]+"\","
+					+ "\"lowerLimit\":\""+obj[4]+"\","
+					+ "\"hystersis\":\""+obj[5]+"\","
+					+ "\"delay\":\""+obj[6]+"\","
+					+ "\"alarmLevel\":\""+obj[7]+"\","
+					+ "\"alarmSign\":\""+obj[8]+"\","
+					+ "\"isSendMessage\":\""+obj[9]+"\","
+					+ "\"isSendMail\":\""+obj[10]+"\"},");
+		}
+		
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
+		}
 		return result_json.toString().replaceAll("null", "");
 	}
 	
@@ -2012,14 +2114,18 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				+ "{ \"header\":\"触发状态\",\"dataIndex\":\"value\",width:80 ,children:[] },"
 				+ "{ \"header\":\"延时(s)\",\"dataIndex\":\"delay\",width:80 ,children:[] },"
 				+ "{ \"header\":\"报警级别\",\"dataIndex\":\"alarmLevel\",width:80 ,children:[] },"
-				+ "{ \"header\":\"报警开关\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] }"
+				+ "{ \"header\":\"报警开关\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送短信\",\"dataIndex\":\"isSendMessage\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送邮件\",\"dataIndex\":\"isSendMail\",width:80 ,children:[] }"
 				+ "]";
 		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
 		result_json.append("\"totalRoot\":[");
 		List<Integer> itemAddrsList=new ArrayList<Integer>();
 		
 		String itemsSql="select t.id, t.itemname,t.itemcode,t.itemaddr,t.bitIndex,t.value,t.delay,"
-				+ " t4.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'),t2.protocol "
+				+ " t4.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'), "
+				+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail,"
+				+ " t2.protocol "
 				+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3, tbl_code t4 "
 				+ " where t.unitid=t2.id and t2.id=t3.alarmunitid and upper(t4.itemcode)=upper('BJJB') and t.alarmlevel=t4.itemvalue "
 				+ " and t3.id="+id+" "
@@ -2027,7 +2133,9 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				+ " order by t.itemaddr,t.bitindex";
 		if("2".equals(classes)){
 			itemsSql="select t.id, t.itemname,t.itemcode,t.itemaddr,t.bitIndex,t.value,t.delay,"
-					+ " t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'),t2.protocol "
+					+ " t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'), "
+					+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail,"
+					+ " t2.protocol "
 					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2, tbl_code t3 "
 					+ " where t.unitid=t2.id and upper(t3.itemcode)=upper('BJJB') and t.alarmlevel=t3.itemvalue "
 					+ " and t2.id="+id+" "
@@ -2072,7 +2180,9 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 					+ "\"value\":\""+("1".equalsIgnoreCase(obj[5]+"")?"开":"关")+"\","
 					+ "\"delay\":\""+obj[6]+"\","
 					+ "\"alarmLevel\":\""+obj[7]+"\","
-					+ "\"alarmSign\":\""+obj[8]+"\"},");
+					+ "\"alarmSign\":\""+obj[8]+"\","
+					+ "\"isSendMessage\":\""+obj[9]+"\","
+					+ "\"isSendMail\":\""+obj[10]+"\"},");
 		}
 		
 		if(result_json.toString().endsWith(",")){
@@ -2095,14 +2205,18 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				+ "{ \"header\":\"含义\",\"dataIndex\":\"meaning\",width:80 ,children:[] },"
 				+ "{ \"header\":\"延时(s)\",\"dataIndex\":\"delay\",width:80 ,children:[] },"
 				+ "{ \"header\":\"报警级别\",\"dataIndex\":\"alarmLevel\",width:80 ,children:[] },"
-				+ "{ \"header\":\"报警开关\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] }"
+				+ "{ \"header\":\"报警开关\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送短信\",\"dataIndex\":\"isSendMessage\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送邮件\",\"dataIndex\":\"isSendMail\",width:80 ,children:[] }"
 				+ "]";
 		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
 		result_json.append("\"totalRoot\":[");
 		List<Integer> itemAddrsList=new ArrayList<Integer>();
 		
 		String itemsSql="select t.id, t.itemname,t.itemcode,t.itemaddr,t.value,t.delay,"
-				+ " t4.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'),t2.protocol "
+				+ " t4.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'),"
+				+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail,"
+				+ " t2.protocol "
 				+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3, tbl_code t4 "
 				+ " where t.unitid=t2.id and t2.id=t3.alarmunitid and upper(t4.itemcode)=upper('BJJB') and t.alarmlevel=t4.itemvalue "
 				+ " and t3.id="+id+" "
@@ -2110,7 +2224,9 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				+ " order by t.itemaddr,t.bitindex";
 		if("2".equals(classes)){
 			itemsSql="select t.id, t.itemname,t.itemcode,t.itemaddr,t.value,t.delay,"
-					+ " t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'),t2.protocol "
+					+ " t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效'),"
+					+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail,"
+					+ " t2.protocol "
 					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2, tbl_code t3 "
 					+ " where t.unitid=t2.id and upper(t3.itemcode)=upper('BJJB') and t.alarmlevel=t3.itemvalue "
 					+ " and t2.id="+id+" "
@@ -2154,7 +2270,168 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 					+ "\"meaning\":\""+meaning+"\","
 					+ "\"delay\":\""+obj[5]+"\","
 					+ "\"alarmLevel\":\""+obj[6]+"\","
-					+ "\"alarmSign\":\""+obj[7]+"\"},");
+					+ "\"alarmSign\":\""+obj[7]+"\","
+					+ "\"isSendMessage\":\""+obj[8]+"\","
+					+ "\"isSendMail\":\""+obj[9]+"\"},");
+		}
+		
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		return result_json.toString().replaceAll("null", "");
+	}
+	
+	public String getProtocolAlarmInstanceFESDiagramResultItemsConfigData(String id,String classes,String resolutionMode){
+		StringBuffer result_json = new StringBuffer();
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"延时(s)\",\"dataIndex\":\"delay\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警级别\",\"dataIndex\":\"alarmLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警使能\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送短信\",\"dataIndex\":\"isSendMessage\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送邮件\",\"dataIndex\":\"isSendMail\",width:80 ,children:[] }"
+				+ "]";
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		
+		String itemsSql="select t.id, t.itemname,t.itemcode,t.delay,"
+				+ " t4.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') as alarmsign, "
+				+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+				+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3, tbl_code t4 "
+				+ " where t.unitid=t2.id and t2.id=t3.alarmunitid and upper(t4.itemcode)=upper('BJJB') and t.alarmlevel=t4.itemvalue "
+				+ " and t3.id="+id+" "
+				+ " and t.type="+resolutionMode
+				+ " order by t.id";
+		if("2".equals(classes)){
+			itemsSql="select t.id, t.itemname,t.itemcode,t.delay,"
+					+ " t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') as alarmsign,"
+					+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2, tbl_code t3 "
+					+ " where t.unitid=t2.id and upper(t3.itemcode)=upper('BJJB') and t.alarmlevel=t3.itemvalue "
+					+ " and t2.id="+id+" "
+					+ " and t.type="+resolutionMode
+					+ " order by t.id";
+		}
+		List<?> list=this.findCallSql(itemsSql);
+		for(int i=0;i<list.size();i++){
+			Object[] obj = (Object[]) list.get(i);
+			result_json.append("{\"id\":"+(i+1)+","
+					+ "\"title\":\""+obj[1]+"\","
+					+ "\"code\":\""+obj[2]+"\","
+					+ "\"delay\":\""+obj[3]+"\","
+					+ "\"alarmLevel\":\""+obj[4]+"\","
+					+ "\"alarmSign\":\""+obj[5]+"\","
+					+ "\"isSendMessage\":\""+obj[6]+"\","
+					+ "\"isSendMail\":\""+obj[7]+"\"},");
+		}
+		
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		return result_json.toString().replaceAll("null", "");
+	}
+	
+	public String getProtocolAlarmInstanceRunStatusItemsConfigData(String id,String classes,String resolutionMode){
+		StringBuffer result_json = new StringBuffer();
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"延时(s)\",\"dataIndex\":\"delay\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警级别\",\"dataIndex\":\"alarmLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警使能\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送短信\",\"dataIndex\":\"isSendMessage\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送邮件\",\"dataIndex\":\"isSendMail\",width:80 ,children:[] }"
+				+ "]";
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		
+		String itemsSql="select t.id, t.itemname,t.itemcode,t.delay,"
+				+ " t4.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') as alarmsign, "
+				+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+				+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3, tbl_code t4 "
+				+ " where t.unitid=t2.id and t2.id=t3.alarmunitid and upper(t4.itemcode)=upper('BJJB') and t.alarmlevel=t4.itemvalue "
+				+ " and t3.id="+id+" "
+				+ " and t.type="+resolutionMode
+				+ " order by t.id";
+		if("2".equals(classes)){
+			itemsSql="select t.id, t.itemname,t.itemcode,t.delay,"
+					+ " t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') as alarmsign,"
+					+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2, tbl_code t3 "
+					+ " where t.unitid=t2.id and upper(t3.itemcode)=upper('BJJB') and t.alarmlevel=t3.itemvalue "
+					+ " and t2.id="+id+" "
+					+ " and t.type="+resolutionMode
+					+ " order by t.id";
+		}
+		List<?> list=this.findCallSql(itemsSql);
+		for(int i=0;i<list.size();i++){
+			Object[] obj = (Object[]) list.get(i);
+			result_json.append("{\"id\":"+(i+1)+","
+					+ "\"title\":\""+obj[1]+"\","
+					+ "\"code\":\""+obj[2]+"\","
+					+ "\"delay\":\""+obj[3]+"\","
+					+ "\"alarmLevel\":\""+obj[4]+"\","
+					+ "\"alarmSign\":\""+obj[5]+"\","
+					+ "\"isSendMessage\":\""+obj[6]+"\","
+					+ "\"isSendMail\":\""+obj[7]+"\"},");
+		}
+		
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("]");
+		result_json.append("}");
+		return result_json.toString().replaceAll("null", "");
+	}
+	
+	public String getProtocolAlarmInstanceCommStatusItemsConfigData(String id,String classes,String resolutionMode){
+		StringBuffer result_json = new StringBuffer();
+		String columns = "["
+				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
+				+ "{ \"header\":\"名称\",\"dataIndex\":\"title\",width:120 ,children:[] },"
+				+ "{ \"header\":\"延时(s)\",\"dataIndex\":\"delay\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警级别\",\"dataIndex\":\"alarmLevel\",width:80 ,children:[] },"
+				+ "{ \"header\":\"报警使能\",\"dataIndex\":\"alarmSign\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送短信\",\"dataIndex\":\"isSendMessage\",width:80 ,children:[] },"
+				+ "{ \"header\":\"是否发送邮件\",\"dataIndex\":\"isSendMail\",width:80 ,children:[] }"
+				+ "]";
+		result_json.append("{ \"success\":true,\"columns\":"+columns+",");
+		result_json.append("\"totalRoot\":[");
+		
+		String itemsSql="select t.id, t.itemname,t.itemcode,t.delay,"
+				+ " t4.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') as alarmsign, "
+				+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+				+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3, tbl_code t4 "
+				+ " where t.unitid=t2.id and t2.id=t3.alarmunitid and upper(t4.itemcode)=upper('BJJB') and t.alarmlevel=t4.itemvalue "
+				+ " and t3.id="+id+" "
+				+ " and t.type="+resolutionMode
+				+ " order by t.id";
+		if("2".equals(classes)){
+			itemsSql="select t.id, t.itemname,t.itemcode,t.delay,"
+					+ " t3.itemname as alarmLevel,decode(t.alarmsign,1,'使能','失效') as alarmsign,"
+					+ " decode(t.issendmessage,1,'是','否') as issendmessage,decode(t.issendmail,1,'是','否') as issendmail "
+					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2, tbl_code t3 "
+					+ " where t.unitid=t2.id and upper(t3.itemcode)=upper('BJJB') and t.alarmlevel=t3.itemvalue "
+					+ " and t2.id="+id+" "
+					+ " and t.type="+resolutionMode
+					+ " order by t.id";
+		}
+		List<?> list=this.findCallSql(itemsSql);
+		for(int i=0;i<list.size();i++){
+			Object[] obj = (Object[]) list.get(i);
+			result_json.append("{\"id\":"+(i+1)+","
+					+ "\"title\":\""+obj[1]+"\","
+					+ "\"code\":\""+obj[2]+"\","
+					+ "\"delay\":\""+obj[3]+"\","
+					+ "\"alarmLevel\":\""+obj[4]+"\","
+					+ "\"alarmSign\":\""+obj[5]+"\","
+					+ "\"isSendMessage\":\""+obj[6]+"\","
+					+ "\"isSendMail\":\""+obj[7]+"\"},");
 		}
 		
 		if(result_json.toString().endsWith(",")){
@@ -2944,13 +3221,11 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				rpcTree_json.append("\"children\": [");
 				rpcTree_json.append("{\"classes\":2,");
 				rpcTree_json.append("\"id\":"+obj[3]+",");
+				rpcTree_json.append("\"deviceType\":"+obj[5]+",");
 				rpcTree_json.append("\"text\":\""+obj[4]+"\",");
 				rpcTree_json.append("\"iconCls\": \"acqGroup\","); 
 				rpcTree_json.append("\"leaf\": true}");
 				rpcTree_json.append("]");
-				
-				
-				
 				rpcTree_json.append("},");
 			}else{
 				pcpTree_json.append("{\"classes\":1,");
@@ -2965,12 +3240,13 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 				pcpTree_json.append("\"expanded\": true,");
 				pcpTree_json.append("\"children\": [");
 				pcpTree_json.append("{\"classes\":2,");
+				pcpTree_json.append("\"deviceType\":"+1+",");
 				pcpTree_json.append("\"id\":"+obj[3]+",");
+				pcpTree_json.append("\"deviceType\":"+obj[5]+",");
 				pcpTree_json.append("\"text\":\""+obj[4]+"\",");
 				pcpTree_json.append("\"iconCls\": \"acqGroup\","); 
 				pcpTree_json.append("\"leaf\": true}");
 				pcpTree_json.append("]");
-				
 				pcpTree_json.append("},");
 			}
 		}
@@ -2987,8 +3263,8 @@ public class AcquisitionUnitManagerService<T> extends BaseService<T> {
 		
 		result_json.append("[");
 		
-		result_json.append("{\"classes\":0,\"text\":\"抽油机\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
-		result_json.append("{\"classes\":0,\"text\":\"螺杆泵\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
+		result_json.append("{\"classes\":0,\"deviceType\":0,\"text\":\"抽油机\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+rpcTree_json+"},");
+		result_json.append("{\"classes\":0,\"deviceType\":1,\"text\":\"螺杆泵\",\"iconCls\": \"device\",\"expanded\": true,\"children\": "+pcpTree_json+"}");
 		result_json.append("]");
 		return result_json.toString().replaceAll("null", "");
 	}
