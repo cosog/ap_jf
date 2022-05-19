@@ -79,7 +79,7 @@ Ext.define("AP.view.realTimeMonitoring.RealTimeMonitoringInfoView", {
                         text: 'ad',
 //                        width: 100,
                         handler: function (v, o) {
-                        	Ext.getCmp('ResourceMonitoringCurveItem_Id').setValue("驱动运行状态");
+                        	Ext.getCmp('ResourceMonitoringCurveItem_Id').setValue("ad运行状态");
                             Ext.getCmp('ResourceMonitoringCurveItemCode_Id').setValue("adRunStatus");
                             var itemCode= Ext.getCmp('ResourceMonitoringCurveItemCode_Id').getValue();
                         	var ResourceProbeHistoryCurveWindow=Ext.create("AP.view.realTimeMonitoring.ResourceProbeHistoryCurveWindow", {
@@ -130,6 +130,7 @@ Ext.define("AP.view.realTimeMonitoring.RealTimeMonitoringInfoView", {
         				id:'PCPRealTimeMonitoringInfoPanel_Id',
         				items: [PCPRealTimeMonitoringInfoView],
         				layout: "fit",
+        				hidden: pcpHidden,
         				border: false
         			}],
         			listeners: {

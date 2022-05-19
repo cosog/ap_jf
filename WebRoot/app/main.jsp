@@ -32,6 +32,7 @@
  var viewInformation = ${configFile}.viewInformation;
  
  var productionUnit = ${configFile}.others.productionUnit;
+ var pcpHidden = ${configFile}.others.pcpHidden;
  var showLogo = ${configFile}.others.showLogo;
  var userAccount="${userLogin.userId}";
  if (user_ == null || "" == (user_)) {

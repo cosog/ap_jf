@@ -80,6 +80,12 @@ public class EquipmentDriverServerTask {
 		path=stringManagerUtils.getFilePath("test4.json","test/");
 		String offLineData=stringManagerUtils.readFile(path,"utf-8");
 		
+		path=stringManagerUtils.getFilePath("test5.json","test/");
+		String pcpDistreteData=stringManagerUtils.readFile(path,"utf-8");
+		
+		path=stringManagerUtils.getFilePath("test6.json","test/");
+		String pcpDistreteData2=stringManagerUtils.readFile(path,"utf-8");
+		
 		String url=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/group";
 		String onlineUrl=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/online";
 		
@@ -89,8 +95,10 @@ public class EquipmentDriverServerTask {
 		while(true){
 			if(i%2==0){
 				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+				StringManagerUtils.sendPostMethod(url, pcpDistreteData,"utf-8");
 			}else{
 				StringManagerUtils.sendPostMethod(url, distreteData2,"utf-8");
+				StringManagerUtils.sendPostMethod(url, pcpDistreteData2,"utf-8");
 			}
 			
 //			if(i%2==0){

@@ -287,8 +287,8 @@ function websocketOnMessage(evt) {
 		                			"目前扭矩曲线",data.surfaceChartsData.wellName+' ['+data.surfaceChartsData.acqTime+']',"FSDiagramAnalysisSingleSurfaceDetailsDiv2_id");
 		                	showBalanceAnalysisCurveChart(data.surfaceChartsData.crankAngle,data.surfaceChartsData.loadRorque,data.surfaceChartsData.crankTorque,data.surfaceChartsData.expectedBalanceTorque,data.surfaceChartsData.expectedNetTorque,
 		                			expectedTorqueChartTitle,data.surfaceChartsData.wellName+' ['+data.surfaceChartsData.acqTime+']',"FSDiagramAnalysisSingleSurfaceDetailsDiv4_id");
-		                	showBalanceAnalysisMotionCurveChart(data.surfaceChartsData.crankAngle,data.surfaceChartsData.positionCurveData,data.surfaceChartsData.polishrodV,data.surfaceChartsData.polishrodA,
-		                			"运动特性曲线",data.surfaceChartsData.wellName+' ['+data.surfaceChartsData.acqTime+']',"FSDiagramAnalysisSingleSurfaceDetailsDiv5_id",2);
+//		                	showBalanceAnalysisMotionCurveChart(data.surfaceChartsData.crankAngle,data.surfaceChartsData.positionCurveData,data.surfaceChartsData.polishrodV,data.surfaceChartsData.polishrodA,
+//		                			"运动特性曲线",data.surfaceChartsData.wellName+' ['+data.surfaceChartsData.acqTime+']',"FSDiagramAnalysisSingleSurfaceDetailsDiv5_id",2);
 		        		}
 					}
 				}

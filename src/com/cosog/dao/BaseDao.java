@@ -2538,7 +2538,7 @@ public class BaseDao extends HibernateDaoSupport {
 				cs.setFloat(20,calculateResponseData.getPumpEfficiency().getPumpEff());
 //				//泵入口出口参数
 				cs.setFloat(21,calculateResponseData.getProduction().getPumpIntakeP());
-				cs.setFloat(21,calculateResponseData.getProduction().getPumpIntakeT());
+				cs.setFloat(22,calculateResponseData.getProduction().getPumpIntakeT());
 				cs.setFloat(23,calculateResponseData.getProduction().getPumpIntakeGOL());
 				cs.setFloat(24,calculateResponseData.getProduction().getPumpIntakeVisl());
 				cs.setFloat(25,calculateResponseData.getProduction().getPumpIntakeBo());
@@ -2783,7 +2783,7 @@ public class BaseDao extends HibernateDaoSupport {
 					+ "?,"
 					+ "?,?,?,?,"
 					+ "?,?,?,?,"
-					+ "?,?,?"
+					+ "?,?,?,"
 					+ "?,?,"
 					+ "?,?,?,?,"
 					+ "?,?,?,?,"

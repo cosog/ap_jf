@@ -630,6 +630,8 @@ public class ConfigFile {
 	    
 	    private int dataSaveMode;
 	    
+	    private boolean pcpHidden;
+	    
 	    private boolean showLogo;
 	    
 	    private boolean printLog;
@@ -707,6 +709,12 @@ public class ConfigFile {
 		}
 		public void setPrintLog(boolean printLog) {
 			this.printLog = printLog;
+		}
+		public boolean getPcpHidden() {
+			return pcpHidden;
+		}
+		public void setPcpHidden(boolean pcpHidden) {
+			this.pcpHidden = pcpHidden;
 		}
 	}
 
