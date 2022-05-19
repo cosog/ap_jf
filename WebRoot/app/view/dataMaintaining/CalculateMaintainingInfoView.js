@@ -25,6 +25,7 @@ Ext.define("AP.view.dataMaintaining.CalculateMaintainingInfoView", {
         				id:'PCPCalculateMaintainingInfoPanel_Id',
         				items: [PCPCalculateMaintainingInfoView],
         				layout: "fit",
+        				hidden: pcpHidden,
         				border: false
         			}],
         			listeners: {

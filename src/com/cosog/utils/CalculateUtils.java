@@ -89,6 +89,8 @@ public class CalculateUtils {
 		String responseDataStr=StringManagerUtils.sendPostMethod(totalUrl[0], requestDataStr,"utf-8");
 		type = new TypeToken<TotalAnalysisResponseData>() {}.getType();
 		TotalAnalysisResponseData responseData=gson.fromJson(responseDataStr, type);
+//		System.out.println("汇总请求数据:"+requestDataStr);
+//		System.out.println("汇总返回数据:"+responseDataStr);
 		return responseData;
 	}
 	
@@ -182,9 +184,9 @@ public class CalculateUtils {
 				volumeWaterCutList.add(responseData.getProduction().getWaterCut());
 				
 				liquidWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
-				oilWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
-				waterWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
-//				weightWaterCutList.add(responseData.getProduction().getLiquidVolumetricProduction());
+				oilWeightProductionList.add(responseData.getProduction().getOilWeightProduction());
+				waterWeightProductionList.add(responseData.getProduction().getWaterWeightProduction());
+//				weightWaterCutList.add(responseData.getProduction().getWaterCut());
 				
 				pumpEffList.add(responseData.getPumpEfficiency().getPumpEff());
 				pumpEff1List.add(responseData.getPumpEfficiency().getPumpEff1());
@@ -290,9 +292,9 @@ public class CalculateUtils {
 				volumeWaterCutList.add(responseData.getProduction().getWaterCut());
 				
 				liquidWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
-				oilWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
-				waterWeightProductionList.add(responseData.getProduction().getLiquidWeightProduction());
-//				weightWaterCutList.add(responseData.getProduction().getLiquidVolumetricProduction());
+				oilWeightProductionList.add(responseData.getProduction().getOilWeightProduction());
+				waterWeightProductionList.add(responseData.getProduction().getWaterWeightProduction());
+//				weightWaterCutList.add(responseData.getProduction().getWaterCut());
 				
 				pumpEffList.add(responseData.getPumpEfficiency().getPumpEff());
 				pumpEff1List.add(responseData.getPumpEfficiency().getPumpEff1());
