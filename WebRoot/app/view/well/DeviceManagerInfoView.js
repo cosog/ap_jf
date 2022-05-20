@@ -37,7 +37,50 @@ Ext.define("AP.view.well.DeviceManagerInfoView", {
         					}
         				}
         			}
-            	}]
+            	}],
+            	listeners: {
+        			beforeclose: function ( panel, eOpts) {
+        				if(rpcDeviceInfoHandsontableHelper!=null){
+        					if(rpcDeviceInfoHandsontableHelper.hot!=undefined){
+        						rpcDeviceInfoHandsontableHelper.hot.destroy();
+        					}
+        					rpcDeviceInfoHandsontableHelper=null;
+        				}
+        				if(rpcPumpingModelHandsontableHelper!=null){
+        					if(rpcPumpingModelHandsontableHelper.hot!=undefined){
+        						rpcPumpingModelHandsontableHelper.hot.destroy();
+        					}
+        					rpcPumpingModelHandsontableHelper=null;
+        				}
+        				if(rpcProductionHandsontableHelper!=null){
+        					if(rpcProductionHandsontableHelper.hot!=undefined){
+        						rpcProductionHandsontableHelper.hot.destroy();
+        					}
+        					rpcProductionHandsontableHelper=null;
+        				}
+        				if(rpcPumpingInfoHandsontableHelper!=null){
+        					if(rpcPumpingInfoHandsontableHelper.hot!=undefined){
+        						rpcPumpingInfoHandsontableHelper.hot.destroy();
+        					}
+        					rpcPumpingInfoHandsontableHelper=null;
+        				}
+        				
+        				
+        				if(pcpDeviceInfoHandsontableHelper!=null){
+        					if(pcpDeviceInfoHandsontableHelper.hot!=undefined){
+        						pcpDeviceInfoHandsontableHelper.hot.destroy();
+        					}
+        					pcpDeviceInfoHandsontableHelper=null;
+        				}
+        				if(pcpProductionHandsontableHelper!=null){
+        					if(pcpProductionHandsontableHelper.hot!=undefined){
+        						pcpProductionHandsontableHelper.hot.destroy();
+        					}
+        					pcpProductionHandsontableHelper=null;
+        				}
+        			},
+        			afterrender: function ( panel, eOpts) {}
+        		}
         });
         me.callParent(arguments);
     }

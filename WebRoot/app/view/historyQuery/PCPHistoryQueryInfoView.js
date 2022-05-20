@@ -229,7 +229,7 @@ Ext.define("AP.view.historyQuery.PCPHistoryQueryInfoView", {
                 }, {
                 	region: 'east',
                     width: '68%',
-                    title: '历史数据',
+                    title: '趋势曲线',
                     autoScroll: true,
                     split: true,
                     collapsible: true,

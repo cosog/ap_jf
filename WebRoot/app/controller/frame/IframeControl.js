@@ -282,9 +282,13 @@ refreshPanel=function(leftOrg_Id,secondTab_Code,rec){
 		var tabPanel = Ext.getCmp("DeviceManagerTabPanel");
 		var activeId = tabPanel.getActiveTab().id;
 		if(activeId=="RPCDeviceManagerPanel"){
-			CreateAndLoadRPCDeviceInfoTable();
+			Ext.getCmp("RPCDeviceSelectRow_Id").setValue(0);
+	    	Ext.getCmp("RPCDeviceSelectEndRow_Id").setValue(0);
+			CreateAndLoadRPCDeviceInfoTable(true);
 		}else if(activeId=="PCPDeviceManagerPanel"){
-			CreateAndLoadPCPDeviceInfoTable();
+			Ext.getCmp("PCPDeviceSelectRow_Id").setValue(0);
+	    	Ext.getCmp("PCPDeviceSelectEndRow_Id").setValue(0);
+			CreateAndLoadPCPDeviceInfoTable(true);
 		}
 	}else if(module_Code == "RPCDeviceManager"){
 		Ext.getCmp("RPCDeviceSelectRow_Id").setValue(0);

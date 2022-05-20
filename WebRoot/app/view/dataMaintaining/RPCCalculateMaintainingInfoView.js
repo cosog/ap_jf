@@ -102,6 +102,12 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                 					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
                 				}
                 			}else if(activeId=="RPCTotalCalculateMaintainingPanel"){
+                				var gridPanel = Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id");
+                				if (isNotVal(gridPanel)) {
+                					gridPanel.getStore().load();
+                				}else{
+                					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
+                				}
                 				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
                 	            if (isNotVal(gridPanel)) {
                 	            	gridPanel.getStore().loadPage(1);
@@ -214,13 +220,6 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                 		calculateSignComb.clearValue();
                 		var activeId = Ext.getCmp("RPCCalculateMaintainingTabPanel").getActiveTab().id;
             			if(activeId=="RPCCalculateMaintainingPanel"){
-            				var gridPanel = Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id");
-            				if (isNotVal(gridPanel)) {
-            					gridPanel.getStore().load();
-            				}else{
-            					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
-            				}
-            				
             				var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
             				if (isNotVal(bbar)) {
             					if(bbar.getStore().isEmptyStore){
@@ -256,13 +255,6 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                 		calculateSignComb.clearValue();
                 		var activeId = Ext.getCmp("RPCCalculateMaintainingTabPanel").getActiveTab().id;
             			if(activeId=="RPCCalculateMaintainingPanel"){
-            				var gridPanel = Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id");
-            				if (isNotVal(gridPanel)) {
-            					gridPanel.getStore().load();
-            				}else{
-            					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
-            				}
-            				
             				var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
             				if (isNotVal(bbar)) {
             					if(bbar.getStore().isEmptyStore){
@@ -293,13 +285,6 @@ Ext.define("AP.view.dataMaintaining.RPCCalculateMaintainingInfoView", {
                 handler: function (v, o) {
                 	var activeId = Ext.getCmp("RPCCalculateMaintainingTabPanel").getActiveTab().id;
         			if(activeId=="RPCCalculateMaintainingPanel"){
-        				var gridPanel = Ext.getCmp("RPCCalculateMaintainingWellListGridPanel_Id");
-        				if (isNotVal(gridPanel)) {
-        					gridPanel.getStore().load();
-        				}else{
-        					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
-        				}
-        				
         				var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
         				if (isNotVal(bbar)) {
         					if(bbar.getStore().isEmptyStore){

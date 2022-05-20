@@ -1,5 +1,8 @@
 package com.cosog.service.back;
 
+import java.io.IOException;
+import java.lang.reflect.Proxy;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.engine.jdbc.SerializableClobProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +47,7 @@ import com.cosog.utils.LicenseMap.License;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import oracle.sql.CLOB;
 import redis.clients.jedis.Jedis;
 
 @Service("wellInformationManagerService")
@@ -675,10 +680,10 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		getBaseDao().saveOrUpdateObject(r);
 	}
 	
-	public String savePumpingModelHandsontableData(PumpingModelHandsontableChangedData pumpingModelHandsontableChangedData) throws Exception {
+	public String savePumpingModelHandsontableData(PumpingModelHandsontableChangedData pumpingModelHandsontableChangedData,String selectedRecordId,String pumpingUnitPTRData) throws Exception {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer collisionbuff = new StringBuffer();
-		List<PumpingModelHandsontableChangedData.Updatelist> list=getBaseDao().savePumpingModelHandsontableData(pumpingModelHandsontableChangedData);
+		List<PumpingModelHandsontableChangedData.Updatelist> list=getBaseDao().savePumpingModelHandsontableData(pumpingModelHandsontableChangedData,selectedRecordId,pumpingUnitPTRData);
 		int successCount=0;
 		int collisionCount=0;
 		collisionbuff.append("[");
@@ -1446,12 +1451,14 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public String doPumpingModelShow(Map map,Page pager,String deviceType,int recordCount) {
+	public String doPumpingModelShow(Map map,Page pager,String deviceType,int recordCount) throws SQLException, IOException {
 		StringBuffer result_json = new StringBuffer();
 		String ddicName="pumpingModelManager";
 		String columns=service.showTableHeadersColumns(ddicName);
 		String sql = "select t.id,t.manufacturer,t.model,t.stroke,decode(t.crankrotationdirection,'Anticlockwise','逆时针','Clockwise','顺时针','') as crankrotationdirection,"
-				+ " t.offsetangleofcrank,t.crankgravityradius,t.singlecrankweight,t.singlecrankpinweight,t.structuralunbalance,t.balanceweight "
+				+ " t.offsetangleofcrank,t.crankgravityradius,t.singlecrankweight,t.singlecrankpinweight,"
+				+ " t.structuralunbalance,t.balanceweight,"
+				+ " t.prtf "
 				+ " from tbl_pumpingmodel t"
 				+ " order by t.manufacturer,t.model";
 		
@@ -1462,6 +1469,15 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		result_json.append("{\"success\":true,\"totalCount\":"+list.size()+",\"columns\":"+columns+",\"totalRoot\":[");
 		for(int i=0;i<list.size();i++){
 			Object[] obj = (Object[]) list.get(i);
+			String prtf="[]";
+			if(obj[11]!=null){
+				SerializableClobProxy   proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[11]);
+				CLOB realClob = (CLOB) proxy.getWrappedClob(); 
+				prtf=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(!StringManagerUtils.isNotNull(prtf)){
+				prtf="[]";
+			}
 			result_json.append("{\"id\":\""+obj[0]+"\",");
 			result_json.append("\"manufacturer\":\""+obj[1]+"\",");
 			result_json.append("\"model\":\""+obj[2]+"\",");
@@ -1472,7 +1488,8 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			result_json.append("\"singleCrankWeight\":\""+obj[7]+"\",");
 			result_json.append("\"singleCrankPinWeight\":\""+obj[8]+"\",");
 			result_json.append("\"structuralUnbalance\":\""+obj[9]+"\",");
-			result_json.append("\"balanceWeight\":\""+obj[10]+"\"},");
+			result_json.append("\"balanceWeight\":\""+obj[10]+"\",");
+			result_json.append("\"prtf\":"+prtf+"},");
 		}
 		if(result_json.toString().endsWith(",")){
 			result_json.deleteCharAt(result_json.length() - 1);
@@ -1524,7 +1541,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			result_json.append("\"crankGravityRadius\":\""+obj[6]+"\",");
 			result_json.append("\"singleCrankWeight\":\""+obj[7]+"\",");
 			result_json.append("\"singleCrankPinWeight\":\""+obj[8]+"\",");
-			result_json.append("\"structuralUnbalance\":\""+obj[9]+"\"}");
+			result_json.append("\"structuralUnbalance\":\""+obj[9]+"\",");
 			result_json.append("\"balanceWeight\":\""+obj[10]+"\"},");
 		}
 		if(result_json.toString().endsWith(",")){

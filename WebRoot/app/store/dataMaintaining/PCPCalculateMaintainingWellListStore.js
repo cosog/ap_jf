@@ -64,17 +64,27 @@ Ext.define('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore', {
     						}else{
     							Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
     						}
-    						var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
-    						if (isNotVal(bbar)) {
-    							if(bbar.getStore().isEmptyStore){
-    								var PCPCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
-    								bbar.setStore(PCPCalculateMaintainingDataStore);
-    							}else{
-    								bbar.getStore().loadPage(1);
-    							}
-    						}else{
-    							Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
-    						}
+    						var activeId = Ext.getCmp("PCPCalculateMaintainingTabPanel").getActiveTab().id;
+    	        			if(activeId=="PCPCalculateMaintainingPanel"){
+    	        				var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
+    	        				if (isNotVal(bbar)) {
+    	        					if(bbar.getStore().isEmptyStore){
+    	        						var PCPCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+    	        						bbar.setStore(PCPCalculateMaintainingDataStore);
+    	        					}else{
+    	        						bbar.getStore().loadPage(1);
+    	        					}
+    	        				}else{
+    	        					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
+    	        				}
+    	        			}else if(activeId=="PCPTotalCalculateMaintainingPanel"){
+    	        				var gridPanel = Ext.getCmp("PCPTotalCalculateMaintainingDataGridPanel_Id");
+    	        	            if (isNotVal(gridPanel)) {
+    	        	            	gridPanel.getStore().loadPage(1);
+    	        	            }else{
+    	        	            	Ext.create("AP.store.dataMaintaining.PCPTotalCalculateMaintainingDataStore");
+    	        	            }
+    	        			}
                     	},
                     	select: function(grid, record, index, eOpts) {
                     		

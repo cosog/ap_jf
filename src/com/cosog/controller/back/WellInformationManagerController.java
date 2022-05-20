@@ -2,6 +2,7 @@ package com.cosog.controller.back;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -357,7 +358,7 @@ public class WellInformationManagerController extends BaseController {
 	}
 	
 	@RequestMapping("/doPumpingModelShow")
-	public String doPumpingModelShow() throws IOException {
+	public String doPumpingModelShow() throws IOException, SQLException {
 		Map<String, Object> map = new HashMap<String, Object>();
 		int recordCount =StringManagerUtils.stringToInteger(ParamUtils.getParameter(request, "recordCount"));
 		int intPage = Integer.parseInt((page == null || page == "0") ? "1" : page);
@@ -675,10 +676,13 @@ public class WellInformationManagerController extends BaseController {
 	public String savePumpingModelHandsontableData() throws Exception {
 		HttpSession session=request.getSession();
 		String data = ParamUtils.getParameter(request, "data").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
+		String selectedRecordId = ParamUtils.getParameter(request, "selectedRecordId");
+		String pumpingUnitPTRData = ParamUtils.getParameter(request, "pumpingUnitPTRData");
 		Gson gson = new Gson();
 		java.lang.reflect.Type type = new TypeToken<PumpingModelHandsontableChangedData>() {}.getType();
 		PumpingModelHandsontableChangedData pumpingModelHandsontableChangedData=gson.fromJson(data, type);
-		String json=this.wellInformationManagerService.savePumpingModelHandsontableData(pumpingModelHandsontableChangedData);
+		String json=this.wellInformationManagerService.savePumpingModelHandsontableData(pumpingModelHandsontableChangedData,selectedRecordId,pumpingUnitPTRData);
+		
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();
