@@ -100,6 +100,12 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
                 					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingDataStore');
                 				}
                 			}else if(activeId=="PCPTotalCalculateMaintainingPanel"){
+                				var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
+                				if (isNotVal(gridPanel)) {
+                					gridPanel.getStore().load();
+                				}else{
+                					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
+                				}
                 				var gridPanel = Ext.getCmp("PCPTotalCalculateMaintainingDataGridPanel_Id");
                 	            if (isNotVal(gridPanel)) {
                 	            	gridPanel.getStore().loadPage(1);
@@ -211,12 +217,6 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
                 		calculateSignComb.clearValue();
                 		var activeId = Ext.getCmp("PCPCalculateMaintainingTabPanel").getActiveTab().id;
             			if(activeId=="PCPCalculateMaintainingPanel"){
-            				var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
-            				if (isNotVal(gridPanel)) {
-            					gridPanel.getStore().load();
-            				}else{
-            					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
-            				}
             				var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
             				if (isNotVal(bbar)) {
             					if(bbar.getStore().isEmptyStore){
@@ -252,12 +252,6 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
                 		calculateSignComb.clearValue();
                 		var activeId = Ext.getCmp("PCPCalculateMaintainingTabPanel").getActiveTab().id;
             			if(activeId=="PCPCalculateMaintainingPanel"){
-            				var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
-            				if (isNotVal(gridPanel)) {
-            					gridPanel.getStore().load();
-            				}else{
-            					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
-            				}
             				var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
             				if (isNotVal(bbar)) {
             					if(bbar.getStore().isEmptyStore){
@@ -288,12 +282,6 @@ Ext.define("AP.view.dataMaintaining.PCPCalculateMaintainingInfoView", {
                 handler: function (v, o) {
                 	var activeId = Ext.getCmp("PCPCalculateMaintainingTabPanel").getActiveTab().id;
         			if(activeId=="PCPCalculateMaintainingPanel"){
-        				var gridPanel = Ext.getCmp("PCPCalculateMaintainingWellListGridPanel_Id");
-        				if (isNotVal(gridPanel)) {
-        					gridPanel.getStore().load();
-        				}else{
-        					Ext.create('AP.store.dataMaintaining.PCPCalculateMaintainingWellListStore');
-        				}
         				var bbar=Ext.getCmp("PCPFESDiagramCalculateMaintainingBbar");
         				if (isNotVal(bbar)) {
         					if(bbar.getStore().isEmptyStore){

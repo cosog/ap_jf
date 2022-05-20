@@ -283,53 +283,6 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                 		border: false,
                 		tabPosition: 'top',
                 		items: [{
-                			title:'实时曲线',
-                			id:"RPCRealTimeMonitoringCurveTabPanel_Id",
-                			layout: 'border',
-                			items: [{
-                				region: 'center',
-                				layout: 'fit',
-                    			autoScroll: true,
-                    			border: false,
-                    			id:"rpcRealTimeMonitoringCurveContent",
-                    			html: '<div id="rpcRealTimeMonitoringCurveContainer" class="hbox" style="width:100%;height:100%;"></div>',
-                    			listeners: {
-                                    resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                                    	var container=$('#rpcRealTimeMonitoringCurveContainer');
-            		        			if(container!=undefined && container.length>0){
-            		        				var containerChildren=container[0].children;
-            		        				if(containerChildren!=undefined && containerChildren.length>0){
-            		        					for(var i=0;i<containerChildren.length;i++){
-            		        						var chart = $("#"+containerChildren[i].id).highcharts(); 
-            		        						if(isNotVal(chart)){
-            		        							chart.setSize($("#"+containerChildren[i].id).offsetWidth, $("#"+containerChildren[i].id).offsetHeight, true);
-            		        						}
-            		        					}
-            		        				}
-            		        			}
-                                    }
-                                }
-                			}]
-                		},{
-                			title:'实时数据',
-                			id:"RPCRealTimeMonitoringTableTabPanel_Id",
-                			layout: 'border',
-                            border: false,
-                            items: [{
-                            	region: 'center',
-                            	header: false,
-                            	id: "RPCRealTimeMonitoringInfoDataPanel_Id",
-                            	layout: 'fit',
-                            	html:'<div class="RPCRealTimeMonitoringInfoDataTableInfoContainer" style="width:100%;height:100%;"><div class="con" id="RPCRealTimeMonitoringInfoDataTableInfoDiv_id"></div></div>',
-                            	listeners: {
-                                    resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                                    	if(rpcDeviceRealTimeMonitoringDataHandsontableHelper!=null && rpcDeviceRealTimeMonitoringDataHandsontableHelper.hot!=undefined){
-                                    		rpcDeviceRealTimeMonitoringDataHandsontableHelper.hot.refreshDimensions();
-                                    	}
-                                    }
-                                }
-                            }]
-                		},{
                         	title: '井筒分析',
                         	margin: '0 0 0 0',
                             padding: 0,
@@ -539,7 +492,54 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
 //                            	    }]
 //                            	}
                             ]
-                        }],
+                        },{
+                			title:'趋势曲线',
+                			id:"RPCRealTimeMonitoringCurveTabPanel_Id",
+                			layout: 'border',
+                			items: [{
+                				region: 'center',
+                				layout: 'fit',
+                    			autoScroll: true,
+                    			border: false,
+                    			id:"rpcRealTimeMonitoringCurveContent",
+                    			html: '<div id="rpcRealTimeMonitoringCurveContainer" class="hbox" style="width:100%;height:100%;"></div>',
+                    			listeners: {
+                                    resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                    	var container=$('#rpcRealTimeMonitoringCurveContainer');
+            		        			if(container!=undefined && container.length>0){
+            		        				var containerChildren=container[0].children;
+            		        				if(containerChildren!=undefined && containerChildren.length>0){
+            		        					for(var i=0;i<containerChildren.length;i++){
+            		        						var chart = $("#"+containerChildren[i].id).highcharts(); 
+            		        						if(isNotVal(chart)){
+            		        							chart.setSize($("#"+containerChildren[i].id).offsetWidth, $("#"+containerChildren[i].id).offsetHeight, true);
+            		        						}
+            		        					}
+            		        				}
+            		        			}
+                                    }
+                                }
+                			}]
+                		},{
+                			title:'动态数据',
+                			id:"RPCRealTimeMonitoringTableTabPanel_Id",
+                			layout: 'border',
+                            border: false,
+                            items: [{
+                            	region: 'center',
+                            	header: false,
+                            	id: "RPCRealTimeMonitoringInfoDataPanel_Id",
+                            	layout: 'fit',
+                            	html:'<div class="RPCRealTimeMonitoringInfoDataTableInfoContainer" style="width:100%;height:100%;"><div class="con" id="RPCRealTimeMonitoringInfoDataTableInfoDiv_id"></div></div>',
+                            	listeners: {
+                                    resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                                    	if(rpcDeviceRealTimeMonitoringDataHandsontableHelper!=null && rpcDeviceRealTimeMonitoringDataHandsontableHelper.hot!=undefined){
+                                    		rpcDeviceRealTimeMonitoringDataHandsontableHelper.hot.refreshDimensions();
+                                    	}
+                                    }
+                                }
+                            }]
+                		}],
                 		listeners: {
             				tabchange: function (tabPanel, newCard,oldCard, obj) {
             					var selectRow= Ext.getCmp("RPCRealTimeMonitoringInfoDeviceListSelectRow_Id").getValue();

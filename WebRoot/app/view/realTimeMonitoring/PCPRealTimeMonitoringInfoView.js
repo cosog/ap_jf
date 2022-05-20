@@ -246,7 +246,7 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                 		border: false,
                 		tabPosition: 'top',
                 		items: [{
-                			title:'实时曲线',
+                			title:'趋势曲线',
                 			id:"PCPRealTimeMonitoringCurveTabPanel_Id",
                 			layout: 'border',
                 			items: [{
@@ -283,7 +283,7 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
 //                                }
 //                            }
                 		},{
-                			title:'实时数据',
+                			title:'动态数据',
                 			id:"PCPRealTimeMonitoringTableTabPanel_Id",
                 			layout: 'border',
                             border: false,

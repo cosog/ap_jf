@@ -65,17 +65,27 @@ Ext.define('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore', {
     							Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingWellListStore');
     						}
     						
-    						var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
-    						if (isNotVal(bbar)) {
-    							if(bbar.getStore().isEmptyStore){
-    								var RPCCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
-    								bbar.setStore(RPCCalculateMaintainingDataStore);
-    							}else{
-    								bbar.getStore().loadPage(1);
-    							}
-    						}else{
-    							Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
-    						}
+    						var activeId = Ext.getCmp("RPCCalculateMaintainingTabPanel").getActiveTab().id;
+    	        			if(activeId=="RPCCalculateMaintainingPanel"){
+    	        				var bbar=Ext.getCmp("RPCFESDiagramCalculateMaintainingBbar");
+    	        				if (isNotVal(bbar)) {
+    	        					if(bbar.getStore().isEmptyStore){
+    	        						var RPCCalculateMaintainingDataStore=Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+    	        						bbar.setStore(RPCCalculateMaintainingDataStore);
+    	        					}else{
+    	        						bbar.getStore().loadPage(1);
+    	        					}
+    	        				}else{
+    	        					Ext.create('AP.store.dataMaintaining.RPCCalculateMaintainingDataStore');
+    	        				}
+    	        			}else if(activeId=="RPCTotalCalculateMaintainingPanel"){
+    	        				var gridPanel = Ext.getCmp("RPCTotalCalculateMaintainingDataGridPanel_Id");
+    	        	            if (isNotVal(gridPanel)) {
+    	        	            	gridPanel.getStore().loadPage(1);
+    	        	            }else{
+    	        	            	Ext.create("AP.store.dataMaintaining.RPCTotalCalculateMaintainingDataStore");
+    	        	            }
+    	        			}
                     	},
                     	select: function(grid, record, index, eOpts) {
                     		

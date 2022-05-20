@@ -1263,7 +1263,7 @@ function deviceRealtimeMonitoringCurve(deviceType){
                 	divId = divPrefix + i+"_Id";
                 	var xTitle='';
                 	var yTitle=legendName[i];
-                	var title = result.deviceName+":"+legendName[i].split("(")[0] + "实时曲线";
+                	var title = result.deviceName+":"+legendName[i].split("(")[0] + "趋势曲线";
                 	var subtitle='';
         		    var color=[];
         		    color.push(colors[i]);

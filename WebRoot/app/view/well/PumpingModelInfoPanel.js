@@ -1,4 +1,5 @@
 var pumpingModelInfoHandsontableHelper = null;
+var pumpingUnitPTFHandsontableHelper=null;
 Ext.define('AP.view.well.PumpingModelInfoPanel', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.pumpingModelInfoPanel',
@@ -7,200 +8,225 @@ Ext.define('AP.view.well.PumpingModelInfoPanel', {
     border: false,
     initComponent: function () {
         Ext.apply(this, {
-            tbar: [{
-                id: 'PumpingModelSelectRow_Id',
-                xtype: 'textfield',
-                value: 0,
-                hidden: true
-            },{
-                id: 'PumpingModelSelectEndRow_Id',
-                xtype: 'textfield',
-                value: 0,
-                hidden: true
-            },{
-                xtype: "combobox",
-                fieldLabel: '辅件类型',
-                id: 'PumpingModelTypeComb_Id',
-                labelWidth: 60,
-                width: 170,
-                labelAlign: 'left',
-                triggerAction: 'all',
-                displayField: "boxval",
-                valueField: "boxkey",
-                selectOnFocus: true,
-                forceSelection: true,
-                value: '',
-                allowBlank: false,
-                editable: false,
-                emptyText: cosog.string.all,
-                blankText: cosog.string.all,
-                store: new Ext.data.SimpleStore({
-                    fields: ['boxkey', 'boxval'],
-                    data: [['', '选择全部'], [0, '泵辅件'], [1, '管辅件']]
-                }),
-                queryMode: 'local',
-                listeners: {
-                    select: function (v, o) {
+        	items: [{
+                layout: "border",
+                border: false,
+                tbar: [{
+                    id: 'PumpingModelSelectRow_Id',
+                    xtype: 'textfield',
+                    value: 0,
+                    hidden: true
+                },{
+                    id: 'PumpingModelSelectEndRow_Id',
+                    xtype: 'textfield',
+                    value: 0,
+                    hidden: true
+                },{
+                    xtype: "combobox",
+                    fieldLabel: '辅件类型',
+                    id: 'PumpingModelTypeComb_Id',
+                    hidden:true,
+                    labelWidth: 60,
+                    width: 170,
+                    labelAlign: 'left',
+                    triggerAction: 'all',
+                    displayField: "boxval",
+                    valueField: "boxkey",
+                    selectOnFocus: true,
+                    forceSelection: true,
+                    value: '',
+                    allowBlank: false,
+                    editable: false,
+                    emptyText: cosog.string.all,
+                    blankText: cosog.string.all,
+                    store: new Ext.data.SimpleStore({
+                        fields: ['boxkey', 'boxval'],
+                        data: [['', '选择全部'], [0, '泵辅件'], [1, '管辅件']]
+                    }),
+                    queryMode: 'local',
+                    listeners: {
+                        select: function (v, o) {
+                            CreateAndLoadPumpingModelInfoTable();
+                        }
+                    }
+                }, '-', {
+                    xtype: 'button',
+                    text: cosog.string.exportExcel,
+//                    pressed: true,
+                    iconCls: 'export',
+                    hidden: false,
+                    handler: function (v, o) {
+                        var fields = "";
+                        var heads = "";
+                        var deviceType = Ext.getCmp('PumpingModelTypeComb_Id').getValue();
+                        var url = context + '/wellInformationManagerController/exportPumpingModelData';
+                        for (var i = 0; i < pumpingModelInfoHandsontableHelper.colHeaders.length; i++) {
+                            fields += pumpingModelInfoHandsontableHelper.columns[i].data + ",";
+                            heads += pumpingModelInfoHandsontableHelper.colHeaders[i] + ","
+                        }
+                        if (isNotVal(fields)) {
+                            fields = fields.substring(0, fields.length - 1);
+                            heads = heads.substring(0, heads.length - 1);
+                        }
+                        
+                        var fileName='抽油机信息';
+                        var title='抽油机信息';
+                        var param = "&fields=" + fields + "&heads=" + URLencode(URLencode(heads)) 
+                        + "&orgId=" + leftOrg_Id + "&deviceType=" + deviceType + "&recordCount=10000" 
+                        + "&fileName=" + URLencode(URLencode(fileName)) 
+                        + "&title=" + URLencode(URLencode(title));
+                        openExcelWindow(url + '?flag=true' + param);
+                    }
+                }, '-', {
+                    xtype: 'button',
+                    iconCls: 'note-refresh',
+                    text: cosog.string.refresh,
+//                    pressed: true,
+                    hidden: false,
+                    handler: function (v, o) {
                         CreateAndLoadPumpingModelInfoTable();
                     }
-                }
-            }, '-', {
-                xtype: 'button',
-                text: cosog.string.exportExcel,
-//                pressed: true,
-                iconCls: 'export',
-                hidden: false,
-                handler: function (v, o) {
-                    var fields = "";
-                    var heads = "";
-                    var deviceType = Ext.getCmp('PumpingModelTypeComb_Id').getValue();
-                    var url = context + '/wellInformationManagerController/exportPumpingModelData';
-                    for (var i = 0; i < pumpingModelInfoHandsontableHelper.colHeaders.length; i++) {
-                        fields += pumpingModelInfoHandsontableHelper.columns[i].data + ",";
-                        heads += pumpingModelInfoHandsontableHelper.colHeaders[i] + ","
-                    }
-                    if (isNotVal(fields)) {
-                        fields = fields.substring(0, fields.length - 1);
-                        heads = heads.substring(0, heads.length - 1);
-                    }
-                    
-                    var fileName='辅件设备';
-                    var title='辅件设备';
-                    if(deviceType===0){
-                    	fileName='泵辅件设备';
-                    	title='泵辅件设备';
-                    }else if(deviceType===1){
-                    	fileName='管辅件设备';
-                    	title='泵辅件设备';
-                    }
 
-                    var param = "&fields=" + fields + "&heads=" + URLencode(URLencode(heads)) 
-                    + "&orgId=" + leftOrg_Id + "&deviceType=" + deviceType + "&recordCount=10000" 
-                    + "&fileName=" + URLencode(URLencode(fileName)) 
-                    + "&title=" + URLencode(URLencode(title));
-                    openExcelWindow(url + '?flag=true' + param);
-                }
-            }, '-', {
-                xtype: 'button',
-                iconCls: 'note-refresh',
-                text: cosog.string.refresh,
-//                pressed: true,
-                hidden: false,
-                handler: function (v, o) {
-                    CreateAndLoadPumpingModelInfoTable();
-                }
-
-            },'-', {
-                id: 'PumpingModelTotalCount_Id',
-                xtype: 'component',
-                hidden: false,
-                tpl: cosog.string.totalCount + ': {count}',
-                style: 'margin-right:15px'
-            }, '->',{
-    			xtype: 'button',
-                text: '添加设备',
-                iconCls: 'add',
-                handler: function (v, o) {
-                	var window = Ext.create("AP.view.well.PumpingModelInfoWindow", {
-                        title: '添加设备'
-                    });
-                    window.show();
-                    Ext.getCmp("addFormPumpingModel_Id").show();
-                    Ext.getCmp("updateFormPumpingModel_Id").hide();
-                    return false;
-    			}
-    		}, '-',{
-    			xtype: 'button',
-    			text: '删除设备',
-    			iconCls: 'delete',
-    			handler: function (v, o) {
-    				var startRow= Ext.getCmp("PumpingModelSelectRow_Id").getValue();
-    				var endRow= Ext.getCmp("PumpingModelSelectEndRow_Id").getValue();
-    				if(startRow!=''&&endRow!=''){
-    					startRow=parseInt(startRow);
-    					endRow=parseInt(endRow);
-    					var deleteInfo='是否删除第'+(startRow+1)+"行~第"+(endRow+1)+"行数据";
-    					if(startRow==endRow){
-    						deleteInfo='是否删除第'+(startRow+1)+"行数据";
-    					}
-    					
-    					Ext.Msg.confirm(cosog.string.yesdel, deleteInfo, function (btn) {
-    			            if (btn == "yes") {
-    			            	for(var i=startRow;i<=endRow;i++){
-    	    						var rowdata = pumpingModelInfoHandsontableHelper.hot.getDataAtRow(i);
-    	    						if (rowdata[0] != null && parseInt(rowdata[0])>0) {
-    	    		                    pumpingModelInfoHandsontableHelper.delidslist.push(rowdata[0]);
-    	    		                }
-    	    					}
-    	    					var saveData={};
-    	    	            	saveData.updatelist=[];
-    	    	            	saveData.insertlist=[];
-    	    	            	saveData.delidslist=pumpingModelInfoHandsontableHelper.delidslist;
-    	    	            	Ext.Ajax.request({
-    	    	                    method: 'POST',
-    	    	                    url: context + '/wellInformationManagerController/savePumpingModelHandsontableData',
-    	    	                    success: function (response) {
-    	    	                        rdata = Ext.JSON.decode(response.responseText);
-    	    	                        if (rdata.success) {
-    	    	                        	Ext.MessageBox.alert("信息", "删除成功");
-    	    	                        	pumpingModelInfoHandsontableHelper.clearContainer();
-    	    	                            CreateAndLoadPumpingModelInfoTable();
-    	    	                        } else {
-    	    	                            Ext.MessageBox.alert("信息", "数据保存失败");
-    	    	                        }
-    	    	                    },
-    	    	                    failure: function () {
-    	    	                        Ext.MessageBox.alert("信息", "请求失败");
-    	    	                        pumpingModelInfoHandsontableHelper.clearContainer();
-    	    	                    },
-    	    	                    params: {
-    	    	                        data: JSON.stringify(saveData)
-    	    	                    }
-    	    	                });
-    			            }
-    			        });
-    				}else{
-    					Ext.MessageBox.alert("信息","请先选中要删除的行");
-    				}
-    			}
-    		}, '-', {
-                xtype: 'button',
-                itemId: 'savePumpingModelDataBtnId',
-                id: 'savePumpingModelDataBtn_Id',
-                disabled: false,
-                hidden: false,
-                text: cosog.string.save,
-                iconCls: 'save',
-                handler: function (v, o) {
-                    pumpingModelInfoHandsontableHelper.saveData();
-                }
-            },"-",{
-    			xtype: 'button',
-                text: '批量添加',
-                iconCls: 'batchAdd',
-                hidden: false,
-                handler: function (v, o) {
-                	var window = Ext.create("AP.view.well.BatchAddPumpingModelWindow", {
-                        title: '辅件设备批量添加'
-                    });
-                    window.show();
-                    return false;
-    			}
-    		}],
-            html: '<div class="PumpingModelContainer" style="width:100%;height:100%;"><div class="con" id="PumpingModelTableDiv_id"></div></div>',
+                },'-', {
+                    id: 'PumpingModelTotalCount_Id',
+                    xtype: 'component',
+                    hidden: false,
+                    tpl: cosog.string.totalCount + ': {count}',
+                    style: 'margin-right:15px'
+                }, '->',{
+        			xtype: 'button',
+                    text: '添加设备',
+                    iconCls: 'add',
+                    handler: function (v, o) {
+                    	var window = Ext.create("AP.view.well.PumpingModelInfoWindow", {
+                            title: '添加设备'
+                        });
+                        window.show();
+                        Ext.getCmp("addFormPumpingModel_Id").show();
+                        Ext.getCmp("updateFormPumpingModel_Id").hide();
+                        return false;
+        			}
+        		}, '-',{
+        			xtype: 'button',
+        			text: '删除设备',
+        			iconCls: 'delete',
+        			handler: function (v, o) {
+        				var startRow= Ext.getCmp("PumpingModelSelectRow_Id").getValue();
+        				var endRow= Ext.getCmp("PumpingModelSelectEndRow_Id").getValue();
+        				if(startRow!=''&&endRow!=''){
+        					startRow=parseInt(startRow);
+        					endRow=parseInt(endRow);
+        					var deleteInfo='是否删除第'+(startRow+1)+"行~第"+(endRow+1)+"行数据";
+        					if(startRow==endRow){
+        						deleteInfo='是否删除第'+(startRow+1)+"行数据";
+        					}
+        					
+        					Ext.Msg.confirm(cosog.string.yesdel, deleteInfo, function (btn) {
+        			            if (btn == "yes") {
+        			            	for(var i=startRow;i<=endRow;i++){
+        	    						var rowdata = pumpingModelInfoHandsontableHelper.hot.getDataAtRow(i);
+        	    						if (rowdata[0] != null && parseInt(rowdata[0])>0) {
+        	    		                    pumpingModelInfoHandsontableHelper.delidslist.push(rowdata[0]);
+        	    		                }
+        	    					}
+        	    					var saveData={};
+        	    	            	saveData.updatelist=[];
+        	    	            	saveData.insertlist=[];
+        	    	            	saveData.delidslist=pumpingModelInfoHandsontableHelper.delidslist;
+        	    	            	Ext.Ajax.request({
+        	    	                    method: 'POST',
+        	    	                    url: context + '/wellInformationManagerController/savePumpingModelHandsontableData',
+        	    	                    success: function (response) {
+        	    	                        rdata = Ext.JSON.decode(response.responseText);
+        	    	                        if (rdata.success) {
+        	    	                        	Ext.MessageBox.alert("信息", "删除成功");
+        	    	                        	pumpingModelInfoHandsontableHelper.clearContainer();
+        	    	                            CreateAndLoadPumpingModelInfoTable();
+        	    	                        } else {
+        	    	                            Ext.MessageBox.alert("信息", "数据保存失败");
+        	    	                        }
+        	    	                    },
+        	    	                    failure: function () {
+        	    	                        Ext.MessageBox.alert("信息", "请求失败");
+        	    	                        pumpingModelInfoHandsontableHelper.clearContainer();
+        	    	                    },
+        	    	                    params: {
+        	    	                        data: JSON.stringify(saveData)
+        	    	                    }
+        	    	                });
+        			            }
+        			        });
+        				}else{
+        					Ext.MessageBox.alert("信息","请先选中要删除的行");
+        				}
+        			}
+        		}, '-', {
+                    xtype: 'button',
+                    itemId: 'savePumpingModelDataBtnId',
+                    id: 'savePumpingModelDataBtn_Id',
+                    disabled: false,
+                    hidden: false,
+                    text: cosog.string.save,
+                    iconCls: 'save',
+                    handler: function (v, o) {
+                        pumpingModelInfoHandsontableHelper.saveData();
+                    }
+                },"-",{
+        			xtype: 'button',
+                    text: '批量添加',
+                    iconCls: 'batchAdd',
+                    hidden: false,
+                    handler: function (v, o) {
+                    	var window = Ext.create("AP.view.well.BatchAddPumpingModelWindow", {
+                            title: '辅件设备批量添加'
+                        });
+                        window.show();
+                        return false;
+        			}
+        		}],
+                items: [{
+                	region: 'center',
+                    layout: 'fit',
+                    title: '抽油机数据',
+                    border: false,
+                    html: '<div class="PumpingModelContainer" style="width:100%;height:100%;"><div class="con" id="PumpingModelTableDiv_id"></div></div>',
+                    listeners: {
+                        resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                            if (pumpingModelInfoHandsontableHelper != null && pumpingModelInfoHandsontableHelper.hot != null && pumpingModelInfoHandsontableHelper.hot != undefined) {
+                            	pumpingModelInfoHandsontableHelper.hot.refreshDimensions();
+                            }
+                        }
+                    }
+                }, {
+                    region: 'east',
+                    width: '33%',
+                    title: '抽油机位置扭矩因数',
+                    id: 'PumpingUnitPTFPanel_Id',
+                    collapsible: true, // 是否折叠
+                    split: true, // 竖折叠条
+                    border: false,
+                    html: '<div id="PumpingUnitPTFDiv_Id" style="width:100%;height:100%;"></div>',
+                    listeners: {
+                    	resize: function (abstractcomponent, adjWidth, adjHeight, options) {
+                    		if (pumpingUnitPTFHandsontableHelper != null && pumpingUnitPTFHandsontableHelper.hot != null && pumpingUnitPTFHandsontableHelper.hot != undefined) {
+                    			pumpingUnitPTFHandsontableHelper.hot.refreshDimensions();
+                            }
+                        }
+                    }
+                }]
+            }],
             listeners: {
-                resize: function (abstractcomponent, adjWidth, adjHeight, options) {
-                    if (pumpingModelInfoHandsontableHelper != null && pumpingModelInfoHandsontableHelper.hot != null && pumpingModelInfoHandsontableHelper.hot != undefined) {
-//                        CreateAndLoadPumpingModelInfoTable();
-                    	pumpingModelInfoHandsontableHelper.hot.refreshDimensions();
-                    }
-                },
                 beforeclose: function (panel, eOpts) {
                     if (pumpingModelInfoHandsontableHelper != null) {
                         if (pumpingModelInfoHandsontableHelper.hot != undefined) {
                             pumpingModelInfoHandsontableHelper.hot.destroy();
                         }
                         pumpingModelInfoHandsontableHelper = null;
+                    }if (pumpingUnitPTFHandsontableHelper != null) {
+                        if (pumpingUnitPTFHandsontableHelper.hot != undefined) {
+                        	pumpingUnitPTFHandsontableHelper.hot.destroy();
+                        }
+                        pumpingUnitPTFHandsontableHelper = null;
                     }
                 }
             }
@@ -224,38 +250,58 @@ function CreateAndLoadPumpingModelInfoTable(isNew) {
             var result = Ext.JSON.decode(response.responseText);
             if (pumpingModelInfoHandsontableHelper == null || pumpingModelInfoHandsontableHelper.hot == null || pumpingModelInfoHandsontableHelper.hot == undefined) {
                 pumpingModelInfoHandsontableHelper = PumpingModelInfoHandsontableHelper.createNew("PumpingModelTableDiv_id");
-                var colHeaders = "[";
-                var columns = "[";
-
-                for (var i = 0; i < result.columns.length; i++) {
-                    colHeaders += "'" + result.columns[i].header + "'";
-                    if (result.columns[i].dataIndex.toUpperCase() === "crankRotationDirection".toUpperCase()) {
-                    	columns += "{data:'" + result.columns[i].dataIndex + "',type:'dropdown',strict:true,allowInvalid:false,source:['顺时针', '逆时针']}";
-                    } else if (result.columns[i].dataIndex.toUpperCase() === "sort".toUpperCase()) {
-                        columns += "{data:'" + result.columns[i].dataIndex + "',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,pumpingModelInfoHandsontableHelper);}}";
-                    } else {
-                        columns += "{data:'" + result.columns[i].dataIndex + "'}";
-                    }
-                    if (i < result.columns.length - 1) {
-                        colHeaders += ",";
-                        columns += ",";
-                    }
-                }
-                colHeaders += "]";
-                columns += "]";
+//                var colHeaders = "[";
+//                var columns = "[";
+//
+//                for (var i = 0; i < result.columns.length; i++) {
+//                    colHeaders += "'" + result.columns[i].header + "'";
+//                    if (result.columns[i].dataIndex.toUpperCase() === "crankRotationDirection".toUpperCase()) {
+//                    	columns += "{data:'" + result.columns[i].dataIndex + "',type:'dropdown',strict:true,allowInvalid:false,source:['顺时针', '逆时针']}";
+//                    } else if (result.columns[i].dataIndex.toUpperCase() === "sort".toUpperCase()) {
+//                        columns += "{data:'" + result.columns[i].dataIndex + "',type:'text',allowInvalid: true, validator: function(val, callback){return handsontableDataCheck_Num_Nullable(val, callback,this.row, this.col,pumpingModelInfoHandsontableHelper);}}";
+//                    } else {
+//                        columns += "{data:'" + result.columns[i].dataIndex + "'}";
+//                    }
+//                    if (i < result.columns.length - 1) {
+//                        colHeaders += ",";
+//                        columns += ",";
+//                    }
+//                }
+//                colHeaders += "]";
+//                columns += "]";
+                
+                
+                var colHeaders="['序号','厂家','型号','冲程(m)','旋转方向','曲柄偏置角(°)','曲柄重心半径(m)','单块曲柄重量(kN)','单块曲柄销重量(kN)','结构不平衡重(kN)','平衡块重量(kN)']";
+                var columns="[{data:'id'},{data:'manufacturer'},{data:'model'},{data:'stroke'}," 
+                	+"{data:'crankRotationDirection',type:'dropdown',strict:true,allowInvalid:false,source:['顺时针', '逆时针']}," 
+                	+"{data:'offsetAngleOfCrank'},{data:'crankGravityRadius'},{data:'singleCrankWeight'},{data:'singleCrankPinWeight'}," 
+                	+"{data:'structuralUnbalance'},{data:'balanceWeight'}," 
+    				+"{data:'prtf'}]";
+                
                 pumpingModelInfoHandsontableHelper.colHeaders = Ext.JSON.decode(colHeaders);
                 pumpingModelInfoHandsontableHelper.columns = Ext.JSON.decode(columns);
                 pumpingModelInfoHandsontableHelper.createTable(result.totalRoot);
             } else {
                 pumpingModelInfoHandsontableHelper.hot.loadData(result.totalRoot);
             }
+            
+            var prtfData=[];
+            var manufacturer='';
+            var model='';
             if(result.totalRoot.length==0){
             	Ext.getCmp("PumpingModelSelectRow_Id").setValue('');
             	Ext.getCmp("PumpingModelSelectEndRow_Id").setValue('');
             }else{
             	Ext.getCmp("PumpingModelSelectRow_Id").setValue(0);
             	Ext.getCmp("PumpingModelSelectEndRow_Id").setValue(0);
+            	var row1=pumpingModelInfoHandsontableHelper.hot.getDataAtRow(0);
+            	manufacturer=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(0,1);
+            	model=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(0,2);
+            	prtfData=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(0,11);
             }
+			CreateAndLoadPumpingUnitPTFTable(prtfData,manufacturer,model);
+			
+			
             Ext.getCmp("PumpingModelTotalCount_Id").update({
                 count: result.totalCount
             });
@@ -299,7 +345,7 @@ var PumpingModelInfoHandsontableHelper = {
             	licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
             	data: data,
                 hiddenColumns: {
-                    columns: [0],
+                    columns: [0,11],
                     indicators: false
                 },
                 columns: pumpingModelInfoHandsontableHelper.columns,
@@ -340,6 +386,11 @@ var PumpingModelInfoHandsontableHelper = {
                     	}
                     	Ext.getCmp("PumpingModelSelectRow_Id").setValue(startRow);
                     	Ext.getCmp("PumpingModelSelectEndRow_Id").setValue(endRow);
+                    	
+                    	var manufacturer=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(startRow,1);
+                    	var model=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(startRow,2);
+                    	var prtfData=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(startRow,11);
+                    	CreateAndLoadPumpingUnitPTFTable(prtfData,manufacturer,model);
                 	}
                 },
                 afterDestroy: function () {
@@ -418,9 +469,30 @@ var PumpingModelInfoHandsontableHelper = {
         //保存数据
         pumpingModelInfoHandsontableHelper.saveData = function () {
             var IframeViewSelection = Ext.getCmp("IframeView_Id").getSelectionModel().getSelection();
-            //插入的数据的获取
+            var selectedRecordId=0;
+            var PumpingUnitPTRDataSaveData=[];
+            var row=parseInt(Ext.getCmp("PumpingModelSelectRow_Id").getValue());
+            if(Ext.getCmp("PumpingModelSelectRow_Id").getValue()!=''){
+            	selectedRecordId=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(row,0);
+            	var PumpingUnitPTRData=pumpingUnitPTFHandsontableHelper.hot.getData();
+            	for(var i=0;i<PumpingUnitPTRData.length;i++){
+            		if(PumpingUnitPTRData[i][0]!=null&&PumpingUnitPTRData[i][0]!="" && isNumber(PumpingUnitPTRData[i][0]) && isNumber(PumpingUnitPTRData[i][1]) && isNumber(PumpingUnitPTRData[i][2])){
+            			var data="{";
+                    	for(var j=0;j<pumpingUnitPTFHandsontableHelper.columns.length;j++){
+                    		data+="\""+pumpingUnitPTFHandsontableHelper.columns[j].data+"\":"+parseFloat(PumpingUnitPTRData[i][j])+"";
+                    		if(j<pumpingUnitPTFHandsontableHelper.columns.length-1){
+                    			data+=","
+                    		}
+                    	}
+                    	data+="}";
+                    	PumpingUnitPTRDataSaveData.push(Ext.JSON.decode(data));
+            		}
+            	}
+            }
+            
+            //插入的数据的获取 
             pumpingModelInfoHandsontableHelper.insertExpressCount();
-            if (JSON.stringify(pumpingModelInfoHandsontableHelper.AllData) != "{}" && pumpingModelInfoHandsontableHelper.validresult) {
+            if (pumpingModelInfoHandsontableHelper.validresult) {
                 Ext.Ajax.request({
                     method: 'POST',
                     url: context + '/wellInformationManagerController/savePumpingModelHandsontableData',
@@ -435,10 +507,12 @@ var PumpingModelInfoHandsontableHelper = {
                         		}
                         	}
                         	Ext.MessageBox.alert("信息", saveInfo);
-                            if(rdata.successCount>0){
-                            	pumpingModelInfoHandsontableHelper.clearContainer();
-                                CreateAndLoadPumpingModelInfoTable();
-                            }
+//                            if(rdata.successCount>0){
+//                            	pumpingModelInfoHandsontableHelper.clearContainer();
+//                                CreateAndLoadPumpingModelInfoTable();
+//                            }
+                            pumpingModelInfoHandsontableHelper.clearContainer();
+                            CreateAndLoadPumpingModelInfoTable();
                         } else {
                             Ext.MessageBox.alert("信息", "数据保存失败");
                         }
@@ -448,7 +522,9 @@ var PumpingModelInfoHandsontableHelper = {
                         pumpingModelInfoHandsontableHelper.clearContainer();
                     },
                     params: {
-                        data: JSON.stringify(pumpingModelInfoHandsontableHelper.AllData)
+                        data: JSON.stringify(pumpingModelInfoHandsontableHelper.AllData),
+                        selectedRecordId:selectedRecordId,
+                        pumpingUnitPTRData: JSON.stringify(PumpingUnitPTRDataSaveData)
                     }
                 });
             } else {
@@ -551,4 +627,77 @@ var PumpingModelInfoHandsontableHelper = {
 
         return pumpingModelInfoHandsontableHelper;
     }
+};
+
+function CreateAndLoadPumpingUnitPTFTable(data,manufacturer,model){
+	if (pumpingUnitPTFHandsontableHelper == null || pumpingUnitPTFHandsontableHelper.hot == null || pumpingUnitPTFHandsontableHelper.hot == undefined) {
+		pumpingUnitPTFHandsontableHelper = PumpingUnitPTFHandsontableHelper.createNew("PumpingUnitPTFDiv_Id");
+		var colHeaders="['曲柄转角(°)','光杆位置因数(%)','扭矩因数(m)']";
+		var columns="[{data:'CrankAngle'},{data:'PR'},{data:'TF'}]";
+		pumpingUnitPTFHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
+		pumpingUnitPTFHandsontableHelper.columns=Ext.JSON.decode(columns);
+		if(data==undefined||data==null||data.length==0){
+			pumpingUnitPTFHandsontableHelper.createTable([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+		}else{
+			pumpingUnitPTFHandsontableHelper.createTable(data);
+		}
+	} else {
+        if(data==undefined||data==null||data.length==0){
+			pumpingUnitPTFHandsontableHelper.hot.loadData([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+		}else{
+			pumpingUnitPTFHandsontableHelper.hot.loadData(data);
+		}
+    }
+	
+	if(isNotVal(manufacturer)){
+		Ext.getCmp("PumpingUnitPTFPanel_Id").setTitle("<font color=red>"+manufacturer+"/"+model+"</font>位置扭矩因数");
+	}else{
+		Ext.getCmp("PumpingUnitPTFPanel_Id").setTitle("抽油机位置扭矩因数");
+	}
+	
+	
+	
+};
+
+var PumpingUnitPTFHandsontableHelper = {
+	    createNew: function (divid) {
+	        var pumpingUnitPTFHandsontableHelper = {};
+	        pumpingUnitPTFHandsontableHelper.hot1 = '';
+	        pumpingUnitPTFHandsontableHelper.divid = divid;
+	        pumpingUnitPTFHandsontableHelper.validresult=true;//数据校验
+	        pumpingUnitPTFHandsontableHelper.colHeaders=[];
+	        pumpingUnitPTFHandsontableHelper.columns=[];
+	        pumpingUnitPTFHandsontableHelper.AllData=[];
+	        
+	        pumpingUnitPTFHandsontableHelper.createTable = function (data) {
+	        	$('#'+pumpingUnitPTFHandsontableHelper.divid).empty();
+	        	var hotElement = document.querySelector('#'+pumpingUnitPTFHandsontableHelper.divid);
+	        	pumpingUnitPTFHandsontableHelper.hot = new Handsontable(hotElement, {
+	        		data: data,
+	        		licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
+//	                hiddenColumns: {
+//	                    columns: [0],
+//	                    indicators: false
+//	                },
+	                columns:pumpingUnitPTFHandsontableHelper.columns,
+	                stretchH: 'all',//延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
+	                autoWrapRow: true,
+	                rowHeaders: true,//显示行头
+	                colHeaders:pumpingUnitPTFHandsontableHelper.colHeaders,//显示列头
+	                columnSorting: true,//允许排序
+	                sortIndicator: true,
+	                manualColumnResize:true,//当值为true时，允许拖动，当为false时禁止拖动
+	                manualRowResize:true,//当值为true时，允许拖动，当为false时禁止拖动
+	                filters: true,
+	                renderAllRows: true,
+	                search: true
+	        	});
+	        }
+	        //保存数据
+	        pumpingUnitPTFHandsontableHelper.saveData = function () {}
+	        pumpingUnitPTFHandsontableHelper.clearContainer = function () {
+	        	pumpingUnitPTFHandsontableHelper.AllData = [];
+	        }
+	        return pumpingUnitPTFHandsontableHelper;
+	    }
 };

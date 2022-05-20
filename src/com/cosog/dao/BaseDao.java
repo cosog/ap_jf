@@ -1611,11 +1611,15 @@ public class BaseDao extends HibernateDaoSupport {
 	}
 	
 	@SuppressWarnings("resource")
-	public List<PumpingModelHandsontableChangedData.Updatelist> savePumpingModelHandsontableData(PumpingModelHandsontableChangedData pumpingModelHandsontableChangedData) throws SQLException {
+	public List<PumpingModelHandsontableChangedData.Updatelist> savePumpingModelHandsontableData(PumpingModelHandsontableChangedData pumpingModelHandsontableChangedData,String selectedRecordId,String pumpingUnitPTRData) throws SQLException {
 		Connection conn=SessionFactoryUtils.getDataSource(getSessionFactory()).getConnection();
 		CallableStatement cs=null;
 		PreparedStatement ps=null;
 		List<PumpingModelHandsontableChangedData.Updatelist> collisionList=new ArrayList<PumpingModelHandsontableChangedData.Updatelist>();
+		
+		CLOB prtfClob_S=new CLOB((OracleConnection) conn);
+		prtfClob_S = oracle.sql.CLOB.createTemporary(conn,false,1);
+		prtfClob_S.putString(1, pumpingUnitPTRData);
 		try {
 			cs = conn.prepareCall("{call prd_update_pumpingmodel(?,?,?,?,?,?,?,?,?,?,?,?,?)}");
 			if(pumpingModelHandsontableChangedData.getUpdatelist()!=null){
@@ -1672,6 +1676,12 @@ public class BaseDao extends HibernateDaoSupport {
 				String delSql="delete from tbl_pumpingmodel t where t.id in ("+StringUtils.join(pumpingModelHandsontableChangedData.getDelidslist(), ",")+")";
 				ps=conn.prepareStatement(delSql);
 				int result=ps.executeUpdate();
+			}
+			if(StringManagerUtils.stringToInteger(selectedRecordId)>0){
+				List<String> clobCont=new ArrayList<String>();
+				clobCont.add(pumpingUnitPTRData);
+				String updatePRTFClobSql="update tbl_pumpingmodel t set t.prtf=? where t.id="+selectedRecordId;
+				executeSqlUpdateClob(updatePRTFClobSql,clobCont);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

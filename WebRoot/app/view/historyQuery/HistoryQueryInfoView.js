@@ -334,7 +334,7 @@ function deviceHistoryQueryCurve(deviceType){
 		    if(tickInterval<100){
 		    	tickInterval=100;
 		    }
-		    var title = result.deviceName + "历史曲线";
+		    var title = result.deviceName + "趋势曲线";
 		    var xTitle='采集时间';
 		    var legendName =result.curveItems;
 		    

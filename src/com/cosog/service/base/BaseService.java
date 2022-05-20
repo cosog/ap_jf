@@ -1031,7 +1031,7 @@ public class BaseService<T> {
 			if(newsql.indexOf("exists")>=0){
 				newsql=newsql.split("exists")[0];
 			}
-			String[] sqlplit = newsql.split("from");
+			String[] sqlplit = newsql.split(" where ")[0].split("from");
 			// 获得第一个select -from 之间信息
 			String getPt="";
 			String getsql="";
