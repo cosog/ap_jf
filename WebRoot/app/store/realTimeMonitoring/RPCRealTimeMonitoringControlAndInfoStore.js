@@ -25,7 +25,7 @@ Ext.define('AP.store.realTimeMonitoring.RPCRealTimeMonitoringControlAndInfoStore
         	var auxiliaryDeviceList=get_rawData.auxiliaryDeviceList;
         	var deviceControlList=get_rawData.deviceControlList;
         	
-        	//设备附加信息
+        	//设备信息
         	var deviceInfoDataStr="{\"items\":[";
         	for(var i=0;i<deviceInfoDataList.length;i++){
         		deviceInfoDataStr+="{\"item\":\""+deviceInfoDataList[i].name+"\",\"value\":\""+deviceInfoDataList[i].value+"\"},";
@@ -51,7 +51,7 @@ Ext.define('AP.store.realTimeMonitoring.RPCRealTimeMonitoringControlAndInfoStore
     		if(!isNotVal(deviceInfoGridPanel)){
     			deviceInfoGridPanel=Ext.create('Ext.grid.Panel', {
     				id:'RPCRealTimeMonitoringDeviceInfoDataGridPanel_Id',
-    				title:'附加信息',
+//    				title:'附加信息',
     				border: false,
     				columnLines: true,
     				forceFit: false,
@@ -80,80 +80,6 @@ Ext.define('AP.store.realTimeMonitoring.RPCRealTimeMonitoringControlAndInfoStore
     			Ext.getCmp("RPCRealTimeMonitoringRightDeviceInfoPanel").add(deviceInfoGridPanel);
     		}else{
     			deviceInfoGridPanel.reconfigure(deviceInfoStore);
-    		}
-        	
-    		//辅件设备
-    		var deviceAuxiliaryInfoDataStr="{\"items\":[";
-        	for(var i=0;i<auxiliaryDeviceList.length;i++){
-        		deviceAuxiliaryInfoDataStr+="{\"id\":"+auxiliaryDeviceList[i].id+","
-        		+"\"name\":\""+auxiliaryDeviceList[i].name+"\","
-        		+"\"model\":\""+auxiliaryDeviceList[i].model+"\","
-        		+"\"remark\":\""+auxiliaryDeviceList[i].remark+"\""
-        		+"},";
-        	}
-        	if(stringEndWith(deviceAuxiliaryInfoDataStr,",")){
-        		deviceAuxiliaryInfoDataStr = deviceAuxiliaryInfoDataStr.substring(0, deviceAuxiliaryInfoDataStr.length - 1);
-    		}
-        	deviceAuxiliaryInfoDataStr+="]}";
-        	
-        	var deviceAuxiliaryInfoStoreData=Ext.JSON.decode(deviceAuxiliaryInfoDataStr);
-        	var deviceAuxiliaryInfoStore=Ext.create('Ext.data.Store', {
-			    fields:['id', 'name','model','remark'],
-			    data:deviceAuxiliaryInfoStoreData,
-			    proxy: {
-			        type: 'memory',
-			        reader: {
-			            type: 'json',
-			            root: 'items'
-			        }
-			    }
-			});
-        	var deviceAuxiliaryInfoGridPanel=Ext.getCmp("RPCRealTimeMonitoringAuxiliaryDeviceInfoDataGridPanel_Id");
-    		if(!isNotVal(deviceAuxiliaryInfoGridPanel)){
-    			deviceAuxiliaryInfoGridPanel=Ext.create('Ext.grid.Panel', {
-    				id:'RPCRealTimeMonitoringAuxiliaryDeviceInfoDataGridPanel_Id',
-    				xtype: 'row-expander-grid',
-    				border: false,
-    				columnLines: true,
-    				forceFit: false,
-    				store: deviceAuxiliaryInfoStore,
-    			    columns: [
-    			    	{ 
-    			        	header: '序号',  
-    			        	xtype: 'rownumberer',
-    			        	align: 'center',
-    			        	width: 50
-    			        },
-    			        { 
-    			        	header: '名称', 
-    			        	dataIndex: 'name',
-    			        	align:'center',
-    			        	flex:10,
-    			        	renderer:function(value){
-    			        		return "<span data-qtip=\""+(value==undefined?"":value)+"\">"+(value==undefined?"":value)+"</span>";
-    			        	}
-    			        }
-    			    ],
-    			    plugins: [{
-    			        ptype: 'rowexpander',
-    			        rowBodyTpl : new Ext.XTemplate(
-    			            '<p><b>规格型号:</b> {model}</p>',
-    			            '<p><b>备注:</b> {remark}</p>',
-    			        {
-    			            formatChange: function(v){
-    			                var color = v >= 0 ? 'green' : 'red';
-    			                return '<span style="color: ' + color + ';">' + Ext.util.Format.usMoney(v) + '</span>';
-    			            }
-    			        })
-    			    }]
-    			});
-    			Ext.getCmp("RPCRealTimeMonitoringRightAuxiliaryDeviceInfoPanel").add(deviceAuxiliaryInfoGridPanel);
-    		}else{
-    			deviceAuxiliaryInfoGridPanel.reconfigure(deviceAuxiliaryInfoStore);
-    		}
-    		var total=deviceAuxiliaryInfoGridPanel.getStore().getCount();
-    		if(total>0&&Ext.getCmp("RPCRealTimeMonitoringRightTabPanel").getActiveTab().id!="RPCRealTimeMonitoringRightControlPanel"){
-    			deviceAuxiliaryInfoGridPanel.plugins[0].toggleRow(0,0);
     		}
     		
         	//控制
