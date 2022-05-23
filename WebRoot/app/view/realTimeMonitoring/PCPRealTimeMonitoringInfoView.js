@@ -321,7 +321,7 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                 		}
                     },{
                     	region: 'east',
-                    	width: '20%',
+                    	width: '25%',
                     	xtype: 'tabpanel',
                     	id:"PCPRealTimeMonitoringRightTabPanel",
                 		activeTab: 0,
@@ -354,6 +354,7 @@ Ext.define("AP.view.realTimeMonitoring.PCPRealTimeMonitoringInfoView", {
                 				height: '50%',
                 				border: false,
                                 layout: 'fit',
+                                hidden:true,
                                 split: true,
                                 collapsible: true,
                                 autoScroll: true,

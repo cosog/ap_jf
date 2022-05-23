@@ -347,7 +347,11 @@ public class RealTimeMonitoringController extends BaseController {
 		String wellName = ParamUtils.getParameter(request, "wellName");
 		deviceType = ParamUtils.getParameter(request, "deviceType");
 		this.pager = new Page("pagerForm", request);
-		json = realTimeMonitoringService.getDeviceControlandInfoData(deviceId,wellName,deviceType,user.getUserNo());
+		if(StringManagerUtils.stringToInteger(deviceType)==1){
+			json = realTimeMonitoringService.getPCPDeviceControlandInfoData(deviceId,wellName,deviceType,user);
+		}else{
+			json = realTimeMonitoringService.getRPCDeviceControlandInfoData(deviceId,wellName,deviceType,user);
+		}
 		//HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("application/json;charset="
 				+ Constants.ENCODING_UTF8);

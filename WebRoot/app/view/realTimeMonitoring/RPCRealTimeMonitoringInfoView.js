@@ -560,7 +560,7 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                 		}
                     },{
                     	region: 'east',
-                    	width: '20%',
+                    	width: '25%',
                     	xtype: 'tabpanel',
                     	id:"RPCRealTimeMonitoringRightTabPanel",
                 		activeTab: 0,
@@ -594,6 +594,7 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                 				border: false,
                                 layout: 'fit',
                                 split: true,
+                                hidden:true,
                                 collapsible: true,
                                 autoScroll: true,
                                 scrollable: true

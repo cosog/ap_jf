@@ -2119,18 +2119,12 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		return result_json.toString().replaceAll("null", "");
 	}
 	
-	
-	public String getDeviceControlandInfoData(String deviceId,String wellName,String deviceType,int userId)throws Exception {
+	public String getRPCDeviceControlandInfoData(String deviceId,String wellName,String deviceType,User user)throws Exception {
 		StringBuffer result_json = new StringBuffer();
 		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
 		String deviceTableName="tbl_rpcdevice";
-		String infoTableName="tbl_rpcdeviceaddinfo";
 		String columnsKey="rpcDeviceAcquisitionItemColumns";
-		if(StringManagerUtils.stringToInteger(deviceType)==1){
-			deviceTableName="tbl_pcpdevice";
-			infoTableName="tbl_pcpdeviceaddinfo";
-			columnsKey="pcpDeviceAcquisitionItemColumns";
-		}
+		String deviceInfoKey="RPCDeviceInfo";
 		
 		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
 		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
@@ -2138,31 +2132,37 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		}
 		Map<String,String> loadedAcquisitionItemColumnsMap=acquisitionItemColumnsMap.get(columnsKey);
 		
-		String isControlSql="select t2.role_flag from tbl_user t,tbl_role t2 where t.user_type=t2.role_id and t.user_no="+userId;
+		Jedis jedis=null;
+		RPCDeviceInfo deviceInfo=null;
+		UserInfo userInfo=null;
+		try{
+			jedis = new Jedis();
+			if(!jedis.exists(deviceInfoKey.getBytes())){
+				MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+			}
+			byte[] dviceInfoByte =jedis.hget(deviceInfoKey.getBytes(),deviceId.getBytes());
+			Object obj =SerializeObjectUnils.unserizlize(dviceInfoByte);
+			if (obj instanceof RPCDeviceInfo) {
+				deviceInfo=(RPCDeviceInfo)obj;
+			}
+
+			if(!jedis.exists("UserInfo".getBytes())){
+				MemoryDataManagerTask.loadUserInfo(null);
+			}
+			userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), user.getUserId().getBytes()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		String protocolItemsSql="select t.wellname,t3.protocol, "
 				+ " listagg(t4.itemname, ',') within group(order by t4.unitid,t4.sort,t4.id,t4.bitindex ) key,"
 				+ " listagg(decode(t4.sort,null,9999,t4.sort), ',') within group(order by t4.unitid,t4.sort,t4.id,t4.bitindex ) sort "
 				+ " from "+deviceTableName+" t,tbl_protocoldisplayinstance t2,tbl_display_unit_conf t3,tbl_display_items2unit_conf t4 "
 				+ " where t.displayinstancecode=t2.code and t2.displayunitid=t3.id and t3.id=t4.unitid and t4.type=2 "
 				+ " and t.id="+deviceId
-				+ " and decode(t4.showlevel,null,9999,t4.showlevel)>=( select r.showlevel from tbl_role r,tbl_user u where u.user_type=r.role_id and u.user_no="+userId+" )"
+				+ " and decode(t4.showlevel,null,9999,t4.showlevel)>=( select r.showlevel from tbl_role r,tbl_user u where u.user_type=r.role_id and u.user_no="+user.getUserNo()+" )"
 				+ " group by t.wellname,t3.protocol";
-		String auxiliaryDeviceSql="select t3.id,t3.name,t3.model,t3.remark "
-				+ " from "+deviceTableName+" t,tbl_auxiliary2master t2,tbl_auxiliarydevice t3 "
-				+ " where t.id=t2.masterid and t2.auxiliaryid=t3.id and t.id="+deviceId
-				+ " order by t3.sort,t3.name";
-		String deviceAddInfoSql = "select t2.id,t2.itemname,t2.itemvalue||decode(t2.itemunit,null,'','','','('||t2.itemunit||')') as itemvalue "
-				+ " from "+deviceTableName+" t,"+infoTableName+" t2 "
-				+ " where t.id=t2.wellid and t.id="+deviceId
-				+ " order by t2.id";
-		
-		List<?> isControlList = this.findCallSql(isControlSql);
 		List<?> itemsList = this.findCallSql(protocolItemsSql);
-		List<?> auxiliaryDeviceQueryList = this.findCallSql(auxiliaryDeviceSql);
-		List<?> deviceAddInfoList = this.findCallSql(deviceAddInfoSql);
-		
-		String isControl=isControlList.size()>0?isControlList.get(0).toString():"0";
-		
+		int isControl=userInfo==null?userInfo.getRoleFlag():0;
 		
 		List<String> controlItems=new ArrayList<String>();
 		List<String> controlColumns=new ArrayList<String>();
@@ -2170,10 +2170,8 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		List<String> controlItemMeaningList=new ArrayList<String>();
 		StringBuffer deviceInfoDataList=new StringBuffer();
 		StringBuffer deviceControlList=new StringBuffer();
-		StringBuffer auxiliaryDeviceList=new StringBuffer();
 		deviceInfoDataList.append("[");
 		deviceControlList.append("[");
-		auxiliaryDeviceList.append("[");
 		
 		String protocolCode="";
 		for(int i=0;i<itemsList.size();i++){
@@ -2229,25 +2227,153 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			}
 		}
 		
-		//辅件设备
-		for(int i=0;i<auxiliaryDeviceQueryList.size();i++){
-			Object[] obj=(Object[]) auxiliaryDeviceQueryList.get(i);
-			auxiliaryDeviceList.append("{\"id\":"+obj[0]+","
-					+ "\"name\":\""+obj[1]+"\","
-					+ "\"model\":\""+obj[2]+"\","
-					+ "\"remark\":\""+obj[3]+"\"},");
+		//设备信息
+		if(deviceInfo!=null){
+			deviceInfoDataList.append("{\"name\":\"抽油机厂家\","+ "\"value\":\""+(deviceInfo.getPumpingUnit()!=null?deviceInfo.getPumpingUnit().getManufacturer():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"抽油机型号\","+ "\"value\":\""+(deviceInfo.getPumpingUnit()!=null?deviceInfo.getPumpingUnit().getModel():"")+"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"原油密度(g/cm^3)\","+ "\"value\":\""+(deviceInfo.getFluidPVT()!=null?deviceInfo.getFluidPVT().getCrudeOilDensity():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"水密度(g/cm^3)\","+ "\"value\":\""+(deviceInfo.getFluidPVT()!=null?deviceInfo.getFluidPVT().getWaterDensity():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"天然气相对密度\","+ "\"value\":\""+(deviceInfo.getFluidPVT()!=null?deviceInfo.getFluidPVT().getNaturalGasRelativeDensity():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"饱和压力(MPa)\","+ "\"value\":\""+(deviceInfo.getFluidPVT()!=null?deviceInfo.getFluidPVT().getSaturationPressure():"")+"\"},");
+
+			deviceInfoDataList.append("{\"name\":\"油层中部深度(m)\","+ "\"value\":\""+(deviceInfo.getReservoir()!=null?deviceInfo.getReservoir().getDepth():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"油层中部温度(℃)\","+ "\"value\":\""+(deviceInfo.getReservoir()!=null?deviceInfo.getReservoir().getTemperature():"")+"\"},");
+
+			deviceInfoDataList.append("{\"name\":\"油压(MPa)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getTubingPressure():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"套压(MPa)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getCasingPressure():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"井口温度(℃)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getWellHeadTemperature():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"含水率(%)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getWaterCut():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"生产气油比(m^3/t)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getProductionGasOilRatio():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"动液面(m)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getProducingfluidLevel():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵挂(m)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getPumpSettingDepth():"")+"\"},");
+		
+			
+			String pumpType="";
+			String barrelType="";
+			if(deviceInfo.getPump()!=null&&deviceInfo.getPump().getPumpType()!=null){
+				if("R".equalsIgnoreCase(deviceInfo.getPump().getPumpType())){
+					pumpType="杆式泵";
+				}else if("T".equalsIgnoreCase(deviceInfo.getPump().getPumpType())){
+					pumpType="管式泵";
+				}
+			}
+			if(deviceInfo.getPump()!=null&&deviceInfo.getPump().getBarrelType()!=null){
+				if("L".equalsIgnoreCase(deviceInfo.getPump().getBarrelType())){
+					barrelType="组合泵";
+				}else if("H".equalsIgnoreCase(deviceInfo.getPump().getBarrelType())){
+					barrelType="整筒泵";
+				}
+			}
+			deviceInfoDataList.append("{\"name\":\"泵类型\","+ "\"value\":\""+pumpType+"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵筒类型\","+ "\"value\":\""+barrelType+"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵级别\","+ "\"value\":\""+(deviceInfo.getPump()!=null?deviceInfo.getPump().getPumpGrade():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵径(mm)\","+ "\"value\":\""+(deviceInfo.getPump()!=null?deviceInfo.getPump().getPumpBoreDiameter()*1000:"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"柱塞长(m)\","+ "\"value\":\""+(deviceInfo.getPump()!=null?deviceInfo.getPump().getPlungerLength():"")+"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"油管内径(mm)\","+ "\"value\":\""+(deviceInfo.getTubingString()!=null&&deviceInfo.getTubingString().getEveryTubing()!=null&&deviceInfo.getTubingString().getEveryTubing().size()>0?deviceInfo.getTubingString().getEveryTubing().get(0).getInsideDiameter()*1000:"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"套管内径(mm)\","+ "\"value\":\""+(deviceInfo.getCasingString()!=null&&deviceInfo.getCasingString().getEveryCasing()!=null&&deviceInfo.getCasingString().getEveryCasing().size()>0?deviceInfo.getCasingString().getEveryCasing().get(0).getInsideDiameter()*1000:"")+"\"},");
+			
+			
+			String rodGrade1="",rodOutsideDiameter1="",rodInsideDiameter1="",rodLength1="";
+			String rodGrade2="",rodOutsideDiameter2="",rodInsideDiameter2="",rodLength2="";
+			String rodGrade3="",rodOutsideDiameter3="",rodInsideDiameter3="",rodLength3="";
+			String rodGrade4="",rodOutsideDiameter4="",rodInsideDiameter4="",rodLength4="";
+			if(deviceInfo.getRodString()!=null&&deviceInfo.getRodString().getEveryRod()!=null&&deviceInfo.getRodString().getEveryRod().size()>0){
+				if(deviceInfo.getRodString().getEveryRod().size()>0){
+					rodGrade1=deviceInfo.getRodString().getEveryRod().get(0).getGrade();
+					rodOutsideDiameter1=deviceInfo.getRodString().getEveryRod().get(0).getOutsideDiameter()*1000+"";
+					rodInsideDiameter1=deviceInfo.getRodString().getEveryRod().get(0).getInsideDiameter()*1000+"";
+					rodLength1=deviceInfo.getRodString().getEveryRod().get(0).getLength()+"";
+				}
+				if(deviceInfo.getRodString().getEveryRod().size()>1){
+					rodGrade2=deviceInfo.getRodString().getEveryRod().get(1).getGrade();
+					rodOutsideDiameter2=deviceInfo.getRodString().getEveryRod().get(1).getOutsideDiameter()*1000+"";
+					rodInsideDiameter2=deviceInfo.getRodString().getEveryRod().get(1).getInsideDiameter()*1000+"";
+					rodLength2=deviceInfo.getRodString().getEveryRod().get(1).getLength()+"";
+				}
+				if(deviceInfo.getRodString().getEveryRod().size()>2){
+					rodGrade3=deviceInfo.getRodString().getEveryRod().get(2).getGrade();
+					rodOutsideDiameter3=deviceInfo.getRodString().getEveryRod().get(2).getOutsideDiameter()*1000+"";
+					rodInsideDiameter3=deviceInfo.getRodString().getEveryRod().get(2).getInsideDiameter()*1000+"";
+					rodLength3=deviceInfo.getRodString().getEveryRod().get(2).getLength()+"";
+				}
+				if(deviceInfo.getRodString().getEveryRod().size()>3){
+					rodGrade4=deviceInfo.getRodString().getEveryRod().get(3).getGrade();
+					rodOutsideDiameter4=deviceInfo.getRodString().getEveryRod().get(3).getOutsideDiameter()*1000+"";
+					rodInsideDiameter4=deviceInfo.getRodString().getEveryRod().get(3).getInsideDiameter()*1000+"";
+					rodLength4=deviceInfo.getRodString().getEveryRod().get(3).getLength()+"";
+				}
+			}
+			
+			deviceInfoDataList.append("{\"name\":\"一级杆级别\",\"value\":\""+rodGrade1+"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆外径(mm)\",\"value\":\""+rodOutsideDiameter1+"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆内径(mm)\",\"value\":\""+rodInsideDiameter1+"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆长度(m)\",\"value\":\""+rodLength1+"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"二级杆级别\",\"value\":\""+rodGrade2+"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆外径(mm)\",\"value\":\""+rodOutsideDiameter2+"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆内径(mm)\",\"value\":\""+rodInsideDiameter2+"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆长度(m)\",\"value\":\""+rodLength2+"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"三级杆级别\",\"value\":\""+rodGrade3+"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆外径(mm)\",\"value\":\""+rodOutsideDiameter3+"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆内径(mm)\",\"value\":\""+rodInsideDiameter3+"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆长度(m)\",\"value\":\""+rodLength3+"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"四级杆级别\",\"value\":\""+rodGrade4+"\"},");
+			deviceInfoDataList.append("{\"name\":\"四级杆外径(mm)\",\"value\":\""+rodOutsideDiameter4+"\"},");
+			deviceInfoDataList.append("{\"name\":\"四级杆内径(mm)\",\"value\":\""+rodInsideDiameter4+"\"},");
+		}else{
+			deviceInfoDataList.append("{\"name\":\"抽油机厂家\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"抽油机型号\","+ "\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"原油密度(g/cm^3)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"水密度(g/cm^3)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"天然气相对密度\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"饱和压力(MPa)\","+ "\"value\":\"\"},");
+
+			deviceInfoDataList.append("{\"name\":\"油层中部深度(m)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"油层中部温度(℃)\","+ "\"value\":\"\"},");
+
+			deviceInfoDataList.append("{\"name\":\"油压(MPa)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"套压(MPa)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"井口温度(℃)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"含水率(%)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"生产气油比(m^3/t)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"动液面(m)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵挂(m)\","+ "\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"泵类型\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵筒类型\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵级别\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵径(mm)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"柱塞长(m)\","+ "\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"油管内径(mm)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"套管内径(mm)\","+ "\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"一级杆级别\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆外径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆内径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆长度(m)\",\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"二级杆级别\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆外径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆内径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆长度(m)\",\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"三级杆级别\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆外径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆内径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆长度(m)\",\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"四级杆级别\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"四级杆外径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"四级杆内径(mm)\",\"value\":\"\"},");
 		}
 		
-		if(auxiliaryDeviceList.toString().endsWith(",")){
-			auxiliaryDeviceList.deleteCharAt(auxiliaryDeviceList.length() - 1);
-		}
 		
-		//设备附加信息
-		for(int i=0;i<deviceAddInfoList.size();i++){
-			Object[] obj=(Object[]) deviceAddInfoList.get(i);
-			deviceInfoDataList.append("{\"name\":\""+obj[1]+"\","
-					+ "\"value\":\""+obj[2]+"\"},");
-		}
 		
 		if(deviceInfoDataList.toString().endsWith(",")){
 			deviceInfoDataList.deleteCharAt(deviceInfoDataList.length() - 1);
@@ -2258,9 +2384,6 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 		if(StringManagerUtils.stringToInteger(deviceType)>0){
 			tableName="tbl_pcpacqdata_latest";
 		}
-//		for(int i=0;i<controlColumns.size();i++){
-//			sql+=",t2."+controlColumns.get(i);
-//		}
 		sql+= " from "+deviceTableName+" t,"+tableName+" t2 where t.id=t2.wellid and t.id="+deviceId;
 		
 		result_json.append("{ \"success\":true,\"isControl\":"+isControl+",");
@@ -2280,12 +2403,284 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			}
 		}
 		deviceInfoDataList.append("]");
-		auxiliaryDeviceList.append("]");
 		deviceControlList.append("]");
 		result_json.append("\"deviceInfoDataList\":"+deviceInfoDataList+",");
-		result_json.append("\"auxiliaryDeviceList\":"+auxiliaryDeviceList+",");
 		result_json.append("\"deviceControlList\":"+deviceControlList);
 		result_json.append("}");
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
+		}
+		return result_json.toString().replaceAll("null", "");
+	}
+	
+	
+	public String getPCPDeviceControlandInfoData(String deviceId,String wellName,String deviceType,User user)throws Exception {
+		StringBuffer result_json = new StringBuffer();
+		int dataSaveMode=Config.getInstance().configFile.getOthers().getDataSaveMode();
+		String deviceTableName="tbl_pcpdevice";
+		String columnsKey="pcpDeviceAcquisitionItemColumns";
+		String deviceInfoKey="PCPDeviceInfo";
+		
+		Map<String, Map<String,String>> acquisitionItemColumnsMap=AcquisitionItemColumnsMap.getMapObject();
+		if(acquisitionItemColumnsMap==null||acquisitionItemColumnsMap.size()==0||acquisitionItemColumnsMap.get(columnsKey)==null){
+			EquipmentDriverServerTask.loadAcquisitionItemColumns(StringManagerUtils.stringToInteger(deviceType));
+		}
+		Map<String,String> loadedAcquisitionItemColumnsMap=acquisitionItemColumnsMap.get(columnsKey);
+		
+		Jedis jedis=null;
+		PCPDeviceInfo deviceInfo=null;
+		UserInfo userInfo=null;
+		try{
+			jedis = new Jedis();
+			if(!jedis.exists(deviceInfoKey.getBytes())){
+				MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+				
+			}
+			byte[] dviceInfoByte =jedis.hget(deviceInfoKey.getBytes(),deviceId.getBytes());
+			Object obj =SerializeObjectUnils.unserizlize(dviceInfoByte);
+			if (obj instanceof PCPDeviceInfo) {
+				deviceInfo=(PCPDeviceInfo)obj;
+			}
+
+			if(!jedis.exists("UserInfo".getBytes())){
+				MemoryDataManagerTask.loadUserInfo(null);
+			}
+			userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), user.getUserId().getBytes()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		String protocolItemsSql="select t.wellname,t3.protocol, "
+				+ " listagg(t4.itemname, ',') within group(order by t4.unitid,t4.sort,t4.id,t4.bitindex ) key,"
+				+ " listagg(decode(t4.sort,null,9999,t4.sort), ',') within group(order by t4.unitid,t4.sort,t4.id,t4.bitindex ) sort "
+				+ " from "+deviceTableName+" t,tbl_protocoldisplayinstance t2,tbl_display_unit_conf t3,tbl_display_items2unit_conf t4 "
+				+ " where t.displayinstancecode=t2.code and t2.displayunitid=t3.id and t3.id=t4.unitid and t4.type=2 "
+				+ " and t.id="+deviceId
+				+ " and decode(t4.showlevel,null,9999,t4.showlevel)>=( select r.showlevel from tbl_role r,tbl_user u where u.user_type=r.role_id and u.user_no="+user.getUserNo()+" )"
+				+ " group by t.wellname,t3.protocol";
+		List<?> itemsList = this.findCallSql(protocolItemsSql);
+		int isControl=userInfo==null?userInfo.getRoleFlag():0;
+		
+		List<String> controlItems=new ArrayList<String>();
+		List<String> controlColumns=new ArrayList<String>();
+		List<Integer> controlItemResolutionMode=new ArrayList<Integer>();
+		List<String> controlItemMeaningList=new ArrayList<String>();
+		StringBuffer deviceInfoDataList=new StringBuffer();
+		StringBuffer deviceControlList=new StringBuffer();
+		deviceInfoDataList.append("[");
+		deviceControlList.append("[");
+		
+		String protocolCode="";
+		for(int i=0;i<itemsList.size();i++){
+			Object[] obj=(Object[]) itemsList.get(i);
+			protocolCode=obj[1]+"";
+			String[] itemsArr=(obj[2]+"").split(",");
+			String[] itemsSortArr=(obj[3]+"").split(",");
+			ModbusProtocolConfig modbusProtocolConfig=MemoryDataManagerTask.getModbusProtocolConfig();
+			if(modbusProtocolConfig!=null&&modbusProtocolConfig.getProtocol()!=null){
+				for(int j=0;j<modbusProtocolConfig.getProtocol().size();j++){
+					if(protocolCode.equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(j).getCode())){
+						for(int m=0;m<itemsArr.length;m++){
+							for(int k=0;k<modbusProtocolConfig.getProtocol().get(j).getItems().size();k++){
+								if(itemsArr[m].equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getTitle())){
+									if("rw".equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getRWType())
+											||"w".equalsIgnoreCase(modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getRWType())){
+										String title=modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getTitle();
+										if(StringManagerUtils.isNotNull(modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getUnit())){
+											title+="("+modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getUnit()+")";
+										}
+										controlItems.add(title);
+										String col=dataSaveMode==0?("ADDR"+modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getAddr()):(loadedAcquisitionItemColumnsMap.get(modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getTitle()));
+										controlColumns.add(col);
+										controlItemResolutionMode.add(modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getResolutionMode());
+										if(modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getResolutionMode()==2){//数据量
+											controlItemMeaningList.add("[]");
+										}else if(modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getResolutionMode()==1){//枚举量
+											if(modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getMeaning()!=null && modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getMeaning().size()>0){
+												StringBuffer itemMeaning_buff = new StringBuffer();
+												itemMeaning_buff.append("[");
+												for(int n=0;n<modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getMeaning().size();n++){
+													itemMeaning_buff.append("["+modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getMeaning().get(n).getValue()+",'"+modbusProtocolConfig.getProtocol().get(j).getItems().get(k).getMeaning().get(n).getMeaning()+"'],");
+												}
+												if(itemMeaning_buff.toString().endsWith(",")){
+													itemMeaning_buff.deleteCharAt(itemMeaning_buff.length() - 1);
+												}
+												itemMeaning_buff.append("]");
+												controlItemMeaningList.add(itemMeaning_buff.toString());
+											}else{
+												controlItemMeaningList.add("[]");
+											}
+										}else{
+											controlItemMeaningList.add("[['true','开'],['false','关']]");
+										}
+									}
+									break;
+								}
+							}
+						}
+						break;
+					}
+				}
+			}
+		}
+		
+		//设备信息
+		if(deviceInfo!=null){
+			deviceInfoDataList.append("{\"name\":\"原油密度(g/cm^3)\","+ "\"value\":\""+(deviceInfo.getFluidPVT()!=null?deviceInfo.getFluidPVT().getCrudeOilDensity():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"水密度(g/cm^3)\","+ "\"value\":\""+(deviceInfo.getFluidPVT()!=null?deviceInfo.getFluidPVT().getWaterDensity():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"天然气相对密度\","+ "\"value\":\""+(deviceInfo.getFluidPVT()!=null?deviceInfo.getFluidPVT().getNaturalGasRelativeDensity():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"饱和压力(MPa)\","+ "\"value\":\""+(deviceInfo.getFluidPVT()!=null?deviceInfo.getFluidPVT().getSaturationPressure():"")+"\"},");
+
+			deviceInfoDataList.append("{\"name\":\"油层中部深度(m)\","+ "\"value\":\""+(deviceInfo.getReservoir()!=null?deviceInfo.getReservoir().getDepth():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"油层中部温度(℃)\","+ "\"value\":\""+(deviceInfo.getReservoir()!=null?deviceInfo.getReservoir().getTemperature():"")+"\"},");
+
+			deviceInfoDataList.append("{\"name\":\"油压(MPa)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getTubingPressure():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"套压(MPa)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getCasingPressure():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"井口温度(℃)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getWellHeadTemperature():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"含水率(%)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getWaterCut():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"生产气油比(m^3/t)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getProductionGasOilRatio():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"动液面(m)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getProducingfluidLevel():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵挂(m)\","+ "\"value\":\""+(deviceInfo.getProduction()!=null?deviceInfo.getProduction().getPumpSettingDepth():"")+"\"},");
+		
+			deviceInfoDataList.append("{\"name\":\"泵筒长(m)\","+ "\"value\":\""+(deviceInfo.getPump()!=null?deviceInfo.getPump().getBarrelLength():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵级数\","+ "\"value\":\""+(deviceInfo.getPump()!=null?deviceInfo.getPump().getBarrelSeries():"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"转子直径(mm)\","+ "\"value\":\""+(deviceInfo.getPump()!=null?deviceInfo.getPump().getRotorDiameter()*1000:"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"公称排量(ml/转)\","+ "\"value\":\""+(deviceInfo.getPump()!=null?deviceInfo.getPump().getQPR():"")+"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"油管内径(mm)\","+ "\"value\":\""+(deviceInfo.getTubingString()!=null&&deviceInfo.getTubingString().getEveryTubing()!=null&&deviceInfo.getTubingString().getEveryTubing().size()>0?deviceInfo.getTubingString().getEveryTubing().get(0).getInsideDiameter()*1000:"")+"\"},");
+			deviceInfoDataList.append("{\"name\":\"套管内径(mm)\","+ "\"value\":\""+(deviceInfo.getCasingString()!=null&&deviceInfo.getCasingString().getEveryCasing()!=null&&deviceInfo.getCasingString().getEveryCasing().size()>0?deviceInfo.getCasingString().getEveryCasing().get(0).getInsideDiameter()*1000:"")+"\"},");
+			
+			
+			String rodGrade1="",rodOutsideDiameter1="",rodInsideDiameter1="",rodLength1="";
+			String rodGrade2="",rodOutsideDiameter2="",rodInsideDiameter2="",rodLength2="";
+			String rodGrade3="",rodOutsideDiameter3="",rodInsideDiameter3="",rodLength3="";
+			String rodGrade4="",rodOutsideDiameter4="",rodInsideDiameter4="",rodLength4="";
+			if(deviceInfo.getRodString()!=null&&deviceInfo.getRodString().getEveryRod()!=null&&deviceInfo.getRodString().getEveryRod().size()>0){
+				if(deviceInfo.getRodString().getEveryRod().size()>0){
+					rodGrade1=deviceInfo.getRodString().getEveryRod().get(0).getGrade();
+					rodOutsideDiameter1=deviceInfo.getRodString().getEveryRod().get(0).getOutsideDiameter()*1000+"";
+					rodInsideDiameter1=deviceInfo.getRodString().getEveryRod().get(0).getInsideDiameter()*1000+"";
+					rodLength1=deviceInfo.getRodString().getEveryRod().get(0).getLength()+"";
+				}
+				if(deviceInfo.getRodString().getEveryRod().size()>1){
+					rodGrade2=deviceInfo.getRodString().getEveryRod().get(1).getGrade();
+					rodOutsideDiameter2=deviceInfo.getRodString().getEveryRod().get(1).getOutsideDiameter()*1000+"";
+					rodInsideDiameter2=deviceInfo.getRodString().getEveryRod().get(1).getInsideDiameter()*1000+"";
+					rodLength2=deviceInfo.getRodString().getEveryRod().get(1).getLength()+"";
+				}
+				if(deviceInfo.getRodString().getEveryRod().size()>2){
+					rodGrade3=deviceInfo.getRodString().getEveryRod().get(2).getGrade();
+					rodOutsideDiameter3=deviceInfo.getRodString().getEveryRod().get(2).getOutsideDiameter()*1000+"";
+					rodInsideDiameter3=deviceInfo.getRodString().getEveryRod().get(2).getInsideDiameter()*1000+"";
+					rodLength3=deviceInfo.getRodString().getEveryRod().get(2).getLength()+"";
+				}
+				if(deviceInfo.getRodString().getEveryRod().size()>3){
+					rodGrade4=deviceInfo.getRodString().getEveryRod().get(3).getGrade();
+					rodOutsideDiameter4=deviceInfo.getRodString().getEveryRod().get(3).getOutsideDiameter()*1000+"";
+					rodInsideDiameter4=deviceInfo.getRodString().getEveryRod().get(3).getInsideDiameter()*1000+"";
+					rodLength4=deviceInfo.getRodString().getEveryRod().get(3).getLength()+"";
+				}
+			}
+			
+			deviceInfoDataList.append("{\"name\":\"一级杆级别\",\"value\":\""+rodGrade1+"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆外径(mm)\",\"value\":\""+rodOutsideDiameter1+"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆内径(mm)\",\"value\":\""+rodInsideDiameter1+"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆长度(m)\",\"value\":\""+rodLength1+"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"二级杆级别\",\"value\":\""+rodGrade2+"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆外径(mm)\",\"value\":\""+rodOutsideDiameter2+"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆内径(mm)\",\"value\":\""+rodInsideDiameter2+"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆长度(m)\",\"value\":\""+rodLength2+"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"三级杆级别\",\"value\":\""+rodGrade3+"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆外径(mm)\",\"value\":\""+rodOutsideDiameter3+"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆内径(mm)\",\"value\":\""+rodInsideDiameter3+"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆长度(m)\",\"value\":\""+rodLength3+"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"四级杆级别\",\"value\":\""+rodGrade4+"\"},");
+			deviceInfoDataList.append("{\"name\":\"四级杆外径(mm)\",\"value\":\""+rodOutsideDiameter4+"\"},");
+			deviceInfoDataList.append("{\"name\":\"四级杆内径(mm)\",\"value\":\""+rodInsideDiameter4+"\"},");
+		}else{
+			deviceInfoDataList.append("{\"name\":\"原油密度(g/cm^3)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"水密度(g/cm^3)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"天然气相对密度\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"饱和压力(MPa)\","+ "\"value\":\"\"},");
+
+			deviceInfoDataList.append("{\"name\":\"油层中部深度(m)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"油层中部温度(℃)\","+ "\"value\":\"\"},");
+
+			deviceInfoDataList.append("{\"name\":\"油压(MPa)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"套压(MPa)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"井口温度(℃)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"含水率(%)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"生产气油比(m^3/t)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"动液面(m)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵挂(m)\","+ "\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"泵筒长(m)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"泵级数\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"转子直径(mm)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"公称排量(ml/转)\","+ "\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"油管内径(mm)\","+ "\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"套管内径(mm)\","+ "\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"一级杆级别\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆外径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆内径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"一级杆长度(m)\",\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"二级杆级别\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆外径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆内径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"二级杆长度(m)\",\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"三级杆级别\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆外径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆内径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"三级杆长度(m)\",\"value\":\"\"},");
+			
+			deviceInfoDataList.append("{\"name\":\"四级杆级别\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"四级杆外径(mm)\",\"value\":\"\"},");
+			deviceInfoDataList.append("{\"name\":\"四级杆内径(mm)\",\"value\":\"\"},");
+		}
+		
+		if(deviceInfoDataList.toString().endsWith(",")){
+			deviceInfoDataList.deleteCharAt(deviceInfoDataList.length() - 1);
+		}
+		
+		String tableName="tbl_rpcacqdata_latest";
+		String sql="select t2.commStatus ";
+		if(StringManagerUtils.stringToInteger(deviceType)>0){
+			tableName="tbl_pcpacqdata_latest";
+		}
+		sql+= " from "+deviceTableName+" t,"+tableName+" t2 where t.id=t2.wellid and t.id="+deviceId;
+		
+		result_json.append("{ \"success\":true,\"isControl\":"+isControl+",");
+		List<?> list = this.findCallSql(sql);
+		if(list.size()>0){
+			if(controlColumns.size()>0){
+//				Object[] obj=(Object[]) list.get(0);
+				result_json.append("\"commStatus\":\""+list.get(0)+"\",");
+				for(int i=0;i<controlColumns.size();i++){
+					deviceControlList.append("{\"title\":\""+controlItems.get(i)+"\",\"name\":\""+controlColumns.get(i)+"\",\"resolutionMode\":"+controlItemResolutionMode.get(i)+",\"value\":\"\",\"itemMeaning\":\""+controlItemMeaningList.get(i)+"\"},");
+				}
+				if(deviceControlList.toString().endsWith(",")){
+					deviceControlList.deleteCharAt(deviceControlList.length() - 1);
+				}
+			}else{
+				result_json.append("\"commStatus\":\""+list.get(0)+"\",");
+			}
+		}
+		deviceInfoDataList.append("]");
+		deviceControlList.append("]");
+		result_json.append("\"deviceInfoDataList\":"+deviceInfoDataList+",");
+		result_json.append("\"deviceControlList\":"+deviceControlList);
+		result_json.append("}");
+		if(jedis!=null){
+			jedis.disconnect();
+			jedis.close();
+		}
 		return result_json.toString().replaceAll("null", "");
 	}
 	
