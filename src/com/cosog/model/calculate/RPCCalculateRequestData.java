@@ -501,13 +501,19 @@ public class RPCCalculateRequestData implements Serializable {
 	public static class EveryBalance implements Serializable {
 		private static final long serialVersionUID = 1L;
 	    private float Weight;
-
+	    private float Position;
 	    public void setWeight(float Weight){
 	        this.Weight = Weight;
 	    }
 	    public float getWeight(){
 	        return this.Weight;
 	    }
+		public float getPosition() {
+			return Position;
+		}
+		public void setPosition(float position) {
+			Position = position;
+		}
 	}
 	
 	public static class Balance implements Serializable {

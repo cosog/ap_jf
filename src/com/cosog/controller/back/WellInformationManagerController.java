@@ -381,6 +381,22 @@ public class WellInformationManagerController extends BaseController {
 		return null;
 	}
 	
+	@RequestMapping("/getPumpingPRTFData")
+	public String getPumpingPRTFData() throws IOException, SQLException {
+		Map<String, Object> map = new HashMap<String, Object>();
+		String recordId= ParamUtils.getParameter(request, "recordId");
+		String stroke= ParamUtils.getParameter(request, "stroke");
+		
+		String json = this.wellInformationManagerService.getPumpingPRTFData(recordId,stroke);
+		response.setContentType("application/json;charset=" + Constants.ENCODING_UTF8);
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
 	@RequestMapping("/getBatchAddPumpingModelTableInfo")
 	public String getBatchAddPumpingModelTableInfo() throws IOException {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -677,12 +693,27 @@ public class WellInformationManagerController extends BaseController {
 		HttpSession session=request.getSession();
 		String data = ParamUtils.getParameter(request, "data").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
 		String selectedRecordId = ParamUtils.getParameter(request, "selectedRecordId");
-		String pumpingUnitPTRData = ParamUtils.getParameter(request, "pumpingUnitPTRData");
 		Gson gson = new Gson();
 		java.lang.reflect.Type type = new TypeToken<PumpingModelHandsontableChangedData>() {}.getType();
 		PumpingModelHandsontableChangedData pumpingModelHandsontableChangedData=gson.fromJson(data, type);
-		String json=this.wellInformationManagerService.savePumpingModelHandsontableData(pumpingModelHandsontableChangedData,selectedRecordId,pumpingUnitPTRData);
+		String json=this.wellInformationManagerService.savePumpingModelHandsontableData(pumpingModelHandsontableChangedData,selectedRecordId);
 		
+		response.setContentType("application/json;charset=utf-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter pw = response.getWriter();
+		pw.print(json);
+		log.warn("jh json is ==" + json);
+		pw.flush();
+		pw.close();
+		return null;
+	}
+	
+	@RequestMapping("/savePumpingPRTFData")
+	public String savePumpingPRTFData() throws Exception {
+		HttpSession session=request.getSession();
+		String data = ParamUtils.getParameter(request, "data").replaceAll("&nbsp;", "").replaceAll(" ", "").replaceAll("null", "");
+		String recordId = ParamUtils.getParameter(request, "recordId");
+		String json=this.wellInformationManagerService.savePumpingPRTFData(recordId,data);
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");
 		PrintWriter pw = response.getWriter();

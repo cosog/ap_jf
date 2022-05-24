@@ -320,6 +320,34 @@ public class MemoryDataManagerTask {
 		}
 	}
 	
+	public static void loadRPCDeviceInfoByPumpingId(String pumpingModelId){
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<String> wellList =new ArrayList<String>();
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		String sql="select t.id from tbl_rpcdevice t,tbl_pumpingmodel t2 where t.pumpingmodelid=t2.id and t2.id= "+pumpingModelId;
+		
+		try {
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				wellList.add(rs.getInt(1)+"");
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
+		if(wellList.size()>0){
+			loadRPCDeviceInfo(wellList,0);
+		}
+	}
+	
 	public static void loadPCPDeviceInfo(List<String> wellList,int condition){//condition 0 -设备ID 1-设备名称
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
