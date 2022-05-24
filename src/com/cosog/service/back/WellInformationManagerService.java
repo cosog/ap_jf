@@ -26,6 +26,7 @@ import com.cosog.model.RpcDeviceInformation;
 import com.cosog.model.SmsDeviceInformation;
 import com.cosog.model.User;
 import com.cosog.model.calculate.PCPProductionData;
+import com.cosog.model.calculate.PumpingPRTFData;
 import com.cosog.model.calculate.RPCProductionData;
 import com.cosog.model.data.DataDictionary;
 import com.cosog.model.drive.KafkaConfig;
@@ -680,10 +681,10 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		getBaseDao().saveOrUpdateObject(r);
 	}
 	
-	public String savePumpingModelHandsontableData(PumpingModelHandsontableChangedData pumpingModelHandsontableChangedData,String selectedRecordId,String pumpingUnitPTRData) throws Exception {
+	public String savePumpingModelHandsontableData(PumpingModelHandsontableChangedData pumpingModelHandsontableChangedData,String selectedRecordId) throws Exception {
 		StringBuffer result_json = new StringBuffer();
 		StringBuffer collisionbuff = new StringBuffer();
-		List<PumpingModelHandsontableChangedData.Updatelist> list=getBaseDao().savePumpingModelHandsontableData(pumpingModelHandsontableChangedData,selectedRecordId,pumpingUnitPTRData);
+		List<PumpingModelHandsontableChangedData.Updatelist> list=getBaseDao().savePumpingModelHandsontableData(pumpingModelHandsontableChangedData,selectedRecordId);
 		int successCount=0;
 		int collisionCount=0;
 		collisionbuff.append("[");
@@ -702,6 +703,57 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		
 		result_json.append("{\"success\":true,\"successCount\":"+successCount+",\"collisionCount\":"+collisionCount+",\"list\":"+collisionbuff+"}");
 		return result_json.toString().replaceAll("null", "");
+	}
+	
+	public String savePumpingPRTFData(String recordId,String data) throws Exception {
+		String result = "{success:true,msg:true}";
+		try{
+			Gson gson = new Gson();
+			java.lang.reflect.Type type=null;
+			type = new TypeToken<PumpingPRTFData.EveryStroke>() {}.getType();
+			PumpingPRTFData.EveryStroke everyStroke=gson.fromJson(data, type);
+			if(everyStroke!=null){
+				String sql = "select t.prtf from tbl_pumpingmodel t where t.id="+recordId;
+				PumpingPRTFData pumpingPRTFData=null;
+				List<String> clobCont=new ArrayList<String>();
+				List<?> list = this.findCallSql(sql);
+				if(list.size()>0){
+					String prtf="";
+					Object obj=(Object)list.get(0);
+					if(obj!=null){
+						SerializableClobProxy   proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj);
+						CLOB realClob = (CLOB) proxy.getWrappedClob(); 
+						prtf=StringManagerUtils.CLOBtoString(realClob);
+						type = new TypeToken<PumpingPRTFData>() {}.getType();
+						pumpingPRTFData=gson.fromJson(prtf, type);
+					}
+					if(pumpingPRTFData!=null&&pumpingPRTFData.getList()!=null&&pumpingPRTFData.getList().size()>0){
+						boolean exist=false;
+						for(int i=0;i<pumpingPRTFData.getList().size();i++){
+							if(pumpingPRTFData.getList().get(i).getStroke()==everyStroke.getStroke()){
+								pumpingPRTFData.getList().set(i, everyStroke);
+								exist=true;
+								break;
+							}
+						}
+						if(!exist){
+							pumpingPRTFData.getList().add(everyStroke);
+						}
+					}else{
+						pumpingPRTFData=new PumpingPRTFData();
+						pumpingPRTFData.setList(new ArrayList<PumpingPRTFData.EveryStroke>());
+						pumpingPRTFData.getList().add(everyStroke);
+					}
+					clobCont.add(gson.toJson(pumpingPRTFData));
+					String updatePRTFClobSql="update tbl_pumpingmodel t set t.prtf=? where t.id="+recordId;
+					getBaseDao().executeSqlUpdateClob(updatePRTFClobSql,clobCont);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = "{success:false,msg:false}";
+		}
+		return result;
 	}
 	
 	public String batchAddPumpingModel(PumpingModelHandsontableChangedData auxiliaryDeviceHandsontableChangedData,String isCheckout) throws Exception {
@@ -1451,14 +1503,87 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 	}
 	
 	@SuppressWarnings("rawtypes")
+	public String getPumpingPRTFData(String recordId,String stroke) throws SQLException, IOException {
+		StringBuffer result_json = new StringBuffer();
+		StringBuffer strokeListBuff = new StringBuffer();
+		String sql = "select t.stroke,t.prtf from tbl_pumpingmodel t where t.id="+recordId;
+		String json = "";
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		List<?> list = this.findCallSql(sql);
+		result_json.append("{\"success\":true,\"totalCount\":"+list.size()+",\"totalRoot\":[");
+		strokeListBuff.append("[");
+		if(list.size()>0){
+			Object[] obj = (Object[]) list.get(0);
+			String prtf="{}";
+			String strokeListData=obj[0].toString();
+			if(StringManagerUtils.isNotNull(strokeListData)){
+				String[] strokeArr=strokeListData.split(",");
+				for(int i=0;i<strokeArr.length;i++){
+					strokeListBuff.append("["+strokeArr[i]+","+strokeArr[i]+"],");
+					if((!StringManagerUtils.isNotNull(stroke)) && i==0){
+						stroke=strokeArr[i];
+					}
+				}
+			}
+			
+			if(obj[1]!=null){
+				SerializableClobProxy   proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[1]);
+				CLOB realClob = (CLOB) proxy.getWrappedClob(); 
+				prtf=StringManagerUtils.CLOBtoString(realClob);
+			}
+			if(!StringManagerUtils.isNotNull(prtf)){
+				prtf="{}";
+			}
+			type = new TypeToken<PumpingPRTFData>() {}.getType();
+			PumpingPRTFData pumpingPRTFData=gson.fromJson(prtf, type);
+			if(pumpingPRTFData!=null){
+				for(int i=0;i<pumpingPRTFData.getList().size();i++){
+					if(StringManagerUtils.isNotNull(stroke)){
+						if(pumpingPRTFData.getList().get(i).getStroke()==StringManagerUtils.stringToFloat(stroke)){
+							for(int j=0;j<pumpingPRTFData.getList().get(i).getPRTF().size();j++){
+								result_json.append("{\"CrankAngle\":\""+pumpingPRTFData.getList().get(i).getPRTF().get(j).getCrankAngle()+"\",");
+								result_json.append("\"PR\":\""+pumpingPRTFData.getList().get(i).getPRTF().get(j).getPR()+"\",");
+								result_json.append("\"TF\":\""+pumpingPRTFData.getList().get(i).getPRTF().get(j).getTF()+"\"},");
+							}
+							break;
+						}
+					}else{
+						if(i==0){
+							for(int j=0;j<pumpingPRTFData.getList().get(i).getPRTF().size();j++){
+								result_json.append("{\"CrankAngle\":\""+pumpingPRTFData.getList().get(i).getPRTF().get(j).getCrankAngle()+"\",");
+								result_json.append("\"PR\":\""+pumpingPRTFData.getList().get(i).getPRTF().get(j).getPR()+"\",");
+								result_json.append("\"TF\":\""+pumpingPRTFData.getList().get(i).getPRTF().get(j).getTF()+"\"},");
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+		if(strokeListBuff.toString().endsWith(",")){
+			strokeListBuff.deleteCharAt(strokeListBuff.length() - 1);
+		}
+		strokeListBuff.append("]");
+		if(result_json.toString().endsWith(",")){
+			result_json.deleteCharAt(result_json.length() - 1);
+		}
+		result_json.append("],");
+		result_json.append("\"strokeList\":"+strokeListBuff.toString());
+		result_json.append("}");
+		json=result_json.toString().replaceAll("null", "");
+		return json;
+	}
+	
+	@SuppressWarnings("rawtypes")
 	public String doPumpingModelShow(Map map,Page pager,String deviceType,int recordCount) throws SQLException, IOException {
 		StringBuffer result_json = new StringBuffer();
 		String ddicName="pumpingModelManager";
 		String columns=service.showTableHeadersColumns(ddicName);
 		String sql = "select t.id,t.manufacturer,t.model,t.stroke,decode(t.crankrotationdirection,'Anticlockwise','逆时针','Clockwise','顺时针','') as crankrotationdirection,"
 				+ " t.offsetangleofcrank,t.crankgravityradius,t.singlecrankweight,t.singlecrankpinweight,"
-				+ " t.structuralunbalance,t.balanceweight,"
-				+ " t.prtf "
+				+ " t.structuralunbalance,t.balanceweight"
+//				+ " t.prtf "
 				+ " from tbl_pumpingmodel t"
 				+ " order by t.manufacturer,t.model";
 		
@@ -1469,15 +1594,15 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		result_json.append("{\"success\":true,\"totalCount\":"+list.size()+",\"columns\":"+columns+",\"totalRoot\":[");
 		for(int i=0;i<list.size();i++){
 			Object[] obj = (Object[]) list.get(i);
-			String prtf="[]";
-			if(obj[11]!=null){
-				SerializableClobProxy   proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[11]);
-				CLOB realClob = (CLOB) proxy.getWrappedClob(); 
-				prtf=StringManagerUtils.CLOBtoString(realClob);
-			}
-			if(!StringManagerUtils.isNotNull(prtf)){
-				prtf="[]";
-			}
+//			String prtf="[]";
+//			if(obj[11]!=null){
+//				SerializableClobProxy   proxy = (SerializableClobProxy)Proxy.getInvocationHandler(obj[11]);
+//				CLOB realClob = (CLOB) proxy.getWrappedClob(); 
+//				prtf=StringManagerUtils.CLOBtoString(realClob);
+//			}
+//			if(!StringManagerUtils.isNotNull(prtf)){
+//				prtf="[]";
+//			}
 			result_json.append("{\"id\":\""+obj[0]+"\",");
 			result_json.append("\"manufacturer\":\""+obj[1]+"\",");
 			result_json.append("\"model\":\""+obj[2]+"\",");
@@ -1488,8 +1613,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 			result_json.append("\"singleCrankWeight\":\""+obj[7]+"\",");
 			result_json.append("\"singleCrankPinWeight\":\""+obj[8]+"\",");
 			result_json.append("\"structuralUnbalance\":\""+obj[9]+"\",");
-			result_json.append("\"balanceWeight\":\""+obj[10]+"\",");
-			result_json.append("\"prtf\":"+prtf+"},");
+			result_json.append("\"balanceWeight\":\""+obj[10]+"\"},");
 		}
 		if(result_json.toString().endsWith(",")){
 			result_json.deleteCharAt(result_json.length() - 1);

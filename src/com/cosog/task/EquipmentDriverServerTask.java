@@ -110,7 +110,7 @@ public class EquipmentDriverServerTask {
 	
 //		StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
 			
-			Thread.sleep(1000*60*10);
+			Thread.sleep(1000*60*1);
 		}
 		
 		

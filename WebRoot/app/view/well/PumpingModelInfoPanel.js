@@ -229,7 +229,11 @@ Ext.define('AP.view.well.PumpingModelInfoPanel', {
                         queryMode: 'local',
                         listeners: {
                             select: function (v, o) {
-                            	
+                            	var selectedRow=Ext.getCmp("PumpingModelSelectRow_Id").getValue();
+                            	var recordId=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(selectedRow,0);
+                            	var manufacturer=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(selectedRow,1);
+                            	var model=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(selectedRow,2);
+                            	CreateAndLoadPumpingUnitPTFTable(recordId,manufacturer,model,v.rawValue);
                             }
                         }
                     },'->', {
@@ -240,7 +244,7 @@ Ext.define('AP.view.well.PumpingModelInfoPanel', {
                         text: cosog.string.save,
                         iconCls: 'save',
                         handler: function (v, o) {
-                        	
+                        	pumpingUnitPTFHandsontableHelper.saveData();
                         }
                     }],
                     html: '<div id="PumpingUnitPTFDiv_Id" style="width:100%;height:100%;"></div>',
@@ -292,8 +296,7 @@ function CreateAndLoadPumpingModelInfoTable(isNew) {
                 var columns="[{data:'id'},{data:'manufacturer'},{data:'model'},{data:'stroke'}," 
                 	+"{data:'crankRotationDirection',type:'dropdown',strict:true,allowInvalid:false,source:['顺时针', '逆时针']}," 
                 	+"{data:'offsetAngleOfCrank'},{data:'crankGravityRadius'},{data:'singleCrankWeight'},{data:'singleCrankPinWeight'}," 
-                	+"{data:'structuralUnbalance'},{data:'balanceWeight'}," 
-    				+"{data:'prtf'}]";
+                	+"{data:'structuralUnbalance'},{data:'balanceWeight'}]";
                 pumpingModelInfoHandsontableHelper.colHeaders = Ext.JSON.decode(colHeaders);
                 pumpingModelInfoHandsontableHelper.columns = Ext.JSON.decode(columns);
                 pumpingModelInfoHandsontableHelper.createTable(result.totalRoot);
@@ -301,39 +304,22 @@ function CreateAndLoadPumpingModelInfoTable(isNew) {
                 pumpingModelInfoHandsontableHelper.hot.loadData(result.totalRoot);
             }
             
-            var prtfData=[];
             var manufacturer='';
             var model='';
-            var pumpingStrokeData=[];
+            var recordId=0;
             if(result.totalRoot.length==0){
             	Ext.getCmp("PumpingModelSelectRow_Id").setValue('');
             	Ext.getCmp("PumpingModelSelectEndRow_Id").setValue('');
             }else{
             	Ext.getCmp("PumpingModelSelectRow_Id").setValue(0);
             	Ext.getCmp("PumpingModelSelectEndRow_Id").setValue(0);
-            	var row1=pumpingModelInfoHandsontableHelper.hot.getDataAtRow(0);
+            	recordId=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(0,0);
             	manufacturer=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(0,1);
             	model=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(0,2);
-            	prtfData=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(0,11);
-            	
-            	var pumpingStrokeDataStr=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(0,3);
-            	if(isNotVal(pumpingStrokeDataStr)){
-            		var arr=pumpingStrokeDataStr.split(",");
-            		for(var i=0;i<arr.length;i++){
-            			pumpingStrokeData.push(Ext.JSON.decode('['+arr[i]+','+arr[i]+']'));
-            		}
-            	}
             }
-            
-			CreateAndLoadPumpingUnitPTFTable(prtfData,manufacturer,model);
-			Ext.getCmp("PumpingModelPRTFStrokeComb_Id").getStore().loadData(pumpingStrokeData);
-			if(pumpingStrokeData.length>0){
-				Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setValue(pumpingStrokeData[0][0]);
-				Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setRawValue(pumpingStrokeData[0][0]);
-			}else{
-				Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setValue('');
-				Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setRawValue('');
-			}
+            Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setValue('');
+			Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setRawValue('');
+			CreateAndLoadPumpingUnitPTFTable(recordId,manufacturer,model,'');
 			
             Ext.getCmp("PumpingModelTotalCount_Id").update({
                 count: result.totalCount
@@ -378,7 +364,7 @@ var PumpingModelInfoHandsontableHelper = {
             	licenseKey: '96860-f3be6-b4941-2bd32-fd62b',
             	data: data,
                 hiddenColumns: {
-                    columns: [0,11],
+                    columns: [0],
                     indicators: false
                 },
                 columns: pumpingModelInfoHandsontableHelper.columns,
@@ -419,27 +405,14 @@ var PumpingModelInfoHandsontableHelper = {
                     	}
                     	Ext.getCmp("PumpingModelSelectRow_Id").setValue(startRow);
                     	Ext.getCmp("PumpingModelSelectEndRow_Id").setValue(endRow);
-                    	
-                    	var pumpingStrokeData=[];
+                    	Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setValue('');
+            			Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setRawValue('');
+                    	var recordId=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(startRow,0);
                     	var manufacturer=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(startRow,1);
                     	var model=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(startRow,2);
-                    	var prtfData=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(startRow,11);
-                    	var pumpingStrokeDataStr=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(startRow,3);
-                    	if(isNotVal(pumpingStrokeDataStr)){
-                    		var arr=pumpingStrokeDataStr.split(",");
-                    		for(var i=0;i<arr.length;i++){
-                    			pumpingStrokeData.push(Ext.JSON.decode('['+arr[i]+','+arr[i]+']'));
-                    		}
-                    	}
-                    	Ext.getCmp("PumpingModelPRTFStrokeComb_Id").getStore().loadData(pumpingStrokeData);
-            			if(pumpingStrokeData.length>0){
-            				Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setValue(pumpingStrokeData[0][0]);
-            				Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setRawValue(pumpingStrokeData[0][0]);
-            			}else{
-            				Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setValue('');
-            				Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setRawValue('');
-            			}
-                    	CreateAndLoadPumpingUnitPTFTable(prtfData,manufacturer,model);
+                    	var stroke=Ext.getCmp("PumpingModelPRTFStrokeComb_Id").rawValue;
+                    	
+                    	CreateAndLoadPumpingUnitPTFTable(recordId,manufacturer,model,stroke);
                 	}
                 },
                 afterDestroy: function () {
@@ -519,24 +492,9 @@ var PumpingModelInfoHandsontableHelper = {
         pumpingModelInfoHandsontableHelper.saveData = function () {
             var IframeViewSelection = Ext.getCmp("IframeView_Id").getSelectionModel().getSelection();
             var selectedRecordId=0;
-            var PumpingUnitPTRDataSaveData=[];
             var row=parseInt(Ext.getCmp("PumpingModelSelectRow_Id").getValue());
             if(Ext.getCmp("PumpingModelSelectRow_Id").getValue()!=''){
             	selectedRecordId=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(row,0);
-            	var PumpingUnitPTRData=pumpingUnitPTFHandsontableHelper.hot.getData();
-            	for(var i=0;i<PumpingUnitPTRData.length;i++){
-            		if(PumpingUnitPTRData[i][0]!=null&&PumpingUnitPTRData[i][0]!="" && isNumber(PumpingUnitPTRData[i][0]) && isNumber(PumpingUnitPTRData[i][1]) && isNumber(PumpingUnitPTRData[i][2])){
-            			var data="{";
-                    	for(var j=0;j<pumpingUnitPTFHandsontableHelper.columns.length;j++){
-                    		data+="\""+pumpingUnitPTFHandsontableHelper.columns[j].data+"\":"+parseFloat(PumpingUnitPTRData[i][j])+"";
-                    		if(j<pumpingUnitPTFHandsontableHelper.columns.length-1){
-                    			data+=","
-                    		}
-                    	}
-                    	data+="}";
-                    	PumpingUnitPTRDataSaveData.push(Ext.JSON.decode(data));
-            		}
-            	}
             }
             
             //插入的数据的获取 
@@ -556,12 +514,10 @@ var PumpingModelInfoHandsontableHelper = {
                         		}
                         	}
                         	Ext.MessageBox.alert("信息", saveInfo);
-//                            if(rdata.successCount>0){
-//                            	pumpingModelInfoHandsontableHelper.clearContainer();
-//                                CreateAndLoadPumpingModelInfoTable();
-//                            }
-                            pumpingModelInfoHandsontableHelper.clearContainer();
-                            CreateAndLoadPumpingModelInfoTable();
+                            if(rdata.successCount>0){
+                            	pumpingModelInfoHandsontableHelper.clearContainer();
+                                CreateAndLoadPumpingModelInfoTable();
+                            }
                         } else {
                             Ext.MessageBox.alert("信息", "数据保存失败");
                         }
@@ -572,8 +528,7 @@ var PumpingModelInfoHandsontableHelper = {
                     },
                     params: {
                         data: JSON.stringify(pumpingModelInfoHandsontableHelper.AllData),
-                        selectedRecordId:selectedRecordId,
-                        pumpingUnitPTRData: JSON.stringify(PumpingUnitPTRDataSaveData)
+                        selectedRecordId:selectedRecordId
                     }
                 });
             } else {
@@ -678,34 +633,54 @@ var PumpingModelInfoHandsontableHelper = {
     }
 };
 
-function CreateAndLoadPumpingUnitPTFTable(data,manufacturer,model){
-	if (pumpingUnitPTFHandsontableHelper == null || pumpingUnitPTFHandsontableHelper.hot == null || pumpingUnitPTFHandsontableHelper.hot == undefined) {
-		pumpingUnitPTFHandsontableHelper = PumpingUnitPTFHandsontableHelper.createNew("PumpingUnitPTFDiv_Id");
-		var colHeaders="['曲柄转角(°)','光杆位置因数(%)','扭矩因数(m)']";
-		var columns="[{data:'CrankAngle'},{data:'PR'},{data:'TF'}]";
-		pumpingUnitPTFHandsontableHelper.colHeaders=Ext.JSON.decode(colHeaders);
-		pumpingUnitPTFHandsontableHelper.columns=Ext.JSON.decode(columns);
-		if(data==undefined||data==null||data.length==0){
-			pumpingUnitPTFHandsontableHelper.createTable([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
-		}else{
-			pumpingUnitPTFHandsontableHelper.createTable(data);
-		}
-	} else {
-        if(data==undefined||data==null||data.length==0){
-			pumpingUnitPTFHandsontableHelper.hot.loadData([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
-		}else{
-			pumpingUnitPTFHandsontableHelper.hot.loadData(data);
-		}
-    }
-	
+function CreateAndLoadPumpingUnitPTFTable(recordId,manufacturer,model,stroke){
 	if(isNotVal(manufacturer)){
 		Ext.getCmp("PumpingUnitPTFPanel_Id").setTitle("<font color=red>"+manufacturer+"/"+model+"</font>位置扭矩因数");
 	}else{
 		Ext.getCmp("PumpingUnitPTFPanel_Id").setTitle("抽油机位置扭矩因数");
 	}
-	
-	
-	
+	Ext.Ajax.request({
+        method: 'POST',
+        url: context + '/wellInformationManagerController/getPumpingPRTFData',
+        success: function (response) {
+            var result = Ext.JSON.decode(response.responseText);
+            
+            
+        	Ext.getCmp("PumpingModelPRTFStrokeComb_Id").getStore().loadData(result.strokeList);
+			if(result.strokeList.length>0){
+				var pumpingModelPRTFStrokeCombValeu=Ext.getCmp("PumpingModelPRTFStrokeComb_Id").getValue();
+				if(!isNotVal(pumpingModelPRTFStrokeCombValeu)){
+					Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setValue(result.strokeList[0][0]);
+					Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setRawValue(result.strokeList[0][0]);
+				}
+			}else{
+				Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setValue('');
+				Ext.getCmp("PumpingModelPRTFStrokeComb_Id").setRawValue('');
+			}
+            
+            if (pumpingUnitPTFHandsontableHelper == null || pumpingUnitPTFHandsontableHelper.hot == null || pumpingUnitPTFHandsontableHelper.hot == undefined) {
+            	pumpingUnitPTFHandsontableHelper = PumpingUnitPTFHandsontableHelper.createNew("PumpingUnitPTFDiv_Id");
+            	var colHeaders="['曲柄转角(°)','光杆位置因数(%)','扭矩因数(m)']";
+        		var columns="[{data:'CrankAngle'},{data:'PR'},{data:'TF'}]";
+        		pumpingUnitPTFHandsontableHelper.colHeaders = Ext.JSON.decode(colHeaders);
+        		pumpingUnitPTFHandsontableHelper.columns = Ext.JSON.decode(columns);
+        		pumpingUnitPTFHandsontableHelper.createTable(result.totalRoot);
+            }else {
+                if(result.totalRoot==0){
+                	pumpingUnitPTFHandsontableHelper.hot.loadData([{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+        		}else{
+        			pumpingUnitPTFHandsontableHelper.hot.loadData(result.totalRoot);
+        		}
+            }
+        },
+        failure: function () {
+            Ext.MessageBox.alert("错误", "与后台联系的时候出了问题");
+        },
+        params: {
+        	recordId: recordId,
+        	stroke:stroke
+        }
+    });
 };
 
 var PumpingUnitPTFHandsontableHelper = {
@@ -743,7 +718,49 @@ var PumpingUnitPTFHandsontableHelper = {
 	        	});
 	        }
 	        //保存数据
-	        pumpingUnitPTFHandsontableHelper.saveData = function () {}
+	        pumpingUnitPTFHandsontableHelper.saveData = function () {
+	            var selectedRecordId=0;
+	            var stroke=Ext.getCmp("PumpingModelPRTFStrokeComb_Id").rawValue;
+	            var row=parseInt(Ext.getCmp("PumpingModelSelectRow_Id").getValue());
+	            if(Ext.getCmp("PumpingModelSelectRow_Id").getValue()!=''){
+	            	selectedRecordId=pumpingModelInfoHandsontableHelper.hot.getDataAtCell(row,0);
+	            }
+	            var strokePRTFData={};
+	            strokePRTFData.Stroke=stroke;
+	            strokePRTFData.PRTF=[];
+	            var PRTFData=pumpingUnitPTFHandsontableHelper.hot.getData();
+	            for(var i=0;i<PRTFData.length;i++){
+	            	if(isNumber(PRTFData[i][0]) && isNumber(PRTFData[i][1]) && isNumber(PRTFData[i][2])){
+	            		var PRTF={};
+		            	PRTF.CrankAngle=parseFloat(PRTFData[i][0]);
+		            	PRTF.PR=parseFloat(PRTFData[i][1]);
+		            	PRTF.TF=parseFloat(PRTFData[i][2]);
+		            	strokePRTFData.PRTF.push(PRTF);
+	            	}
+	            }
+	            
+                Ext.Ajax.request({
+                    method: 'POST',
+                    url: context + '/wellInformationManagerController/savePumpingPRTFData',
+                    success: function (response) {
+                    	rdata = Ext.JSON.decode(response.responseText);
+                        if (rdata.success) {
+                        	var saveInfo='保存成功';
+                        	Ext.MessageBox.alert("信息", saveInfo);
+                        } else {
+                            Ext.MessageBox.alert("信息", "数据保存失败");
+                        }
+                    },
+                    failure: function () {
+                        Ext.MessageBox.alert("信息", "请求失败");
+                        pumpingUnitPTFHandsontableHelper.clearContainer();
+                    },
+                    params: {
+                        data: JSON.stringify(strokePRTFData),
+                        recordId:selectedRecordId
+                    }
+                });
+	        }
 	        pumpingUnitPTFHandsontableHelper.clearContainer = function () {
 	        	pumpingUnitPTFHandsontableHelper.AllData = [];
 	        }

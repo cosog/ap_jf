@@ -61,7 +61,7 @@ Ext.define('AP.store.realTimeMonitoring.RPCRealTimeMonitoringControlAndInfoStore
     			        	header: '名称',  
     			        	dataIndex: 'item',
     			        	align:'left',
-    			        	flex:9,
+    			        	flex:1,
     			        	renderer:function(value){
     			        		return "<span data-qtip=\""+(value==undefined?"":value)+"\">"+(value==undefined?"":value)+"</span>";
     			        	}
@@ -70,7 +70,7 @@ Ext.define('AP.store.realTimeMonitoring.RPCRealTimeMonitoringControlAndInfoStore
     			        	header: '变量', 
     			        	dataIndex: 'value',
     			        	align:'center',
-    			        	flex:10,
+    			        	flex:1,
     			        	renderer:function(value){
     			        		return "<span data-qtip=\""+(value==undefined?"":value)+"\">"+(value==undefined?"":value)+"</span>";
     			        	}
