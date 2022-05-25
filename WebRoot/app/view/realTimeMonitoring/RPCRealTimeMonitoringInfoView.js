@@ -570,13 +570,6 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                         header: false,
                 		tabPosition: 'top',
                 		items: [{
-                			title:'设备控制',
-                			id: 'RPCRealTimeMonitoringRightControlPanel',
-                            border: false,
-                            layout: 'fit',
-                            autoScroll: true,
-                            scrollable: true
-                		},{
                 			title:'设备信息',
                 			layout: 'border',
                 			items:[{
@@ -599,6 +592,13 @@ Ext.define("AP.view.realTimeMonitoring.RPCRealTimeMonitoringInfoView", {
                                 autoScroll: true,
                                 scrollable: true
                 			}]
+                		},{
+                			title:'设备控制',
+                			id: 'RPCRealTimeMonitoringRightControlPanel',
+                            border: false,
+                            layout: 'fit',
+                            autoScroll: true,
+                            scrollable: true
                 		}]
                     }],
                     listeners: {
