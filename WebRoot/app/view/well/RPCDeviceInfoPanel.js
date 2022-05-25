@@ -78,6 +78,7 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
                     }
                 }
             });
+        
         Ext.apply(this, {
             tbar: [rpcDeviceCombo, '-',{
                 id: 'RPCDeviceSelectRow_Id',
@@ -244,7 +245,6 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
                 	if (IframeViewSelection.length > 0) {
                 		selectedOrgName=foreachAndSearchOrgAbsolutePath(IframeViewStore.data.items,IframeViewSelection[0].data.orgId);
                 		selectedOrgId=IframeViewSelection[0].data.orgId;
-                		
                 	} else {
                 		if(count>0){
                 			selectedOrgName=IframeViewStore.getAt(0).data.text;
@@ -260,6 +260,34 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
                     Ext.getCmp("batchAddDeviceOrg_Id").setValue(selectedOrgId);
                     window.show();
                     return false;
+    			}
+    		},'-',{
+    			xtype: 'button',
+    			text:'excel导入',
+    			iconCls: 'upload',
+    			handler: function (v, o) {
+    				var selectedOrgName="";
+                	var selectedOrgId="";
+                	var IframeViewStore = Ext.getCmp("IframeView_Id").getStore();
+            		var count=IframeViewStore.getCount();
+                	var IframeViewSelection = Ext.getCmp("IframeView_Id").getSelectionModel().getSelection();
+                	if (IframeViewSelection.length > 0) {
+                		selectedOrgName=foreachAndSearchOrgAbsolutePath(IframeViewStore.data.items,IframeViewSelection[0].data.orgId);
+                		selectedOrgId=IframeViewSelection[0].data.orgId;
+                	} else {
+                		if(count>0){
+                			selectedOrgName=IframeViewStore.getAt(0).data.text;
+                			selectedOrgId=IframeViewStore.getAt(0).data.orgId;
+                		}
+                	}
+    				
+    				var window = Ext.create("AP.view.well.ExcelImportDeviceWindow", {
+                        title: '设备导入'
+                    });
+    				Ext.getCmp("excelImportDeviceWinOgLabel_Id").setHtml("设备将添加到【<font color=red>"+selectedOrgName+"</font>】下,请确认");
+                    Ext.getCmp("excelImportDeviceType_Id").setValue(101);
+                    Ext.getCmp("excelImportDeviceOrg_Id").setValue(selectedOrgId);
+                    window.show();
     			}
     		},'-', {
     			xtype: 'button',
@@ -1066,7 +1094,7 @@ var RPCPumpingModelHandsontableHelper = {
 	        
 	        rpcPumpingModelHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 	        
 	        rpcPumpingModelHandsontableHelper.createTable = function (data) {
@@ -1174,7 +1202,7 @@ var RPCProductionHandsontableHelper = {
 	        
 	        rpcProductionHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 
 	        rpcProductionHandsontableHelper.createTable = function (data) {
@@ -1341,7 +1369,7 @@ var RPCPumpingInfoHandsontableHelper = {
 	        
 	        rpcPumpingInfoHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 
 	        rpcPumpingInfoHandsontableHelper.createTable = function (data) {

@@ -1182,7 +1182,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		if (StringManagerUtils.isNotNull(wellInformationName)) {
 			WellInformation_Str = " and t.wellname like '%" + wellInformationName+ "%'";
 		}
-		String sql = "select id,orgName,wellName,applicationScenariosName,instanceName,instanceName,alarmInstanceName,signInId,slave,"
+		String sql = "select id,orgName,wellName,applicationScenariosName,instanceName,displayInstanceName,alarmInstanceName,signInId,slave,"
 				+ " videoUrl,sortNum,status,statusName"
 				+ " from "+tableName+" t where 1=1"
 				+ WellInformation_Str;

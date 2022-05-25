@@ -365,7 +365,7 @@ var ProtocolAlarmUnitConfigNumItemsHandsontableHelper = {
 	        
 	        protocolAlarmUnitConfigNumItemsHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 	        
 	        protocolAlarmUnitConfigNumItemsHandsontableHelper.createTable = function (data) {
@@ -483,7 +483,7 @@ var ProtocolAlarmUnitConfigCalNumItemsHandsontableHelper = {
 	        
 	        protocolAlarmUnitConfigCalNumItemsHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 	        
 	        protocolAlarmUnitConfigCalNumItemsHandsontableHelper.createTable = function (data) {
@@ -589,7 +589,7 @@ var ProtocolConfigAlarmUnitPropertiesHandsontableHelper = {
 	        
 	        protocolConfigAlarmUnitPropertiesHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 	        
 	        protocolConfigAlarmUnitPropertiesHandsontableHelper.createTable = function (data) {
@@ -697,7 +697,7 @@ var ProtocolAlarmUnitConfigEnumItemsHandsontableHelper = {
 	        
 	        protocolAlarmUnitConfigEnumItemsHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 	        
 	        protocolAlarmUnitConfigEnumItemsHandsontableHelper.createTable = function (data) {
@@ -832,7 +832,7 @@ var ProtocolAlarmUnitConfigSwitchItemsHandsontableHelper = {
 	        
 	        protocolAlarmUnitConfigSwitchItemsHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 	        
 	        protocolAlarmUnitConfigSwitchItemsHandsontableHelper.createTable = function (data) {
@@ -965,7 +965,7 @@ var ProtocolAlarmUnitConfigCommStatusItemsHandsontableHelper = {
 	        
 	        protocolAlarmUnitConfigCommStatusItemsHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 	        
 	        protocolAlarmUnitConfigCommStatusItemsHandsontableHelper.createTable = function (data) {
@@ -1083,7 +1083,7 @@ var ProtocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper = {
 	        
 	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 	        
 	        protocolAlarmUnitConfigFESDiagramConditionsItemsHandsontableHelper.createTable = function (data) {
@@ -1201,7 +1201,7 @@ var ProtocolAlarmUnitConfigRunStatusItemsHandsontableHelper = {
 	        
 	        protocolAlarmUnitConfigRunStatusItemsHandsontableHelper.addBoldBg = function (instance, td, row, col, prop, value, cellProperties) {
 	            Handsontable.renderers.TextRenderer.apply(this, arguments);
-	            td.style.backgroundColor = 'rgb(184, 184, 184)';
+	            td.style.backgroundColor = 'rgb(245, 245, 245)';
 	        }
 	        
 	        protocolAlarmUnitConfigRunStatusItemsHandsontableHelper.createTable = function (data) {
