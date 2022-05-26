@@ -41,9 +41,11 @@ public class RPCCalculateRequestData implements Serializable {
     	
     	this.setTubingString(new TubingString());
     	this.getTubingString().setEveryTubing(new ArrayList<EveryTubing>());
+    	this.getTubingString().getEveryTubing().add(new EveryTubing());
     	
     	this.setCasingString(new CasingString());
     	this.getCasingString().setEveryCasing(new ArrayList<EveryCasing>());
+    	this.getCasingString().getEveryCasing().add(new EveryCasing());
     	
     	this.setRodString(new RodString());
     	this.getRodString().setEveryRod(new ArrayList<EveryRod>());

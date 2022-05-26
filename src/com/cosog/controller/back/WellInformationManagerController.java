@@ -1229,7 +1229,7 @@ public class WellInformationManagerController extends BaseController {
 			this.rpcDeviceManagerService.doRPCDeviceAdd(rpcDeviceInformation);
 			List<String> wells=new ArrayList<String>();
 			wells.add(rpcDeviceInformation.getWellName());
-			MemoryDataManagerTask.loadRPCDeviceInfo(wells,1);
+			MemoryDataManagerTask.loadRPCDeviceInfo(wells,1,"update");
 			List<String> addWellList=new ArrayList<String>();
 			addWellList.add(rpcDeviceInformation.getWellName());
 			if(rpcDeviceInformation.getStatus()==1){
@@ -1287,7 +1287,7 @@ public class WellInformationManagerController extends BaseController {
 			
 			List<String> wells=new ArrayList<String>();
 			wells.add(pcpDeviceInformation.getWellName());
-			MemoryDataManagerTask.loadPCPDeviceInfo(wells,1);
+			MemoryDataManagerTask.loadPCPDeviceInfo(wells,1,"update");
 			
 			List<String> addWellList=new ArrayList<String>();
 			addWellList.add(pcpDeviceInformation.getWellName());

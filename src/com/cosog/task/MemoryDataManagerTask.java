@@ -69,8 +69,8 @@ public class MemoryDataManagerTask {
 			loadAlarmInstanceOwnItemByUnitId("");
 			loadDisplayInstanceOwnItemByUnitId("");
 			
-			loadRPCDeviceInfo(null,0);
-			loadPCPDeviceInfo(null,0);
+			loadRPCDeviceInfo(null,0,"update");
+			loadPCPDeviceInfo(null,0,"update");
 			
 			loadTodayFESDiagram(null,0);
 			loadTodayRPMData(null,0);
@@ -173,7 +173,7 @@ public class MemoryDataManagerTask {
 		}
 	}
 	
-	public static void loadRPCDeviceInfo(List<String> wellList,int condition){//condition 0 -设备ID 1-设备名称
+	public static void loadRPCDeviceInfo(List<String> wellList,int condition,String method){//condition 0 -设备ID 1-设备名称
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -192,6 +192,28 @@ public class MemoryDataManagerTask {
 			}else{
 				wells=StringManagerUtils.joinStringArr2(wellList, ",");
 			}	
+			
+			if("delete".equalsIgnoreCase(method)){
+				if(condition==0){
+					for(int i=0;i<wellList.size();i++){
+						jedis.hdel("RPCDeviceInfo".getBytes(), wellList.get(i).getBytes());
+					}
+				}else if(condition==1){
+					for(int i=0;i<wellList.size();i++){
+						if(jedis.exists("RPCDeviceInfo".getBytes())){
+							List<byte[]> rpcDeviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
+							for(int j=0;j<rpcDeviceInfoByteList.size();j++){
+								RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(rpcDeviceInfoByteList.get(i));
+								if(wellList.get(i).equalsIgnoreCase(rpcDeviceInfo.getWellName())){
+									jedis.hdel("RPCDeviceInfo".getBytes(), (rpcDeviceInfo.getId()+"").getBytes());
+									break;
+								}
+							}
+						}
+					}
+				}
+				return;
+			}
 					
 			String sql="select t.id,t.orgid,t.orgName,t.wellname,t.devicetype,t.devicetypename,t.applicationscenarios,t.applicationScenariosName,t.signinid,t.slave,t.videourl,"
 					+ "t.instancecode,t.instancename,t.alarminstancecode,t.alarminstancename,t.displayinstancecode,t.displayinstancename,"
@@ -344,11 +366,11 @@ public class MemoryDataManagerTask {
 			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
 		if(wellList.size()>0){
-			loadRPCDeviceInfo(wellList,0);
+			loadRPCDeviceInfo(wellList,0,"update");
 		}
 	}
 	
-	public static void loadPCPDeviceInfo(List<String> wellList,int condition){//condition 0 -设备ID 1-设备名称
+	public static void loadPCPDeviceInfo(List<String> wellList,int condition,String method){//condition 0 -设备ID 1-设备名称
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
@@ -368,6 +390,29 @@ public class MemoryDataManagerTask {
 			}else{
 				wells=StringManagerUtils.joinStringArr2(wellList, ",");
 			}
+			
+			if("delete".equalsIgnoreCase(method)){
+				if(condition==0){
+					for(int i=0;i<wellList.size();i++){
+						jedis.hdel("PCPDeviceInfo".getBytes(), wellList.get(i).getBytes());
+					}
+				}else if(condition==1){
+					for(int i=0;i<wellList.size();i++){
+						if(jedis.exists("PCPDeviceInfo".getBytes())){
+							List<byte[]> deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
+							for(int j=0;j<deviceInfoByteList.size();j++){
+								PCPDeviceInfo deviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+								if(wellList.get(i).equalsIgnoreCase(deviceInfo.getWellName())){
+									jedis.hdel("PCPDeviceInfo".getBytes(), (deviceInfo.getId()+"").getBytes());
+									break;
+								}
+							}
+						}
+					}
+				}
+				return;
+			}
+			
 			String sql="select t.id,t.orgid,t.orgName,t.wellname,t.devicetype,t.devicetypename,t.applicationscenarios,t.applicationScenariosName,t.signinid,t.slave,t.videourl,"
 					+ "t.instancecode,t.instancename,t.alarminstancecode,t.alarminstancename,t.displayinstancecode,t.displayinstancename,"
 					+ "t.status,t.statusName,"
@@ -1250,7 +1295,7 @@ public class MemoryDataManagerTask {
 				}
 				
 				if(!jedis.exists("RPCDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 				}
 				if(jedis.hexists("RPCDeviceInfo".getBytes(), key.getBytes())){
 					RPCDeviceInfo memRPCDeviceInfo =(RPCDeviceInfo) SerializeObjectUnils.unserizlize(jedis.hget("RPCDeviceInfo".getBytes(), key.getBytes()));
@@ -1349,7 +1394,7 @@ public class MemoryDataManagerTask {
 				}
 				
 				if(!jedis.exists("PCPDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0,"update");
 				}
 				if(jedis.hexists("PCPDeviceInfo".getBytes(), key.getBytes())){
 					PCPDeviceInfo memPCPDeviceInfo =(PCPDeviceInfo) SerializeObjectUnils.unserizlize(jedis.hget("PCPDeviceInfo".getBytes(), key.getBytes()));

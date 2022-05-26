@@ -84,7 +84,7 @@ public class DriverAPIController extends BaseController{
 		try{
 			jedis = new Jedis();
 			if(!jedis.exists("RPCDeviceInfo".getBytes())){
-				MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+				MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 			}
 			List<byte[]> rpcDeviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
 			for(int i=0;i<rpcDeviceInfoByteList.size();i++){
@@ -160,7 +160,7 @@ public class DriverAPIController extends BaseController{
 			}
 
 			if(!jedis.exists("PCPDeviceInfo".getBytes())){
-				MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+				MemoryDataManagerTask.loadPCPDeviceInfo(null,0,"update");
 			}
 			List<byte[]> pcpDeviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
 			for(int i=0;i<pcpDeviceInfoByteList.size();i++){
@@ -290,7 +290,7 @@ public class DriverAPIController extends BaseController{
 				
 				
 				if(!jedis.exists("RPCDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 				}
 				List<byte[]> rpcDeviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
 				for(int i=0;i<rpcDeviceInfoByteList.size();i++){
@@ -312,7 +312,7 @@ public class DriverAPIController extends BaseController{
 				
 				if(rpcDeviceInfo==null){
 					if(!jedis.exists("PCPDeviceInfo".getBytes())){
-						MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+						MemoryDataManagerTask.loadPCPDeviceInfo(null,0,"update");
 					}
 					List<byte[]> pcpDeviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
 					for(int i=0;i<pcpDeviceInfoByteList.size();i++){
@@ -538,7 +538,7 @@ public class DriverAPIController extends BaseController{
 				PCPDeviceInfo pcpDeviceInfo=null;
 				
 				if(!jedis.exists("RPCDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 				}
 				List<byte[]> rpcDeviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
 				for(int i=0;i<rpcDeviceInfoByteList.size();i++){
@@ -555,7 +555,7 @@ public class DriverAPIController extends BaseController{
 				
 				if(rpcDeviceInfo==null){
 					if(!jedis.exists("PCPDeviceInfo".getBytes())){
-						MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+						MemoryDataManagerTask.loadPCPDeviceInfo(null,0,"update");
 					}
 					List<byte[]> pcpDeviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
 					for(int i=0;i<pcpDeviceInfoByteList.size();i++){

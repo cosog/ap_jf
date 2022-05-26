@@ -261,10 +261,11 @@ Ext.define('AP.view.well.RPCDeviceInfoPanel', {
                     window.show();
                     return false;
     			}
-    		},'-',{
+    		},{
     			xtype: 'button',
     			text:'excel导入',
     			iconCls: 'upload',
+    			hidden:true,
     			handler: function (v, o) {
     				var selectedOrgName="";
                 	var selectedOrgId="";
