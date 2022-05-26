@@ -68,12 +68,12 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			
 			if(StringManagerUtils.stringToInteger(deviceType) ==0){
 				if(!jedis.exists("RPCDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 				}
 				deviceInfoByteList =jedis.hvals("RPCDeviceInfo".getBytes());
 			}else{
 				if(!jedis.exists("PCPDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0,"update");
 				}
 				deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
 			}
@@ -242,11 +242,11 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
 			if(StringManagerUtils.stringToInteger(deviceType)==0){
 				if(!jedis.exists("RPCDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 				}
 			}else if(StringManagerUtils.stringToInteger(deviceType)==1){
 				if(!jedis.exists("PCPDeviceInfo".getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0,"update");
 				}
 			}
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
@@ -441,7 +441,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		try{
 			jedis = new Jedis();
 			if(!jedis.exists("RPCDeviceInfo".getBytes())){
-				MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+				MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 			}
 			if(!jedis.exists("AlarmShowStyle".getBytes())){
 				MemoryDataManagerTask.initAlarmStyle();
@@ -756,7 +756,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		try{
 			jedis = new Jedis();
 			if(!jedis.exists("RPCDeviceInfo".getBytes())){
-				MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+				MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 			}
 			if(!jedis.exists("AlarmShowStyle".getBytes())){
 				MemoryDataManagerTask.initAlarmStyle();
@@ -944,7 +944,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		try{
 			jedis = new Jedis();
 			if(!jedis.exists("PCPDeviceInfo".getBytes())){
-				MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+				MemoryDataManagerTask.loadPCPDeviceInfo(null,0,"update");
 			}
 			if(!jedis.exists("AlarmShowStyle".getBytes())){
 				MemoryDataManagerTask.initAlarmStyle();
@@ -1227,7 +1227,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		try{
 			jedis = new Jedis();
 			if(!jedis.exists("RPCDeviceInfo".getBytes())){
-				MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+				MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 			}
 			if(!jedis.exists("AlarmShowStyle".getBytes())){
 				MemoryDataManagerTask.initAlarmStyle();
@@ -1411,14 +1411,14 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		try{
 			if(StringManagerUtils.stringToInteger(deviceType)==0){
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 				}
 				RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
 				displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode();
 				alarmInstanceCode=rpcDeviceInfo.getAlarmInstanceCode();
 			}else{
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0,"update");
 				}
 				PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
 				displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode();
@@ -1890,13 +1890,13 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			
 			if(StringManagerUtils.stringToInteger(deviceType)==0){
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+					MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 				}
 				RPCDeviceInfo rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
 				displayInstanceCode=rpcDeviceInfo.getDisplayInstanceCode()+"";
 			}else{
 				if(!jedis.exists(deviceInfoKey.getBytes())){
-					MemoryDataManagerTask.loadPCPDeviceInfo(null,0);
+					MemoryDataManagerTask.loadPCPDeviceInfo(null,0,"update");
 				}
 				PCPDeviceInfo pcpDeviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget(deviceInfoKey.getBytes(), deviceId.getBytes()));
 				displayInstanceCode=pcpDeviceInfo.getDisplayInstanceCode()+"";
@@ -2296,7 +2296,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 		String alarmInstanceCode="";
 		try{
 			if(!jedis.exists("RPCDeviceInfo".getBytes())){
-				MemoryDataManagerTask.loadRPCDeviceInfo(null,0);
+				MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 			}
 			if(jedis.hexists("RPCDeviceInfo".getBytes(), deviceId.getBytes())){
 				rpcDeviceInfo=(RPCDeviceInfo)SerializeObjectUnils.unserizlize(jedis.hget("RPCDeviceInfo".getBytes(), deviceId.getBytes()));

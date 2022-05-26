@@ -355,7 +355,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
 		int collisionCount=0;
 		int overlayCount=0;
-		String ddicName="rpcDeviceManager";
+		String ddicName="rpcDeviceBatchAdd";
 		String columns=service.showTableHeadersColumns(ddicName);
 		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().batchAddRPCDevice(wellHandsontableChangedData,orgId,deviceType,isCheckout,user);
 		String instanceSql="select t.name from tbl_protocolinstance t where t.devicetype=0 order by t.sort";
@@ -429,7 +429,57 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					collisionBuff.append("\"slave\":\""+list.get(i).getSlave()+"\",");
 					collisionBuff.append("\"statusName\":\""+list.get(i).getStatusName()+"\",");
 					collisionBuff.append("\"sortNum\":\""+list.get(i).getSortNum()+"\",");
-					collisionBuff.append("\"dataInfo\":\""+list.get(i).getSaveStr()+"\"},");
+					
+					collisionBuff.append("\"crudeOilDensity\":\""+list.get(i).getCrudeOilDensity()+"\",");
+		        	collisionBuff.append("\"waterDensity\":\""+list.get(i).getWaterDensity()+"\",");
+		        	collisionBuff.append("\"naturalGasRelativeDensity\":\""+list.get(i).getNaturalGasRelativeDensity()+"\",");
+		        	collisionBuff.append("\"saturationPressure\":\""+list.get(i).getSaturationPressure()+"\",");
+		        	collisionBuff.append("\"reservoirDepth\":\""+list.get(i).getReservoirDepth()+"\",");
+		        	collisionBuff.append("\"reservoirTemperature\":\""+list.get(i).getReservoirTemperature()+"\",");
+		        	collisionBuff.append("\"tubingPressure\":\""+list.get(i).getTubingPressure()+"\",");
+		        	collisionBuff.append("\"casingPressure\":\""+list.get(i).getCasingPressure()+"\",");
+		        	collisionBuff.append("\"wellHeadTemperature\":\""+list.get(i).getWellHeadTemperature()+"\",");
+		        	collisionBuff.append("\"waterCut\":\""+list.get(i).getWaterCut()+"\",");
+		        	collisionBuff.append("\"productionGasOilRatio\":\""+list.get(i).getProductionGasOilRatio()+"\",");
+		        	collisionBuff.append("\"producingfluidLevel\":\""+list.get(i).getProducingfluidLevel()+"\",");
+		        	collisionBuff.append("\"pumpSettingDepth\":\""+list.get(i).getPumpSettingDepth()+"\",");
+		        	collisionBuff.append("\"pumpType\":\""+list.get(i).getPumpType()+"\",");
+		        	collisionBuff.append("\"barrelType\":\""+list.get(i).getBarrelType()+"\",");
+		        	collisionBuff.append("\"pumpGrade\":\""+list.get(i).getPumpGrade()+"\",");
+		        	collisionBuff.append("\"pumpBoreDiameter\":\""+list.get(i).getPumpBoreDiameter()+"\",");
+		        	collisionBuff.append("\"plungerLength\":\""+list.get(i).getPlungerLength()+"\",");
+		        	collisionBuff.append("\"tubingStringInsideDiameter\":\""+list.get(i).getTubingStringInsideDiameter()+"\",");
+		        	collisionBuff.append("\"casingStringInsideDiameter\":\""+list.get(i).getCasingStringInsideDiameter()+"\",");
+		        	collisionBuff.append("\"rodGrade1\":\""+list.get(i).getRodGrade1()+"\",");
+		        	collisionBuff.append("\"rodOutsideDiameter1\":\""+list.get(i).getRodOutsideDiameter1()+"\",");
+		        	collisionBuff.append("\"rodInsideDiameter1\":\""+list.get(i).getRodInsideDiameter1()+"\",");
+		        	collisionBuff.append("\"rodLength1\":\""+list.get(i).getRodLength1()+"\",");
+		        	collisionBuff.append("\"rodGrade2\":\""+list.get(i).getRodGrade2()+"\",");
+		        	collisionBuff.append("\"rodOutsideDiameter2\":\""+list.get(i).getRodOutsideDiameter2()+"\",");
+		        	collisionBuff.append("\"rodInsideDiameter2\":\""+list.get(i).getRodInsideDiameter2()+"\",");
+		        	collisionBuff.append("\"rodLength2\":\""+list.get(i).getRodLength2()+"\",");
+		        	collisionBuff.append("\"rodGrade3\":\""+list.get(i).getRodGrade3()+"\",");
+		        	collisionBuff.append("\"rodOutsideDiameter3\":\""+list.get(i).getRodOutsideDiameter3()+"\",");
+		        	collisionBuff.append("\"rodInsideDiameter3\":\""+list.get(i).getRodInsideDiameter3()+"\",");
+		        	collisionBuff.append("\"rodLength3\":\""+list.get(i).getRodLength3()+"\",");
+		        	collisionBuff.append("\"rodGrade4\":\""+list.get(i).getRodGrade4()+"\",");
+		        	collisionBuff.append("\"rodOutsideDiameter4\":\""+list.get(i).getRodOutsideDiameter4()+"\",");
+		        	collisionBuff.append("\"rodInsideDiameter4\":\""+list.get(i).getRodInsideDiameter4()+"\",");
+		        	collisionBuff.append("\"rodLength4\":\""+list.get(i).getRodLength4()+"\",");
+		        	collisionBuff.append("\"netGrossRatio\":\""+list.get(i).getNetGrossRatio()+"\",");
+		        	collisionBuff.append("\"manufacturer\":\""+list.get(i).getManufacturer()+"\",");
+		        	collisionBuff.append("\"model\":\""+list.get(i).getModel()+"\",");
+		        	collisionBuff.append("\"stroke\":\""+list.get(i).getStroke()+"\",");
+		        	collisionBuff.append("\"crankRotationDirection\":\""+list.get(i).getCrankGravityRadius()+"\",");
+		        	collisionBuff.append("\"offsetAngleOfCrank\":\""+list.get(i).getOffsetAngleOfCrank()+"\",");
+		        	collisionBuff.append("\"crankGravityRadius\":\""+list.get(i).getCrankGravityRadius()+"\",");
+		        	collisionBuff.append("\"singleCrankWeight\":\""+list.get(i).getSingleCrankWeight()+"\",");
+		        	collisionBuff.append("\"singleCrankPinWeight\":\""+list.get(i).getSingleCrankPinWeight()+"\",");
+		        	collisionBuff.append("\"structuralUnbalance\":\""+list.get(i).getStructuralUnbalance()+"\",");
+		        	collisionBuff.append("\"balanceWeight\":\""+list.get(i).getBalanceWeight()+"\",");
+		        	collisionBuff.append("\"balancePosition\":\""+list.get(i).getBalancePosition()+"\",");
+		        	
+		        	collisionBuff.append("\"dataInfo\":\""+list.get(i).getSaveStr()+"\"},");
 				}else if(list.get(i).getSaveSign()==-33){//覆盖信息
 					overlayCount+=1;
 					overlayBuff.append("{\"id\":\""+list.get(i).getId()+"\",");
@@ -442,6 +492,56 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 					overlayBuff.append("\"slave\":\""+list.get(i).getSlave()+"\",");
 					overlayBuff.append("\"statusName\":\""+list.get(i).getStatusName()+"\",");
 					overlayBuff.append("\"sortNum\":\""+list.get(i).getSortNum()+"\",");
+					
+					overlayBuff.append("\"crudeOilDensity\":\""+list.get(i).getCrudeOilDensity()+"\",");
+		        	overlayBuff.append("\"waterDensity\":\""+list.get(i).getWaterDensity()+"\",");
+		        	overlayBuff.append("\"naturalGasRelativeDensity\":\""+list.get(i).getNaturalGasRelativeDensity()+"\",");
+		        	overlayBuff.append("\"saturationPressure\":\""+list.get(i).getSaturationPressure()+"\",");
+		        	overlayBuff.append("\"reservoirDepth\":\""+list.get(i).getReservoirDepth()+"\",");
+		        	overlayBuff.append("\"reservoirTemperature\":\""+list.get(i).getReservoirTemperature()+"\",");
+		        	overlayBuff.append("\"tubingPressure\":\""+list.get(i).getTubingPressure()+"\",");
+		        	overlayBuff.append("\"casingPressure\":\""+list.get(i).getCasingPressure()+"\",");
+		        	overlayBuff.append("\"wellHeadTemperature\":\""+list.get(i).getWellHeadTemperature()+"\",");
+		        	overlayBuff.append("\"waterCut\":\""+list.get(i).getWaterCut()+"\",");
+		        	overlayBuff.append("\"productionGasOilRatio\":\""+list.get(i).getProductionGasOilRatio()+"\",");
+		        	overlayBuff.append("\"producingfluidLevel\":\""+list.get(i).getProducingfluidLevel()+"\",");
+		        	overlayBuff.append("\"pumpSettingDepth\":\""+list.get(i).getPumpSettingDepth()+"\",");
+		        	overlayBuff.append("\"pumpType\":\""+list.get(i).getPumpType()+"\",");
+		        	overlayBuff.append("\"barrelType\":\""+list.get(i).getBarrelType()+"\",");
+		        	overlayBuff.append("\"pumpGrade\":\""+list.get(i).getPumpGrade()+"\",");
+		        	overlayBuff.append("\"pumpBoreDiameter\":\""+list.get(i).getPumpBoreDiameter()+"\",");
+		        	overlayBuff.append("\"plungerLength\":\""+list.get(i).getPlungerLength()+"\",");
+		        	overlayBuff.append("\"tubingStringInsideDiameter\":\""+list.get(i).getTubingStringInsideDiameter()+"\",");
+		        	overlayBuff.append("\"casingStringInsideDiameter\":\""+list.get(i).getCasingStringInsideDiameter()+"\",");
+		        	overlayBuff.append("\"rodGrade1\":\""+list.get(i).getRodGrade1()+"\",");
+		        	overlayBuff.append("\"rodOutsideDiameter1\":\""+list.get(i).getRodOutsideDiameter1()+"\",");
+		        	overlayBuff.append("\"rodInsideDiameter1\":\""+list.get(i).getRodInsideDiameter1()+"\",");
+		        	overlayBuff.append("\"rodLength1\":\""+list.get(i).getRodLength1()+"\",");
+		        	overlayBuff.append("\"rodGrade2\":\""+list.get(i).getRodGrade2()+"\",");
+		        	overlayBuff.append("\"rodOutsideDiameter2\":\""+list.get(i).getRodOutsideDiameter2()+"\",");
+		        	overlayBuff.append("\"rodInsideDiameter2\":\""+list.get(i).getRodInsideDiameter2()+"\",");
+		        	overlayBuff.append("\"rodLength2\":\""+list.get(i).getRodLength2()+"\",");
+		        	overlayBuff.append("\"rodGrade3\":\""+list.get(i).getRodGrade3()+"\",");
+		        	overlayBuff.append("\"rodOutsideDiameter3\":\""+list.get(i).getRodOutsideDiameter3()+"\",");
+		        	overlayBuff.append("\"rodInsideDiameter3\":\""+list.get(i).getRodInsideDiameter3()+"\",");
+		        	overlayBuff.append("\"rodLength3\":\""+list.get(i).getRodLength3()+"\",");
+		        	overlayBuff.append("\"rodGrade4\":\""+list.get(i).getRodGrade4()+"\",");
+		        	overlayBuff.append("\"rodOutsideDiameter4\":\""+list.get(i).getRodOutsideDiameter4()+"\",");
+		        	overlayBuff.append("\"rodInsideDiameter4\":\""+list.get(i).getRodInsideDiameter4()+"\",");
+		        	overlayBuff.append("\"rodLength4\":\""+list.get(i).getRodLength4()+"\",");
+		        	overlayBuff.append("\"netGrossRatio\":\""+list.get(i).getNetGrossRatio()+"\",");
+		        	overlayBuff.append("\"manufacturer\":\""+list.get(i).getManufacturer()+"\",");
+		        	overlayBuff.append("\"model\":\""+list.get(i).getModel()+"\",");
+		        	overlayBuff.append("\"stroke\":\""+list.get(i).getStroke()+"\",");
+		        	overlayBuff.append("\"crankRotationDirection\":\""+list.get(i).getCrankGravityRadius()+"\",");
+		        	overlayBuff.append("\"offsetAngleOfCrank\":\""+list.get(i).getOffsetAngleOfCrank()+"\",");
+		        	overlayBuff.append("\"crankGravityRadius\":\""+list.get(i).getCrankGravityRadius()+"\",");
+		        	overlayBuff.append("\"singleCrankWeight\":\""+list.get(i).getSingleCrankWeight()+"\",");
+		        	overlayBuff.append("\"singleCrankPinWeight\":\""+list.get(i).getSingleCrankPinWeight()+"\",");
+		        	overlayBuff.append("\"structuralUnbalance\":\""+list.get(i).getStructuralUnbalance()+"\",");
+		        	overlayBuff.append("\"balanceWeight\":\""+list.get(i).getBalanceWeight()+"\",");
+		        	overlayBuff.append("\"balancePosition\":\""+list.get(i).getBalancePosition()+"\",");
+					
 					overlayBuff.append("\"dataInfo\":\""+list.get(i).getSaveStr()+"\"},");
 				}
 			}
@@ -497,7 +597,7 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
 		int collisionCount=0;
 		int overlayCount=0;
-		String ddicName="rpcDeviceManager";
+		String ddicName="pcpDeviceBatchAdd";
 		String columns=service.showTableHeadersColumns(ddicName);
 		List<WellHandsontableChangedData.Updatelist> list=getBaseDao().batchAddPCPDevice(wellHandsontableChangedData,orgId,deviceType,isCheckout,user);
 		String instanceSql="select t.name from tbl_protocolinstance t where t.devicetype=1 order by t.sort";
@@ -2209,11 +2309,11 @@ public class WellInformationManagerService<T> extends BaseService<T> {
 		StringBuffer displayInstanceDropdownData = new StringBuffer();
 		StringBuffer alarmInstanceDropdownData = new StringBuffer();
 		StringBuffer applicationScenariosDropdownData = new StringBuffer();
-		String ddicName="rpcDeviceManager";
+		String ddicName="rpcDeviceBatchAdd";
 		int protocolType=0;
 		int deviceType=StringManagerUtils.stringToInteger(deviceTypeStr);
 		if(deviceType>=200&&deviceType<300){
-			ddicName="pcpDeviceManager";
+			ddicName="pcpDeviceBatchAdd";
 			protocolType=1;
 		}
 		
