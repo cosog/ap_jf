@@ -110,7 +110,7 @@ public class EquipmentDriverServerTask {
 	
 //		StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
 			
-			Thread.sleep(1000*60*1);
+			Thread.sleep(1000*60*10);
 		}
 		
 		
@@ -745,18 +745,6 @@ public class EquipmentDriverServerTask {
 							initProtocol.setMethod(method);
 							StringManagerUtils.printLog("协议初始化："+gson.toJson(initProtocol));
 							StringManagerUtils.sendPostMethod(initUrl, gson.toJson(initProtocol),"utf-8");
-//							loadAcquisitionItemColumns(modbusProtocolConfig.getProtocol().get(i).getDeviceType());
-//							if(modbusProtocolConfig.getProtocol().get(i).getDeviceType()==0){
-//								initAcquisitionItemDataBaseColumns("tbl_rpcacqdata_hist",0);
-//								initAcquisitionItemDataBaseColumns("tbl_rpcacqdata_latest",0);
-//								initDataDictionary("7f13446d19b4497986980fa16a750f95",0);//抽油机实时概览字典
-//								initDataDictionary("cd7b24562b924d19b556de31256e22a1",0);//抽油机历史查询字典
-//							}else{
-//								initAcquisitionItemDataBaseColumns("tbl_pcpacqdata_hist",1);
-//								initAcquisitionItemDataBaseColumns("tbl_pcpacqdata_latest",1);
-//								initDataDictionary("e0f5f3ff8a1f46678c284fba9cc113e8",1);//螺杆泵实时概览字典
-//								initDataDictionary("fb7d070a349c403b8a26d71c12af7a05",1);//螺杆泵历史查询字典
-//							}
 							break;
 						}
 					}

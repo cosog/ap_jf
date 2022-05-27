@@ -65,9 +65,11 @@ public class MemoryDataManagerTask {
 			jedis = new Jedis();
 			jedis.flushDB();
 			
-			loadAcqInstanceOwnItemByGroupId("");
-			loadAlarmInstanceOwnItemByUnitId("");
-			loadDisplayInstanceOwnItemByUnitId("");
+			loadProtocolConfig();
+			
+			loadAcqInstanceOwnItemById("","update");
+			loadAlarmInstanceOwnItemById("","update");
+			loadDisplayInstanceOwnItemById("","update");
 			
 			loadRPCDeviceInfo(null,0,"update");
 			loadPCPDeviceInfo(null,0,"update");
@@ -228,7 +230,8 @@ public class MemoryDataManagerTask {
 					+ "t2.totalkwatth,t2.todaykwatth,"
 					+ " t2.resultstatus,decode(t2.resultcode,null,0,t2.resultcode) as resultcode"
 					+ " from viw_rpcdevice t"
-					+ " left outer join tbl_rpcacqdata_latest t2 on t2.wellid=t.id ";
+					+ " left outer join tbl_rpcacqdata_latest t2 on t2.wellid=t.id "
+					+ " where 1=1 ";
 			if(StringManagerUtils.isNotNull(wells)){
 				if(condition==0){
 					sql+=" and t.id in("+wells+")";
@@ -374,7 +377,6 @@ public class MemoryDataManagerTask {
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
-		int result=0;
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
 		conn=OracleJdbcUtis.getConnection();
@@ -391,21 +393,21 @@ public class MemoryDataManagerTask {
 				wells=StringManagerUtils.joinStringArr2(wellList, ",");
 			}
 			
-			if("delete".equalsIgnoreCase(method)){
+			if("delete".equalsIgnoreCase(method)&&jedis.exists("PCPDeviceInfo".getBytes())){
 				if(condition==0){
 					for(int i=0;i<wellList.size();i++){
-						jedis.hdel("PCPDeviceInfo".getBytes(), wellList.get(i).getBytes());
+						if(jedis.hexists("PCPDeviceInfo".getBytes(), wellList.get(i).getBytes())){
+							jedis.hdel("PCPDeviceInfo".getBytes(), wellList.get(i).getBytes());
+						}
 					}
-				}else if(condition==1){
+				}else if(condition==1&&jedis.exists("PCPDeviceInfo".getBytes())){
 					for(int i=0;i<wellList.size();i++){
-						if(jedis.exists("PCPDeviceInfo".getBytes())){
-							List<byte[]> deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
-							for(int j=0;j<deviceInfoByteList.size();j++){
-								PCPDeviceInfo deviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
-								if(wellList.get(i).equalsIgnoreCase(deviceInfo.getWellName())){
-									jedis.hdel("PCPDeviceInfo".getBytes(), (deviceInfo.getId()+"").getBytes());
-									break;
-								}
+						List<byte[]> deviceInfoByteList =jedis.hvals("PCPDeviceInfo".getBytes());
+						for(int j=0;j<deviceInfoByteList.size();j++){
+							PCPDeviceInfo deviceInfo=(PCPDeviceInfo)SerializeObjectUnils.unserizlize(deviceInfoByteList.get(i));
+							if(wellList.get(i).equalsIgnoreCase(deviceInfo.getWellName()) && jedis.hexists("PCPDeviceInfo".getBytes(), (deviceInfo.getId()+"").getBytes())){
+								jedis.hdel("PCPDeviceInfo".getBytes(), (deviceInfo.getId()+"").getBytes());
+								break;
 							}
 						}
 					}
@@ -423,7 +425,8 @@ public class MemoryDataManagerTask {
 					+ "t2.runstatus,t2.runtime,t2.runtimeefficiency,t2.runrange,"
 					+ "t2.totalkwatth,t2.todaykwatth "
 					+ " from viw_pcpdevice t"
-					+ " left outer join tbl_pcpacqdata_latest t2 on t2.wellid=t.id ";
+					+ " left outer join tbl_pcpacqdata_latest t2 on t2.wellid=t.id "
+					+ " where 1=1 ";
 			if(StringManagerUtils.isNotNull(wells)){
 				if(condition==0){
 					sql+=" and t.id in("+wells+")";
@@ -510,7 +513,7 @@ public class MemoryDataManagerTask {
 		}
 	}
 	
-	public static void loadAcqInstanceOwnItemByGroupId(String groupId){
+	public static void loadAcqInstanceOwnItemById(String instanceId,String method){
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
@@ -527,12 +530,11 @@ public class MemoryDataManagerTask {
 					+ "t.id as itemid,t.itemname,t.itemcode,t.bitindex,t.groupid"
 					+ " from tbl_acq_item2group_conf t,tbl_acq_group_conf t2,tbl_acq_group2unit_conf t3,tbl_acq_unit_conf t4,tbl_protocolinstance t5 "
 					+ " where t.groupid=t2.id and t2.id=t3.groupid and t3.unitid=t4.id and t4.id=t5.unitid and t2.type=0";
-			if(StringManagerUtils.isNotNull(groupId)){
-				sql+=" and t5.unitid in (select t6.unitid from tbl_acq_group2unit_conf t6 where t6.groupid="+groupId+")";
-				instanceSql+=" and t.unitid in (select t6.unitid from tbl_acq_group2unit_conf t6 where t6.groupid="+groupId+")";
+			if(StringManagerUtils.isNotNull(instanceId)){
+				sql+=" and t5.id ="+instanceId;
+				instanceSql+=" and t.id="+instanceId;
 			}
 			sql+=" order by t5.code, t.groupid,t.id";
-			
 			pstmt = conn.prepareStatement(instanceSql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
@@ -546,61 +548,55 @@ public class MemoryDataManagerTask {
         		pstmt.close();  
         	if(rs!=null)
         		rs.close();
-			
-			pstmt = conn.prepareStatement(sql);
-			rs=pstmt.executeQuery();
-			while(rs.next()){
-				AcqInstanceOwnItem acqInstanceOwnItem=null;
-				if(jedis.hexists("AcqInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
-					byte[]byt=  jedis.hget("AcqInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
-					Object obj = SerializeObjectUnils.unserizlize(byt);
-					if (obj instanceof AcqInstanceOwnItem) {
-						acqInstanceOwnItem=(AcqInstanceOwnItem) obj;
-			         }
-				}else{
-					acqInstanceOwnItem=new AcqInstanceOwnItem();
-				}
-				
-				acqInstanceOwnItem.setInstanceCode(rs.getString(1)+"");
-				acqInstanceOwnItem.setDeviceType(rs.getInt(2));
-				acqInstanceOwnItem.setProtocol(rs.getString(3)+"");
-				acqInstanceOwnItem.setUnitId(rs.getInt(4));
-				acqInstanceOwnItem.setAcqCycle(rs.getInt(5));
-				acqInstanceOwnItem.setSaveCycle(rs.getInt(6));
-				
-				if(acqInstanceOwnItem.getItemList()==null){
-					acqInstanceOwnItem.setItemList(new ArrayList<AcqItem>());
-				}
-				AcqItem acqItem=new AcqItem();
-				acqItem.setItemId(rs.getInt(7));
-				acqItem.setItemName(rs.getString(8)+"");
-				acqItem.setItemCode(rs.getString(9)+"");
-				acqItem.setBitIndex(rs.getInt(10));
-				acqItem.setGroupId(rs.getInt(11));
-				
-				int index=-1;
-				for(int i=0;i<acqInstanceOwnItem.getItemList().size();i++){
-					if(acqItem.getItemId()==acqInstanceOwnItem.getItemList().get(i).getItemId()){
-						index=i;
-						break;
+			if(!"delete".equalsIgnoreCase(method)){
+				pstmt = conn.prepareStatement(sql);
+				rs=pstmt.executeQuery();
+				while(rs.next()){
+					AcqInstanceOwnItem acqInstanceOwnItem=null;
+					if(jedis.hexists("AcqInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
+						byte[]byt=  jedis.hget("AcqInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
+						Object obj = SerializeObjectUnils.unserizlize(byt);
+						if (obj instanceof AcqInstanceOwnItem) {
+							acqInstanceOwnItem=(AcqInstanceOwnItem) obj;
+				         }
+					}else{
+						acqInstanceOwnItem=new AcqInstanceOwnItem();
 					}
+					
+					acqInstanceOwnItem.setInstanceCode(rs.getString(1)+"");
+					acqInstanceOwnItem.setDeviceType(rs.getInt(2));
+					acqInstanceOwnItem.setProtocol(rs.getString(3)+"");
+					acqInstanceOwnItem.setUnitId(rs.getInt(4));
+					acqInstanceOwnItem.setAcqCycle(rs.getInt(5));
+					acqInstanceOwnItem.setSaveCycle(rs.getInt(6));
+					
+					if(acqInstanceOwnItem.getItemList()==null){
+						acqInstanceOwnItem.setItemList(new ArrayList<AcqItem>());
+					}
+					AcqItem acqItem=new AcqItem();
+					acqItem.setItemId(rs.getInt(7));
+					acqItem.setItemName(rs.getString(8)+"");
+					acqItem.setItemCode(rs.getString(9)+"");
+					acqItem.setBitIndex(rs.getInt(10));
+					acqItem.setGroupId(rs.getInt(11));
+					
+					int index=-1;
+					for(int i=0;i<acqInstanceOwnItem.getItemList().size();i++){
+						if(acqItem.getItemId()==acqInstanceOwnItem.getItemList().get(i).getItemId()){
+							index=i;
+							break;
+						}
+					}
+					if(index>=0){
+						acqInstanceOwnItem.getItemList().set(index, acqItem);
+					}else{
+						acqInstanceOwnItem.getItemList().add(acqItem);
+					}
+					
+					String key=acqInstanceOwnItem.getInstanceCode();
+					jedis.hset("AcqInstanceOwnItem".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(acqInstanceOwnItem));//哈希(Hash)
 				}
-				if(index>=0){
-					acqInstanceOwnItem.getItemList().set(index, acqItem);
-				}else{
-					acqInstanceOwnItem.getItemList().add(acqItem);
-				}
-				
-				String key=acqInstanceOwnItem.getInstanceCode();
-				jedis.hset("AcqInstanceOwnItem".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(acqInstanceOwnItem));//哈希(Hash)
 			}
-			
-//			byte[]byt=  jedis.hget("AcqInstanceOwnItem".getBytes(), "instance5".getBytes());
-//			Object obj = SerializeObjectUnils.unserizlize(byt);
-//			if (obj instanceof AcqInstanceOwnItem) {
-//				AcqInstanceOwnItem acqInstanceOwnItem=(AcqInstanceOwnItem) obj;
-//				System.out.println(new Gson().toJson(acqInstanceOwnItem));
-//	        }
 		}catch (Exception e) {
 			e.printStackTrace();
 		} finally{
@@ -612,13 +608,85 @@ public class MemoryDataManagerTask {
 		}
 	}
 	
-	public static void loadDisplayInstanceOwnItemByUnitId(String unitId){
+	public static void loadAcqInstanceOwnItemByCode(String instanceCode,String method){
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
-		int result=0;
-		Gson gson = new Gson();
-		java.lang.reflect.Type type=null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		try {
+			String instanceSql="select t.id from tbl_protocolinstance t where 1=1 ";
+			if(StringManagerUtils.isNotNull(instanceCode)){
+				instanceSql+=" and t.instanceCode='"+instanceCode+"'";
+			}
+			pstmt = conn.prepareStatement(instanceSql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				loadAcqInstanceOwnItemById(rs.getInt(1)+"",method);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
+	}
+	
+	public static void loadAcqInstanceOwnItemByGroupId(String groupId,String method){
+		Connection conn = null;   
+		PreparedStatement pstmt = null;   
+		ResultSet rs = null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		try {
+			String instanceSql="select t.id from tbl_protocolinstance t where 1=1 ";
+			if(StringManagerUtils.isNotNull(groupId)){
+				instanceSql+=" and t.unitid in (select t6.unitid from tbl_acq_group2unit_conf t6 where t6.groupid="+groupId+")";
+			}
+			pstmt = conn.prepareStatement(instanceSql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				loadAcqInstanceOwnItemById(rs.getInt(1)+"",method);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
+	}
+	
+	public static void loadAcqInstanceOwnItemByUnitId(String unitId,String method){
+		Connection conn = null;   
+		PreparedStatement pstmt = null;   
+		ResultSet rs = null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		try {
+			String instanceSql="select t.id from tbl_protocolinstance t where 1=1 ";
+			if(StringManagerUtils.isNotNull(unitId)){
+				instanceSql+=" and t.unitid ="+unitId;
+			}
+			pstmt = conn.prepareStatement(instanceSql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				loadAcqInstanceOwnItemById(rs.getInt(1)+"",method);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
+	}
+	
+	public static void loadDisplayInstanceOwnItemById(String instanceId,String method){
+		Connection conn = null;   
+		PreparedStatement pstmt = null;   
+		ResultSet rs = null;
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
@@ -631,9 +699,9 @@ public class MemoryDataManagerTask {
 					+ "decode(t.showlevel,null,9999,t.showlevel) as showlevel,decode(t.sort,null,9999,t.sort) as sort,t.realtimecurve,t.realtimecurvecolor,t.historycurve,t.historycurvecolor,t.type "
 					+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2,tbl_protocoldisplayinstance t3 "
 					+ " where t.unitid=t2.id and t2.id=t3.displayunitid";
-			if(StringManagerUtils.isNotNull(unitId)){
-				sql+=" and t.unitid="+unitId;
-				instanceSql+=" and t.displayunitid="+unitId;
+			if(StringManagerUtils.isNotNull(instanceId)){
+				sql+=" and t.id="+instanceId;
+				instanceSql+=" and t.id="+instanceId;
 			}
 			sql+=" order by t3.code, t.unitid,t.id";
 			
@@ -650,66 +718,59 @@ public class MemoryDataManagerTask {
         		pstmt.close();  
         	if(rs!=null)
         		rs.close();
-			
-			
-			pstmt = conn.prepareStatement(sql);
-			rs=pstmt.executeQuery();
-			while(rs.next()){
-				DisplayInstanceOwnItem displayInstanceOwnItem=null;
-				if(jedis.hexists("DisplayInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
-					byte[]byt=  jedis.hget("DisplayInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
-					Object obj = SerializeObjectUnils.unserizlize(byt);
-					if (obj instanceof DisplayInstanceOwnItem) {
-						displayInstanceOwnItem=(DisplayInstanceOwnItem) obj;
-			         }
-				}else{
-					displayInstanceOwnItem=new DisplayInstanceOwnItem();
-				}
-				
-				displayInstanceOwnItem.setInstanceCode(rs.getString(1));
-				displayInstanceOwnItem.setDeviceType(rs.getInt(2));
-				displayInstanceOwnItem.setProtocol(rs.getString(3));
-				displayInstanceOwnItem.setUnitId(rs.getInt(4));
-				
-				if(displayInstanceOwnItem.getItemList()==null){
-					displayInstanceOwnItem.setItemList(new ArrayList<DisplayItem>());
-				}
-				DisplayItem displayItem=new DisplayItem();
-				displayItem.setUnitId(rs.getInt(4));
-				displayItem.setItemId(rs.getInt(5));
-				displayItem.setItemName(rs.getString(6)+"");
-				displayItem.setItemCode(rs.getString(7)+"");
-				displayItem.setBitIndex(rs.getInt(8));
-				displayItem.setShowLevel(rs.getInt(9));
-				displayItem.setSort(rs.getInt(10));
-				displayItem.setRealtimeCurve(rs.getInt(11));
-				displayItem.setRealtimeCurveColor(rs.getString(12)+"");
-				displayItem.setHistoryCurve(rs.getInt(13));
-				displayItem.setHistoryCurveColor(rs.getString(14)+"");
-				displayItem.setType(rs.getInt(15));
-				int index=-1;
-				for(int i=0;i<displayInstanceOwnItem.getItemList().size();i++){
-					if(displayItem.getItemCode().equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(i).getItemCode()) && displayItem.getType()==displayInstanceOwnItem.getItemList().get(i).getType()){
-						index=i;
-						break;
-					}
-				}
-				if(index>=0){
-					displayInstanceOwnItem.getItemList().set(index, displayItem);
-				}else{
-					displayInstanceOwnItem.getItemList().add(displayItem);
-				}
-				Collections.sort(displayInstanceOwnItem.getItemList());
-				String key=displayInstanceOwnItem.getInstanceCode();
-				jedis.hset("DisplayInstanceOwnItem".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(displayInstanceOwnItem));//哈希(Hash)
-			}
-//			byte[]byt=  jedis.hget("DisplayInstanceOwnItem".getBytes(), "displayinstance1".getBytes());
-//			Object obj = SerializeObjectUnils.unserizlize(byt);
-//			if (obj instanceof DisplayInstanceOwnItem) {
-//				DisplayInstanceOwnItem displayInstanceOwnItem=(DisplayInstanceOwnItem) obj;
-//				System.out.println(new Gson().toJson(displayInstanceOwnItem));
-//	        }
-			
+        	if(!"delete".equalsIgnoreCase(method)){
+        		pstmt = conn.prepareStatement(sql);
+    			rs=pstmt.executeQuery();
+    			while(rs.next()){
+    				DisplayInstanceOwnItem displayInstanceOwnItem=null;
+    				if(jedis.hexists("DisplayInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
+    					byte[]byt=  jedis.hget("DisplayInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
+    					Object obj = SerializeObjectUnils.unserizlize(byt);
+    					if (obj instanceof DisplayInstanceOwnItem) {
+    						displayInstanceOwnItem=(DisplayInstanceOwnItem) obj;
+    			         }
+    				}else{
+    					displayInstanceOwnItem=new DisplayInstanceOwnItem();
+    				}
+    				
+    				displayInstanceOwnItem.setInstanceCode(rs.getString(1));
+    				displayInstanceOwnItem.setDeviceType(rs.getInt(2));
+    				displayInstanceOwnItem.setProtocol(rs.getString(3));
+    				displayInstanceOwnItem.setUnitId(rs.getInt(4));
+    				
+    				if(displayInstanceOwnItem.getItemList()==null){
+    					displayInstanceOwnItem.setItemList(new ArrayList<DisplayItem>());
+    				}
+    				DisplayItem displayItem=new DisplayItem();
+    				displayItem.setUnitId(rs.getInt(4));
+    				displayItem.setItemId(rs.getInt(5));
+    				displayItem.setItemName(rs.getString(6)+"");
+    				displayItem.setItemCode(rs.getString(7)+"");
+    				displayItem.setBitIndex(rs.getInt(8));
+    				displayItem.setShowLevel(rs.getInt(9));
+    				displayItem.setSort(rs.getInt(10));
+    				displayItem.setRealtimeCurve(rs.getInt(11));
+    				displayItem.setRealtimeCurveColor(rs.getString(12)+"");
+    				displayItem.setHistoryCurve(rs.getInt(13));
+    				displayItem.setHistoryCurveColor(rs.getString(14)+"");
+    				displayItem.setType(rs.getInt(15));
+    				int index=-1;
+    				for(int i=0;i<displayInstanceOwnItem.getItemList().size();i++){
+    					if(displayItem.getItemCode().equalsIgnoreCase(displayInstanceOwnItem.getItemList().get(i).getItemCode()) && displayItem.getType()==displayInstanceOwnItem.getItemList().get(i).getType()){
+    						index=i;
+    						break;
+    					}
+    				}
+    				if(index>=0){
+    					displayInstanceOwnItem.getItemList().set(index, displayItem);
+    				}else{
+    					displayInstanceOwnItem.getItemList().add(displayItem);
+    				}
+    				Collections.sort(displayInstanceOwnItem.getItemList());
+    				String key=displayInstanceOwnItem.getInstanceCode();
+    				jedis.hset("DisplayInstanceOwnItem".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(displayInstanceOwnItem));//哈希(Hash)
+    			}
+        	}
 		}catch (Exception e) {
 			e.printStackTrace();
 		} finally{
@@ -721,26 +782,24 @@ public class MemoryDataManagerTask {
 		}
 	}
 	
-	public static void loadDisplayInstanceOwnItemByAcqGroupId(String groupId){
+	public static void loadDisplayInstanceOwnItemByUnitId(String unitId,String method){
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
-		int result=0;
-		
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
         }
 		try {
-			List<String> unitIdList=new ArrayList<String>();
-			String sql="select t.id from tbl_acq_unit_conf t,tbl_acq_group2unit_conf t2,tbl_acq_group_conf t3 where t.id=t2.unitid and t2.groupid=t3.id and t3.id="+groupId+"";
-			pstmt = conn.prepareStatement(sql);
+			String instanceSql="select t.id from tbl_protocoldisplayinstance t where 1=1 ";
+			if(StringManagerUtils.isNotNull(unitId)){
+				instanceSql+=" and t.displayunitid="+unitId;
+			}
+			
+			pstmt = conn.prepareStatement(instanceSql);
 			rs=pstmt.executeQuery();
 			while(rs.next()){
-				unitIdList.add(rs.getInt(1)+"");
-			}
-			for(int i=0;i<unitIdList.size();i++){
-				loadDisplayInstanceOwnItemByUnitId(unitIdList.get(i));
+				loadDisplayInstanceOwnItemById(rs.getInt(1)+"",method);
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -749,13 +808,60 @@ public class MemoryDataManagerTask {
 		}
 	}
 	
-	public static void loadAlarmInstanceOwnItemByUnitId(String unitId){
+	public static void loadDisplayInstanceOwnItemByAcqGroupId(String groupId,String method){
 		Connection conn = null;   
 		PreparedStatement pstmt = null;   
 		ResultSet rs = null;
-		int result=0;
-		Gson gson = new Gson();
-		java.lang.reflect.Type type=null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		try {
+			String sql="select t4.id from tbl_acq_unit_conf t,tbl_acq_group2unit_conf t2,tbl_acq_group_conf t3,tbl_protocoldisplayinstance t4 "
+					+ " where t.id=t2.unitid and t2.groupid=t3.id and t4.displayunitid=t.id"
+					+ " and t3.id="+groupId+"";
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				loadDisplayInstanceOwnItemById(rs.getInt(1)+"",method);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
+	}
+	
+	public static void loadDisplayInstanceOwnItemByCode(String instanceCode,String method){
+		Connection conn = null;   
+		PreparedStatement pstmt = null;   
+		ResultSet rs = null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		try {
+			String instanceSql="select t.id from tbl_protocoldisplayinstance t where 1=1 ";
+			if(StringManagerUtils.isNotNull(instanceCode)){
+				instanceSql+=" and t.instanceCode='"+instanceCode+"'";
+			}
+			
+			pstmt = conn.prepareStatement(instanceSql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				loadDisplayInstanceOwnItemById(rs.getInt(1)+"",method);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
+	}
+	
+	public static void loadAlarmInstanceOwnItemById(String instanceId,String method){
+		Connection conn = null;   
+		PreparedStatement pstmt = null;   
+		ResultSet rs = null;
 		conn=OracleJdbcUtis.getConnection();
 		if(conn==null){
         	return;
@@ -769,9 +875,9 @@ public class MemoryDataManagerTask {
 					+ "t.value,t.upperlimit,t.lowerlimit,t.hystersis,t.delay,decode(t.alarmsign,0,0,t.alarmlevel) as alarmlevel,t.alarmsign,t.type,t.issendmessage,t.issendmail "
 					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3 "
 					+ " where t.unitid=t2.id and t2.id=t3.alarmunitid";
-			if(StringManagerUtils.isNotNull(unitId)){
-				sql+=" and t.unitid="+unitId;
-				instanceSql+=" and t.alarmunitid="+unitId;
+			if(StringManagerUtils.isNotNull(instanceId)){
+				sql+=" and t.id="+instanceId;
+				instanceSql+=" and t.id="+instanceId;
 			}
 			sql+=" order by t3.code, t.unitid,t.id";
 			
@@ -784,78 +890,73 @@ public class MemoryDataManagerTask {
 					}
 				}
 			}
-			if(pstmt!=null)
-        		pstmt.close();  
-        	if(rs!=null)
-        		rs.close();
-			
-			pstmt = conn.prepareStatement(sql);
-			rs=pstmt.executeQuery();
-			while(rs.next()){
-				AlarmInstanceOwnItem alarmInstanceOwnItem=null;
-				if(jedis.hexists("AlarmInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
-					byte[]byt=  jedis.hget("AlarmInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
-					Object obj = SerializeObjectUnils.unserizlize(byt);
-					if (obj instanceof AlarmInstanceOwnItem) {
-						alarmInstanceOwnItem=(AlarmInstanceOwnItem) obj;
-			         }
-				}else{
-					alarmInstanceOwnItem=new AlarmInstanceOwnItem();
-				}
-				
-				alarmInstanceOwnItem.setInstanceCode(rs.getString(1));
-				alarmInstanceOwnItem.setDeviceType(rs.getInt(2));
-				alarmInstanceOwnItem.setUnitId(rs.getInt(3));
-				alarmInstanceOwnItem.setProtocol(rs.getString(4));
-				
-				if(alarmInstanceOwnItem.getItemList()==null){
-					alarmInstanceOwnItem.setItemList(new ArrayList<AlarmItem>());
-				}
-				AlarmItem alarmItem=new AlarmItem();
-				alarmItem.setUnitId(rs.getInt(3));
-				alarmItem.setItemId(rs.getInt(5));
-				alarmItem.setItemName(rs.getString(6));
-				alarmItem.setItemCode(rs.getString(7));
-				alarmItem.setItemAddr(rs.getInt(8));
-				alarmItem.setBitIndex(rs.getInt(9));
-				
-				alarmItem.setValue(rs.getFloat(10));
-				alarmItem.setUpperLimit(rs.getFloat(11));
-				alarmItem.setLowerLimit(rs.getFloat(12));
-				alarmItem.setHystersis(rs.getFloat(13));
-				alarmItem.setDelay(rs.getInt(14));
-				
-				alarmItem.setAlarmLevel(rs.getInt(15));
-				alarmItem.setAlarmSign(rs.getInt(16));
-				
-				alarmItem.setType(rs.getInt(17));
-
-				alarmItem.setIsSendMessage(rs.getInt(18));
-				alarmItem.setIsSendMail(rs.getInt(19));
-				
-				int index=-1;
-				for(int i=0;i<alarmInstanceOwnItem.getItemList().size();i++){
-					if(alarmItem.getItemId()==alarmInstanceOwnItem.getItemList().get(i).getItemId()){
-						index=i;
-						break;
+			if(!"delete".equalsIgnoreCase(method)){
+				if(pstmt!=null)
+	        		pstmt.close();  
+	        	if(rs!=null)
+	        		rs.close();
+				pstmt = conn.prepareStatement(sql);
+				rs=pstmt.executeQuery();
+				while(rs.next()){
+					AlarmInstanceOwnItem alarmInstanceOwnItem=null;
+					if(jedis.hexists("AlarmInstanceOwnItem".getBytes(), rs.getString(1).getBytes())){
+						byte[]byt=  jedis.hget("AlarmInstanceOwnItem".getBytes(), rs.getString(1).getBytes());
+						Object obj = SerializeObjectUnils.unserizlize(byt);
+						if (obj instanceof AlarmInstanceOwnItem) {
+							alarmInstanceOwnItem=(AlarmInstanceOwnItem) obj;
+				         }
+					}else{
+						alarmInstanceOwnItem=new AlarmInstanceOwnItem();
 					}
+					
+					alarmInstanceOwnItem.setInstanceCode(rs.getString(1));
+					alarmInstanceOwnItem.setDeviceType(rs.getInt(2));
+					alarmInstanceOwnItem.setUnitId(rs.getInt(3));
+					alarmInstanceOwnItem.setProtocol(rs.getString(4));
+					
+					if(alarmInstanceOwnItem.getItemList()==null){
+						alarmInstanceOwnItem.setItemList(new ArrayList<AlarmItem>());
+					}
+					AlarmItem alarmItem=new AlarmItem();
+					alarmItem.setUnitId(rs.getInt(3));
+					alarmItem.setItemId(rs.getInt(5));
+					alarmItem.setItemName(rs.getString(6));
+					alarmItem.setItemCode(rs.getString(7));
+					alarmItem.setItemAddr(rs.getInt(8));
+					alarmItem.setBitIndex(rs.getInt(9));
+					
+					alarmItem.setValue(rs.getFloat(10));
+					alarmItem.setUpperLimit(rs.getFloat(11));
+					alarmItem.setLowerLimit(rs.getFloat(12));
+					alarmItem.setHystersis(rs.getFloat(13));
+					alarmItem.setDelay(rs.getInt(14));
+					
+					alarmItem.setAlarmLevel(rs.getInt(15));
+					alarmItem.setAlarmSign(rs.getInt(16));
+					
+					alarmItem.setType(rs.getInt(17));
+
+					alarmItem.setIsSendMessage(rs.getInt(18));
+					alarmItem.setIsSendMail(rs.getInt(19));
+					
+					int index=-1;
+					for(int i=0;i<alarmInstanceOwnItem.getItemList().size();i++){
+						if(alarmItem.getItemId()==alarmInstanceOwnItem.getItemList().get(i).getItemId()){
+							index=i;
+							break;
+						}
+					}
+					if(index>=0){
+						alarmInstanceOwnItem.getItemList().set(index, alarmItem);
+					}else{
+						alarmInstanceOwnItem.getItemList().add(alarmItem);
+					}
+					
+					String key=alarmInstanceOwnItem.getInstanceCode();
+					jedis.hset("AlarmInstanceOwnItem".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(alarmInstanceOwnItem));//哈希(Hash)
+					
 				}
-				if(index>=0){
-					alarmInstanceOwnItem.getItemList().set(index, alarmItem);
-				}else{
-					alarmInstanceOwnItem.getItemList().add(alarmItem);
-				}
-				
-				String key=alarmInstanceOwnItem.getInstanceCode();
-				jedis.hset("AlarmInstanceOwnItem".getBytes(), key.getBytes(), SerializeObjectUnils.serialize(alarmInstanceOwnItem));//哈希(Hash)
-				
 			}
-//			byte[]byt=  jedis.hget("AlarmInstanceOwnItem".getBytes(), "alarminstance3".getBytes());
-//			Object obj = SerializeObjectUnils.unserizlize(byt);
-//			if (obj instanceof AlarmInstanceOwnItem) {
-//				AlarmInstanceOwnItem alarmInstanceOwnItem=(AlarmInstanceOwnItem) obj;
-//				System.out.println(new Gson().toJson(alarmInstanceOwnItem));
-//	        }
 		}catch (Exception e) {
 			e.printStackTrace();
 		} finally{
@@ -864,6 +965,60 @@ public class MemoryDataManagerTask {
 				jedis.disconnect();
 				jedis.close();
 			}
+		}
+	}
+	
+	public static void loadAlarmInstanceOwnItemByCode(String instanceCode,String method){
+		Connection conn = null;   
+		PreparedStatement pstmt = null;   
+		ResultSet rs = null;
+		int result=0;
+		Gson gson = new Gson();
+		java.lang.reflect.Type type=null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		try {
+			String instanceSql="select t.id from tbl_protocolalarminstance t where 1=1 ";
+			if(StringManagerUtils.isNotNull(instanceCode)){
+				instanceSql+=" and t.instanceCode='"+instanceCode+"'";
+			}
+			
+			pstmt = conn.prepareStatement(instanceSql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				loadAlarmInstanceOwnItemById(rs.getInt(1)+"",method);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
+		}
+	}
+	
+	public static void loadAlarmInstanceOwnItemByUnitId(String unitId,String method){
+		Connection conn = null;   
+		PreparedStatement pstmt = null;   
+		ResultSet rs = null;
+		conn=OracleJdbcUtis.getConnection();
+		if(conn==null){
+        	return;
+        }
+		try {
+			String instanceSql="select t.id from tbl_protocolalarminstance t where 1=1 ";
+			if(StringManagerUtils.isNotNull(unitId)){
+				instanceSql+=" and t.alarmunitid="+unitId;
+			}
+			pstmt = conn.prepareStatement(instanceSql);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				loadAlarmInstanceOwnItemById(rs.getInt(1)+"",method);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			OracleJdbcUtis.closeDBConnection(conn, pstmt, rs);
 		}
 	}
 	

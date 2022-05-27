@@ -154,7 +154,6 @@ public class BaseDao extends HibernateDaoSupport {
 
 	@Transactional
 	public <T> Serializable addObject(T clazz) {
-
 		return this.save(clazz);
 	}
 
@@ -380,6 +379,7 @@ public class BaseDao extends HibernateDaoSupport {
 		for (int i = 0; i < values.length; i++) {
 			query.setParameter(i, values[i]);
 		}
+		StringManagerUtils.printLog(callSql);
 		return query.list();
 	}
 
@@ -759,12 +759,13 @@ public class BaseDao extends HibernateDaoSupport {
 			}
 		}
 		Integer rows =0;
-			SQLQuery query = getSessionFactory().getCurrentSession().createSQLQuery(allsql);
-			for (int i = 0; i < values.length; i++) {
-				values[i] = values[i].toString().replace("@", ",");
-				query.setParameter(i, values[i]);
-			}
-			rows= Integer.parseInt(query.uniqueResult() + "");
+		SQLQuery query = getSessionFactory().getCurrentSession().createSQLQuery(allsql);
+		StringManagerUtils.printLog(allsql);
+		for (int i = 0; i < values.length; i++) {
+			values[i] = values[i].toString().replace("@", ",");
+			query.setParameter(i, values[i]);
+		}
+		rows= Integer.parseInt(query.uniqueResult() + "");
 		return rows;
 	}
 

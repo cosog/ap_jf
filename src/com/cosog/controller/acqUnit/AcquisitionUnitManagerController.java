@@ -545,9 +545,9 @@ public class AcquisitionUnitManagerController extends BaseController {
 				}
 				EquipmentDriverServerTask.initInstanceConfigByAcqGroupId(groupId+"","update");
 				EquipmentDriverServerTask.initPumpDriverAcquisitionInfoConfigByAcqGroupId(groupId+"","update");
-				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId(groupId);
 				this.acquisitionUnitItemManagerService.doAcquisitionGroupOwnItemChange(groupId);
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByAcqGroupId(groupId);
+				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId(groupId,"update");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemByAcqGroupId(groupId,"update");
 			}
 			result = "{success:true,msg:true}";
 			response.setCharacterEncoding(Constants.ENCODING_UTF8);
@@ -691,8 +691,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 						displayUnitItem.setMatrix(module_[10]);
 						this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
 					}
-					
-					MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId);
+					MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId,"update");
 				}
 			}
 			result = "{success:true,msg:true}";
@@ -784,7 +783,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 						displayUnitItem.setMatrix(module_[6]);
 						this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
 					}
-					MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId);
+					MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId,"update");
 				}
 			}
 			result = "{success:true,msg:true}";
@@ -843,7 +842,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 					displayUnitItem.setMatrix(module_[8]);
 					this.displayUnitItemManagerService.grantDisplayItemsPermission(displayUnitItem);
 				}
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId);
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId,"update");
 			}
 		
 			result = "{success:true,msg:true}";
@@ -1690,6 +1689,8 @@ public class AcquisitionUnitManagerController extends BaseController {
 				for(int i=0;i<acquisitionUnitHandsontableChangeData.getDelidslist().size();i++){
 					EquipmentDriverServerTask.initDriverAcquisitionInfoConfigByAcqUnitId(acquisitionUnitHandsontableChangeData.getDelidslist().get(i), "delete");
 					EquipmentDriverServerTask.initInstanceConfigByAcqUnitId(acquisitionUnitHandsontableChangeData.getDelidslist().get(i), "delete");
+					MemoryDataManagerTask.loadAcqInstanceOwnItemByUnitId(acquisitionUnitHandsontableChangeData.getDelidslist().get(i), "delete");
+					MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(acquisitionUnitHandsontableChangeData.getDelidslist().get(i), "delete");
 					this.acquisitionUnitManagerService.doAcquisitionUnitBulkDelete(acquisitionUnitHandsontableChangeData.getDelidslist().get(i),deviceType);
 				}
 			}
@@ -1744,7 +1745,8 @@ public class AcquisitionUnitManagerController extends BaseController {
 				for(int i=0;i<acquisitionGroupHandsontableChangeData.getDelidslist().size();i++){
 					this.acquisitionUnitManagerService.doAcquisitionGroupBulkDelete(acquisitionGroupHandsontableChangeData.getDelidslist().get(i));
 					EquipmentDriverServerTask.initInstanceConfigByAcqUnitId(unitId, "update");
-					MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId);
+					MemoryDataManagerTask.loadAcqInstanceOwnItemByUnitId(unitId,"update");
+					MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId(unitId,"update");
 				}
 			}
 			if(acquisitionGroupHandsontableChangeData.getUpdatelist()!=null){
@@ -1851,6 +1853,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 			this.protocolInstanceManagerService.doModbusProtocolInstanceAdd(protocolInstance);
 			List<String> instanceList=new ArrayList<String>();
 			instanceList.add(protocolInstance.getName());
+			MemoryDataManagerTask.loadAcqInstanceOwnItemByCode(protocolInstance.getCode(),"update");
 			EquipmentDriverServerTask.initInstanceConfig(instanceList, "update");
 			result = "{success:true,msg:true}";
 		} catch (Exception e) {
@@ -1916,6 +1919,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 		if(modbusProtocolAlarmUnitSaveData!=null){
 			if(modbusProtocolAlarmUnitSaveData.getDelidslist()!=null){
 				for(int i=0;i<modbusProtocolAlarmUnitSaveData.getDelidslist().size();i++){
+					MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId(modbusProtocolAlarmUnitSaveData.getDelidslist().get(i),"delete");
 					this.acquisitionUnitManagerService.doModbusProtocolAlarmUnitDelete(modbusProtocolAlarmUnitSaveData.getDelidslist().get(i));
 				}
 			}
@@ -1929,7 +1933,6 @@ public class AcquisitionUnitManagerController extends BaseController {
 				alarmUnit.setRemark(modbusProtocolAlarmUnitSaveData.getRemark());
 				try {
 					this.alarmUnitManagerService.doAlarmUnitEdit(alarmUnit);
-					
 					this.alarmUnitManagerService.deleteCurrentAlarmUnitOwnItems(modbusProtocolAlarmUnitSaveData);
 					if(modbusProtocolAlarmUnitSaveData.getAlarmItems()!=null){
 						for(int i=0;i<modbusProtocolAlarmUnitSaveData.getAlarmItems().size();i++){
@@ -2000,7 +2003,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 							}
 						}
 						
-						MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId(modbusProtocolAlarmUnitSaveData.getId()+"");
+						MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId(modbusProtocolAlarmUnitSaveData.getId()+"","update");
 					}
 					
 					json = "{success:true,msg:true}";
@@ -2080,9 +2083,8 @@ public class AcquisitionUnitManagerController extends BaseController {
 							instanceList=new ArrayList<String>();
 							instanceList.add(modbusProtocolInstanceSaveData.getName());
 							EquipmentDriverServerTask.initInstanceConfig(instanceList, "update");
-							EquipmentDriverServerTask.initDriverAcquisitionInfoConfigByProtocolInstanceId(modbusProtocolInstanceSaveData.getId()+"", "update");
 						}
-						
+						EquipmentDriverServerTask.initDriverAcquisitionInfoConfigByProtocolInstanceId(modbusProtocolInstanceSaveData.getId()+"", "update");
 						json = "{success:true,msg:true}";
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -2107,6 +2109,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 		String result = "";
 		try {
 			this.protocolDisplayInstanceManagerService.doModbusProtocolDisplayInstanceAdd(protocolDisplayInstance);
+			MemoryDataManagerTask.loadDisplayInstanceOwnItemByCode(protocolDisplayInstance.getCode(),"update");
 			result = "{success:true,msg:true}";
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -2134,6 +2137,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 			if(modbusProtocolDisplayInstanceSaveData.getDelidslist()!=null){
 				for(int i=0;i<modbusProtocolDisplayInstanceSaveData.getDelidslist().size();i++){
 					this.protocolDisplayInstanceManagerService.doModbusProtocolDisplayInstanceBulkDelete(modbusProtocolDisplayInstanceSaveData.getDelidslist().get(i));
+					MemoryDataManagerTask.loadDisplayInstanceOwnItemById(modbusProtocolDisplayInstanceSaveData.getDelidslist().get(i),"delete");
 				}
 			}
 			
@@ -2151,6 +2155,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 				}
 				try {
 					this.protocolDisplayInstanceManagerService.doModbusProtocolDisplayInstanceEdit(protocolDisplayInstance);
+					MemoryDataManagerTask.loadDisplayInstanceOwnItemById(protocolDisplayInstance.getId()+"","update");
 					json = "{success:true,msg:true}";
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -2174,6 +2179,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 		String result = "";
 		try {
 			this.protocolAlarmInstanceManagerService.doModbusProtocolAlarmInstanceAdd(protocolAlarmInstance);
+			MemoryDataManagerTask.loadAlarmInstanceOwnItemByCode(protocolAlarmInstance.getCode(),"update");
 			result = "{success:true,msg:true}";
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -2200,6 +2206,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 		if(modbusProtocolAlarmInstanceSaveData!=null){
 			if(modbusProtocolAlarmInstanceSaveData.getDelidslist()!=null){
 				for(int i=0;i<modbusProtocolAlarmInstanceSaveData.getDelidslist().size();i++){
+					MemoryDataManagerTask.loadAlarmInstanceOwnItemById(modbusProtocolAlarmInstanceSaveData.getDelidslist().get(i),"delete");
 					this.protocolAlarmInstanceManagerService.doModbusProtocolAlarmInstanceBulkDelete(modbusProtocolAlarmInstanceSaveData.getDelidslist().get(i));
 				}
 			}
@@ -2218,6 +2225,7 @@ public class AcquisitionUnitManagerController extends BaseController {
 				}
 				try {
 					this.protocolAlarmInstanceManagerService.doModbusProtocolAlarmInstanceEdit(protocolAlarmInstance);
+					MemoryDataManagerTask.loadAlarmInstanceOwnItemById(protocolAlarmInstance.getId()+"","update");
 					json = "{success:true,msg:true}";
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
