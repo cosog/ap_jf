@@ -335,7 +335,7 @@ public class DriverAPIController extends BaseController{
 				
 				if(rpcDeviceInfo!=null || pcpDeviceInfo!=null){
 					if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-						MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+						MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 					}
 					
 					String realtimeTable="";
@@ -642,15 +642,15 @@ public class DriverAPIController extends BaseController{
 			}
 			
 			if(!jedis.exists("AcqInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId("");
+				MemoryDataManagerTask.loadAcqInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1584,15 +1584,15 @@ public class DriverAPIController extends BaseController{
 			}
 			
 			if(!jedis.exists("AcqInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId("");
+				MemoryDataManagerTask.loadAcqInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 			}
 		}catch(Exception e){
 			e.printStackTrace();

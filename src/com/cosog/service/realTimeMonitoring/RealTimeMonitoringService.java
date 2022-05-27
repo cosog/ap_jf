@@ -734,15 +734,15 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			}
 			
 			if(!jedis.exists("AcqInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId("");
+				MemoryDataManagerTask.loadAcqInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1227,14 +1227,14 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			}
 			
 			if(!jedis.exists("AcqInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId("");
+				MemoryDataManagerTask.loadAcqInstanceOwnItemById("","update");
 			}
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1702,7 +1702,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
 			
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			
 			if(StringManagerUtils.isNotNull(displayInstanceCode)&&jedis.hexists("DisplayInstanceOwnItem".getBytes(),displayInstanceCode.getBytes())){
@@ -1710,7 +1710,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			}
 			
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 			}
 			
 			if(StringManagerUtils.isNotNull(alarmInstanceCode)&&jedis.hexists("AlarmInstanceOwnItem".getBytes(),alarmInstanceCode.getBytes())){
@@ -2158,7 +2158,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), user.getUserId().getBytes()));
 			
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			if(jedis!=null&&deviceInfo!=null&&jedis.hexists("DisplayInstanceOwnItem".getBytes(), deviceInfo.getDisplayInstanceCode().getBytes())){
 				displayInstanceOwnItem=(DisplayInstanceOwnItem) SerializeObjectUnils.unserizlize(jedis.hget("DisplayInstanceOwnItem".getBytes(), deviceInfo.getDisplayInstanceCode().getBytes()));
@@ -2456,7 +2456,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 			userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), user.getUserId().getBytes()));
 			
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			if(jedis!=null&&deviceInfo!=null&&jedis.hexists("DisplayInstanceOwnItem".getBytes(), deviceInfo.getDisplayInstanceCode().getBytes())){
 				displayInstanceOwnItem=(DisplayInstanceOwnItem) SerializeObjectUnils.unserizlize(jedis.hget("DisplayInstanceOwnItem".getBytes(), deviceInfo.getDisplayInstanceCode().getBytes()));
@@ -2800,7 +2800,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 				MemoryDataManagerTask.loadUserInfo(null);
 			}
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			if(jedis.hexists("UserInfo".getBytes(), userAccount.getBytes())){
 				userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), userAccount.getBytes()));

@@ -267,7 +267,7 @@ public class StringManagerUtils {
     
     public static void printLog(String x){
     	if(Config.getInstance().configFile.getOthers().getPrintLog()){
-    		System.out.println(x);
+    		System.out.println(StringManagerUtils.getCurrentTime("yyyy-MM-dd HH:mm:ss")+":"+x);
     	}
     }
     

@@ -250,7 +250,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				}
 			}
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -461,15 +461,15 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			}
 			
 			if(!jedis.exists("AcqInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId("");
+				MemoryDataManagerTask.loadAcqInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -775,7 +775,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			}
 			
 			if(!jedis.exists("AcqInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId("");
+				MemoryDataManagerTask.loadAcqInstanceOwnItemById("","update");
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -960,15 +960,15 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			}
 			
 			if(!jedis.exists("AcqInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId("");
+				MemoryDataManagerTask.loadAcqInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1246,7 +1246,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			}
 			
 			if(!jedis.exists("AcqInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAcqInstanceOwnItemByGroupId("");
+				MemoryDataManagerTask.loadAcqInstanceOwnItemById("","update");
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1433,7 +1433,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
 			
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			
 			if(StringManagerUtils.isNotNull(displayInstanceCode)&&jedis.hexists("DisplayInstanceOwnItem".getBytes(),displayInstanceCode.getBytes())){
@@ -1441,7 +1441,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			}
 			
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 			}
 			
 			if(StringManagerUtils.isNotNull(alarmInstanceCode)&&jedis.hexists("AlarmInstanceOwnItem".getBytes(),alarmInstanceCode.getBytes())){
@@ -1881,7 +1881,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				MemoryDataManagerTask.loadUserInfo(null);
 			}
 			if(!jedis.exists("DisplayInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadDisplayInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadDisplayInstanceOwnItemById("","update");
 			}
 			if(jedis.hexists("UserInfo".getBytes(), userAccount.getBytes())){
 				userInfo=(UserInfo) SerializeObjectUnils.unserizlize(jedis.hget("UserInfo".getBytes(), userAccount.getBytes()));
@@ -2310,7 +2310,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			
 			
 			if(!jedis.exists("AlarmInstanceOwnItem".getBytes())){
-				MemoryDataManagerTask.loadAlarmInstanceOwnItemByUnitId("");
+				MemoryDataManagerTask.loadAlarmInstanceOwnItemById("","update");
 			}
 			
 			if(StringManagerUtils.isNotNull(alarmInstanceCode)&&jedis.hexists("AlarmInstanceOwnItem".getBytes(),alarmInstanceCode.getBytes())){
