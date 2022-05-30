@@ -1499,22 +1499,14 @@ color16ToRgba = function(sColor,Opacity){
 			var backgroundColor='#FFFFFF';
 		 	var color='#000000';
 		 	var opacity=1;
-		 	if (alarmLevel == 0) {
-		 		backgroundColor='#'+alarmShowStyle.Data.Normal.BackgroundColor;
-		 		color='#'+alarmShowStyle.Data.Normal.Color;
-		 		opacity=alarmShowStyle.Data.Normal.Opacity
-			}else if (alarmLevel == 100) {
-				backgroundColor='#'+alarmShowStyle.Data.FirstLevel.BackgroundColor;
-				color='#'+alarmShowStyle.Data.FirstLevel.Color;
-				opacity=alarmShowStyle.Data.FirstLevel.Opacity
-			}else if (alarmLevel == 200) {
-				backgroundColor='#'+alarmShowStyle.Data.SecondLevel.BackgroundColor;
-				color='#'+alarmShowStyle.Data.SecondLevel.Color;
-				opacity=alarmShowStyle.Data.SecondLevel.Opacity
-			}else if (alarmLevel == 300) {
-				backgroundColor='#'+alarmShowStyle.Data.ThirdLevel.BackgroundColor;
-				color='#'+alarmShowStyle.Data.ThirdLevel.Color;
-				opacity=alarmShowStyle.Data.ThirdLevel.Opacity
+		 	if (runStatus == 0) {
+		 		backgroundColor='#'+alarmShowStyle.Run.stop.BackgroundColor;
+		 		color='#'+alarmShowStyle.Run.stop.Color;
+		 		opacity=alarmShowStyle.Run.stop.Opacity
+			}else if (runStatus == 1) {
+				backgroundColor='#'+alarmShowStyle.Run.run.BackgroundColor;
+		 		color='#'+alarmShowStyle.Run.run.Color;
+		 		opacity=alarmShowStyle.Run.run.Opacity
 			}
 		 	var rgba=color16ToRgba(backgroundColor,opacity);
 		 	o.style='background-color:'+rgba+';color:'+color+';';

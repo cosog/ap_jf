@@ -1,20 +1,6 @@
 package com.cosog.model;
 
 public class AlarmShowStyle implements java.io.Serializable {
-	
-	public AlarmShowStyle() {
-		this.Comm=new CommAlarmStyle();
-		this.Data=new AlarmLevelStyle();
-		
-		this.Comm.setOnline(new AlarmStyle());
-		this.Comm.setOffline(new AlarmStyle());
-		
-		this.Data.setNormal(new AlarmStyle());
-		this.Data.setFirstLevel(new AlarmStyle());
-		this.Data.setSecondLevel(new AlarmStyle());
-		this.Data.setThirdLevel(new AlarmStyle());
-	}
-
 	/**
 	 * 
 	 */
@@ -22,7 +8,26 @@ public class AlarmShowStyle implements java.io.Serializable {
 
 	private CommAlarmStyle Comm;
 	
+	private RunAlarmStyle Run;
+	
 	private AlarmLevelStyle Data;
+	
+	public AlarmShowStyle() {
+		this.Comm=new CommAlarmStyle();
+		this.Run=new RunAlarmStyle();
+		this.Data=new AlarmLevelStyle();
+		
+		this.Comm.setOnline(new AlarmStyle());
+		this.Comm.setOffline(new AlarmStyle());
+		
+		this.Run.setRun(new AlarmStyle());
+		this.Run.setStop(new AlarmStyle());
+		
+		this.Data.setNormal(new AlarmStyle());
+		this.Data.setFirstLevel(new AlarmStyle());
+		this.Data.setSecondLevel(new AlarmStyle());
+		this.Data.setThirdLevel(new AlarmStyle());
+	}
 
 	public static class CommAlarmStyle implements java.io.Serializable {
 		private static final long serialVersionUID = 1L;
@@ -45,6 +50,30 @@ public class AlarmShowStyle implements java.io.Serializable {
 
 		public void setOffline(AlarmStyle offline) {
 			this.offline = offline;
+		}
+    }
+	
+	public static class RunAlarmStyle implements java.io.Serializable {
+		private static final long serialVersionUID = 1L;
+		
+    	private AlarmStyle run;
+
+        private AlarmStyle stop;
+
+		public AlarmStyle getRun() {
+			return run;
+		}
+
+		public void setRun(AlarmStyle run) {
+			this.run = run;
+		}
+
+		public AlarmStyle getStop() {
+			return stop;
+		}
+
+		public void setStop(AlarmStyle stop) {
+			this.stop = stop;
 		}
     }
     
@@ -151,5 +180,13 @@ public class AlarmShowStyle implements java.io.Serializable {
 
 	public void setComm(CommAlarmStyle comm) {
 		Comm = comm;
+	}
+
+	public RunAlarmStyle getRun() {
+		return Run;
+	}
+
+	public void setRun(RunAlarmStyle run) {
+		Run = run;
 	}
 }
