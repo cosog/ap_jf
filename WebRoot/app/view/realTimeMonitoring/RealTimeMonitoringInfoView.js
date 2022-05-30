@@ -766,8 +766,8 @@ function initRealTimeMonitoringStatPieOrColChat(get_rawData) {
 	
 	var alarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue());
 	var colors=[];
-	colors.push('#'+alarmShowStyle.Comm.online.BackgroundColor);
-	colors.push('#'+alarmShowStyle.Comm.offline.BackgroundColor);
+	colors.push('#'+alarmShowStyle.Comm.online.Color);
+	colors.push('#'+alarmShowStyle.Comm.offline.Color);
 	
 	ShowRealTimeMonitoringStatPieOrColChat(title,divid, "设备数占", pieData,colors);
 	
@@ -922,11 +922,11 @@ function initRealTimeMonitoringRunStatusStatPieOrColChat(get_rawData) {
 			if(datalist[i].count>0){
 				pieDataStr+="['"+datalist[i].item+"',"+datalist[i].count+"],";
 				if(datalist[i].itemCode=='run'){
-					colors.push('#'+alarmShowStyle.Comm.online.BackgroundColor);
+					colors.push('#'+alarmShowStyle.Run.run.Color);
 				}else if(datalist[i].itemCode=='stop'){
-					colors.push('#'+alarmShowStyle.Comm.offline.BackgroundColor);
+					colors.push('#'+alarmShowStyle.Run.stop.Color);
 				}else if(datalist[i].itemCode=='offline'){
-					colors.push('#767272');
+					colors.push('#'+alarmShowStyle.Comm.offline.Color);
 				}
 			}
 		}

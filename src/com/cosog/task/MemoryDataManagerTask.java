@@ -58,7 +58,7 @@ public class MemoryDataManagerTask {
 		return instance;
 	}
 	
-//	@Scheduled(fixedRate = 1000*60*60*24*365*100)
+	@Scheduled(fixedRate = 1000*60*60*24*365*100)
 	public static void loadMemoryData(){
 		Jedis jedis=null;
 		try{
@@ -1268,13 +1268,18 @@ public class MemoryDataManagerTask {
 					+ " (select * from tbl_code t where t.itemcode='BJYSTMD' ) v3 "
 					+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
 					+ " order by v1.itemvalue ";
-			String sql2="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
+			String commAlarmSql="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
 					+ " (select * from tbl_code t where t.itemcode='TXBJYS' ) v1,"
 					+ " (select * from tbl_code t where t.itemcode='TXBJQJYS' ) v2,"
 					+ " (select * from tbl_code t where t.itemcode='TXBJYSTMD' ) v3 "
 					+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
 					+ " order by v1.itemvalue ";
-			
+			String runAlarmSql="select v1.itemvalue as alarmLevel,v1.itemname as backgroundColor,v2.itemname as color,v3.itemname as opacity from "
+					+ " (select * from tbl_code t where t.itemcode='YXBJYS' ) v1,"
+					+ " (select * from tbl_code t where t.itemcode='YXBJQJYS' ) v2,"
+					+ " (select * from tbl_code t where t.itemcode='YXBJYSTMD' ) v3 "
+					+ " where v1.itemvalue=v2.itemvalue and v1.itemvalue=v3.itemvalue "
+					+ " order by v1.itemvalue ";
 			conn=OracleJdbcUtis.getConnection();
 			if(conn==null){
 				return null;
@@ -1304,7 +1309,7 @@ public class MemoryDataManagerTask {
 					alarmShowStyle.getData().getThirdLevel().setOpacity(rs.getString(4));
 				}	
 			}
-			pstmt = conn.prepareStatement(sql2); 
+			pstmt = conn.prepareStatement(commAlarmSql); 
 			rs=pstmt.executeQuery();
 			while(rs.next()){
 				if(rs.getInt(1)==0){
@@ -1319,6 +1324,22 @@ public class MemoryDataManagerTask {
 					alarmShowStyle.getComm().getOnline().setOpacity(rs.getString(4));
 				}
 			}
+			pstmt = conn.prepareStatement(runAlarmSql); 
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				if(rs.getInt(1)==0){
+					alarmShowStyle.getRun().getStop().setValue(rs.getInt(1));
+					alarmShowStyle.getRun().getStop().setBackgroundColor(rs.getString(2));
+					alarmShowStyle.getRun().getStop().setColor(rs.getString(3));
+					alarmShowStyle.getRun().getStop().setOpacity(rs.getString(4));
+				}else if(rs.getInt(1)==1){
+					alarmShowStyle.getRun().getRun().setValue(rs.getInt(1));
+					alarmShowStyle.getRun().getRun().setBackgroundColor(rs.getString(2));
+					alarmShowStyle.getRun().getRun().setColor(rs.getString(3));
+					alarmShowStyle.getRun().getRun().setOpacity(rs.getString(4));
+				}
+			}
+			
 			jedis = new Jedis();
 			jedis.set("AlarmShowStyle".getBytes(), SerializeObjectUnils.serialize(alarmShowStyle));
 			
