@@ -11,10 +11,19 @@ insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_COD
 values (2018, 9999, '历史查询', '历史查询', 'AP.view.historyQuery.HistoryQueryInfoView', 'DeviceHistoryQuery', 1020010, null, null, 'history', 0, 'AP.controller.frame.MainIframeControl');
 
 insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
-values (2058, 9999, '故障查询', '故障查询', 'AP.view.alarmQuery.AlarmQueryInfoView', 'AlarmQuery', 1030010, null, null, 'alarm', 0, 'AP.controller.frame.MainIframeControl');
+values (2158, 9999, '生产报表', '生产报表', 'AP.view.reportOut.ReportOutDailyReportView', 'DailyReport', 1030010, null, null, 'report', 0, 'AP.controller.frame.MainIframeControl');
 
 insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
-values (2038, 9999, '日志查询', '日志查询', 'AP.view.log.LogInfoView', 'LogQuery', 1040010, null, null, 'log', 0, 'AP.controller.frame.MainIframeControl');
+values (2058, 9999, '故障查询', '故障查询', 'AP.view.alarmQuery.AlarmQueryInfoView', 'AlarmQuery', 1040010, null, null, 'alarm', 0, 'AP.controller.frame.MainIframeControl');
+
+insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
+values (2038, 9999, '日志查询', '日志查询', 'AP.view.log.LogInfoView', 'LogQuery', 1050010, null, null, 'log', 0, 'AP.controller.frame.MainIframeControl');
+
+insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
+values (2179, 9999, '计算维护', '计算维护', 'AP.view.dataMaintaining.CalculateMaintainingInfoView', 'CalculateMaintaining', 1060010, null, null, 'calculate', 0, '#');
+
+insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
+values (1777, 9999, '驱动配置', '驱动配置', 'AP.view.acquisitionUnit.ProtocolConfigInfoView', 'DataSource', 1070010, null, null, 'driverConfig', 0, 'AP.controller.acquisitionUnit.AcquisitionUnitInfoControl');
 
 insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
 values (27, 9999, '权限管理', '权限管理', '#', 'right_Ids', 2030000, null, null, 'right', 0, 'AP.controller.frame.MainIframeControl');
@@ -29,19 +38,13 @@ insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_COD
 values (31, 9999, '设备管理', '设备管理', '#', 'dataConfig', 2040000, null, null, 'dataConfig', 0, 'AP.controller.frame.MainIframeControl');
 
 insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
-values (34, 31, '抽油机', '抽油机', 'AP.view.well.RPCDeviceInfoPanel', 'RPCDeviceManager', 2040100, null, null, 'wellInformation', 0, 'AP.controller.well.WellInfoController');
+values (34, 31, '井名信息', '井名信息', 'AP.view.well.DeviceManagerInfoView', 'WellInformation', 2040100, null, null, 'wellInformation', 0, 'AP.controller.well.WellInfoController');
 
 insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
-values (2098, 31, '螺杆泵', '螺杆泵管理', 'AP.view.well.PCPDeviceInfoPanel', 'PCPDeviceManager', 2040200, null, null, 'pipelineDevice', 0, 'AP.controller.well.WellInfoController');
-
-insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
-values (2118, 31, '辅件设备', '辅件设备', 'AP.view.well.AuxiliaryDeviceInfoPanel', 'AuxiliaryDeviceManager', 2040300, null, null, 'auxiliaryDevice', 0, 'AP.controller.well.WellInfoController');
+values (2118, 31, '抽油机信息', '抽油机信息', 'AP.view.well.PumpingModelInfoPanel', 'PumpingModelManager', 2040300, null, null, 'pumping', 0, 'AP.controller.well.WellInfoController');
 
 insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
 values (2078, 31, '短信设备', '短信设备管理', 'AP.view.well.SMSDeviceInfoView', 'SMSDeviceManager', 2040400, null, null, 'smsDevice', 0, 'AP.controller.well.WellInfoController');
-
-insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
-values (1777, 9999, '驱动配置', '驱动配置', 'AP.view.acquisitionUnit.ProtocolConfigInfoView', 'DataSource', 2040100, null, null, 'driverConfig', 0, 'AP.controller.acquisitionUnit.AcquisitionUnitInfoControl');
 
 insert into tbl_module (MD_ID, MD_PARENTID, MD_NAME, MD_SHOWNAME, MD_URL, MD_CODE, MD_SEQ, MD_LEVEL, MD_FLAG, MD_ICON, MD_TYPE, MD_CONTROL)
 values (23, 9999, '系统配置', '系统配置', '#', 'SystemManageent', 2090000, null, null, 'system', 0, 'AP.controller.frame.MainIframeControl');
@@ -55,137 +58,143 @@ values (894, 23, '字典配置', '字典配置', 'AP.view.data.SystemdataInfoView', 'Dat
 /*==============================================================*/
 /* 初始化tbl_role数据                                          */
 /*==============================================================*/
-insert into TBL_ROLE (ROLE_ID, ROLE_NAME, ROLE_FLAG, REMARK, SHOWLEVEL, ROLE_LEVEL)
-values (1, '超级管理员', 1, '全部权限', 1, 1);
+insert into TBL_ROLE (ROLE_ID, ROLE_NAME, ROLE_LEVEL, ROLE_FLAG, SHOWLEVEL, REMARK)
+values (1, '超级管理员', 1, 1, 1, '全部权限');
 
-insert into TBL_ROLE (ROLE_ID, ROLE_NAME, ROLE_FLAG, REMARK, SHOWLEVEL, ROLE_LEVEL)
-values (2, '软件管理员', 1, '数据查询、编辑、权限管理', 2, 2);
+insert into TBL_ROLE (ROLE_ID, ROLE_NAME, ROLE_LEVEL, ROLE_FLAG, SHOWLEVEL, REMARK)
+values (2, '软件管理员', 2, 1, 2, '数据查询、编辑、权限管理');
 
-insert into TBL_ROLE (ROLE_ID, ROLE_NAME, ROLE_FLAG, REMARK, SHOWLEVEL, ROLE_LEVEL)
-values (3, '应用分析员', 0, '数据查询', 3, 3);
+insert into TBL_ROLE (ROLE_ID, ROLE_NAME, ROLE_LEVEL, ROLE_FLAG, SHOWLEVEL, REMARK)
+values (3, '应用分析员', 3, 0, 3, '数据查询');
 
 /*==============================================================*/
 /* 初始化tbl_module2role数据                                          */
 /*==============================================================*/
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (9999, '0,0,0', 1, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (1, 9999, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (1998, '0,0,0', 2, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (2, 1998, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2018, '0,0,0', 3, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (3, 2018, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2058, '0,0,0', 4, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (4, 2058, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2038, '0,0,0', 5, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (5, 2038, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (27, '0,0,0', 6, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (6, 27, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (24, '0,0,0', 7, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (7, 24, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (29, '0,0,0', 9, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (9, 29, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (31, '0,0,0', 10, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (10, 31, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (34, '0,0,0', 11, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (11, 34, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2098, '0,0,0', 12, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (13, 2078, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2078, '0,0,0', 13, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (14, 2118, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2118, '0,0,0', 14, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (15, 1777, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (1777, '0,0,0', 15, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (16, 23, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (23, '0,0,0', 16, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (17, 26, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (26, '0,0,0', 17, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (18, 894, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (894, '0,0,0', 18, 1);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (83, 2158, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (1998, '0,0,0', 46, 3);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (105, 2179, 1, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2018, '0,0,0', 47, 3);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (50, 9999, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2058, '0,0,0', 48, 3);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (51, 1998, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2038, '0,0,0', 49, 3);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (52, 2018, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (9999, '0,0,0', 50, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (53, 2058, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (1998, '0,0,0', 51, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (54, 2038, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2018, '0,0,0', 52, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (55, 27, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2058, '0,0,0', 53, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (56, 24, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2038, '0,0,0', 54, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (58, 29, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (27, '0,0,0', 55, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (59, 31, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (24, '0,0,0', 56, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (60, 34, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (29, '0,0,0', 58, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (62, 2118, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (31, '0,0,0', 59, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (63, 2078, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (34, '0,0,0', 60, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (64, 1777, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2098, '0,0,0', 61, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (65, 23, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2118, '0,0,0', 62, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (66, 26, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (2078, '0,0,0', 63, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (67, 894, 2, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (1777, '0,0,0', 64, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (46, 1998, 3, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (23, '0,0,0', 65, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (47, 2018, 3, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (26, '0,0,0', 66, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (48, 2058, 3, '0,0,0');
 
-insert into TBL_MODULE2ROLE (RM_MODULEID, RM_MATRIX, RM_ID, RM_ROLEID)
-values (894, '0,0,0', 67, 2);
+insert into TBL_MODULE2ROLE (RM_ID, RM_MODULEID, RM_ROLEID, RM_MATRIX)
+values (49, 2038, 3, '0,0,0');
+
+/*==============================================================*/
+/* 初始化tbl_org数据                                          */
+/*==============================================================*/
+insert into tbl_org (ORG_ID, ORG_CODE, ORG_NAME, ORG_MEMO, ORG_PARENT, ORG_SEQ)
+values (1, '0000', '组织根节点', '组织根节点', 0, null);
 
 /*==============================================================*/
 /* 初始化tbl_user数据                                          */
 /*==============================================================*/
 insert into TBL_USER (USER_NO, USER_ID, USER_PWD, USER_NAME, USER_IN_EMAIL, USER_PHONE, USER_TYPE, USER_ORGID, USER_REGTIME, USER_QUICKLOGIN, USER_ENABLE, USER_RECEIVESMS, USER_RECEIVEMAIL)
-values (1, 'system', '91742dcf6ee79059583f6af36e37d9ff', '超级管理员', null, null, 1, 1, sysdate, 0, 1, 0, 0);
+values (1, 'system', '91742dcf6ee79059583f6af36e37d9ff', '超级管理员', null, null, 1, 1, to_date('17-03-2022 14:51:10', 'dd-mm-yyyy hh24:mi:ss'), 0, 1, 0, 0);
 
 insert into TBL_USER (USER_NO, USER_ID, USER_PWD, USER_NAME, USER_IN_EMAIL, USER_PHONE, USER_TYPE, USER_ORGID, USER_REGTIME, USER_QUICKLOGIN, USER_ENABLE, USER_RECEIVESMS, USER_RECEIVEMAIL)
-values (2, 'admin', 'e10adc3949ba59abbe56e057f20f883e', '超级管理员', null, null, 1, 1, sysdate, 0, 1, 0, 0);
+values (2, 'admin', 'e10adc3949ba59abbe56e057f20f883e', '超级管理员', null, null, 1, 1, to_date('17-03-2022 14:51:10', 'dd-mm-yyyy hh24:mi:ss'), 0, 1, 0, 0);

@@ -23,13 +23,18 @@ t.videourl,
 t.instancecode,
 decode(t.devicetype,2,t4.name,t2.name) as instancename,
 t.alarminstancecode,t3.name as alarminstancename,
-t.status,decode(t.status,1,'使能','失效') as statusName,
+t.displayinstancecode,t5.name as displayinstancename,
+t.status,decode(t.status,1,'??','??') as statusName,
+t.productiondata,t.balanceinfo,t.stroke,
+t.pumpingmodelid,t6.manufacturer,t6.model,t6.crankrotationdirection,t6.offsetangleofcrank,t6.crankgravityradius,t6.singlecrankweight,t6.singlecrankpinweight,t6.structuralunbalance,
 t.sortnum
 from tbl_rpcdevice t
 left outer join  tbl_org org  on t.orgid=org.org_id
 left outer join tbl_protocolinstance t2 on t.instancecode=t2.code
 left outer join tbl_protocolalarminstance t3 on t.alarminstancecode=t3.code
 left outer join tbl_protocolsmsinstance t4 on t.instancecode =t4.code
+left outer join tbl_protocoldisplayinstance t5 on t.displayinstancecode=t5.code
+left outer join tbl_pumpingmodel t6 on t.pumpingmodelid=t6.id
 left outer join tbl_code c1 on c1.itemcode='APPLICATIONSCENARIOS' and t.applicationscenarios=c1.itemvalue
 left outer join tbl_code c2 on c2.itemcode='DEVICETYPE' and t.devicetype=c2.itemvalue;
 /
@@ -47,13 +52,16 @@ t.videourl,
 t.instancecode,
 decode(t.devicetype,2,t4.name,t2.name) as instancename,
 t.alarminstancecode,t3.name as alarminstancename,
-t.status,decode(t.status,1,'使能','失效') as statusName,
+t.displayinstancecode,t5.name as displayinstancename,
+t.status,decode(t.status,1,'??','??') as statusName,
+t.productiondata,
 t.sortnum
 from tbl_pcpdevice t
 left outer join  tbl_org org  on t.orgid=org.org_id
 left outer join tbl_protocolinstance t2 on t.instancecode=t2.code
 left outer join tbl_protocolalarminstance t3 on t.alarminstancecode=t3.code
 left outer join tbl_protocolsmsinstance t4 on t.instancecode =t4.code
+left outer join tbl_protocoldisplayinstance t5 on t.displayinstancecode=t5.code
 left outer join tbl_code c1 on c1.itemcode='APPLICATIONSCENARIOS' and t.applicationscenarios=c1.itemvalue
 left outer join tbl_code c2 on c2.itemcode='DEVICETYPE' and t.devicetype=c2.itemvalue;
 /
@@ -120,6 +128,57 @@ t2.recoverytime,t.orgid
 /
 
 /*==============================================================*/
+/* View: viw_rpcdailycalculationdata                                  */
+/*==============================================================*/
+create or replace view viw_rpcdailycalculationdata as
+select
+ t.id,well.wellname,well.id as wellid,
+ t.calDate,t.extendeddays,t.calDate-t.extendeddays as acquisitionDate,
+ t.commstatus,decode(t.commstatus,1,'??','??') as commStatusName,t.commtime,t.commtimeefficiency,t.commrange,
+ t.runStatus,
+ case when t.commstatus=1 then
+           decode(t.runstatus,1,'??','??')
+      else '??' end as runStatusName,
+ t.runtime,t.runrange,t.runtimeefficiency as runtimeefficiency,
+ decode(t.resultcode,null,1100,0,1100,t.resultcode) as resultcode,
+ status.resultname as resultname,t.resultString,status.optimizationsuggestion,
+ t.theoreticalproduction,
+ t.liquidweightproduction,t.oilweightproduction,t.waterweightproduction,t.weightwatercut,
+ t.liquidVolumetricproduction,t.oilvolumetricproduction,t.watervolumetricproduction,t.volumewatercut,
+ t.stroke,t.spm,t.fmax,t.fmin,t.fullnesscoefficient,
+ t.pumpeff*100 as pumpeff,t.pumpeff1*100 as pumpeff1,t.pumpeff2*100 as pumpeff2,t.pumpeff3*100 as pumpeff3,t.pumpeff4*100 as pumpeff4,
+ t.systemefficiency*100 as systemEfficiency,t.surfacesystemefficiency*100 as surfaceSystemEfficiency,t.welldownsystemefficiency*100 as welldownSystemEfficiency,
+ t.energyper100mlift,
+ t.todayKWattH,
+ t.iDegreeBalance,
+ t.wattDegreeBalance,
+ t.deltaradius*100 as deltaradius,
+ well.sortnum,org.org_code,org.org_id,null as remark
+from
+tbl_rpcdevice well
+left outer join  tbl_org org  on well.orgid=org.org_id
+left outer join  tbl_rpcdailycalculationdata t  on t.wellid=well.id
+left outer join  tbl_rpc_worktype status  on  status.resultcode=decode(t.resultcode,null,1100,0,1100,t.resultcode);
+/
+
+/*==============================================================*/
+/* View: viw_rpc_calculatemain                             */
+/*==============================================================*/
+create or replace view viw_rpc_calculatemain as
+select t.id as id,
+well.id as wellid,well.wellName,
+t.fesdiagramacqtime,t.resultstatus,t.resultcode,ws.resultName,
+t.liquidWeightProduction,t.oilWeightProduction,
+t.liquidVolumetricProduction,t.oilVolumetricProduction,
+t.levelcorrectvalue,t.inverproducingfluidlevel,
+t.productiondata,
+well.orgid
+from tbl_rpcacqdata_hist t
+left outer join tbl_rpcdevice well on t.wellid=well.id
+left outer join tbl_rpc_worktype ws on  t.resultcode=ws.resultcode;
+/
+
+/*==============================================================*/
 /* View: viw_pcpacqrawdata                             */
 /*==============================================================*/
 create or replace view viw_pcpacqrawdata as
@@ -166,15 +225,59 @@ t2.recoverytime,t.orgid
 /
 
 /*==============================================================*/
+/* View: viw_pcpdailycalculationdata                                  */
+/*==============================================================*/
+create or replace view viw_pcpdailycalculationdata as
+select
+ t.id,well.wellname,well.id as wellid,
+ t.calDate,t.extendeddays,t.calDate-t.extendeddays as acquisitionDate,
+ t.commstatus,decode(t.commstatus,1,'??','??') as commStatusName,t.commtime,t.commtimeefficiency,t.commrange,
+ t.runStatus,
+ case when t.commstatus=1 then
+           decode(t.runstatus,1,'??','??')
+      else '??' end as runStatusName,
+ t.runtime,t.runrange,t.runtimeefficiency as runtimeefficiency,
+ t.rpm,
+ t.theoreticalproduction,
+ t.liquidweightproduction,t.oilweightproduction,t.waterweightproduction,t.weightwatercut,
+ t.liquidVolumetricproduction,t.oilvolumetricproduction,t.watervolumetricproduction,t.volumewatercut,
+ t.pumpeff*100 as pumpeff,t.pumpeff1*100 as pumpeff1,t.pumpeff2*100 as pumpeff2,
+ t.systemefficiency*100 as systemEfficiency,t.energyper100mlift,
+ t.todayKWattH,
+ well.sortnum,org.org_code,org.org_id,null as remark
+from
+tbl_pcpdevice well
+left outer join  tbl_org org  on well.orgid=org.org_id
+left outer join  tbl_pcpdailycalculationdata t  on t.wellid=well.id;
+/
+
+/*==============================================================*/
+/* View: viw_pcp_calculatemain                                  */
+/*==============================================================*/
+create or replace view viw_pcp_calculatemain as
+select t.id as id,
+well.id as wellid,well.wellName,
+t.acqtime,t.resultstatus,
+t.liquidWeightProduction,t.oilWeightProduction,
+t.liquidVolumetricProduction,t.oilVolumetricProduction,
+t.productiondata,
+well.orgid
+from tbl_pcpacqdata_hist t
+left outer join tbl_pcpdevice well on t.wellid=well.id;
+/
+
+/*==============================================================*/
 /* View: viw_deviceoperationlog                                  */
 /*==============================================================*/
 create or replace view viw_deviceoperationlog as
 select t.id,t.devicetype,code1.itemname as deviceTypeName,
-t.wellname,t.createtime,t.user_id,t.loginip,t.action,code2.itemname as actionname,t.remark ,
+t.wellname,t.createtime,u.user_no,t.user_id,r.role_id,r.role_level,t.loginip,t.action,code2.itemname as actionname,t.remark ,
 (case when t.devicetype>=100 and t.devicetype<200 then t2.orgid
       when t.devicetype>=200 and t.devicetype<300 then t3.orgid
       when t.devicetype>=300then t4.orgid end) as orgid
 from tbl_deviceoperationlog t
+left outer join tbl_user u on u.user_id=t.user_id
+left outer join tbl_role r on r.role_id=u.user_type
 left outer join tbl_rpcdevice t2 on t.wellname=t2.wellname and t.devicetype>=100 and t.devicetype<200
 left outer join tbl_pcpdevice t3 on t.wellname=t3.wellname and t.devicetype>=200 and t.devicetype<300
 left outer join tbl_smsdevice t4 on t.wellname=t4.wellname and t.devicetype>=300
@@ -186,8 +289,8 @@ left outer join tbl_code code2 on t.action=code2.itemvalue and upper(code2.itemc
 /* View: viw_systemlog                                  */
 /*==============================================================*/
 create or replace view viw_systemlog as
-select t.id,t.createtime,t.user_id,t.loginip,t.action,t3.itemname as actionname,t.remark ,t2.user_orgid as orgid
-from tbl_systemlog t,tbl_user t2,tbl_code t3
-where t.user_id=t2.user_id
+select t.id,t.createtime,t2.user_no,t.user_id,t4.role_id,t4.role_level,t.loginip,t.action,t3.itemname as actionname,t.remark ,t2.user_orgid as orgid
+from tbl_systemlog t,tbl_user t2,tbl_code t3,tbl_role t4
+where t.user_id=t2.user_id and t2.user_type=t4.role_id
 and t.action=t3.itemvalue and upper(t3.itemcode)=upper('systemAction');
 /

@@ -135,7 +135,7 @@ Ext.define("AP.view.historyQuery.PCPHistoryQueryInfoView", {
                     	region: 'south',
                     	split: true,
                         collapsible: true,
-                    	height: '40%',
+                    	height: '50%',
                     	xtype: 'tabpanel',
                     	id:'PCPHistoryQueryStatTabPanel',
                     	activeTab: 0,

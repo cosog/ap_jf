@@ -636,8 +636,8 @@ function ShowRealTimeMonitoringFESDiagramResultStatPieOrColChat(title,divid, nam
 			pointFormat : '设备数: <b>{point.y}</b> 占: <b>{point.percentage:.1f}%</b>'
 		},
 		legend : {
-			align : 'center',
-			verticalAlign : 'bottom',
+			align : 'center',//center left
+			verticalAlign : 'bottom',//bottom middle
 			layout : 'horizontal' //vertical 竖直 horizontal-水平
 		},
 		plotOptions : {

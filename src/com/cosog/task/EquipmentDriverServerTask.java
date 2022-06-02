@@ -56,7 +56,7 @@ public class EquipmentDriverServerTask {
 	}
 	
 	@SuppressWarnings({ "static-access", "unused" })
-	@Scheduled(fixedRate = 1000*60*60*24*365*100)
+//	@Scheduled(fixedRate = 1000*60*60*24*365*100)
 	public void driveServerTast() throws SQLException, ParseException,InterruptedException, IOException{
 		Gson gson = new Gson();
 		java.lang.reflect.Type type=null;
@@ -86,6 +86,9 @@ public class EquipmentDriverServerTask {
 		path=stringManagerUtils.getFilePath("test6.json","test/");
 		String pcpDistreteData2=stringManagerUtils.readFile(path,"utf-8");
 		
+		path=stringManagerUtils.getFilePath("test7.json","test/");
+		String rpctest=stringManagerUtils.readFile(path,"utf-8");
+		
 		String url=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/group";
 		String onlineUrl=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/online";
 		
@@ -93,13 +96,14 @@ public class EquipmentDriverServerTask {
 		
 		int i=0;
 		while(true){
-			if(i%2==0){
-				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
-				StringManagerUtils.sendPostMethod(url, pcpDistreteData,"utf-8");
-			}else{
-				StringManagerUtils.sendPostMethod(url, distreteData2,"utf-8");
-				StringManagerUtils.sendPostMethod(url, pcpDistreteData2,"utf-8");
-			}
+			StringManagerUtils.sendPostMethod(url, rpctest,"utf-8");
+//			if(i%2==0){
+//				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+//				StringManagerUtils.sendPostMethod(url, pcpDistreteData,"utf-8");
+//			}else{
+//				StringManagerUtils.sendPostMethod(url, distreteData2,"utf-8");
+//				StringManagerUtils.sendPostMethod(url, pcpDistreteData2,"utf-8");
+//			}
 			
 //			if(i%2==0){
 //				StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
