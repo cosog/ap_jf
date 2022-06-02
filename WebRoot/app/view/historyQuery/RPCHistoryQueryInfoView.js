@@ -142,7 +142,7 @@ Ext.define("AP.view.historyQuery.RPCHistoryQueryInfoView", {
                     	region: 'south',
                     	split: true,
                         collapsible: true,
-                    	height: '40%',
+                    	height: '50%',
                     	xtype: 'tabpanel',
                     	id:'RPCHistoryQueryStatTabPanel',
                     	activeTab: 0,

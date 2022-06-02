@@ -1,1 +1,1 @@
-drop user ap_fb cascade;
+drop user ap_jf cascade;

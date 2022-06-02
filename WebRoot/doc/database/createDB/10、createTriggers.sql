@@ -1,4 +1,5 @@
-CREATE OR REPLACE TRIGGER "BEF_HIBERNATE_SEQUENCE_INSERT"
+
+CREATE OR REPLACE TRIGGER BEF_HIBERNATE_SEQUENCE_INSERT
 BEFORE INSERT ON TBL_DIST_ITEM
 FOR EACH ROW
 BEGIN
@@ -99,6 +100,19 @@ BEGIN
 end;
 /
 
+CREATE OR REPLACE TRIGGER 
+trg_b_display_item2unit_conf_i   before  insert on TBL_DISPLAY_ITEMS2UNIT_CONF FOR EACH ROW
+BEGIN
+  SELECT seq_display_items2unit_conf.nextval INTO :new.id FROM dual;
+end;
+/
+
+CREATE OR REPLACE TRIGGER trg_b_display_unit_conf_i   before  insert on TBL_DISPLAY_UNIT_CONF FOR EACH ROW
+BEGIN
+  SELECT SEQ_DISPLAY_UNIT_CONF.nextval,'unit' || SEQ_DISPLAY_UNIT_CONF.nextval INTO :new.id, :new.unit_code FROM dual;
+end;
+/
+
 create or replace trigger trg_b_module2role_i   before  insert  on tbl_module2role FOR EACH ROW
 BEGIN
        SELECT seq_role_module.nextval INTO :new.rm_id FROM dual;
@@ -136,9 +150,9 @@ BEGIN
 end;
 /
 
-create or replace trigger trg_b_rpcacqdata_hist_i   before  insert on tbl_rpcacqdata_hist FOR EACH ROW
+create or replace trigger trg_b_pcpacqrawdata_i   before  insert on tbl_pcpacqrawdata FOR EACH ROW
 BEGIN
-  SELECT seq_rpcacqdata_hist.nextval INTO :new.id FROM dual;
+  SELECT seq_pcpacqrawdata.nextval INTO :new.id FROM dual;
 end;
 /
 
@@ -147,8 +161,8 @@ declare
     recordCount number(8,2) :=0;
 BEGIN
   SELECT seq_pcpalarminfo_hist.nextval INTO :new.id FROM dual;
-  select count(1) into recordCount from tbl_pcpalarminfo_latest t 
-  where t.wellid=:new.wellid and t.alarmtype=:new.alarmtype and t.itemname=:new.itemname; 
+  select count(1) into recordCount from tbl_pcpalarminfo_latest t
+  where t.wellid=:new.wellid and t.alarmtype=:new.alarmtype and t.itemname=:new.itemname;
   if recordCount=0 then
     insert into tbl_pcpalarminfo_latest(
     wellid,alarmtime,itemname,alarmtype,alarmvalue,alarminfo,alarmlimit,
@@ -163,7 +177,7 @@ BEGIN
         t.alarminfo=:new.alarminfo,t.alarmlimit=:new.alarmlimit,
         t.hystersis=:new.hystersis,t.alarmlevel=:new.alarmlevel,t.recoverytime=:new.recoverytime,
         t.issendmessage=:new.issendmessage, t.issendmail=:new.issendmail
-    where t.wellid=:new.wellid and t.alarmtype=:new.alarmtype and t.itemname=:new.itemname;  
+    where t.wellid=:new.wellid and t.alarmtype=:new.alarmtype and t.itemname=:new.itemname;
   end if;
 end;
 /
@@ -174,9 +188,9 @@ BEGIN
 end;
 /
 
-create or replace trigger trg_b_pcpdevice_i   before  insert on tbl_pcpdevice FOR EACH ROW
+CREATE OR REPLACE TRIGGER trg_b_PCPDAILY_i   before  insert on TBL_PCPDAILYCALCULATIONDATA FOR EACH ROW
 BEGIN
-  SELECT seq_pcpdevice.nextval INTO :new.id FROM dual;
+  SELECT SEQ_PCPDAILYCALCULATIONDATA.nextval INTO :new.id FROM dual;
 end;
 /
 
@@ -193,9 +207,21 @@ BEGIN
 end;
 /
 
+create or replace trigger trg_b_pcpdevice_i   before  insert on tbl_pcpdevice FOR EACH ROW
+BEGIN
+  SELECT seq_pcpdevice.nextval INTO :new.id FROM dual;
+end;
+/
+
 CREATE OR REPLACE TRIGGER trg_b_protocolalarminstance_i   before  insert on tbl_protocolalarminstance FOR EACH ROW
 BEGIN
   SELECT seq_protocolalarminstance.nextval,'alarminstance' || seq_protocolalarminstance.nextval INTO :new.id, :new.code FROM dual;
+end;
+/
+
+CREATE OR REPLACE TRIGGER trg_b_protocoldisplayinst_i   before  insert on tbl_protocoldisplayinstance FOR EACH ROW
+BEGIN
+  SELECT seq_protocoldisplayinstance.nextval,'displayinstance' || seq_protocoldisplayinstance.nextval INTO :new.id, :new.code FROM dual;
 end;
 /
 
@@ -209,6 +235,24 @@ CREATE OR REPLACE TRIGGER trg_b_protocolsmsinstance_i   before  insert on tbl_pr
 BEGIN
   SELECT seq_protocolsmsinstance.nextval,'smsinstance' || seq_protocolsmsinstance.nextval INTO :new.id, :new.code FROM dual;
 end;
+/
+
+create or replace trigger trg_b_pumpingmodel_i   before  insert on tbl_pumpingmodel FOR EACH ROW
+BEGIN
+  SELECT seq_pumpingmodel.nextval INTO :new.id FROM dual;
+end;
+/
+
+create or replace trigger trg_b_resourcemonitoring_i   before  insert on tbl_resourcemonitoring FOR EACH ROW
+BEGIN
+  SELECT seq_resourcemonitoring.nextval INTO :new.id FROM dual;
+END;
+/
+
+create or replace trigger trg_b_role_i   before  insert  on TBL_ROLE FOR EACH ROW
+BEGIN
+       SELECT SEQ_ROLE.nextval INTO :new.ROLE_ID FROM dual;
+END;
 /
 
 create or replace trigger trg_b_rpcacqdata_hist_i   before  insert on tbl_rpcacqdata_hist FOR EACH ROW
@@ -234,8 +278,8 @@ declare
     recordCount number(8,2) :=0;
 BEGIN
   SELECT seq_rpcalarminfo_hist.nextval INTO :new.id FROM dual;
-  select count(1) into recordCount from tbl_rpcalarminfo_latest t 
-  where t.wellid=:new.wellid and t.alarmtype=:new.alarmtype and t.itemname=:new.itemname; 
+  select count(1) into recordCount from tbl_rpcalarminfo_latest t
+  where t.wellid=:new.wellid and t.alarmtype=:new.alarmtype and t.itemname=:new.itemname;
   if recordCount=0 then
     insert into tbl_rpcalarminfo_latest(
     wellid,alarmtime,itemname,alarmtype,alarmvalue,alarminfo,alarmlimit,
@@ -250,7 +294,7 @@ BEGIN
         t.alarminfo=:new.alarminfo,t.alarmlimit=:new.alarmlimit,
         t.hystersis=:new.hystersis,t.alarmlevel=:new.alarmlevel,t.recoverytime=:new.recoverytime,
         t.issendmessage=:new.issendmessage, t.issendmail=:new.issendmail
-    where t.wellid=:new.wellid and t.alarmtype=:new.alarmtype and t.itemname=:new.itemname;  
+    where t.wellid=:new.wellid and t.alarmtype=:new.alarmtype and t.itemname=:new.itemname;
   end if;
 end;
 /
@@ -261,9 +305,9 @@ BEGIN
 end;
 /
 
-create or replace trigger trg_b_rpcdevice_i   before  insert on tbl_rpcdevice FOR EACH ROW
+CREATE OR REPLACE TRIGGER trg_b_RPCDAILY_i   before  insert on TBL_RPCDAILYCALCULATIONDATA FOR EACH ROW
 BEGIN
-  SELECT seq_rpcdevice.nextval INTO :new.id FROM dual;
+  SELECT SEQ_RPCDAILYCALCULATIONDATA.nextval INTO :new.id FROM dual;
 end;
 /
 
@@ -280,15 +324,15 @@ BEGIN
 end;
 /
 
-create or replace trigger trg_b_resourcemonitoring_i   before  insert on tbl_resourcemonitoring FOR EACH ROW
+create or replace trigger trg_b_rpcdevice_i   before  insert on tbl_rpcdevice FOR EACH ROW
 BEGIN
-  SELECT seq_resourcemonitoring.nextval INTO :new.id FROM dual;
-END;
+  SELECT seq_rpcdevice.nextval INTO :new.id FROM dual;
+end;
 /
 
-create or replace trigger trg_b_role_i   before  insert  on TBL_ROLE FOR EACH ROW
+create or replace trigger trg_b_rpc_worktype_i_u   before  insert or update  on TBL_RPC_WORKTYPE FOR EACH ROW
 BEGIN
-       SELECT SEQ_ROLE.nextval INTO :new.ROLE_ID FROM dual;
+  SELECT SEQ_RPC_WORKTYPE.nextval INTO :new.id FROM dual;
 END;
 /
 
