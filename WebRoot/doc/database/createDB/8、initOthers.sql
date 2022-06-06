@@ -588,7 +588,7 @@ insert into TBL_RPC_WORKTYPE (ID, RESULTCODE, RESULTNAME, RESULTDESCRIPTION, OPT
 values (14, 1214, '双凡尔漏失', '"图形呈椭圆状；图形在上、下理论载荷线之间；漏失严重时，油井不出油。"', '洗井、碰泵或检泵', null);
 
 insert into TBL_RPC_WORKTYPE (ID, RESULTCODE, RESULTNAME, RESULTDESCRIPTION, OPTIMIZATIONSUGGESTION, REMARK)
-values (15, 1215, '游动凡尔失灵或油管漏', '"图形呈条带状；图形在下理论载荷线附近；产量为零。"', '洗井、碰泵或检泵', null);
+values (15, 1215, '游动凡尔失灵/油管漏', '"图形呈条带状；图形在下理论载荷线附近；产量为零。"', '洗井、碰泵或检泵', null);
 
 insert into TBL_RPC_WORKTYPE (ID, RESULTCODE, RESULTNAME, RESULTDESCRIPTION, OPTIMIZATIONSUGGESTION, REMARK)
 values (16, 1216, '固定凡尔失灵', '"图形呈条带状；图形在上理论载荷线附近；产量为零。"', '洗井、碰泵或检泵', null);
@@ -612,7 +612,7 @@ insert into TBL_RPC_WORKTYPE (ID, RESULTCODE, RESULTNAME, RESULTDESCRIPTION, OPT
 values (22, 1222, '杆断脱', '"图形呈条带状，两端尖；图形在下理论载荷线下方，断杆位置距井口越近图形越下移；产量突然为零。"', '替换抽油杆', null);
 
 insert into TBL_RPC_WORKTYPE (ID, RESULTCODE, RESULTNAME, RESULTDESCRIPTION, OPTIMIZATIONSUGGESTION, REMARK)
-values (23, 1223, '杆（泵）卡', '"图形呈斜条带状；可通过图形拐点找到被卡位置；油井不出油。"', '洗井或检泵', null);
+values (23, 1223, '杆(泵)卡', '"图形呈斜条带状；可通过图形拐点找到被卡位置；油井不出油。"', '洗井或检泵', null);
 
 insert into TBL_RPC_WORKTYPE (ID, RESULTCODE, RESULTNAME, RESULTDESCRIPTION, OPTIMIZATIONSUGGESTION, REMARK)
 values (24, 1224, '轻微结蜡', '"图形肥大；产量下降。"', '洗井或加药', null);
