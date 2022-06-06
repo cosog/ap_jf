@@ -531,8 +531,8 @@ public class MemoryDataManagerTask {
 					+ " from tbl_acq_item2group_conf t,tbl_acq_group_conf t2,tbl_acq_group2unit_conf t3,tbl_acq_unit_conf t4,tbl_protocolinstance t5 "
 					+ " where t.groupid=t2.id and t2.id=t3.groupid and t3.unitid=t4.id and t4.id=t5.unitid and t2.type=0";
 			if(StringManagerUtils.isNotNull(instanceId)){
-				sql+=" and t5.id ="+instanceId;
 				instanceSql+=" and t.id="+instanceId;
+				sql+=" and t5.id ="+instanceId;
 			}
 			sql+=" order by t5.code, t.groupid,t.id";
 			pstmt = conn.prepareStatement(instanceSql);
@@ -700,8 +700,8 @@ public class MemoryDataManagerTask {
 					+ " from tbl_display_items2unit_conf t,tbl_display_unit_conf t2,tbl_protocoldisplayinstance t3 "
 					+ " where t.unitid=t2.id and t2.id=t3.displayunitid";
 			if(StringManagerUtils.isNotNull(instanceId)){
-				sql+=" and t.id="+instanceId;
 				instanceSql+=" and t.id="+instanceId;
+				sql+=" and t3.id="+instanceId;
 			}
 			sql+=" order by t3.code, t.unitid,t.id";
 			
@@ -876,8 +876,8 @@ public class MemoryDataManagerTask {
 					+ " from tbl_alarm_item2unit_conf t,tbl_alarm_unit_conf t2,tbl_protocolalarminstance t3 "
 					+ " where t.unitid=t2.id and t2.id=t3.alarmunitid";
 			if(StringManagerUtils.isNotNull(instanceId)){
-				sql+=" and t.id="+instanceId;
 				instanceSql+=" and t.id="+instanceId;
+				sql+=" and t3.id="+instanceId;
 			}
 			sql+=" order by t3.code, t.unitid,t.id";
 			
