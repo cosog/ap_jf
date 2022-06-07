@@ -244,7 +244,7 @@ function createRealTimeMonitoringColumn(columnInfo) {
         if (attr.dataIndex.toUpperCase() == 'id'.toUpperCase()) {
             myColumns += ",xtype: 'rownumberer',sortable : false,locked:true";
         }
-        else if (attr.dataIndex.toUpperCase()=='wellName'.toUpperCase()||attr.dataIndex.toUpperCase()=='deviceType'.toUpperCase()||attr.dataIndex.toUpperCase()=='deviceTypeName'.toUpperCase()) {
+        else if (attr.dataIndex.toUpperCase()=='wellName'.toUpperCase()) {
             myColumns += ",sortable : false,locked:true,dataIndex:'" + attr.dataIndex + "',renderer:function(value){return \"<span data-qtip=\"+(value==undefined?\"\":value)+\">\"+(value==undefined?\"\":value)+\"</span>\";}";
         }
         else if (attr.dataIndex.toUpperCase()=='commStatusName'.toUpperCase()) {

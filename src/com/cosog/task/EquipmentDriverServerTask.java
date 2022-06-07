@@ -66,109 +66,111 @@ public class EquipmentDriverServerTask {
 		initWellCommStatus();
 		MemoryDataManagerTask.loadMemoryData();
 		
-		String path="";
-		StringManagerUtils stringManagerUtils=new StringManagerUtils();
-		path=stringManagerUtils.getFilePath("test1.json","test/");
-		String distreteData=stringManagerUtils.readFile(path,"utf-8");
-		
-		path=stringManagerUtils.getFilePath("test2.json","test/");
-		String distreteData2=stringManagerUtils.readFile(path,"utf-8");
-		
-		path=stringManagerUtils.getFilePath("test3.json","test/");
-		String onLineData=stringManagerUtils.readFile(path,"utf-8");
-		
-		path=stringManagerUtils.getFilePath("test4.json","test/");
-		String offLineData=stringManagerUtils.readFile(path,"utf-8");
-		
-		path=stringManagerUtils.getFilePath("test5.json","test/");
-		String pcpDistreteData=stringManagerUtils.readFile(path,"utf-8");
-		
-		path=stringManagerUtils.getFilePath("test6.json","test/");
-		String pcpDistreteData2=stringManagerUtils.readFile(path,"utf-8");
-		
-		path=stringManagerUtils.getFilePath("test7.json","test/");
-		String rpctest=stringManagerUtils.readFile(path,"utf-8");
-		
-		String url=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/group";
-		String onlineUrl=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/online";
-		
-//		StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
-		
-		int i=0;
-		while(true){
-			StringManagerUtils.sendPostMethod(url, rpctest,"utf-8");
-//			if(i%2==0){
-//				StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
-//				StringManagerUtils.sendPostMethod(url, pcpDistreteData,"utf-8");
-//			}else{
-//				StringManagerUtils.sendPostMethod(url, distreteData2,"utf-8");
-//				StringManagerUtils.sendPostMethod(url, pcpDistreteData2,"utf-8");
-//			}
-			
-//			if(i%2==0){
-//				StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
-//			}else{
-//				StringManagerUtils.sendPostMethod(onlineUrl, offLineData,"utf-8");
-//			}
-			i++;
+		initServerConfig();
+		initProtocolConfig("","");
+		initInstanceConfig(null,"");
+		initSMSInstanceConfig(null,"");
+		initSMSDevice(null,"");
+		initRPCDriverAcquisitionInfoConfig(null,"");
+		initPCPDriverAcquisitionInfoConfig(null,"");
+		boolean sendMsg=false;
+		do{
+			String responseData=StringManagerUtils.sendPostMethod(probeUrl, "","utf-8");
+			type = new TypeToken<DriverProbeResponse>() {}.getType();
+			DriverProbeResponse driverProbeResponse=gson.fromJson(responseData, type);
+			String Ver="";
+			if(driverProbeResponse!=null){
+				sendMsg=false;
+				if(!driverProbeResponse.getHttpServerInitStatus()){
+					initServerConfig();
+				}
+				if(!driverProbeResponse.getProtocolInitStatus()){
+					initProtocolConfig("","");
+				}
+				if(!driverProbeResponse.getInstanceInitStatus()){
+					initInstanceConfig(null,"");
+					initSMSInstanceConfig(null,"");
+				}
+				if(!driverProbeResponse.getSMSInitStatus()){
+					initSMSDevice(null,"");
+				}
+				if(!driverProbeResponse.getIDInitStatus()){
+					//清空内存
+					Map<String, Object> dataModelMap = DataModelMap.getMapObject();
+					Map<String,InitializedDeviceInfo> initializedDeviceList=(Map<String,InitializedDeviceInfo>) dataModelMap.get("InitializedDeviceList");
+					if(initializedDeviceList!=null){
+						dataModelMap.remove("InitializedDeviceList");
+						initializedDeviceList=new HashMap<String,InitializedDeviceInfo>();
+						dataModelMap.put("InitializedDeviceList", initializedDeviceList);
+					}
+					
+					initRPCDriverAcquisitionInfoConfig(null,"");
+					initPCPDriverAcquisitionInfoConfig(null,"");
+				}
+				Ver=driverProbeResponse.getVer();
+			}else{
+				if(!sendMsg){
+					StringManagerUtils.sendPostMethod(allOfflineUrl, "","utf-8");
+					sendMsg=true;
+				}
+			}
+			Thread.sleep(1000*1);
+		}while(true);
+	}
 	
-//		StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
+	public static void exampleDataManage() throws InterruptedException{
+		if(Config.getInstance().configFile.getOthers().getExampleEable()){
+			String path="";
+			StringManagerUtils stringManagerUtils=new StringManagerUtils();
+			path=stringManagerUtils.getFilePath("test1.json","example/");
+			String distreteData=stringManagerUtils.readFile(path,"utf-8");
 			
-			Thread.sleep(1000*60*10);
+			path=stringManagerUtils.getFilePath("test2.json","example/");
+			String distreteData2=stringManagerUtils.readFile(path,"utf-8");
+			
+			path=stringManagerUtils.getFilePath("test3.json","example/");
+			String onLineData=stringManagerUtils.readFile(path,"utf-8");
+			
+			path=stringManagerUtils.getFilePath("test4.json","example/");
+			String offLineData=stringManagerUtils.readFile(path,"utf-8");
+			
+			path=stringManagerUtils.getFilePath("test5.json","example/");
+			String pcpDistreteData=stringManagerUtils.readFile(path,"utf-8");
+			
+			path=stringManagerUtils.getFilePath("test6.json","example/");
+			String pcpDistreteData2=stringManagerUtils.readFile(path,"utf-8");
+			
+			path=stringManagerUtils.getFilePath("test7.json","example/");
+			String rpctest=stringManagerUtils.readFile(path,"utf-8");
+			
+			String url=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/group";
+			String onlineUrl=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/online";
+			
+//			StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+			
+			int i=0;
+			while(true){
+				StringManagerUtils.sendPostMethod(url, rpctest,"utf-8");
+//				if(i%2==0){
+//					StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
+//					StringManagerUtils.sendPostMethod(url, pcpDistreteData,"utf-8");
+//				}else{
+//					StringManagerUtils.sendPostMethod(url, distreteData2,"utf-8");
+//					StringManagerUtils.sendPostMethod(url, pcpDistreteData2,"utf-8");
+//				}
+				
+//				if(i%2==0){
+//					StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
+//				}else{
+//					StringManagerUtils.sendPostMethod(onlineUrl, offLineData,"utf-8");
+//				}
+				i++;
+		
+//			StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
+				
+				Thread.sleep(1000*60*10);
+			}
 		}
-		
-		
-
-//		initServerConfig();
-//		initProtocolConfig("","");
-//		initInstanceConfig(null,"");
-//		initSMSInstanceConfig(null,"");
-//		initSMSDevice(null,"");
-//		initRPCDriverAcquisitionInfoConfig(null,"");
-//		initPCPDriverAcquisitionInfoConfig(null,"");
-//		boolean sendMsg=false;
-//		do{
-//			String responseData=StringManagerUtils.sendPostMethod(probeUrl, "","utf-8");
-//			type = new TypeToken<DriverProbeResponse>() {}.getType();
-//			DriverProbeResponse driverProbeResponse=gson.fromJson(responseData, type);
-//			String Ver="";
-//			if(driverProbeResponse!=null){
-//				sendMsg=false;
-//				if(!driverProbeResponse.getHttpServerInitStatus()){
-//					initServerConfig();
-//				}
-//				if(!driverProbeResponse.getProtocolInitStatus()){
-//					initProtocolConfig("","");
-//				}
-//				if(!driverProbeResponse.getInstanceInitStatus()){
-//					initInstanceConfig(null,"");
-//					initSMSInstanceConfig(null,"");
-//				}
-//				if(!driverProbeResponse.getSMSInitStatus()){
-//					initSMSDevice(null,"");
-//				}
-//				if(!driverProbeResponse.getIDInitStatus()){
-//					//清空内存
-//					Map<String, Object> dataModelMap = DataModelMap.getMapObject();
-//					Map<String,InitializedDeviceInfo> initializedDeviceList=(Map<String,InitializedDeviceInfo>) dataModelMap.get("InitializedDeviceList");
-//					if(initializedDeviceList!=null){
-//						dataModelMap.remove("InitializedDeviceList");
-//						initializedDeviceList=new HashMap<String,InitializedDeviceInfo>();
-//						dataModelMap.put("InitializedDeviceList", initializedDeviceList);
-//					}
-//					
-//					initRPCDriverAcquisitionInfoConfig(null,"");
-//					initPCPDriverAcquisitionInfoConfig(null,"");
-//				}
-//				Ver=driverProbeResponse.getVer();
-//			}else{
-//				if(!sendMsg){
-//					StringManagerUtils.sendPostMethod(allOfflineUrl, "","utf-8");
-//					sendMsg=true;
-//				}
-//			}
-//			Thread.sleep(1000*1);
-//		}while(true);
 	}
 	
 	public static class DriverProbeResponse{

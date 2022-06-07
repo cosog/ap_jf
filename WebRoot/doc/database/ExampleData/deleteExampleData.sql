@@ -6,6 +6,7 @@ truncate table tbl_org;
 /*==============================================================*/
 /* 删除设备数据                                                */
 /*==============================================================*/
-truncate table tbl_wellinformation;
+truncate table tbl_rpcdevice;
+truncate table tbl_pcpdevice;
 
 exit;

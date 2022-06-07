@@ -4,7 +4,8 @@
 @5、createProcedures.sql
 @6、initModuleAndRole.sql
 @7、initDataDictionary.sql
-@8、initOthers.sql
-@9、createSequences.sql
-@10、createTriggers.sql
+@8、initDriverConfig.sql
+@9、initOthers.sql
+@10、createSequences.sql
+@11、createTriggers.sql
 exit
