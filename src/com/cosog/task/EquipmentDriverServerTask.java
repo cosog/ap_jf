@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -65,6 +66,7 @@ public class EquipmentDriverServerTask {
 		
 		initWellCommStatus();
 		MemoryDataManagerTask.loadMemoryData();
+		exampleDataManage();
 		
 		initServerConfig();
 		initProtocolConfig("","");
@@ -118,58 +120,64 @@ public class EquipmentDriverServerTask {
 		}while(true);
 	}
 	
-	public static void exampleDataManage() throws InterruptedException{
-		if(Config.getInstance().configFile.getOthers().getExampleEable()){
-			String path="";
-			StringManagerUtils stringManagerUtils=new StringManagerUtils();
-			path=stringManagerUtils.getFilePath("test1.json","example/");
-			String distreteData=stringManagerUtils.readFile(path,"utf-8");
-			
-			path=stringManagerUtils.getFilePath("test2.json","example/");
-			String distreteData2=stringManagerUtils.readFile(path,"utf-8");
-			
-			path=stringManagerUtils.getFilePath("test3.json","example/");
-			String onLineData=stringManagerUtils.readFile(path,"utf-8");
-			
-			path=stringManagerUtils.getFilePath("test4.json","example/");
-			String offLineData=stringManagerUtils.readFile(path,"utf-8");
-			
-			path=stringManagerUtils.getFilePath("test5.json","example/");
-			String pcpDistreteData=stringManagerUtils.readFile(path,"utf-8");
-			
-			path=stringManagerUtils.getFilePath("test6.json","example/");
-			String pcpDistreteData2=stringManagerUtils.readFile(path,"utf-8");
-			
-			path=stringManagerUtils.getFilePath("test7.json","example/");
-			String rpctest=stringManagerUtils.readFile(path,"utf-8");
-			
-			String url=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/group";
-			String onlineUrl=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/online";
-			
-//			StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
-			
-			int i=0;
-			while(true){
-				StringManagerUtils.sendPostMethod(url, rpctest,"utf-8");
-//				if(i%2==0){
-//					StringManagerUtils.sendPostMethod(url, distreteData,"utf-8");
-//					StringManagerUtils.sendPostMethod(url, pcpDistreteData,"utf-8");
-//				}else{
-//					StringManagerUtils.sendPostMethod(url, distreteData2,"utf-8");
-//					StringManagerUtils.sendPostMethod(url, pcpDistreteData2,"utf-8");
-//				}
+	public static class ExampleDataManageThread extends Thread{
+		private String deviceName;
+		private int cycle;
+		private int wait;
+		public ExampleDataManageThread(String deviceName,int cycle,int wait) {
+			super();
+			this.deviceName = deviceName;
+			this.cycle = cycle;
+			this.wait = wait;
+		}
+		public void run(){
+			try {
+				Thread.sleep(1000*wait);
+				String url=Config.getInstance().configFile.getServer().getAccessPath()+"/api/acq/group";
 				
-//				if(i%2==0){
-//					StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
-//				}else{
-//					StringManagerUtils.sendPostMethod(onlineUrl, offLineData,"utf-8");
-//				}
-				i++;
-		
-//			StringManagerUtils.sendPostMethod(onlineUrl, onLineData,"utf-8");
+				String path="";
+				StringManagerUtils stringManagerUtils=new StringManagerUtils();
+				path=stringManagerUtils.getFilePath(deviceName+"_01.json","example/");
+				String data=stringManagerUtils.readFile(path,"utf-8");
 				
-				Thread.sleep(1000*60*10);
+				path=stringManagerUtils.getFilePath(deviceName+"_02.json","example/");
+				String data2=stringManagerUtils.readFile(path,"utf-8");
+				
+				int i=0;
+				while(true){
+					if(i%2==0){
+						StringManagerUtils.sendPostMethod(url, data,"utf-8");
+					}else{
+						StringManagerUtils.sendPostMethod(url, data2,"utf-8");
+					}
+					i++;
+					Thread.sleep(1000*60*cycle);
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
+		}
+	}
+	
+	public static void exampleDataManage(){
+		if(Config.getInstance().configFile.getOthers().getExampleEnable()){
+			try {
+				new ExampleDataManageThread("rpc01",10,0).start();
+				new ExampleDataManageThread("rpc02",10,2).start();
+				new ExampleDataManageThread("rpc03",10,4).start();
+				new ExampleDataManageThread("rpc04",10,6).start();
+				new ExampleDataManageThread("rpc05",10,8).start();
+				new ExampleDataManageThread("rpc06",10,10).start();
+				new ExampleDataManageThread("rpc07",10,12).start();
+				new ExampleDataManageThread("rpc08",10,14).start();
+				new ExampleDataManageThread("rpc09",10,16).start();
+				new ExampleDataManageThread("rpc10",10,18).start();
+				
+				new ExampleDataManageThread("pcp01",10,20).start();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 		}
 	}
 	

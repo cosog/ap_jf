@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public class CalculateDataService<T> extends BaseService<T> {
 		boolean isSendMail=false;
 		StringBuffer SMSContent = new StringBuffer();
 		StringBuffer EMailContent = new StringBuffer();
-		SMSContent.append(((StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200)?"泵":"管")+"设备"+wellName+"于"+acqTime+"发生报警:");
+		SMSContent.append(((StringManagerUtils.stringToInteger(deviceType)>=100&&StringManagerUtils.stringToInteger(deviceType)<200)?"抽油机":"螺杆泵")+"设备"+wellName+"于"+acqTime+"发生报警:");
 		Map<String, String> alarmInfoMap=AlarmInfoMap.getMapObject();
 		List<AcquisitionItemInfo> saveAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
 		for(int i=0;i<acquisitionItemInfoList.size();i++){
@@ -94,20 +95,24 @@ public class CalculateDataService<T> extends BaseService<T> {
 					}
 					
 				}
-				
 			}else{
-				String keyIndex=wellName+","+deviceType+","+acquisitionItemInfoList.get(i).getTitle();
-				boolean reset=false;
-				 for (String key : alarmInfoMap.keySet()) {
-					 if(key.indexOf(keyIndex)>=0){
-						 reset=true;
-						 alarmInfoMap.remove(key);
-						 break;
+				try{
+					String keyIndex=wellName+","+deviceType+","+acquisitionItemInfoList.get(i).getTitle();
+					boolean reset=false;
+					Iterator<String> it = alarmInfoMap.keySet().iterator();
+					while(it.hasNext()){
+						if(it.next().indexOf(keyIndex)>=0){
+							 reset=true;
+							 it.remove();
+							 break;
+						 }
+					}
+					if(reset){
+						 
 					 }
-				 }
-				 if(reset){
-					 
-				 }
+				}catch(Exception e){
+//					e.printStackTrace();
+				}
 			}
 		}
 		if(saveAcquisitionItemInfoList.size()>0){
