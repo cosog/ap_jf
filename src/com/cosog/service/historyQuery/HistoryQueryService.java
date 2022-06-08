@@ -542,7 +542,8 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				+ "averageWatt,polishrodPower,waterPower,"
 				+ "surfaceSystemEfficiency*100 as surfaceSystemEfficiency,welldownSystemEfficiency*100 as welldownSystemEfficiency,"
 				+ "systemEfficiency*100 as systemEfficiency,energyper100mlift,pumpEff*100 as pumpEff,"
-				+ "iDegreeBalance,wattDegreeBalance,deltaradius*100 as deltaradius";
+				+ "iDegreeBalance,wattDegreeBalance,deltaradius*100 as deltaradius,"
+				+ "levelCorrectValue,inverProducingfluidLevel,todayKWattH";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -636,6 +637,9 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"iDegreeBalance\":\""+obj[30]+"\",");
 			result_json.append("\"wattDegreeBalance\":\""+obj[31]+"\",");
 			result_json.append("\"deltaradius\":\""+obj[32]+"\",");
+			result_json.append("\"levelCorrectValue\":\""+obj[33]+"\",");
+			result_json.append("\"inverProducingfluidLevel\":\""+obj[34]+"\",");
+			result_json.append("\"todayKWattH\":\""+obj[35]+"\",");
 			result_json.append("\"details\":\"\",");
 			
 			alarmInfo.append("[");
@@ -844,7 +848,8 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				+ "averageWatt,polishrodPower,waterPower,"
 				+ "surfaceSystemEfficiency*100 as surfaceSystemEfficiency,welldownSystemEfficiency*100 as welldownSystemEfficiency,"
 				+ "systemEfficiency*100 as systemEfficiency,energyper100mlift,pumpEff*100 as pumpEff,"
-				+ "iDegreeBalance,wattDegreeBalance,deltaradius*100 as deltaradius";
+				+ "iDegreeBalance,wattDegreeBalance,deltaradius*100 as deltaradius,"
+				+ "levelCorrectValue,inverProducingfluidLevel,todayKWattH";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -910,6 +915,9 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"iDegreeBalance\":\""+obj[30]+"\",");
 			result_json.append("\"wattDegreeBalance\":\""+obj[31]+"\",");
 			result_json.append("\"deltaradius\":\""+obj[32]+"\",");
+			result_json.append("\"levelCorrectValue\":\""+obj[33]+"\",");
+			result_json.append("\"inverProducingfluidLevel\":\""+obj[34]+"\",");
+			result_json.append("\"todayKWattH\":\""+obj[35]+"\",");
 			result_json.append("\"details\":\"\",");
 			
 			for(int j=0;j<ddicColumnsList.size();j++){
@@ -1048,7 +1056,8 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				+ "t2.runtime,t2.runtimeefficiency,t2.runrange,"
 				+ prodCol+""
 				+ "averageWatt,waterPower,"
-				+ "systemEfficiency*100 as systemEfficiency,energyper100mlift,pumpEff*100 as pumpEff";
+				+ "systemEfficiency*100 as systemEfficiency,energyper100mlift,pumpEff*100 as pumpEff,"
+				+ "todayKWattH";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -1124,6 +1133,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"systemEfficiency\":\""+obj[19]+"\",");
 			result_json.append("\"energyper100mlift\":\""+obj[20]+"\",");
 			result_json.append("\"pumpEff\":\""+obj[21]+"\",");
+			result_json.append("\"todayKWattH\":\""+obj[22]+"\",");
 			result_json.append("\"details\":\"\",");
 			
 			alarmInfo.append("[");
@@ -1322,7 +1332,8 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 				+ "t2.runtime,t2.runtimeefficiency,t2.runrange,"
 				+ prodCol+""
 				+ "averageWatt,waterPower,"
-				+ "systemEfficiency*100 as systemEfficiency,energyper100mlift,pumpEff*100 as pumpEff";
+				+ "systemEfficiency*100 as systemEfficiency,energyper100mlift,pumpEff*100 as pumpEff,"
+				+ "todayKWattH";
 		
 		String[] ddicColumns=ddic.getSql().split(",");
 		for(int i=0;i<ddicColumns.length;i++){
@@ -1374,6 +1385,7 @@ public class HistoryQueryService<T> extends BaseService<T>  {
 			result_json.append("\"systemEfficiency\":\""+obj[19]+"\",");
 			result_json.append("\"energyper100mlift\":\""+obj[20]+"\",");
 			result_json.append("\"pumpEff\":\""+obj[21]+"\",");
+			result_json.append("\"todayKWattH\":\""+obj[22]+"\",");
 			result_json.append("\"details\":\"\",");
 			
 			for(int j=0;j<ddicColumnsList.size();j++){

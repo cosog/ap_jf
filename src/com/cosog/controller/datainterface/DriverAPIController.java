@@ -1077,7 +1077,7 @@ public class DriverAPIController extends BaseController{
 					updateTotalDataSql+=",t.totalKWattH= "+totalKWattH;
 					
 					rpcDeviceInfo.setTotalKWattH(totalKWattH);
-					calItemResolutionDataList.add(new ProtocolItemResolutionData("累计用电量","累计用电量",totalKWattH+"",totalKWattH+"","","totalKWattH","","","","",1));
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("累计用电量","累计用电量",totalKWattH+"",totalKWattH+"","","totalKWattH","","","","kW·h",1));
 				}
 				
 				if(energyCalculateResponseData!=null&&energyCalculateResponseData.getResultStatus()==1){
@@ -1096,6 +1096,8 @@ public class DriverAPIController extends BaseController{
 					Collections.sort(rpcDeviceInfo.getRPCCalculateList());
 					String totalRequestData=CalculateUtils.getFESDiagramTotalRequestData(date, rpcDeviceInfo);
 					totalAnalysisResponseData=CalculateUtils.totalCalculate(totalRequestData);
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("累计产液量","累计产液量",totalAnalysisResponseData.getLiquidVolumetricProduction().getValue()+"",totalAnalysisResponseData.getLiquidVolumetricProduction().getValue()+"","","liquidVolumetricProduction_l","","","","m^3/d",1));
+					calItemResolutionDataList.add(new ProtocolItemResolutionData("累计产液量","累计产液量",totalAnalysisResponseData.getLiquidWeightProduction().getValue()+"",totalAnalysisResponseData.getLiquidWeightProduction().getValue()+"","","liquidWeightProduction_l","","","","t/d",1));
 				}
 				
 				if(totalAnalysisResponseData!=null&&totalAnalysisResponseData.getResultStatus()==1){
@@ -2385,7 +2387,7 @@ public class DriverAPIController extends BaseController{
 			
 			//液面反演校正值、反演液面
 			FESDiagramCalItemList.add(new ProtocolItemResolutionData("液面反演校正值","液面反演校正值",calculateResponseData.getProduction().getLevelCorrectValue()+"",calculateResponseData.getProduction().getLevelCorrectValue()+"","","LEVELCORRECTVALUE","","","","m",1));
-			FESDiagramCalItemList.add(new ProtocolItemResolutionData("反演液面","反演液面",calculateResponseData.getProduction().getProducingfluidLevel()+"",calculateResponseData.getProduction().getProducingfluidLevel()+"","","INVERPRODUCINGFLUIDLEVEL","","","","m",1));
+			FESDiagramCalItemList.add(new ProtocolItemResolutionData("动液面","动液面",calculateResponseData.getProduction().getProducingfluidLevel()+"",calculateResponseData.getProduction().getProducingfluidLevel()+"","","INVERPRODUCINGFLUIDLEVEL","","","","m",1));
 			
 			//系统效率
 			FESDiagramCalItemList.add(new ProtocolItemResolutionData("有功功率","有功功率",calculateResponseData.getFESDiagram().getAvgWatt()+"",calculateResponseData.getFESDiagram().getAvgWatt()+"","","AVERAGEWATT","","","","kW",1));
