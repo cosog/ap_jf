@@ -3456,9 +3456,9 @@ showBalanceAnalysisCurveChart = function(crankAngle,loadRorque,crankTorque,balan
 	var catagories1 = "[";
     var series1 = "[";
     if(crankAngleArr.length>0){
-    	var loadData="{\"name\":\"载荷\",\"data\":[";
-    	var crankData="{\"name\":\"曲柄\",\"data\":[";
-    	var balanceData="{\"name\":\"平衡块\",\"data\":[";
+    	var loadData="{\"name\":\"载荷\",\"visible\":false,\"data\":[";
+    	var crankData="{\"name\":\"曲柄\",\"visible\":false,\"data\":[";
+    	var balanceData="{\"name\":\"平衡块\",\"visible\":false,\"data\":[";
     	var netData="{\"name\":\"净扭矩\",\"data\":[";
         for(var i=0;i<crankAngleArr.length;i++){
         	catagories1+=crankAngleArr[i];
