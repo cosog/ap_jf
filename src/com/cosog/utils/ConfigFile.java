@@ -636,7 +636,7 @@ public class ConfigFile {
 	    
 	    private boolean printLog;
 	    
-	    private boolean exampleEnable;
+	    private boolean simulateAcqEnable;
 
 		private String serialnumber;
 
@@ -718,11 +718,11 @@ public class ConfigFile {
 		public void setPcpHidden(boolean pcpHidden) {
 			this.pcpHidden = pcpHidden;
 		}
-		public boolean getExampleEnable() {
-			return exampleEnable;
+		public boolean getSimulateAcqEnable() {
+			return simulateAcqEnable;
 		}
-		public void setExampleEnable(boolean exampleEnable) {
-			this.exampleEnable = exampleEnable;
+		public void setSimulateAcqEnable(boolean simulateAcqEnable) {
+			this.simulateAcqEnable = simulateAcqEnable;
 		}
 	}
 

@@ -97,6 +97,6 @@ others:
    pcpHidden: false
    showLogo: true
    printLog: true
-   exampleEnable: true
+   simulateAcqEnable: true
    serialnumber: ""
       

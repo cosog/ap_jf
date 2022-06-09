@@ -68,56 +68,56 @@ public class EquipmentDriverServerTask {
 		MemoryDataManagerTask.loadMemoryData();
 		exampleDataManage();
 		
-		initServerConfig();
-		initProtocolConfig("","");
-		initInstanceConfig(null,"");
-		initSMSInstanceConfig(null,"");
-		initSMSDevice(null,"");
-		initRPCDriverAcquisitionInfoConfig(null,"");
-		initPCPDriverAcquisitionInfoConfig(null,"");
-		boolean sendMsg=false;
-		do{
-			String responseData=StringManagerUtils.sendPostMethod(probeUrl, "","utf-8");
-			type = new TypeToken<DriverProbeResponse>() {}.getType();
-			DriverProbeResponse driverProbeResponse=gson.fromJson(responseData, type);
-			String Ver="";
-			if(driverProbeResponse!=null){
-				sendMsg=false;
-				if(!driverProbeResponse.getHttpServerInitStatus()){
-					initServerConfig();
-				}
-				if(!driverProbeResponse.getProtocolInitStatus()){
-					initProtocolConfig("","");
-				}
-				if(!driverProbeResponse.getInstanceInitStatus()){
-					initInstanceConfig(null,"");
-					initSMSInstanceConfig(null,"");
-				}
-				if(!driverProbeResponse.getSMSInitStatus()){
-					initSMSDevice(null,"");
-				}
-				if(!driverProbeResponse.getIDInitStatus()){
-					//清空内存
-					Map<String, Object> dataModelMap = DataModelMap.getMapObject();
-					Map<String,InitializedDeviceInfo> initializedDeviceList=(Map<String,InitializedDeviceInfo>) dataModelMap.get("InitializedDeviceList");
-					if(initializedDeviceList!=null){
-						dataModelMap.remove("InitializedDeviceList");
-						initializedDeviceList=new HashMap<String,InitializedDeviceInfo>();
-						dataModelMap.put("InitializedDeviceList", initializedDeviceList);
-					}
-					
-					initRPCDriverAcquisitionInfoConfig(null,"");
-					initPCPDriverAcquisitionInfoConfig(null,"");
-				}
-				Ver=driverProbeResponse.getVer();
-			}else{
-				if(!sendMsg){
-					StringManagerUtils.sendPostMethod(allOfflineUrl, "","utf-8");
-					sendMsg=true;
-				}
-			}
-			Thread.sleep(1000*1);
-		}while(true);
+//		initServerConfig();
+//		initProtocolConfig("","");
+//		initInstanceConfig(null,"");
+//		initSMSInstanceConfig(null,"");
+//		initSMSDevice(null,"");
+//		initRPCDriverAcquisitionInfoConfig(null,"");
+//		initPCPDriverAcquisitionInfoConfig(null,"");
+//		boolean sendMsg=false;
+//		do{
+//			String responseData=StringManagerUtils.sendPostMethod(probeUrl, "","utf-8");
+//			type = new TypeToken<DriverProbeResponse>() {}.getType();
+//			DriverProbeResponse driverProbeResponse=gson.fromJson(responseData, type);
+//			String Ver="";
+//			if(driverProbeResponse!=null){
+//				sendMsg=false;
+//				if(!driverProbeResponse.getHttpServerInitStatus()){
+//					initServerConfig();
+//				}
+//				if(!driverProbeResponse.getProtocolInitStatus()){
+//					initProtocolConfig("","");
+//				}
+//				if(!driverProbeResponse.getInstanceInitStatus()){
+//					initInstanceConfig(null,"");
+//					initSMSInstanceConfig(null,"");
+//				}
+//				if(!driverProbeResponse.getSMSInitStatus()){
+//					initSMSDevice(null,"");
+//				}
+//				if(!driverProbeResponse.getIDInitStatus()){
+//					//清空内存
+//					Map<String, Object> dataModelMap = DataModelMap.getMapObject();
+//					Map<String,InitializedDeviceInfo> initializedDeviceList=(Map<String,InitializedDeviceInfo>) dataModelMap.get("InitializedDeviceList");
+//					if(initializedDeviceList!=null){
+//						dataModelMap.remove("InitializedDeviceList");
+//						initializedDeviceList=new HashMap<String,InitializedDeviceInfo>();
+//						dataModelMap.put("InitializedDeviceList", initializedDeviceList);
+//					}
+//					
+//					initRPCDriverAcquisitionInfoConfig(null,"");
+//					initPCPDriverAcquisitionInfoConfig(null,"");
+//				}
+//				Ver=driverProbeResponse.getVer();
+//			}else{
+//				if(!sendMsg){
+//					StringManagerUtils.sendPostMethod(allOfflineUrl, "","utf-8");
+//					sendMsg=true;
+//				}
+//			}
+//			Thread.sleep(1000*1);
+//		}while(true);
 	}
 	
 	public static class ExampleDataManageThread extends Thread{
@@ -160,20 +160,20 @@ public class EquipmentDriverServerTask {
 	}
 	
 	public static void exampleDataManage(){
-		if(Config.getInstance().configFile.getOthers().getExampleEnable()){
+		if(Config.getInstance().configFile.getOthers().getSimulateAcqEnable()){
 			try {
 				new ExampleDataManageThread("rpc01",10,0).start();
-				new ExampleDataManageThread("rpc02",10,2).start();
-				new ExampleDataManageThread("rpc03",10,4).start();
-				new ExampleDataManageThread("rpc04",10,6).start();
-				new ExampleDataManageThread("rpc05",10,8).start();
-				new ExampleDataManageThread("rpc06",10,10).start();
-				new ExampleDataManageThread("rpc07",10,12).start();
-				new ExampleDataManageThread("rpc08",10,14).start();
-				new ExampleDataManageThread("rpc09",10,16).start();
-				new ExampleDataManageThread("rpc10",10,18).start();
+				new ExampleDataManageThread("rpc02",10,60).start();
+				new ExampleDataManageThread("rpc03",10,120).start();
+				new ExampleDataManageThread("rpc04",10,180).start();
+				new ExampleDataManageThread("rpc05",10,240).start();
+				new ExampleDataManageThread("rpc06",10,300).start();
+				new ExampleDataManageThread("rpc07",10,360).start();
+				new ExampleDataManageThread("rpc08",10,420).start();
+//				new ExampleDataManageThread("rpc09",10,16).start();
+//				new ExampleDataManageThread("rpc10",10,18).start();
 				
-				new ExampleDataManageThread("pcp01",10,20).start();
+				new ExampleDataManageThread("pcp01",10,480).start();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

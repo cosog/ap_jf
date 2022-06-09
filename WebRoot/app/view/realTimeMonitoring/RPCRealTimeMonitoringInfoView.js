@@ -762,7 +762,11 @@ var RPCDeviceRealTimeMonitoringDataHandsontableHelper = {
 	        }
 	        
 	        rpcDeviceRealTimeMonitoringDataHandsontableHelper.addCellStyle = function (instance, td, row, col, prop, value, cellProperties) {
-	            Handsontable.renderers.TextRenderer.apply(this, arguments);
+	        	if(row>0 && value!=null && value.length>11){
+	        		value=value.substring(0, 8)+"...";
+                }
+	        	
+	        	Handsontable.renderers.TextRenderer.apply(this, arguments);
 	            var AlarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue()); 
 	            if (row ==0) {
 	            	Handsontable.renderers.TextRenderer.apply(this, arguments);
@@ -825,6 +829,7 @@ var RPCDeviceRealTimeMonitoringDataHandsontableHelper = {
 	                stretchH: 'all',//延伸列的宽度, last:延伸最后一列,all:延伸所有列,none默认不延伸
 	                rowHeaders: false,//显示行头
 	                colHeaders: false,
+	                autoWrapRow: false, //自动换行
 	                rowHeights: [40],
 	                mergeCells: [{
                         "row": 0,
