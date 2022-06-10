@@ -94,12 +94,26 @@ Ext.define('AP.store.historyQuery.RPCHistoryQueryWellListStore', {
             	gridPanel.getSelectionModel().select(0, true);
             }else{
             	Ext.getCmp("RPCHistoryQueryInfoDeviceListSelectRow_Id").setValue(-1);
-            	var gridPanel = Ext.getCmp("RPCHistoryQueryDataGridPanel_Id");
-                if (isNotVal(gridPanel)) {
-                	gridPanel.getStore().loadPage(1);
-                }else{
-                	Ext.create("AP.store.historyQuery.RPCHistoryDataStore");
-                }
+            	
+            	
+				var activeId = Ext.getCmp("RPCHistoryQueryTabPanel").getActiveTab().id;
+				if(activeId=="RPCHistoryDataTabPanel"){
+					var gridPanel = Ext.getCmp("RPCHistoryQueryDataGridPanel_Id");
+                    if (isNotVal(gridPanel)) {
+                    	gridPanel.getStore().loadPage(1);
+                    }else{
+                    	Ext.create("AP.store.historyQuery.RPCHistoryDataStore");
+                    }
+				}else if(activeId=="RPCHistoryDiagramTabPanel"){
+					loadSurfaceCardList(1);
+				}else if(activeId=="RPCHistoryDiagramOverlayTabPanel"){
+					var gridPanel = Ext.getCmp("RPCHistoryQueryFSdiagramOverlayGrid_Id");
+                    if (isNotVal(gridPanel)) {
+                    	gridPanel.getStore().load();
+                    }else{
+                    	Ext.create("AP.store.historyQuery.RPCHistoryQueryDiagramOverlayStore");
+                    }
+				}
             }
         },
         beforeload: function (store, options) {

@@ -2,14 +2,14 @@ drop tablespace ap_jf_temp including contents and datafiles;
 drop tablespace ap_jf_data including contents and datafiles;
 drop user ap_jf cascade;
 create temporary tablespace ap_jf_temp
-TEMPFILE 'D:\oracle11g\oradata\orcl\ap_jf_temp.dbf'
+TEMPFILE 'D:\oracle19c\oradata\ORCL\orclpdb\ap_jf_temp.dbf'
 size 50m reuse
 autoextend on
 next 50m maxsize unlimited
 extent management local;
 create tablespace ap_jf_data
 logging
-DATAFILE 'D:\oracle11g\oradata\orcl\ap_jf_data.dbf'
+DATAFILE 'D:\oracle19c\oradata\ORCL\orclpdb\ap_jf_data.dbf'
 size 350m reuse
 autoextend on
 next 50m maxsize unlimited

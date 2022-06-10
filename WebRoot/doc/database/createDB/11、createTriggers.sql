@@ -330,7 +330,7 @@ BEGIN
 end;
 /
 
-create or replace trigger trg_b_rpc_worktype_i_u   before  insert or update  on TBL_RPC_WORKTYPE FOR EACH ROW
+create or replace trigger trg_b_rpc_worktype_i_u   before insert on TBL_RPC_WORKTYPE FOR EACH ROW
 BEGIN
   SELECT SEQ_RPC_WORKTYPE.nextval INTO :new.id FROM dual;
 END;

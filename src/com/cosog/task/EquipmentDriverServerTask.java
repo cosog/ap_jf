@@ -68,56 +68,56 @@ public class EquipmentDriverServerTask {
 		MemoryDataManagerTask.loadMemoryData();
 		exampleDataManage();
 		
-//		initServerConfig();
-//		initProtocolConfig("","");
-//		initInstanceConfig(null,"");
-//		initSMSInstanceConfig(null,"");
-//		initSMSDevice(null,"");
-//		initRPCDriverAcquisitionInfoConfig(null,"");
-//		initPCPDriverAcquisitionInfoConfig(null,"");
-//		boolean sendMsg=false;
-//		do{
-//			String responseData=StringManagerUtils.sendPostMethod(probeUrl, "","utf-8");
-//			type = new TypeToken<DriverProbeResponse>() {}.getType();
-//			DriverProbeResponse driverProbeResponse=gson.fromJson(responseData, type);
-//			String Ver="";
-//			if(driverProbeResponse!=null){
-//				sendMsg=false;
-//				if(!driverProbeResponse.getHttpServerInitStatus()){
-//					initServerConfig();
-//				}
-//				if(!driverProbeResponse.getProtocolInitStatus()){
-//					initProtocolConfig("","");
-//				}
-//				if(!driverProbeResponse.getInstanceInitStatus()){
-//					initInstanceConfig(null,"");
-//					initSMSInstanceConfig(null,"");
-//				}
-//				if(!driverProbeResponse.getSMSInitStatus()){
-//					initSMSDevice(null,"");
-//				}
-//				if(!driverProbeResponse.getIDInitStatus()){
-//					//清空内存
-//					Map<String, Object> dataModelMap = DataModelMap.getMapObject();
-//					Map<String,InitializedDeviceInfo> initializedDeviceList=(Map<String,InitializedDeviceInfo>) dataModelMap.get("InitializedDeviceList");
-//					if(initializedDeviceList!=null){
-//						dataModelMap.remove("InitializedDeviceList");
-//						initializedDeviceList=new HashMap<String,InitializedDeviceInfo>();
-//						dataModelMap.put("InitializedDeviceList", initializedDeviceList);
-//					}
-//					
-//					initRPCDriverAcquisitionInfoConfig(null,"");
-//					initPCPDriverAcquisitionInfoConfig(null,"");
-//				}
-//				Ver=driverProbeResponse.getVer();
-//			}else{
-//				if(!sendMsg){
-//					StringManagerUtils.sendPostMethod(allOfflineUrl, "","utf-8");
-//					sendMsg=true;
-//				}
-//			}
-//			Thread.sleep(1000*1);
-//		}while(true);
+		initServerConfig();
+		initProtocolConfig("","");
+		initInstanceConfig(null,"");
+		initSMSInstanceConfig(null,"");
+		initSMSDevice(null,"");
+		initRPCDriverAcquisitionInfoConfig(null,"");
+		initPCPDriverAcquisitionInfoConfig(null,"");
+		boolean sendMsg=false;
+		do{
+			String responseData=StringManagerUtils.sendPostMethod(probeUrl, "","utf-8");
+			type = new TypeToken<DriverProbeResponse>() {}.getType();
+			DriverProbeResponse driverProbeResponse=gson.fromJson(responseData, type);
+			String Ver="";
+			if(driverProbeResponse!=null){
+				sendMsg=false;
+				if(!driverProbeResponse.getHttpServerInitStatus()){
+					initServerConfig();
+				}
+				if(!driverProbeResponse.getProtocolInitStatus()){
+					initProtocolConfig("","");
+				}
+				if(!driverProbeResponse.getInstanceInitStatus()){
+					initInstanceConfig(null,"");
+					initSMSInstanceConfig(null,"");
+				}
+				if(!driverProbeResponse.getSMSInitStatus()){
+					initSMSDevice(null,"");
+				}
+				if(!driverProbeResponse.getIDInitStatus()){
+					//清空内存
+					Map<String, Object> dataModelMap = DataModelMap.getMapObject();
+					Map<String,InitializedDeviceInfo> initializedDeviceList=(Map<String,InitializedDeviceInfo>) dataModelMap.get("InitializedDeviceList");
+					if(initializedDeviceList!=null){
+						dataModelMap.remove("InitializedDeviceList");
+						initializedDeviceList=new HashMap<String,InitializedDeviceInfo>();
+						dataModelMap.put("InitializedDeviceList", initializedDeviceList);
+					}
+					
+					initRPCDriverAcquisitionInfoConfig(null,"");
+					initPCPDriverAcquisitionInfoConfig(null,"");
+				}
+				Ver=driverProbeResponse.getVer();
+			}else{
+				if(!sendMsg){
+					StringManagerUtils.sendPostMethod(allOfflineUrl, "","utf-8");
+					sendMsg=true;
+				}
+			}
+			Thread.sleep(1000*1);
+		}while(true);
 	}
 	
 	public static class ExampleDataManageThread extends Thread{

@@ -84,6 +84,17 @@ Ext.define('AP.store.realTimeMonitoring.RPCRealTimeMonitoringWellListStore', {
 					rpcDeviceRealTimeMonitoringDataHandsontableHelper=null;
 				}
             	Ext.getCmp("RPCRealTimeMonitoringInfoDeviceListSelectRow_Id").setValue(-1);
+            	
+            	$("#FSDiagramAnalysisSingleWellboreDetailsDiv1_id").html('');
+            	$("#FSDiagramAnalysisSingleWellboreDetailsDiv2_id").html('');
+            	$("#FSDiagramAnalysisSingleWellboreDetailsDiv3_id").html('');
+            	$("#FSDiagramAnalysisSingleWellboreDetailsDiv4_id").html('');
+            	
+            	$("#FSDiagramAnalysisSingleSurfaceDetailsDiv1_id").html('');
+            	$("#FSDiagramAnalysisSingleSurfaceDetailsDiv2_id").html('');
+            	$("#FSDiagramAnalysisSingleSurfaceDetailsDiv3_id").html('');
+            	$("#FSDiagramAnalysisSingleSurfaceDetailsDiv4_id").html('');
+            	
             	$("#rpcRealTimeMonitoringCurveContainer").html('');
             	$("#RPCRealTimeMonitoringInfoDataTableInfoContainer").html('');
             	
