@@ -640,3 +640,6 @@ values (31, 1231, '应力超标', null, '优化抽油杆柱组合', null);
 
 insert into TBL_RPC_WORKTYPE (ID, RESULTCODE, RESULTNAME, RESULTDESCRIPTION, OPTIMIZATIONSUGGESTION, REMARK)
 values (32, 1232, '采集异常', null, '检查采集仪表', null);
+
+insert into TBL_RPC_WORKTYPE (ID, RESULTCODE, RESULTNAME, RESULTDESCRIPTION, OPTIMIZATIONSUGGESTION, REMARK)
+values (33, 1302, '停抽', null, '', null);

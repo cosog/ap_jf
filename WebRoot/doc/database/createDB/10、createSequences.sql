@@ -337,7 +337,7 @@ cache 20;
 create sequence SEQ_RPC_WORKTYPE
 minvalue 1
 maxvalue 999999999999999999999999
-start with 81
+start with 34
 increment by 1
 cache 20;
 /

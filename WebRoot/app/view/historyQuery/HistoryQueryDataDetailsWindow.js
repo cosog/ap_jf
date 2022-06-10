@@ -153,7 +153,10 @@ var DeviceHistoryQueryDataHandsontableHelper = {
 	        }
 	        
 	        deviceHistoryQueryDataHandsontableHelper.addCellStyle = function (instance, td, row, col, prop, value, cellProperties) {
-	            Handsontable.renderers.TextRenderer.apply(this, arguments);
+	        	if(row>0 && value!=null && value.length>11){
+	        		value=value.substring(0, 8)+"...";
+                }
+	        	Handsontable.renderers.TextRenderer.apply(this, arguments);
 	            var AlarmShowStyle=Ext.JSON.decode(Ext.getCmp("AlarmShowStyle_Id").getValue()); 
 	            if (row ==0) {
 	            	Handsontable.renderers.TextRenderer.apply(this, arguments);

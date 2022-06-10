@@ -83,7 +83,7 @@ public class CalculateManagerService<T> extends BaseService<T> {
 	public String getWellList(String orgId, String wellName, Page pager,String wellType,String startDate,String endDate,String calculateSign,String calculateType)
 			throws Exception {
 		String json="";
-		if("1".equals(calculateType)||"2".equals(calculateType)){
+		if("1".equals(calculateType)||"2".equals(calculateType)||"3".equals(calculateType)||"4".equals(calculateType)){
 			json=this.getDiagnoseAndProdCalculateWellListData(orgId, wellName, pager, wellType, startDate, endDate, calculateSign, calculateType);
 		}else if("5".equals(calculateType)){//电参反演地面功图
 			json=this.getElecInverCalculateWellListData(orgId, wellName, pager, wellType, startDate, endDate, calculateSign, calculateType);
@@ -395,8 +395,8 @@ public class CalculateManagerService<T> extends BaseService<T> {
 		
 		columns = "["
 				+ "{ \"header\":\"序号\",\"dataIndex\":\"id\",width:50 ,children:[] },"
-				+ "{ \"header\":\"井名\",\"dataIndex\":\"wellName\" ,children:[] },"
-				+ "{ \"header\":\"采集时间\",\"dataIndex\":\"acqTime\",width:150,children:[] }"
+				+ "{ \"header\":\"井名\",\"dataIndex\":\"wellName\",flex:3 ,children:[] },"
+				+ "{ \"header\":\"采集时间\",\"dataIndex\":\"acqTime\",flex:5,width:150,children:[] }"
 				+ "]";
 		
 		

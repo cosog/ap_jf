@@ -3,6 +3,7 @@ package com.cosog.service.realTimeMonitoring;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1884,7 +1885,7 @@ public class RealTimeMonitoringService<T> extends BaseService<T> {
 						String columnName=calItemList.get(i).getName();
 						String rawColumnName=columnName;
 						String value=obj[i+6+protocolItems.size()]+"";
-						if(value.toUpperCase().contains("CLOB")){
+						if(obj[i+6+protocolItems.size()] instanceof CLOB || obj[i+6+protocolItems.size()] instanceof Clob){
 							value=StringManagerUtils.CLOBObjectToString(obj[i+6+protocolItems.size()]);
 						}
 						String rawValue=value;
