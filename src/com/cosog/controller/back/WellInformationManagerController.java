@@ -175,6 +175,7 @@ public class WellInformationManagerController extends BaseController {
 		String selectedDeviceId = ParamUtils.getParameter(request, "selectedDeviceId");
 		deviceType= ParamUtils.getParameter(request, "deviceType");
 		String selectedOrgId=ParamUtils.getParameter(request, "selectedOrgId");
+		String selectedOrgName=ParamUtils.getParameter(request, "selectedOrgName");
 		User user = null;
 		HttpSession session=request.getSession();
 		user = (User) session.getAttribute("userLogin");
@@ -183,7 +184,7 @@ public class WellInformationManagerController extends BaseController {
 				orgId = "" + user.getUserorgids();
 			}
 		}
-		this.wellInformationManagerService.changeDeviceOrg(selectedDeviceId,selectedOrgId,deviceType);
+		this.wellInformationManagerService.changeDeviceOrg(selectedDeviceId,selectedOrgId,selectedOrgName,deviceType);
 		String json = "{\"success\":true}";
 		response.setContentType("application/json;charset=utf-8");
 		response.setHeader("Cache-Control", "no-cache");

@@ -61,7 +61,7 @@ public class CalculateDataService<T> extends BaseService<T> {
 		List<AcquisitionItemInfo> saveAcquisitionItemInfoList=new ArrayList<AcquisitionItemInfo>();
 		for(int i=0;i<acquisitionItemInfoList.size();i++){
 			if(acquisitionItemInfoList.get(i).getAlarmLevel()>0){
-				String key=wellName+","+deviceType+","+acquisitionItemInfoList.get(i).getTitle()+","+acquisitionItemInfoList.get(i).getAlarmInfo();
+				String key=wellName+","+deviceType+","+acquisitionItemInfoList.get(i).getColumn()+","+acquisitionItemInfoList.get(i).getAlarmInfo();
 				String lastAlarmTime=alarmInfoMap.get(key);
 				
 				long timeDiff=StringManagerUtils.getTimeDifference(lastAlarmTime, acqTime, "yyyy-MM-dd HH:mm:ss");
@@ -69,7 +69,6 @@ public class CalculateDataService<T> extends BaseService<T> {
 					alarmInfoMap.put(key, acqTime);
 					saveAcquisitionItemInfoList.add(acquisitionItemInfoList.get(i));
 					if(acquisitionItemInfoList.get(i).getIsSendMessage()==1){//如果该报警项发送短信
-						
 						isSendSMS=true;
 						if(acquisitionItemInfoList.get(i).getAlarmType()==3){//开关量报警
 							SMSContent.append(acquisitionItemInfoList.get(i).getAlarmInfo());
@@ -79,6 +78,8 @@ public class CalculateDataService<T> extends BaseService<T> {
 							SMSContent.append(acquisitionItemInfoList.get(i).getTitle()+acquisitionItemInfoList.get(i).getAlarmInfo()
 									+",报警值"+acquisitionItemInfoList.get(i).getValue()+",限值"+acquisitionItemInfoList.get(i).getAlarmLimit()
 									+",回差"+acquisitionItemInfoList.get(i).getHystersis()+";");
+						}else{
+							SMSContent.append(acquisitionItemInfoList.get(i).getAlarmInfo());
 						}
 					}
 					if(acquisitionItemInfoList.get(i).getIsSendMail()==1){//如果该报警项发送邮件
@@ -91,9 +92,10 @@ public class CalculateDataService<T> extends BaseService<T> {
 							EMailContent.append(acquisitionItemInfoList.get(i).getTitle()+acquisitionItemInfoList.get(i).getAlarmInfo()
 									+",报警值"+acquisitionItemInfoList.get(i).getValue()+",限值"+acquisitionItemInfoList.get(i).getAlarmLimit()
 									+",回差"+acquisitionItemInfoList.get(i).getHystersis()+";");
+						}else{
+							EMailContent.append(acquisitionItemInfoList.get(i).getAlarmInfo());
 						}
 					}
-					
 				}
 			}else{
 				try{
