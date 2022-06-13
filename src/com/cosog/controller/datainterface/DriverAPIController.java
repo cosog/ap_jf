@@ -286,9 +286,6 @@ public class DriverAPIController extends BaseController{
 				}
 				alarmShowStyle=(AlarmShowStyle) SerializeObjectUnils.unserizlize(jedis.get("AlarmShowStyle".getBytes()));
 				
-				
-				
-				
 				if(!jedis.exists("RPCDeviceInfo".getBytes())){
 					MemoryDataManagerTask.loadRPCDeviceInfo(null,0,"update");
 				}
@@ -437,16 +434,17 @@ public class DriverAPIController extends BaseController{
 					int commAlarmLevel=0,isSendMessage=0,isSendMail=0,delay=0;
 					String key="";
 					String alarmInfo="";
-					
+					String alarmSMSContent="";
 					if(alarmInstanceOwnItem!=null){
 						Map<String, String> alarmInfoMap=AlarmInfoMap.getMapObject();
 						if(acqOnline.getStatus()){
 							key=wellName+","+deviceType+",上线";
 							alarmInfo="上线";
-							
+							alarmSMSContent="设备"+wellName+"于"+currentTime+"上线";
 						}else{
 							key=wellName+","+deviceType+",离线";
 							alarmInfo="离线";
+							alarmSMSContent="设备"+wellName+"于"+currentTime+"离线";
 						}
 						for(int i=0;i<alarmInstanceOwnItem.getItemList().size();i++){
 							if(alarmInstanceOwnItem.getItemList().get(i).getType()==3 &&   alarmInfo.equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(i).getItemName()) && alarmInstanceOwnItem.getItemList().get(i).getAlarmLevel()>0){
@@ -459,7 +457,7 @@ public class DriverAPIController extends BaseController{
 						}
 						commAlarm="insert into "+alarmTableName+" (wellid,alarmtime,itemname,alarmtype,alarmvalue,alarminfo,alarmlevel)"
 								+ "values("+deviceId+",to_date('"+currentTime+"','yyyy-mm-dd hh24:mi:ss'),'通信状态',3,"+(acqOnline.getStatus()?1:0)+",'"+alarmInfo+"',"+commAlarmLevel+")";
-						String alarmSMSContent="设备"+wellName+"于"+currentTime+"离线";
+						
 						
 						String lastAlarmTime=alarmInfoMap.get(key);
 						long timeDiff=StringManagerUtils.getTimeDifference(lastAlarmTime, currentTime, "yyyy-MM-dd HH:mm:ss");
@@ -1230,28 +1228,45 @@ public class DriverAPIController extends BaseController{
 								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
 							}
 							break;
+						}else if(("runStatus".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn())||"runStatusName".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn()))
+								&& alarmInstanceOwnItem.getItemList().get(k).getType()==6
+								&& calItemResolutionDataList.get(i).getValue().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemName()) ){
+							alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel();
+							if(alarmLevel>0){
+								acquisitionItemInfo.setAlarmLevel(alarmLevel);
+								acquisitionItemInfo.setAlarmInfo(calItemResolutionDataList.get(i).getValue());
+								acquisitionItemInfo.setAlarmType(alarmInstanceOwnItem.getItemList().get(k).getType());
+								acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
+								acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
+								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+							}
+							break;
 						}else if(alarmInstanceOwnItem.getItemList().get(k).getType()==5&&calItemResolutionDataList.get(i).getColumn().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemCode())){
 							float hystersis=alarmInstanceOwnItem.getItemList().get(k).getHystersis();
 							if(StringManagerUtils.isNotNull(alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+"") && StringManagerUtils.stringToFloat(acquisitionItemInfo.getRawValue())>alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+hystersis){
 								alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel();
-								acquisitionItemInfo.setAlarmLevel(alarmLevel);
-								acquisitionItemInfo.setHystersis(hystersis);
-								acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getUpperLimit());
-								acquisitionItemInfo.setAlarmInfo("高报");
-								acquisitionItemInfo.setAlarmType(5);
-								acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
-								acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
-								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+								if(alarmLevel>0){
+									acquisitionItemInfo.setAlarmLevel(alarmLevel);
+									acquisitionItemInfo.setHystersis(hystersis);
+									acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getUpperLimit());
+									acquisitionItemInfo.setAlarmInfo("高报");
+									acquisitionItemInfo.setAlarmType(5);
+									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
+									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
+									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+								}
 							}else if((StringManagerUtils.isNotNull(alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()+"") && StringManagerUtils.stringToFloat(acquisitionItemInfo.getRawValue())<alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()-hystersis)){
 								alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmSign()>0?alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel():0;
-								acquisitionItemInfo.setAlarmLevel(alarmLevel);
-								acquisitionItemInfo.setHystersis(hystersis);
-								acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getLowerLimit());
-								acquisitionItemInfo.setAlarmInfo("低报");
-								acquisitionItemInfo.setAlarmType(5);
-								acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
-								acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
-								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+								if(alarmLevel>0){
+									acquisitionItemInfo.setAlarmLevel(alarmLevel);
+									acquisitionItemInfo.setHystersis(hystersis);
+									acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getLowerLimit());
+									acquisitionItemInfo.setAlarmInfo("低报");
+									acquisitionItemInfo.setAlarmType(5);
+									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
+									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
+									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+								}
 							}
 							break;
 						}
@@ -2107,28 +2122,45 @@ public class DriverAPIController extends BaseController{
 					acquisitionItemInfo.setSort(calItemResolutionDataList.get(i).getSort());
 
 					for(int k=0;alarmInstanceOwnItem!=null&&k<alarmInstanceOwnItem.getItemList().size();k++){
-						if(alarmInstanceOwnItem.getItemList().get(k).getType()==5&&calItemResolutionDataList.get(i).getColumn().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemCode())){
+						if(("runStatus".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn())||"runStatusName".equalsIgnoreCase(calItemResolutionDataList.get(i).getColumn()))
+								&& alarmInstanceOwnItem.getItemList().get(k).getType()==6
+								&& calItemResolutionDataList.get(i).getValue().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemName()) ){
+							alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel();
+							if(alarmLevel>0){
+								acquisitionItemInfo.setAlarmLevel(alarmLevel);
+								acquisitionItemInfo.setAlarmInfo(calItemResolutionDataList.get(i).getValue());
+								acquisitionItemInfo.setAlarmType(alarmInstanceOwnItem.getItemList().get(k).getType());
+								acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
+								acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
+								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+							}
+							break;
+						}else if(alarmInstanceOwnItem.getItemList().get(k).getType()==5&&calItemResolutionDataList.get(i).getColumn().equalsIgnoreCase(alarmInstanceOwnItem.getItemList().get(k).getItemCode())){
 							float hystersis=alarmInstanceOwnItem.getItemList().get(k).getHystersis();
 							if(StringManagerUtils.isNotNull(alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+"") && StringManagerUtils.stringToFloat(acquisitionItemInfo.getRawValue())>alarmInstanceOwnItem.getItemList().get(k).getUpperLimit()+hystersis){
 								alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel();
-								acquisitionItemInfo.setAlarmLevel(alarmLevel);
-								acquisitionItemInfo.setHystersis(hystersis);
-								acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getUpperLimit());
-								acquisitionItemInfo.setAlarmInfo("高报");
-								acquisitionItemInfo.setAlarmType(5);
-								acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
-								acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
-								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+								if(alarmLevel>0){
+									acquisitionItemInfo.setAlarmLevel(alarmLevel);
+									acquisitionItemInfo.setHystersis(hystersis);
+									acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getUpperLimit());
+									acquisitionItemInfo.setAlarmInfo("高报");
+									acquisitionItemInfo.setAlarmType(5);
+									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
+									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
+									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+								}
 							}else if((StringManagerUtils.isNotNull(alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()+"") && StringManagerUtils.stringToFloat(acquisitionItemInfo.getRawValue())<alarmInstanceOwnItem.getItemList().get(k).getLowerLimit()-hystersis)){
 								alarmLevel=alarmInstanceOwnItem.getItemList().get(k).getAlarmSign()>0?alarmInstanceOwnItem.getItemList().get(k).getAlarmLevel():0;
-								acquisitionItemInfo.setAlarmLevel(alarmLevel);
-								acquisitionItemInfo.setHystersis(hystersis);
-								acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getLowerLimit());
-								acquisitionItemInfo.setAlarmInfo("低报");
-								acquisitionItemInfo.setAlarmType(5);
-								acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
-								acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
-								acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+								if(alarmLevel>0){
+									acquisitionItemInfo.setAlarmLevel(alarmLevel);
+									acquisitionItemInfo.setHystersis(hystersis);
+									acquisitionItemInfo.setAlarmLimit(alarmInstanceOwnItem.getItemList().get(k).getLowerLimit());
+									acquisitionItemInfo.setAlarmInfo("低报");
+									acquisitionItemInfo.setAlarmType(5);
+									acquisitionItemInfo.setAlarmDelay(alarmInstanceOwnItem.getItemList().get(k).getDelay());
+									acquisitionItemInfo.setIsSendMessage(alarmInstanceOwnItem.getItemList().get(k).getIsSendMessage());
+									acquisitionItemInfo.setIsSendMail(alarmInstanceOwnItem.getItemList().get(k).getIsSendMail());
+								}
 							}
 							break;
 						}
